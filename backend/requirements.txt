@@ -1,0 +1,26 @@
+# Core dependencies
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-dotenv>=1.0.0
+
+# HTTP client
+httpx>=0.26.0
+
+# Data validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Database (PostgreSQL Enterprise)
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+
+# Caching (Redis)
+redis>=5.0.0
+cachetools>=5.3.0
+
+# GraphQL
+strawberry-graphql[fastapi]
+
+# Utils
+python-multipart>=0.0.6
+watchfiles>=0.21.0

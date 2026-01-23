@@ -1,0 +1,266 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   APPLE-GRADE DESIGN SYSTEM
+   Pure Black • Premium Gradients • Subtle Glow
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Pure Black Background - Like Apple */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+
+    /* Cards with subtle elevation */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+
+    /* Popovers */
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary - Apple Blue */
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Dark Gray */
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Muted - Subtle Gray */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+
+    /* Accent - Soft Glow */
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders & Inputs */
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 211 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Apple-Grade Premium Colors */
+    --apple-blue: 211 100% 50%;
+    --apple-purple: 280 100% 70%;
+    --apple-pink: 330 100% 71%;
+    --apple-orange: 28 100% 54%;
+    --apple-green: 142 76% 36%;
+    --apple-teal: 175 84% 32%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  /* Premium Heading Typography - Outfit font */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, sans-serif;
+    @apply tracking-tight;
+  }
+
+  /* Refined Content Typography - Inter font */
+  p,
+  span,
+  li,
+  label,
+  a,
+  div,
+  td,
+  th {
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Paragraph styling */
+  p {
+    line-height: 1.7;
+  }
+
+  /* Small text refinement */
+  .text-sm,
+  .text-xs {
+    letter-spacing: 0.01em;
+  }
+
+  /* Uppercase labels - wide tracking */
+  .uppercase {
+    letter-spacing: 0.1em;
+  }
+
+  /* Arabic Font Support */
+  [dir="rtl"] body {
+    font-family: var(--font-cairo), sans-serif;
+  }
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    font-family: var(--font-cairo), sans-serif;
+  }
+
+  [dir="rtl"] p,
+  [dir="rtl"] span,
+  [dir="rtl"] li,
+  [dir="rtl"] label,
+  [dir="rtl"] a,
+  [dir="rtl"] div {
+    font-family: var(--font-cairo), sans-serif;
+    letter-spacing: 0;
+  }
+
+  /* Selection Color */
+  ::selection {
+    background: hsl(211 100% 50% / 0.3);
+    color: white;
+  }
+}
+
+/* ============================================
+   PREMIUM UTILITY CLASSES
+   ============================================ */
+
+/* Glass Panel - Apple-style frosted glass */
+.glass-panel {
+  @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl;
+}
+
+/* Premium gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-gray-400;
+}
+
+.gradient-text-blue {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400;
+}
+
+.gradient-text-premium {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-blue-100 to-blue-400;
+}
+
+/* Apple-style subtle glow effects */
+.glow-blue {
+  box-shadow: 0 0 60px -15px hsl(211 100% 50% / 0.5);
+}
+
+.glow-white {
+  box-shadow: 0 0 80px -20px rgba(255, 255, 255, 0.15);
+}
+
+/* Premium card hover effect */
+.premium-card {
+  @apply bg-white/[0.02] border border-white/[0.05] rounded-2xl transition-all duration-300;
+}
+
+.premium-card:hover {
+  @apply bg-white/[0.04] border-white/[0.1];
+  transform: translateY(-2px);
+}
+
+/* Subtle animated gradient border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(hsl(0 0% 4%), hsl(0 0% 4%)) padding-box,
+    linear-gradient(135deg, hsl(211 100% 50% / 0.5), hsl(280 100% 70% / 0.5), hsl(330 100% 71% / 0.5)) border-box;
+  border: 1px solid transparent;
+}
+
+/* Premium button glow */
+.btn-glow {
+  @apply relative overflow-hidden;
+}
+
+.btn-glow::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-blue-500/0;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn-glow:hover::before {
+  transform: translateX(100%);
+}
+
+/* Text shadow for premium headlines */
+.text-shadow-glow {
+  text-shadow: 0 0 80px rgba(255, 255, 255, 0.3);
+}
+
+/* Premium input styling */
+input,
+textarea,
+select {
+  @apply transition-all duration-200;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  @apply ring-2 ring-blue-500/30 border-blue-500/50;
+}
+
+/* Smooth page transitions */
+main {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 4%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 20%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 30%);
+}
