@@ -42,11 +42,17 @@ class CreativeCortex:
 
     async def _call_llm(self, state: AgentState):
         messages = state["messages"]
-        # Inject system prompt if first message
-        if not any(isinstance(m, SystemMessage) for m in messages):
-            system_prompt = SystemMessage(content="""
+        from app.services.knowledge import knowledge_oracle
+        
+        # Inject system prompt with real-time intelligence
+        intelligence_brief = knowledge_oracle.get_intelligence_brief()
+        
+        system_prompt = SystemMessage(content=f"""
 You are 'The Creative Cortex', the high-intelligence AI backbone of Logistics OS (Phoenix).
 Your persona is premium, professional, and slightly futuristic.
+
+REAL-TIME GLOBAL INTELLIGENCE:
+{intelligence_brief}
 
 Key Capabilities:
 1. Real-time Logistics Advisory: Provide insights on routes, carrier options (Maersk, CMA, MSC), and transit times.
@@ -55,11 +61,15 @@ Key Capabilities:
 
 Rules:
 - Speak as a high-end AI assistant.
-- Use technical but accessible terminology.
+- Mention current global status if relevant to the user query.
 - Always tie insights back to the 'Phoenix' platform.
 - If you don't know something, admit it and suggest a manual verification.
 """)
-            messages = [system_prompt] + messages
+        
+        # Always use the freshest system prompt at the start
+        # Filter out old system messages to prevent prompt pollution
+        filtered_messages = [m for m in messages if not isinstance(m, SystemMessage)]
+        messages = [system_prompt] + filtered_messages
         
         response = await self.llm.ainvoke(messages)
         return {"messages": [response]}
