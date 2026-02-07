@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Providers } from "@/components/providers";
+import { CreativeCortex } from "@/components/domain/ai/CreativeCortex";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -21,13 +22,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${outfit.variable} ${cairo.variable} font-sans bg-background text-foreground`}>
+      <body className={`${inter.variable} ${outfit.variable} ${cairo.variable} font-sans bg-black text-white antialiased min-h-screen flex flex-col`}>
         <Providers>
           <Navbar />
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-1">{children}</main>
-            <Footer />
+          <div className="flex-1 flex flex-col">
+            <main className="flex-1 w-full">{children}</main>
           </div>
+          <Footer />
+          <CreativeCortex />
         </Providers>
       </body>
     </html>

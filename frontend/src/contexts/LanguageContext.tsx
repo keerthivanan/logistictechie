@@ -20,28 +20,29 @@ import { ar } from '@/lib/i18n/ar';
 const dictionaries = { en, ar };
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguageState] = useState<Language>('en');
-    const [direction, setDirection] = useState<Direction>('ltr');
-
-    useEffect(() => {
-        // Load saved language or default to English
-        const savedLang = localStorage.getItem('language') as Language;
-        if (savedLang) {
-            setLanguage(savedLang);
+    const [language, setLanguageState] = useState<Language>(() => {
+        if (typeof window !== 'undefined') {
+            return (localStorage.getItem('language') as Language) || 'en';
         }
-    }, []);
+        return 'en';
+    });
+    const direction: Direction = language === 'ar' ? 'rtl' : 'ltr';
 
-    const setLanguage = (lang: Language) => {
+    function setLanguage(lang: Language) {
         setLanguageState(lang);
-        const dir = lang === 'ar' ? 'rtl' : 'ltr';
-        setDirection(dir);
         localStorage.setItem('language', lang);
-        document.documentElement.lang = lang;
-        document.documentElement.dir = dir;
-    };
+        // DOM updates handled by useEffect
+    }
+
+    // Sync DOM on mount/change
+    useEffect(() => {
+        document.documentElement.lang = language;
+        document.documentElement.dir = direction;
+    }, [language, direction]);
 
     const t = (key: string): string => {
         const keys = key.split('.');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let value: any = dictionaries[language];
 
         for (const k of keys) {

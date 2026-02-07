@@ -120,7 +120,7 @@ const mapStyle = [
 // Fallback logic if API Key is missing
 const center = { lat: 20, lng: 0 }; // World view
 
-export default function RouteMap({ origin, destination, className = "" }: RouteMapProps) {
+export default function RouteMap({ className = "" }: RouteMapProps) {
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "", // Use empty string to avoid crash, will error gracefully
     });
@@ -138,20 +138,20 @@ export default function RouteMap({ origin, destination, className = "" }: RouteM
     // Placeholder if no key or loading
     if (loadError) {
         return (
-            <div className={`flex flex-col items-center justify-center bg-black/40 rounded-xl border border-blue-500/20 backdrop-blur-sm ${className}`}>
-                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center mb-3 animate-pulse">
-                    <span className="h-2 w-2 rounded-full bg-blue-500" />
+            <div className={`flex flex-col items-center justify-center bg-black/40 rounded-xl border border-white/10 backdrop-blur-sm ${className}`}>
+                <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-3 animate-pulse">
+                    <span className="h-2 w-2 rounded-full bg-white" />
                 </div>
-                <span className="text-blue-400 font-bold mb-1 tracking-wide uppercase text-xs">Satellite Feed Offline</span>
-                <span className="text-[10px] text-gray-500">API Key Configuration Required</span>
+                <span className="text-white font-bold mb-1 tracking-wide uppercase text-xs">Satellite Feed Offline</span>
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Configuration Required</span>
             </div>
         );
     }
 
     if (!isLoaded) {
         return (
-            <div className={`flex flex-col items-center justify-center bg-gray-900 rounded-xl ${className}`}>
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            <div className={`flex flex-col items-center justify-center bg-black rounded-xl ${className}`}>
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
             </div>
         );
     }
@@ -174,7 +174,7 @@ export default function RouteMap({ origin, destination, className = "" }: RouteM
             <Polyline
                 path={[originPos, destPos]}
                 options={{
-                    strokeColor: "#3b82f6",
+                    strokeColor: "#FFFFFF",
                     strokeOpacity: 0.8,
                     strokeWeight: 2,
                     geodesic: true, // Curved line

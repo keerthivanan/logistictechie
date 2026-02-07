@@ -1,0 +1,36 @@
+import os
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "Logistics OS (Ocean Protocol)"
+    VERSION: str = "2.0.0"
+    API_V1_STR: str = "/api"
+    
+    # 🛑 CRITICAL: These keys must remain empty here.
+    # They MUST be provided in the .env file.
+    # If missing, the application will log a warning but won't fake data.
+    
+    MAERSK_CONSUMER_KEY: str = ""
+    MAERSK_CONSUMER_SECRET: str = ""
+    
+    CMA_API_KEY: str = ""
+    MSC_API_KEY: str = ""
+    SEARATES_API_KEY: str = ""
+    
+    # 🗄️ DATABASE CONFIG (PostgreSQL)
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:2003@localhost:5432/logistics_db")
+    
+    # 🧠 AI & KNOWLEDGE CONFIG
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
+    QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+
+    ALLOWED_ORIGINS: list = ["*"]
+
+    class Config:
+        # Load .env from backend/ directory (one level up from app/)
+        # app/core/config.py -> app/core -> app -> backend
+        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env")
+
+settings = Settings()

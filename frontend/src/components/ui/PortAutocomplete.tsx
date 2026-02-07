@@ -72,7 +72,7 @@ export function PortAutocomplete({ value, onChange, placeholder }: PortAutocompl
                     className="w-full justify-between h-12 bg-background/50 border-input font-normal"
                 >
                     <div className="flex items-center gap-2 overflow-hidden">
-                        <MapPin className="h-4 w-4 shrink-0 opacity-50 text-blue-400" />
+                        <MapPin className="h-4 w-4 shrink-0 opacity-50 text-gray-400" />
                         <span className={cn("truncate", !value && "text-muted-foreground")}>
                             {value || placeholder || "Select port..."}
                         </span>

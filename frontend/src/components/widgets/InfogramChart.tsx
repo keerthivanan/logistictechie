@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 interface InfogramChartProps {
     dataId: string;
@@ -12,7 +12,6 @@ interface InfogramChartProps {
  * Embeddable Chart component for Freightos Indices (FAX, FBX)
  */
 export default function InfogramChart({ dataId, title, className }: InfogramChartProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Check if script is already loaded
@@ -25,16 +24,16 @@ export default function InfogramChart({ dataId, title, className }: InfogramChar
             document.body.appendChild(script);
         } else {
             // Re-initialize if script already exists
-            // @ts-ignore
+            // @ts-expect-error - external library interaction
             if (window.InfogramEmbeds && window.InfogramEmbeds.process) {
-                // @ts-ignore
+                // @ts-expect-error - external library interaction
                 window.InfogramEmbeds.process();
             }
         }
     }, []);
 
     return (
-        <div className={`w-full bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 ${className}`}>
+        <div className={`w-full bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10 ${className}`}>
             <div
                 className="infogram-embed"
                 data-id={dataId}

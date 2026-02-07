@@ -32,53 +32,53 @@ export function Navbar() {
 
     return (
         <>
-            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-                    ? 'bg-black/80 backdrop-blur-xl border-b border-white/[0.05]'
-                    : 'bg-transparent'
+            <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+                ? 'bg-black/95 backdrop-blur-3xl border-b border-white/10 py-2'
+                : 'bg-transparent py-4'
                 }`}>
-                <div className="container max-w-7xl mx-auto flex h-16 items-center justify-between px-6">
+                <div className="container max-w-7xl mx-auto flex h-14 items-center justify-between px-6">
 
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="h-9 w-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                            <Globe className="h-5 w-5 text-white" />
+                    {/* Logo - Alpha Class Branding */}
+                    <Link href="/" className="flex items-center gap-4 group">
+                        <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:rotate-[360deg]">
+                            <Globe className="h-6 w-6 text-black" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">
-                            Logi<span className="text-blue-400">Tech</span>
+                        <span className="text-2xl font-black tracking-tighter text-white uppercase italic group-hover:not-italic transition-all duration-500">
+                            LOGI<span className="text-gray-500">TECH</span>
                         </span>
                     </Link>
 
                     {/* Navigation Links (Desktop) */}
-                    <nav className="hidden md:flex items-center gap-8">
+                    <nav className="hidden md:flex items-center gap-10">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="text-sm font-medium text-gray-400 hover:text-white transition-colors relative group"
+                                className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-500 hover:text-white transition-all relative group"
                             >
                                 {link.label}
-                                <span className="absolute -bottom-1 left-0 w-0 h-px bg-blue-400 transition-all group-hover:w-full" />
+                                <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-white transition-all duration-500 group-hover:w-full" />
                             </Link>
                         ))}
                     </nav>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-4">
-                        {/* Language Toggle */}
+                    <div className="flex items-center gap-6">
+                        {/* Language Toggle - Premium Pill */}
                         <button
                             onClick={toggleLanguage}
-                            className="text-xs font-medium text-gray-500 hover:text-white transition-colors px-2 py-1 rounded border border-white/10 hover:border-white/20"
+                            className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all px-4 py-2 rounded-full border border-white/10 hover:border-white/30 bg-white/[0.02]"
                         >
-                            {language === 'en' ? 'العربية' : 'EN'}
+                            {language === 'en' ? 'Arabic' : 'English'}
                         </button>
 
                         {/* Desktop Actions */}
-                        <div className="hidden md:flex items-center gap-3">
-                            <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                        <div className="hidden md:flex items-center gap-6">
+                            <Link href="/login" className="text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-all">
                                 {t('nav.signIn')}
                             </Link>
                             <Link href="/quote">
-                                <Button className="bg-white text-black hover:bg-gray-100 h-9 px-5 font-medium shadow-lg">
+                                <Button className="bg-white text-black hover:bg-gray-200 h-11 px-8 font-black uppercase tracking-tighter rounded-xl shadow-2xl transition-all active:scale-95">
                                     {t('nav.getQuote')}
                                 </Button>
                             </Link>
@@ -87,9 +87,9 @@ export function Navbar() {
                         {/* Mobile Menu Button */}
                         <button
                             onClick={() => setIsMobileOpen(!isMobileOpen)}
-                            className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            className="md:hidden text-white p-2 hover:bg-white/10 rounded-xl transition-all"
                         >
-                            {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                            {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
                     </div>
                 </div>
@@ -98,28 +98,28 @@ export function Navbar() {
             {/* Mobile Menu Overlay */}
             {isMobileOpen && (
                 <div className="fixed inset-0 z-40 md:hidden">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileOpen(false)} />
-                    <div className="absolute top-16 left-0 right-0 bg-black border-b border-white/10 p-6 animate-in slide-in-from-top-2">
-                        <nav className="flex flex-col gap-4 mb-6">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-2xl" onClick={() => setIsMobileOpen(false)} />
+                    <div className="absolute top-0 left-0 right-0 bg-black border-b border-white/10 pt-20 pb-10 px-8 animate-in slide-in-from-top-4 duration-500">
+                        <nav className="flex flex-col gap-6 mb-10">
                             {navLinks.map((link) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
                                     onClick={() => setIsMobileOpen(false)}
-                                    className="text-lg font-medium text-gray-300 hover:text-white py-2 border-b border-white/5"
+                                    className="text-2xl font-black uppercase tracking-tighter text-gray-500 hover:text-white py-4 border-b border-white/5 transition-colors"
                                 >
                                     {link.label}
                                 </Link>
                             ))}
                         </nav>
-                        <div className="flex gap-3">
+                        <div className="grid grid-cols-2 gap-4">
                             <Link href="/login" className="flex-1" onClick={() => setIsMobileOpen(false)}>
-                                <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/5">
+                                <Button variant="outline" className="w-full h-14 border-white/10 text-white hover:bg-white hover:text-black font-black uppercase tracking-tighter rounded-2xl">
                                     {t('nav.signIn')}
                                 </Button>
                             </Link>
                             <Link href="/quote" className="flex-1" onClick={() => setIsMobileOpen(false)}>
-                                <Button className="w-full bg-white text-black hover:bg-gray-100">
+                                <Button className="w-full h-14 bg-white text-black hover:bg-gray-200 font-black uppercase tracking-tighter rounded-2xl">
                                     {t('nav.getQuote')}
                                 </Button>
                             </Link>

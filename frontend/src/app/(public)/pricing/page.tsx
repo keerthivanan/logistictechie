@@ -17,7 +17,7 @@ export default function PricingPage() {
             price: t('pricing.plans.starter.price'),
             period: "",
             icon: Zap,
-            gradient: "from-gray-500 to-gray-400",
+            gradient: "from-white to-gray-400",
             features: [
                 t('pricing.features.shipments_5'),
                 t('pricing.features.tracking_basic'),
@@ -33,7 +33,7 @@ export default function PricingPage() {
             price: t('pricing.plans.professional.price'),
             period: "/month",
             icon: Shield,
-            gradient: "from-blue-500 to-cyan-400",
+            gradient: "from-white to-gray-400",
             features: [
                 t('pricing.features.shipments_unlimited'),
                 t('pricing.features.tracking_gps'),
@@ -51,7 +51,7 @@ export default function PricingPage() {
             price: t('pricing.plans.enterprise.price'),
             period: "",
             icon: Crown,
-            gradient: "from-purple-500 to-pink-400",
+            gradient: "from-white to-gray-400",
             features: [
                 t('pricing.features.pro_features'),
                 t('pricing.features.manager'),
@@ -66,30 +66,34 @@ export default function PricingPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-24 pb-20">
+        <main className="min-h-screen bg-black pt-32 pb-24 bg-mesh-dark">
             {/* Hero */}
-            <section className="relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-500/15 rounded-full blur-[120px]" />
+            <section className="relative overflow-hidden mb-20">
+                {/* Holographic scanner effect */}
+                <motion.div
+                    animate={{ y: [0, 600, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                    className="absolute top-0 left-0 right-0 h-[1px] bg-white/20 z-10 pointer-events-none"
+                />
 
-                <div className="container relative z-10 max-w-5xl mx-auto px-6 pt-12 pb-20">
+                <div className="container relative z-10 max-w-5xl mx-auto px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                         className="text-center"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-400 mb-8">
-                            <Sparkles className="h-4 w-4 text-blue-400" />
-                            <span>Simple, transparent pricing</span>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-8 holographic-glow">
+                            Value Logic Protocols
                         </div>
 
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
+                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 uppercase italic">
                             {t('pricing.title')}{' '}
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
+                            <span className="text-gray-500 not-italic">
                                 {t('pricing.title_gradient')}
                             </span>
                         </h1>
-                        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                        <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed">
                             {t('pricing.subtitle')}
                         </p>
                     </motion.div>
@@ -97,51 +101,48 @@ export default function PricingPage() {
             </section>
 
             {/* Pricing Cards */}
-            <section className="container max-w-6xl mx-auto px-6">
-                <div className="grid md:grid-cols-3 gap-6 items-start">
+            <section className="container max-w-7xl mx-auto px-6 mb-32">
+                <div className="grid md:grid-cols-3 gap-10 items-stretch">
                     {plans.map((plan, idx) => (
                         <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className={plan.highlight ? 'md:-mt-4' : ''}
+                            className={plan.highlight ? 'md:-mt-8' : ''}
                         >
-                            <Card className={`relative overflow-hidden rounded-3xl p-8 transition-all duration-300 h-full ${plan.highlight
-                                    ? 'bg-gradient-to-b from-blue-600/20 to-black border-blue-500/50 shadow-2xl shadow-blue-500/10'
-                                    : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.1]'
+                            <Card className={`relative overflow-hidden rounded-[40px] p-12 transition-all duration-700 h-full shadow-2xl ultra-card ${plan.highlight
+                                ? 'bg-white/[0.04] border-white/40 scale-105 z-10 iridescent-border'
+                                : 'bg-white/[0.02] border-white/10'
                                 }`}>
-                                {/* Popular Badge */}
-                                {plan.highlight && (
-                                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
-                                )}
 
                                 {/* Icon */}
-                                <div className={`inline-flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br ${plan.gradient} mb-6`}>
-                                    <plan.icon className="h-6 w-6 text-white" />
+                                <div className={`inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white text-black mb-10 shadow-2xl`}>
+                                    <plan.icon className="h-8 w-8" />
                                 </div>
 
-                                <h3 className="text-2xl font-bold text-white mb-1">{plan.name}</h3>
-                                <p className="text-gray-500 text-sm mb-6">{plan.description}</p>
+                                <h3 className="text-3xl font-black text-white mb-2 uppercase tracking-tighter italic">{plan.name}</h3>
+                                <p className="text-gray-500 text-sm mb-10 uppercase tracking-widest font-bold">{plan.description}</p>
 
-                                <div className="mb-8">
-                                    <span className="text-5xl font-bold text-white">{plan.price}</span>
-                                    <span className="text-gray-500">{plan.period}</span>
+                                <div className="mb-10">
+                                    <span className="text-6xl font-black text-white tracking-tighter italic">{plan.price}</span>
+                                    <span className="text-gray-500 uppercase tracking-widest text-xs font-bold ml-2">{plan.period}</span>
                                 </div>
 
-                                <ul className="space-y-4 mb-8">
+                                <ul className="space-y-5 mb-12">
                                     {plan.features.map((f, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-gray-300">
-                                            <Check className={`h-5 w-5 flex-shrink-0 mt-0.5 ${plan.highlight ? 'text-blue-400' : 'text-emerald-500'}`} />
+                                        <li key={i} className="flex items-start gap-4 text-white font-bold uppercase tracking-widest text-[10px]">
+                                            <div className="h-2 w-2 bg-white rounded-full mt-1 shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                                             <span>{f}</span>
                                         </li>
                                     ))}
                                 </ul>
 
-                                <Link href="/quote" className="block">
-                                    <Button className={`w-full h-12 font-medium ${plan.highlight
-                                            ? 'bg-white text-black hover:bg-gray-100'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                <Link href="/quote" className="block mt-auto">
+                                    <Button className={`w-full h-16 font-black uppercase tracking-tighter text-lg rounded-2xl transition-all duration-500 shadow-2xl ${plan.highlight
+                                        ? 'bg-white text-black hover:bg-gray-100 hover:scale-105'
+                                        : 'bg-white/5 text-white border border-white/10 hover:bg-white hover:text-black'
                                         }`}>
                                         {plan.cta}
                                     </Button>
@@ -153,18 +154,17 @@ export default function PricingPage() {
             </section>
 
             {/* FAQ Teaser */}
-            <section className="container max-w-4xl mx-auto px-6 mt-20">
+            <section className="container max-w-4xl mx-auto px-6 mt-20 text-center">
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center"
                 >
-                    <p className="text-gray-500">
-                        Have questions? {' '}
-                        <Link href="/company" className="text-blue-400 hover:text-blue-300 transition-colors">
-                            Contact our team
+                    <p className="text-gray-500 uppercase tracking-widest text-xs font-bold">
+                        Need an customized Enterprise solution? {' '}
+                        <Link href="/company" className="text-white hover:underline transition-all">
+                            Executive Advisory →
                         </Link>
                     </p>
                 </motion.div>

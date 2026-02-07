@@ -3,17 +3,17 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Users, Target, Award, Globe, MapPin, Mail, Github, Rocket, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CompanyPage() {
     const { t } = useLanguage();
 
     const values = [
-        { icon: Target, title: t('company.values.precision'), description: t('company.values.precision_desc'), gradient: "from-blue-500 to-cyan-400" },
-        { icon: Users, title: t('company.values.transparency'), description: t('company.values.transparency_desc'), gradient: "from-purple-500 to-pink-400" },
-        { icon: Award, title: t('company.values.excellence'), description: t('company.values.excellence_desc'), gradient: "from-amber-500 to-orange-400" },
-        { icon: Globe, title: t('company.values.global'), description: t('company.values.global_desc'), gradient: "from-emerald-500 to-teal-400" },
+        { icon: Target, title: t('company.values.precision'), description: t('company.values.precision_desc'), gradient: "bg-white text-black" },
+        { icon: Users, title: t('company.values.transparency'), description: t('company.values.transparency_desc'), gradient: "bg-white text-black" },
+        { icon: Award, title: t('company.values.excellence'), description: t('company.values.excellence_desc'), gradient: "bg-white text-black" },
+        { icon: Globe, title: t('company.values.global'), description: t('company.values.global_desc'), gradient: "bg-white text-black" },
     ];
 
     const stats = [
@@ -24,10 +24,10 @@ export default function CompanyPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-24 pb-20">
+        <main className="min-h-screen bg-black pt-24 pb-20 bg-mesh-dark">
             {/* Hero */}
             <section className="relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-500/15 rounded-full blur-[120px]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-white/5 rounded-full blur-[120px]" />
 
                 <div className="container relative z-10 max-w-5xl mx-auto px-6 pt-12 pb-20">
                     <motion.div
@@ -36,13 +36,17 @@ export default function CompanyPage() {
                         transition={{ duration: 0.6 }}
                         className="text-center"
                     >
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-8 holographic-glow">
+                            System Identity
+                        </div>
+
+                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-white mb-6 uppercase italic">
                             {t('company.title')}{' '}
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                            <span className="text-gray-500 not-italic">
                                 {t('company.title_gradient')}
                             </span>
                         </h1>
-                        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                        <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed mb-10">
                             {t('company.subtitle')}
                         </p>
                     </motion.div>
@@ -59,9 +63,9 @@ export default function CompanyPage() {
                     className="grid grid-cols-2 md:grid-cols-4 gap-6"
                 >
                     {stats.map((stat, idx) => (
-                        <div key={idx} className="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-                            <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                            <div className="text-sm text-gray-500 uppercase tracking-wider">{stat.label}</div>
+                        <div key={idx} className="text-center p-8 rounded-3xl bg-white/[0.02] border border-white/10 ultra-card transition-all hover:scale-105">
+                            <div className="text-5xl font-black text-white mb-2 tracking-tighter italic">{stat.value}</div>
+                            <div className="text-[10px] text-gray-500 uppercase font-black tracking-[0.2em]">{stat.label}</div>
                         </div>
                     ))}
                 </motion.div>
@@ -76,8 +80,8 @@ export default function CompanyPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">{t('company.mission_title')}</h2>
-                        <div className="space-y-4 text-gray-400 leading-relaxed">
+                        <h2 className="text-4xl font-black text-white mb-8 uppercase tracking-tighter italic">{t('company.mission_title')}</h2>
+                        <div className="space-y-6 text-gray-500 font-medium leading-relaxed">
                             <p>{t('company.mission_text1')}</p>
                             <p>{t('company.mission_text2')}</p>
                             <p>{t('company.mission_text3')}</p>
@@ -90,25 +94,27 @@ export default function CompanyPage() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.1 }}
                     >
-                        <Card className="p-8 bg-gradient-to-br from-blue-500/10 to-purple-500/5 border-blue-500/20 rounded-3xl">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                                    <Rocket className="h-7 w-7 text-white" />
+                        <Card className="p-10 bg-white/[0.03] border border-white/10 rounded-[40px] ultra-card relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.05] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+
+                            <div className="flex items-center gap-6 mb-10">
+                                <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center shadow-2xl">
+                                    <Rocket className="h-8 w-8 text-black" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white">{t('company.platform_status')}</h3>
+                                <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic">{t('company.platform_status')}</h3>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-6 relative z-10">
                                 {[
-                                    { label: t('company.status_items.searates') || "Freightos API", status: t('company.status_items.integrated') },
+                                    { label: t('company.status_items.searates') || "Multi-Carrier API", status: t('company.status_items.integrated') },
                                     { label: t('company.status_items.gmaps'), status: t('company.status_items.integrated') },
                                     { label: t('company.status_items.tracking'), status: t('company.status_items.ready') },
                                     { label: t('company.status_items.wizard'), status: t('company.status_items.complete') },
                                 ].map((item, idx) => (
-                                    <div key={idx} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                                        <span className="text-gray-300">{item.label}</span>
-                                        <span className="flex items-center gap-2 text-emerald-400 text-sm font-medium">
-                                            <CheckCircle2 className="h-4 w-4" />
+                                    <div key={idx} className="flex items-center justify-between py-4 border-b border-white/5 last:border-0 hover:pl-2 transition-all group">
+                                        <span className="text-gray-400 font-bold uppercase tracking-widest text-xs group-hover:text-white transition-colors">{item.label}</span>
+                                        <span className="flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.2em] bg-white/[0.05] px-4 py-2 rounded-full border border-white/10">
+                                            <CheckCircle2 className="h-3 w-3" />
                                             {item.status}
                                         </span>
                                     </div>
@@ -126,12 +132,12 @@ export default function CompanyPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12"
+                    className="text-center mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl font-bold text-white">{t('company.values.title')}</h2>
+                    <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic">{t('company.values.title')}</h2>
                 </motion.div>
 
-                <div className="grid md:grid-cols-4 gap-6">
+                <div className="grid md:grid-cols-4 gap-8">
                     {values.map((v, idx) => (
                         <motion.div
                             key={idx}
@@ -140,12 +146,12 @@ export default function CompanyPage() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.4, delay: idx * 0.1 }}
                         >
-                            <Card className="p-6 bg-white/[0.02] border-white/[0.05] text-center h-full hover:bg-white/[0.04] hover:border-white/[0.1] transition-all group">
-                                <div className={`inline-flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br ${v.gradient} mb-4 group-hover:scale-110 transition-transform`}>
-                                    <v.icon className="h-6 w-6 text-white" />
+                            <Card className="p-10 bg-white/[0.02] border border-white/10 text-center h-full hover:bg-white/[0.05] transition-all group ultra-card rounded-[32px]">
+                                <div className={`inline-flex items-center justify-center h-16 w-16 rounded-2xl ${v.gradient} mb-8 group-hover:rotate-[360deg] transition-all duration-700 shadow-2xl`}>
+                                    <v.icon className="h-8 w-8" />
                                 </div>
-                                <h4 className="font-semibold text-white mb-2">{v.title}</h4>
-                                <p className="text-sm text-gray-500">{v.description}</p>
+                                <h4 className="font-black text-white mb-4 uppercase tracking-tighter text-xl">{v.title}</h4>
+                                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest leading-relaxed">{v.description}</p>
                             </Card>
                         </motion.div>
                     ))}

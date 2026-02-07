@@ -11,20 +11,20 @@ export default function DashboardPage() {
     const { t } = useLanguage();
 
     const stats = [
-        { icon: Ship, value: "—", label: t('dashboard.stats.active'), color: "text-blue-400", bg: "bg-blue-500/10" },
-        { icon: Activity, value: "—", label: t('dashboard.stats.quotes'), color: "text-emerald-400", bg: "bg-emerald-500/10" },
-        { icon: Clock, value: "—", label: t('dashboard.stats.transit'), color: "text-amber-400", bg: "bg-amber-500/10" },
-        { icon: MapPin, value: "—", label: t('dashboard.stats.routes'), color: "text-purple-400", bg: "bg-purple-500/10" },
+        { icon: Ship, value: "—", label: t('dashboard.stats.active') },
+        { icon: Activity, value: "—", label: t('dashboard.stats.quotes') },
+        { icon: Clock, value: "—", label: t('dashboard.stats.transit') },
+        { icon: MapPin, value: "—", label: t('dashboard.stats.routes') },
     ];
 
     const quickActions = [
-        { icon: Package, title: t('dashboard.quick_actions.quote_title'), desc: t('dashboard.quick_actions.quote_desc'), href: "/quote", gradient: "from-blue-500/20 to-cyan-500/10", iconColor: "text-blue-400", borderColor: "border-blue-500/30 hover:border-blue-500" },
-        { icon: MapPin, title: t('dashboard.quick_actions.track_title'), desc: t('dashboard.quick_actions.track_desc'), href: "/tracking", gradient: "from-purple-500/20 to-pink-500/10", iconColor: "text-purple-400", borderColor: "border-purple-500/30 hover:border-purple-500" },
-        { icon: Plane, title: t('dashboard.quick_actions.services_title'), desc: t('dashboard.quick_actions.services_desc'), href: "/services", gradient: "from-amber-500/20 to-orange-500/10", iconColor: "text-amber-400", borderColor: "border-amber-500/30 hover:border-amber-500" },
+        { icon: Package, title: t('dashboard.quick_actions.quote_title'), desc: t('dashboard.quick_actions.quote_desc'), href: "/quote" },
+        { icon: MapPin, title: t('dashboard.quick_actions.track_title'), desc: t('dashboard.quick_actions.track_desc'), href: "/tracking" },
+        { icon: Plane, title: t('dashboard.quick_actions.services_title'), desc: t('dashboard.quick_actions.services_desc'), href: "/services" },
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-24 pb-20">
+        <main className="min-h-screen bg-black pt-24 pb-20 bg-mesh-dark">
             <div className="container max-w-7xl mx-auto px-6">
 
                 {/* Header */}
@@ -32,72 +32,73 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-6"
+                    className="flex flex-col md:flex-row md:items-center md:justify-between mb-16 gap-8 border-b border-white/5 pb-12"
                 >
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-white uppercase tracking-[0.3em] mb-6 holographic-glow">
+                            Security Verified
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-4 uppercase italic">
                             {t('dashboard.welcome')}{' '}
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
+                            <span className="text-gray-500 not-italic">
                                 {t('dashboard.command_center')}
                             </span>
                         </h1>
-                        <p className="text-gray-500">{t('dashboard.subtitle')}</p>
+                        <p className="text-gray-500 text-xl font-light tracking-tight">{t('dashboard.subtitle')}</p>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" className="border-white/10 text-gray-400 hover:bg-white/5 hover:text-white">
-                            <Bell className="mr-2 h-4 w-4" /> {t('dashboard.notifications')}
+                    <div className="flex gap-4">
+                        <Button variant="outline" className="h-14 px-8 border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-2xl font-black uppercase tracking-tighter shadow-2xl">
+                            <Bell className="mr-3 h-5 w-5" /> {t('dashboard.notifications')}
                         </Button>
                         <Link href="/quote">
-                            <Button className="bg-white text-black hover:bg-gray-100 font-medium">
-                                <Plus className="mr-2 h-4 w-4" /> {t('dashboard.new_shipment')}
+                            <Button className="h-14 px-10 bg-white text-black hover:bg-gray-100 font-black uppercase tracking-tighter rounded-2xl border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                <Plus className="mr-3 h-5 w-5" /> {t('dashboard.new_shipment')}
                             </Button>
                         </Link>
                     </div>
                 </motion.div>
 
-                {/* Welcome Banner */}
+                {/* Welcome Banner - Monochrome Ultra */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                    <Card className="p-8 bg-gradient-to-r from-blue-500/10 to-cyan-500/5 border-blue-500/20 rounded-2xl mb-8">
-                        <div className="flex items-start gap-4">
-                            <div className="h-12 w-12 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                                <Info className="h-6 w-6 text-blue-400" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-white text-lg mb-2">{t('dashboard.ready_title')}</h3>
-                                <p className="text-gray-400 mb-4 max-w-2xl">
-                                    {t('dashboard.ready_desc')}
-                                </p>
-                                <Link href="/quote">
-                                    <Button className="bg-blue-600 hover:bg-blue-500 text-white">
-                                        {t('dashboard.get_quote')} <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </Link>
-                            </div>
+                    <Card className="p-12 bg-white/[0.02] border-white/10 rounded-[40px] mb-12 flex flex-col md:flex-row items-center gap-10 ultra-card transition-all group overflow-hidden relative">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.03] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+
+                        <div className="h-20 w-20 rounded-3xl bg-white flex items-center justify-center flex-shrink-0 shadow-[0_0_40px_rgba(255,255,255,0.2)] group-hover:rotate-[360deg] transition-all duration-700">
+                            <Info className="h-10 w-10 text-black" />
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                            <h3 className="font-black text-white text-3xl mb-3 uppercase tracking-tighter italic">{t('dashboard.ready_title')}</h3>
+                            <p className="text-gray-500 mb-8 max-w-3xl leading-relaxed text-lg font-medium">
+                                {t('dashboard.ready_desc')}
+                            </p>
+                            <Link href="/quote">
+                                <Button className="bg-white hover:bg-gray-100 text-black font-black h-14 px-10 rounded-2xl uppercase tracking-tighter shadow-2xl group/btn">
+                                    {t('dashboard.get_quote')} <ArrowRight className="ml-3 h-5 w-5 group-hover/btn:translate-x-2 transition-transform" />
+                                </Button>
+                            </Link>
                         </div>
                     </Card>
                 </motion.div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid - Ultra Monochrome */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+                    className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
                 >
                     {stats.map((stat, idx) => (
-                        <Card key={idx} className="p-6 bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04] transition-all">
-                            <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-xl ${stat.bg}`}>
-                                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                        <Card key={idx} className="p-10 bg-white/[0.01] border border-white/5 hover:border-white/20 transition-all rounded-[32px] ultra-card group">
+                            <div className="flex flex-col gap-6">
+                                <div className="flex items-center gap-4 text-gray-500 group-hover:text-white transition-colors">
+                                    <stat.icon className="h-6 w-6" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.25em]">{stat.label}</span>
                                 </div>
-                                <div>
-                                    <div className="text-3xl font-bold text-white">{stat.value}</div>
-                                    <div className="text-sm text-gray-500">{stat.label}</div>
-                                </div>
+                                <div className="text-6xl font-black text-white tracking-tighter italic h-14 flex items-center">{stat.value}</div>
                             </div>
                         </Card>
                     ))}
@@ -108,37 +109,46 @@ export default function DashboardPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="mb-12"
+                    className="mb-16"
                 >
-                    <h2 className="text-xl font-bold text-white mb-4">{t('dashboard.shipments_title')}</h2>
-                    <Card className="p-16 bg-white/[0.02] border-white/[0.05] text-center rounded-2xl">
-                        <Package className="h-16 w-16 text-gray-700 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-white mb-2">{t('dashboard.no_shipments_title')}</h3>
-                        <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">{t('dashboard.shipments_title')}</h2>
+                    </div>
+
+                    <Card className="p-24 bg-black border border-dashed border-white/10 text-center rounded-[40px] ultra-card hover:border-white/30 transition-all relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-white/[0.01] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                        <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-white/[0.03] mb-8 group-hover:scale-110 transition-transform">
+                            <Package className="h-12 w-12 text-gray-700" />
+                        </div>
+                        <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter italic">{t('dashboard.no_shipments_title')}</h3>
+                        <p className="text-gray-500 mb-10 max-w-md mx-auto font-bold uppercase tracking-widest text-[10px] leading-relaxed">
                             {t('dashboard.no_shipments_desc')}
                         </p>
                         <Link href="/quote">
-                            <Button className="bg-white text-black hover:bg-gray-100">
+                            <Button className="bg-white text-black hover:bg-gray-100 font-black h-14 px-12 rounded-2xl uppercase tracking-tighter shadow-2xl">
                                 {t('dashboard.get_quote')}
                             </Button>
                         </Link>
                     </Card>
                 </motion.div>
 
-                {/* Quick Actions */}
+                {/* Quick Actions - High Resolution */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                 >
-                    <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <h2 className="text-3xl font-black text-white mb-8 uppercase tracking-tighter italic">Quick Actions</h2>
+                    <div className="grid md:grid-cols-3 gap-8">
                         {quickActions.map((action, idx) => (
                             <Link key={idx} href={action.href}>
-                                <Card className={`p-6 bg-gradient-to-br ${action.gradient} border ${action.borderColor} rounded-2xl transition-all cursor-pointer group h-full`}>
-                                    <action.icon className={`h-8 w-8 ${action.iconColor} mb-4 group-hover:scale-110 transition-transform`} />
-                                    <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors mb-1">{action.title}</h3>
-                                    <p className="text-sm text-gray-500">{action.desc}</p>
+                                <Card className="p-10 bg-white/[0.02] border border-white/5 rounded-[32px] transition-all cursor-pointer group h-full hover:bg-white/[0.05] hover:border-white/20 ultra-card">
+                                    <div className="h-16 w-16 bg-white text-black rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-[360deg] transition-all duration-700 shadow-2xl">
+                                        <action.icon className="h-8 w-8" />
+                                    </div>
+                                    <h3 className="font-black text-white text-2xl mb-4 uppercase tracking-tighter">{action.title}</h3>
+                                    <p className="text-sm font-medium text-gray-500 leading-relaxed uppercase tracking-widest text-[10px]">{action.desc}</p>
                                 </Card>
                             </Link>
                         ))}

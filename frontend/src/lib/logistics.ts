@@ -7,21 +7,25 @@ export interface QuoteRequest {
     container: string;
 }
 
+// OceanQuote from Backend
+// OceanQuote from Backend
 export interface QuoteResult {
-    id: string;
+    id: string; // Generated on frontend or mapped
     carrier: string;
-    carrier_logo?: string;
+    carrier_logo?: string; // Mapped based on name
     price: number;
     currency: string;
     days: number;
     validUntil: string;
     isReal: boolean;
-    co2_emissions?: number;
 }
 
-const BACKEND_URL = "http://localhost:8000/api";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
 
 export const logisticsClient = {
+    /**
+     * Fetch Shipping Rates from Logistics Engine
+     */
     /**
      * Fetch Shipping Rates from Logistics Engine
      */
@@ -30,25 +34,35 @@ export const logisticsClient = {
             const { data } = await axios.post(`${BACKEND_URL}/quotes/`, {
                 origin: req.origin,
                 destination: req.destination,
-                cargo_type: req.container
+                container: req.container
             });
 
             if (data && data.success && Array.isArray(data.quotes)) {
-                return data.quotes.map((r: any) => ({
-                    id: r.id,
-                    carrier: r.carrier,
-                    carrier_logo: r.carrier_logo,
-                    price: r.price,
-                    currency: r.currency,
-                    days: r.transit_days,
-                    validUntil: r.valid_until,
-                    isReal: r.is_real
-                }));
+
+                return data.quotes.map((r: any, index: number) => {
+                    let logo = '/logos/maersk.png';
+                    const name = r.carrier_name.toLowerCase();
+                    if (name.includes('maersk')) logo = '/logos/maersk.png';
+                    else if (name.includes('cma')) logo = '/logos/cma.png';
+                    else if (name.includes('msc')) logo = '/logos/msc.png';
+                    else if (name.includes('searates')) logo = '/logos/searates.png';
+                    else logo = '/logos/carrier-generic.png';
+
+                    return {
+                        id: r.id || `quote-${index}-${Date.now()}`,
+                        carrier: r.carrier_name,
+                        carrier_logo: logo,
+                        price: r.price,
+                        currency: r.currency,
+                        days: r.transit_time_days,
+                        validUntil: r.expiration_date || "2026-12-31",
+                        isReal: r.is_real_api_rate
+                    };
+                });
             }
             return [];
         } catch (error) {
             console.error("Logistics Engine Error:", error);
-            // Fallback to empty array to handle gracefully
             return [];
         }
     },
@@ -59,8 +73,19 @@ export const logisticsClient = {
     trackContainer: async (number: string) => {
         try {
             const { data } = await axios.get(`${BACKEND_URL}/tracking/${number}`);
-            if (data && data.success) {
-                return data;
+            if (data && data.success && data.data) {
+                const b = data.data;
+                // Standardize backend data to UI format
+                return {
+                    status: b.status,
+                    eta: "Check Carrier Site", // Default as simulation
+                    events: b.events.map((e: string, i: number) => ({
+                        event: e,
+                        status: i === 0 ? 'done' : i === 1 ? 'current' : 'pending',
+                        loc: b.current_location,
+                        date: "2026-02-07"
+                    }))
+                };
             }
             return null;
         } catch (error) {
@@ -72,6 +97,7 @@ export const logisticsClient = {
     /**
      * Create a Booking
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bookQuote: async (bookingData: any) => {
         try {
             const { data } = await axios.post(`${BACKEND_URL}/bookings/`, bookingData);

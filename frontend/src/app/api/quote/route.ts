@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { logisticsClient } from '@/lib/logistics';
-import { pricingEngine } from '@/lib/pricing';
 
 export async function POST(request: Request) {
     try {
@@ -9,26 +8,17 @@ export async function POST(request: Request) {
 
         console.log(`📡 API: Calculating Quote for ${origin} -> ${destination}`);
 
-        // 1. Get Raw Rates from Logistics Engine
+        // 1. Get Raw Rates from Logistics Engine (Real Data)
         const rawQuotes = await logisticsClient.getRates({
             origin,
             destination,
             container
         });
 
-        // 2. Apply Pricing Logic (Markup + Fees)
-        const finalRates = pricingEngine.calculateFinalRates({
-            quotes: rawQuotes,
-            services: {
-                customs: true, // Defaulting for MVP
-                insurance: true,
-                delivery: false
-            }
-        });
-
+        // 2. Return Rates Directly (Pricing logic now handled by Backend/RMS)
         return NextResponse.json({
             success: true,
-            quotes: finalRates
+            quotes: rawQuotes
         });
 
     } catch (error) {
