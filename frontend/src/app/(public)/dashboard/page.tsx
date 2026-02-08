@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Ship, Plane, Clock, Activity, MapPin, Bell, Info, ArrowRight, Plus } from "lucide-react";
+import { Package, Ship, Plane, Clock, Activity, MapPin, Bell, Info, ArrowRight, Plus, Crown, Shield } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -11,21 +11,40 @@ export default function DashboardPage() {
     const { t } = useLanguage();
 
     const stats = [
-        { icon: Ship, value: "—", label: t('dashboard.stats.active') },
-        { icon: Activity, value: "—", label: t('dashboard.stats.quotes') },
-        { icon: Clock, value: "—", label: t('dashboard.stats.transit') },
-        { icon: MapPin, value: "—", label: t('dashboard.stats.routes') },
+        { icon: Activity, value: "14%", label: "Geopolitical Risk" },
+        { icon: Ship, value: "3.2k", label: "Fleet Carbon (kg)" },
+        { icon: Plane, value: "98.2", label: "Route Health Index" },
+        { icon: Clock, value: "0ms", label: "Sync Latency" },
     ];
 
     const quickActions = [
-        { icon: Package, title: t('dashboard.quick_actions.quote_title'), desc: t('dashboard.quick_actions.quote_desc'), href: "/quote" },
-        { icon: MapPin, title: t('dashboard.quick_actions.track_title'), desc: t('dashboard.quick_actions.track_desc'), href: "/tracking" },
-        { icon: Plane, title: t('dashboard.quick_actions.services_title'), desc: t('dashboard.quick_actions.services_desc'), href: "/services" },
+        { icon: Package, title: t('dashboard.quick_actions.quote_title'), desc: "Execute King-Level corridor analysis.", href: "/quote" },
+        { icon: MapPin, title: t('dashboard.quick_actions.track_title'), desc: "Real-time 3D telemetry tracking.", href: "/tracking" },
+        { icon: Crown, title: "Sovereign Audit", desc: "Predictive risk & compliance reporting.", href: "/tools" },
     ];
 
     return (
         <main className="min-h-screen bg-black pt-24 pb-20 bg-mesh-dark">
             <div className="container max-w-7xl mx-auto px-6">
+
+                {/* 🚨 Sovereign Alert Banner */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-12 bg-white/[0.03] border-2 border-white/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl overflow-hidden relative"
+                >
+                    <div className="absolute top-0 left-0 h-full w-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+                    <div className="flex items-center gap-6">
+                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center animate-pulse">
+                            <Shield className="h-6 w-6 text-black" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-black text-white uppercase tracking-tighter italic">Sovereign Intel: Suez Corridor Health</h4>
+                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Status: SECURE | Congestion: LOW | Risk: 12%</p>
+                        </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-white hover:text-black font-black uppercase tracking-widest text-[9px]">View Detail Intelligence →</Button>
+                </motion.div>
 
                 {/* Header */}
                 <motion.div

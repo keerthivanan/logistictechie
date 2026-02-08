@@ -34,7 +34,7 @@ export default function ToolsPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-32 pb-24">
+        <main className="min-h-screen bg-black pt-32 pb-24 bg-mesh-dark">
             <div className="container mx-auto px-6 max-w-7xl">
                 {/* Header Section */}
                 <motion.div
@@ -43,10 +43,10 @@ export default function ToolsPage() {
                     transition={{ duration: 0.8, ease: "circOut" }}
                     className="mb-20 text-center"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-6 holographic-glow">
                         <Zap className="w-3 h-3 text-white" /> Logistics Intelligence
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter">
+                    <h1 className="text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter italic">
                         Shipment Utilities
                     </h1>
                     <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed">
@@ -54,7 +54,6 @@ export default function ToolsPage() {
                     </p>
                 </motion.div>
 
-                {/* Grid of Tools */}
                 <div className="grid lg:grid-cols-2 gap-10">
                     {tools.map((tool, i) => (
                         <motion.div
@@ -65,24 +64,26 @@ export default function ToolsPage() {
                             className="space-y-4"
                         >
                             <div className="flex items-center gap-4 mb-2">
-                                <div className="p-3 bg-white text-black rounded-lg">
+                                <div className="p-3 bg-white text-black rounded-xl shadow-2xl">
                                     <tool.icon className="w-5 h-5" />
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white uppercase tracking-tight">{tool.title}</h3>
-                                    <p className="text-sm text-gray-500">{tool.desc}</p>
+                                <div className="">
+                                    <h3 className="text-xl font-bold text-white uppercase tracking-tighter italic">{tool.title}</h3>
+                                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">{tool.desc}</p>
                                 </div>
                             </div>
 
-                            <FreightosWidget
-                                title={tool.title}
-                                widgetType={tool.type}
-                                config={{
-                                    title: tool.title,
-                                    background: { color: '#000000' }, // Force dark inside widget if possible
-                                    appId: ''
-                                }}
-                            />
+                            <div className="ultra-card p-1 rounded-[32px] overflow-hidden">
+                                <FreightosWidget
+                                    title={tool.title}
+                                    widgetType={tool.type}
+                                    config={{
+                                        title: tool.title,
+                                        background: { color: '#000000' }, // Force dark inside widget if possible
+                                        appId: ''
+                                    }}
+                                />
+                            </div>
                         </motion.div>
                     ))}
                 </div>
@@ -95,11 +96,12 @@ export default function ToolsPage() {
                     className="mt-24 pt-24 border-t border-white/10"
                 >
                     <div className="mb-10 text-center">
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Market Rate Estimator</h2>
-                        <p className="text-gray-400">Benchmark your current logistics costs against global market averages.</p>
+                        <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic holographic-glow inline-block px-8 py-2">Market Rate Estimator</h2>
+                        <p className="text-gray-500 uppercase tracking-widest text-xs font-bold">Benchmark your current logistics costs against global market averages.</p>
                     </div>
 
-                    <div className="relative p-1 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="ultra-card p-4 rounded-[40px] relative overflow-hidden bg-white/[0.01]">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none" />
                         <FreightosWidget
                             title="Freight Rate Estimator"
                             widgetType="FreightEstimator"

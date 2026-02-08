@@ -18,6 +18,14 @@ export interface QuoteResult {
     days: number;
     validUntil: string;
     isReal: boolean;
+    tags?: string[];
+    fee_breakdown?: { name: string; amount: number }[];
+
+    // 👑 Sovereign Intelligence
+    riskScore: number;
+    carbonEmissions: number;
+    customsDuty: number;
+    portCongestion: number;
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
@@ -56,7 +64,15 @@ export const logisticsClient = {
                         currency: r.currency,
                         days: r.transit_time_days,
                         validUntil: r.expiration_date || "2026-12-31",
-                        isReal: r.is_real_api_rate
+                        isReal: r.is_real_api_rate,
+                        tags: ["Direct", "Eco-Select"], // Elite defaults
+                        fee_breakdown: r.surcharges ? r.surcharges.map((s: any) => ({ name: s.name, amount: s.amount })) : [],
+
+                        // 👑 Sovereign Metrics Mapping
+                        riskScore: r.risk_score || 0,
+                        carbonEmissions: r.carbon_emissions || 0,
+                        customsDuty: r.customs_duty_estimate || 0,
+                        portCongestion: r.port_congestion_index || 0
                     };
                 });
             }

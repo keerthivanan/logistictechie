@@ -4,6 +4,7 @@ import { useQuoteStore } from "@/hooks/use-quote";
 import { CargoSelectionPopover } from "../CargoSelectionPopover";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PackageOpen } from "lucide-react";
+import { AIDocumentUpload } from "../AIDocumentUpload";
 
 export function CargoStep() {
     // const { t } = useLanguage();
@@ -26,10 +27,10 @@ export function CargoStep() {
                         <p className="text-[10px] text-gray-600 uppercase font-bold tracking-widest mt-2 px-1">Select dimensions & load type for precision results.</p>
                     </div>
 
-                    {/* Value Logic - High Contrast */}
-                    <div className="bg-white/[0.01] rounded-xl p-8 border border-dashed border-white/5 flex flex-col items-center justify-center text-center text-gray-700 hover:border-white/10 transition-colors group">
-                        <PackageOpen className="w-10 h-10 opacity-20 mb-3 group-hover:opacity-40 transition-opacity" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Automated Value Logic Active</span>
+                    {/* Zero-Manual Action - High Resolution */}
+                    <div className="space-y-4">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest">Autonomous Entry</label>
+                        <AIDocumentUpload />
                     </div>
                 </div>
 

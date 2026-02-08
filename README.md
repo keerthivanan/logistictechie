@@ -50,15 +50,19 @@ Direct integration with real-world carrier APIs, moving beyond mock data:
 - Docker & Docker Compose
 - OpenAI API Key
 
-### 2. Startup
-```bash
-# Clone the repository
-git clone https://github.com/keerthivanan/logistictechie.git
-cd logistics
+### 2. Startup (The Sovereign Way)
+We use a dedicated Conda environment (`logistics_env`) for creating the "Best of All Time" stability.
 
-# Set your API Keys in backend/.env & frontend/.env.local
-# Then launch the ecosystem
-docker-compose up --build
+**One-Click Launch:**
+```bash
+# Simply run the dev script
+.\dev.bat
+```
+
+**Manual Launch (If needed):**
+```powershell
+conda activate logistics_env
+python start_services.py
 ```
 
 ---

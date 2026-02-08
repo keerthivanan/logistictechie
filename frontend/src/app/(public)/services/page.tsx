@@ -53,11 +53,9 @@ export default function ServicesPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-32 pb-24">
+        <main className="min-h-screen bg-black pt-32 pb-24 bg-mesh-dark">
             {/* Hero */}
             <section className="relative overflow-hidden mb-20">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-white/5 rounded-full blur-[120px]" />
-
                 <div className="container relative z-10 max-w-5xl mx-auto px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -65,10 +63,10 @@ export default function ServicesPage() {
                         transition={{ duration: 0.6 }}
                         className="text-center"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-8">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-8 holographic-glow">
                             Global Operations
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 uppercase">
+                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 uppercase italic">
                             {t('services.hero_prefix')}{' '}
                             <span className="text-gray-500">
                                 {t('services.hero_gradient')}
@@ -93,7 +91,7 @@ export default function ServicesPage() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
                         >
-                            <Card className={`relative overflow-hidden rounded-[32px] bg-white/[0.02] border border-white/10 p-10 md:p-12 transition-all duration-500 hover:bg-white/[0.04] hover:border-white/20 group h-full shadow-2xl`}>
+                            <div className="ultra-card bg-white/[0.02] border border-white/10 p-10 md:p-12 transition-all duration-500 hover:bg-white/[0.04] hover:border-white/20 group h-full rounded-[40px] shadow-2xl flex flex-col">
                                 {/* Icon */}
                                 <div className={`inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white text-black mb-8 shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
                                     <service.icon className="h-8 w-8" />
@@ -107,7 +105,7 @@ export default function ServicesPage() {
                                     {service.description}
                                 </p>
 
-                                <ul className="space-y-4 mb-10">
+                                <ul className="space-y-4 mb-10 flex-grow">
                                     {service.features.map((f, i) => (
                                         <li key={i} className="flex items-center gap-3 text-white font-bold uppercase tracking-widest text-[10px]">
                                             <div className="h-1.5 w-1.5 bg-white rounded-full" />
@@ -117,11 +115,11 @@ export default function ServicesPage() {
                                 </ul>
 
                                 <Link href="/quote">
-                                    <Button className="bg-white text-black hover:bg-gray-200 h-14 px-8 rounded-xl font-black uppercase tracking-tighter text-base shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white">
+                                    <Button className="bg-white text-black hover:bg-gray-200 h-14 px-8 rounded-xl font-black uppercase tracking-tighter text-base shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white active:scale-95 transition-all">
                                         {t('common.getStarted')} <ArrowRight className="ml-2 h-5 w-5" />
                                     </Button>
                                 </Link>
-                            </Card>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
@@ -149,7 +147,7 @@ export default function ServicesPage() {
                             transition={{ duration: 0.4, delay: idx * 0.1 }}
                             className="text-center group"
                         >
-                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white/5 border border-white/10 text-white mb-6 group-hover:bg-white group-hover:text-black transition-all duration-500 shadow-xl">
+                            <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white/5 border border-white/10 text-white mb-6 group-hover:bg-white group-hover:text-black transition-all duration-500 shadow-xl ultra-card">
                                 <b.icon className="h-8 w-8" />
                             </div>
                             <h4 className="font-black text-white mb-2 uppercase tracking-tighter text-lg italic">{b.title}</h4>

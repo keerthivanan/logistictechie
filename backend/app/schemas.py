@@ -28,6 +28,12 @@ class OceanQuote(BaseModel):
     
     surcharges: List[Surcharge] = []
     
+    # 👑 Sovereign Intelligence Metrics
+    risk_score: float = 0.0
+    carbon_emissions: float = 0.0
+    customs_duty_estimate: float = 0.0
+    port_congestion_index: float = 0.0
+    
     # 🔒 Security Verification
     is_real_api_rate: bool = True
     source_endpoint: str 

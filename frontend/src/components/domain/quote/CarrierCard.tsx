@@ -54,27 +54,30 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                     );
                                 })
                             ) : null}
+                            {/* Sovereign Intelligence Badges */}
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors ${quote.riskScore > 50 ? 'border-red-500/50 text-red-500' : 'border-white/10 text-gray-500 group-hover:text-gray-300'}`}>
+                                <ShieldCheck className="w-3 h-3 mr-1.5" /> Risk: {quote.riskScore}%
+                            </span>
+
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 text-gray-400">
+                                <Leaf className="w-3 h-3 mr-1.5" /> {quote.carbonEmissions.toLocaleString()} kg CO₂
+                            </span>
+
                             {/* Verified Badge */}
                             {quote.isReal && (
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white text-black shadow-lg">
-                                    <ShieldCheck className="w-3 h-3 mr-1.5" /> Verified
-                                </span>
-                            )}
-                            {/* CO2 Badge */}
-                            {quote.co2_emissions && (
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 text-gray-400">
-                                    <Leaf className="w-3 h-3 mr-1.5" /> {quote.co2_emissions} kg CO₂e
+                                    Verified
                                 </span>
                             )}
                         </div>
                     </div>
                 </div>
                 <div className="text-right space-y-1">
-                    <div className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Standard Spot Rate</div>
+                    <div className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Freight + Landed Estimate</div>
                     <div className="text-4xl font-black text-white tracking-tighter leading-none">
-                        USD {quote.price.toLocaleString()}
+                        USD {(quote.price + quote.customsDuty).toLocaleString()}
                     </div>
-                    <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{quote.currency} / 40FT HC</div>
+                    <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Incl. ${quote.customsDuty.toLocaleString()} Duties</div>
                 </div>
             </div>
 
@@ -208,7 +211,13 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-white">Port of Discharge</p>
-                                            <p className="text-xs text-gray-500">{destination.split(',')[0]} Port</p>
+                                            <p className="text-xs text-gray-500 italic mb-2">{destination.split(',')[0]} Port</p>
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-1 w-24 bg-white/10 rounded-full overflow-hidden">
+                                                    <div className={`h-full ${quote.portCongestion > 70 ? 'bg-red-500' : 'bg-green-500'}`} style={{ width: `${quote.portCongestion}%` }} />
+                                                </div>
+                                                <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Health: {100 - Math.round(quote.portCongestion)}%</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

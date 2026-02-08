@@ -17,10 +17,10 @@ def start_system():
     print("---------------------------------------")
     
     # 2. Start Backend
-    print("🔹 Launching Backend (Port 8000)...")
-    # We use Popen to run in parallel
+    print("🔹 Launching Backend (Port 8000) via logistics_env...")
+    # Executing via Conda to ensure proper connectivity
     backend_process = subprocess.Popen(
-        [sys.executable, "run.py"], 
+        f"conda run -n logistics_env python run.py", 
         cwd=backend_dir,
         shell=True
     )

@@ -5,6 +5,7 @@ from app.services.ocean.maersk import MaerskClient
 from app.services.ocean.cma_cgm import CmaClient
 from app.services.ocean.msc import MscClient
 from app.services.ocean.searates import SearatesClient
+from app.services.sovereign import sovereign_engine
 import asyncio
 
 router = APIRouter()
@@ -12,8 +13,7 @@ router = APIRouter()
 @router.post("/", response_model=Dict)
 async def get_real_ocean_quotes(request: RateRequest):
     """
-    Orchestrates REAL calls to Maersk, CMA CGM, MSC, and Searates.
-    If no keys are configured, returns an explicit warning.
+    Orchestrates REAL calls and enriches them with Sovereign Intelligence.
     """
     maersk = MaerskClient()
     cma = CmaClient()
@@ -34,6 +34,13 @@ async def get_real_ocean_quotes(request: RateRequest):
     
     for res in results:
         if isinstance(res, list):
+            # 👑 SOVEREIGN ENRICHMENT: Apply King-Level Metrics to every quote
+            for quote in res:
+                quote.risk_score = sovereign_engine.calculate_risk_score(request.origin, request.destination)
+                quote.carbon_emissions = sovereign_engine.estimate_carbon_footprint(12000, quote.container_type) # 12k km avg
+                quote.customs_duty_estimate = sovereign_engine.predict_landed_cost(quote.price, "General") 
+                quote.port_congestion_index = sovereign_engine.get_port_congestion(request.destination)
+                
             all_quotes.extend(res)
         else:
             errors.append(str(res))

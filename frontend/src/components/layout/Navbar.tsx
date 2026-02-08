@@ -44,7 +44,7 @@ export function Navbar() {
                             <Globe className="h-6 w-6 text-black" />
                         </div>
                         <span className="text-2xl font-black tracking-tighter text-white uppercase italic group-hover:not-italic transition-all duration-500">
-                            LOGI<span className="text-gray-500">TECH</span>
+                            PHOENIX<span className="text-gray-500">OS</span>
                         </span>
                     </Link>
 

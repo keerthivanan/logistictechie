@@ -29,9 +29,17 @@ The UI must be "Best of All Time".
 -   **Network Check:** Verify the XHR request went to the backend and returned JSON.
 -   **Latency Check:** Is it under 500ms? If not, why?
 
+## 5. The Sovereign Execution (Operating Phase)
+**"Is the environment legitimate?"**
+To ensure "Best of All Time" stability, we use a dedicated Conda environment.
+-   **Mandated Env:** `logistics_env`
+-   **Protocol:** Always run backend commands via `conda run -n logistics_env`.
+-   **Integrity:** Never use local `venv` or global python; maintain the Sovereign boundary.
+
 ---
 
 ## Current Roadmap Status
 1.  ✅ **Foundation:** Real Backend & DB (Done)
-2.  🔄 **Polishing:** Frontend Experience (In Progress)
-3.  🚀 **Launch:** Production Deployment (Next)
+2.  ✅ **Sovereign Intelligence:** Phase 7 Metrics & AI (Done)
+3.  ✅ **Verification:** Connectivity & Schema Audit (Done)
+4.  🚀 **Launch:** Production Deployment (Ready)

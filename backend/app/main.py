@@ -1,12 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routers import quotes, auth, bookings, tracking, ai, documents
 from app.core.config import settings
-from app.api.routers import quotes
+from app.db.session import engine, Base
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 🔱 Sovereign Database Handshake
+    async with engine.begin() as conn:
+        print("🔱 Harmonizing Sovereign Database Schema...")
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="The 'True Ocean' Protocol. Uses strictly real API integrations."
+    description="The 'True Ocean' Protocol. Uses strictly real API integrations.",
+    lifespan=lifespan
 )
 
 # CORS
@@ -19,12 +30,12 @@ app.add_middleware(
 )
 
 # Mount the 'Honest' Routers
-from app.api.routers import quotes, auth, bookings, tracking, ai
 app.include_router(quotes.router, prefix="/api/quotes", tags=["Ocean Quotes"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(tracking.router, prefix="/api/tracking", tags=["Global Tracking"])
 app.include_router(ai.router, prefix="/api/ai", tags=["Creative Cortex AI"])
+app.include_router(documents.router, prefix="/api/documents", tags=["Document AI"])
 
 @app.get("/")
 def health_check():

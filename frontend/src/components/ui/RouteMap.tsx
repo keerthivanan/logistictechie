@@ -1,8 +1,9 @@
 "use client";
 
-import { useLoadScript, GoogleMap, Marker, Polyline } from "@react-google-maps/api";
+import { GoogleMap, Marker, Polyline } from "@react-google-maps/api";
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
+import { useGoogleMaps } from "../providers/GoogleMapsProvider";
 
 interface RouteMapProps {
     origin?: string; // e.g. "Shanghai, China"
@@ -121,9 +122,7 @@ const mapStyle = [
 const center = { lat: 20, lng: 0 }; // World view
 
 export default function RouteMap({ className = "" }: RouteMapProps) {
-    const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "", // Use empty string to avoid crash, will error gracefully
-    });
+    const { isLoaded, loadError } = useGoogleMaps();
 
     const options = useMemo(() => ({
         styles: mapStyle,
@@ -133,6 +132,7 @@ export default function RouteMap({ className = "" }: RouteMapProps) {
         mapTypeControl: false,
         fullscreenControl: false,
         minZoom: 2,
+        mapId: process.env.NEXT_PUBLIC_MAP_ID || "bf19cf086f6f9660", // Enterprise 3D Map ID
     }), []);
 
     // Placeholder if no key or loading

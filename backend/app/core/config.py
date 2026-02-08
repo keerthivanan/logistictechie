@@ -2,7 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Logistics OS (Ocean Protocol)"
+    PROJECT_NAME: str = "PHOENIX LOGISTICS OS"
     VERSION: str = "2.0.0"
     API_V1_STR: str = "/api"
     
@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
     QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    
+    # 🌍 GOOGLE ENTERPRISE SUITE
+    GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "phoenix-logistics-2026")
+    GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
     ALLOWED_ORIGINS: list = ["*"]
 

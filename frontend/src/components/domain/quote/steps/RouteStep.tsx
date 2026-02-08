@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Map } from "lucide-react";
 import RouteMap from "@/components/ui/RouteMap";
-import { PortAutocomplete } from "@/components/ui/PortAutocomplete";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { GooglePlacesInput } from "@/components/ui/GooglePlacesInput";
 
 export function RouteStep() {
     const { t } = useLanguage();
@@ -23,22 +23,24 @@ export function RouteStep() {
                 </div>
 
                 <div className="space-y-8 bg-white/[0.02] p-8 rounded-2xl border border-white/10 shadow-2xl">
-                    <div className="space-y-3">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.origin')}</Label>
-                        <PortAutocomplete
-                            value={formData.origin}
-                            onChange={(val) => updateForm({ origin: val })}
-                            placeholder={t('quote.wizard.route.origin_placeholder')}
-                        />
-                    </div>
+                    <div className="space-y-8">
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.origin')}</Label>
+                            <GooglePlacesInput
+                                value={formData.origin}
+                                onChange={(val: string) => updateForm({ origin: val })}
+                                placeholder={t('quote.wizard.route.origin_placeholder')}
+                            />
+                        </div>
 
-                    <div className="space-y-3">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.destination')}</Label>
-                        <PortAutocomplete
-                            value={formData.destination}
-                            onChange={(val) => updateForm({ destination: val })}
-                            placeholder={t('quote.wizard.route.dest_placeholder')}
-                        />
+                        <div className="space-y-3">
+                            <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.destination')}</Label>
+                            <GooglePlacesInput
+                                value={formData.destination}
+                                onChange={(val: string) => updateForm({ destination: val })}
+                                placeholder={t('quote.wizard.route.dest_placeholder')}
+                            />
+                        </div>
                     </div>
                 </div>
 

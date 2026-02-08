@@ -23,7 +23,7 @@ export function Footer() {
                                 <Globe className="h-6 w-6 text-black" />
                             </div>
                             <span className="text-2xl font-black tracking-tighter text-white uppercase italic group-hover:not-italic transition-all duration-500">
-                                LOGI<span className="text-gray-500">TECH</span>
+                                PHOENIX<span className="text-gray-500">OS</span>
                             </span>
                         </Link>
                         <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest leading-relaxed mb-8">
@@ -78,7 +78,7 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
                     <p className="text-gray-700 text-[9px] font-black uppercase tracking-[0.4em]">
-                        © 2026 LOGITECH® SYSTEM. {t('footer.rights')}
+                        © 2026 PHOENIX LOGISTICS OS®. {t('footer.rights')}
                     </p>
                     <div className="flex items-center gap-8 text-[9px] font-black uppercase tracking-widest text-gray-700">
                         <span className="flex items-center gap-3">

@@ -1,6 +1,6 @@
-# 📜 PROJECT MANIFESTO: The Global Oracle (Logistics OS)
+# 📜 PROJECT MANIFESTO: PHOENIX LOGISTICS OS
 
-**Version:** 2.0.0 (Phoenix Edition)
+**Version:** 2.0.0 (Gold Edition)
 **Timeline:** 2026
 **Philosophy:** "Global Brain, Local Tongue" | "True Ocean Protocol"
 
@@ -15,7 +15,7 @@ This system adheres to a strict "Honest IO" architecture:
 
 ## 3. The 2026 Technology Stack
 ### Brain (Backend)
--   **Runtime**: Python 3.12+
+-   **Runtime**: Python 3.12+ (Mandated Conda Env: `logistics_env`)
 -   **Framework**: FastAPI (High-performance Async I/O)
 -   **Database**: PostgreSQL 16 + AsyncPG driver
 -   **ORM**: SQLAlchemy 2.0 (Async Session Mode)

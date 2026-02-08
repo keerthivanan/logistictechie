@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import { ShieldCheck, Cpu, Globe, Zap } from "lucide-react";
 
 const CARRIER_LOGS = [
-    { text: "Initiating Deep Corridors Scan...", icon: Globe },
-    { text: "Carrier Handshake: MAERSK Alpha-Gate...", icon: Zap },
-    { text: "Carrier Handshake: CMA CGM Prime-Net...", icon: Zap },
-    { text: "Carrier Handshake: MSC Global-Link...", icon: Zap },
-    { text: "Decrypting Searates Master API...", icon: Cpu },
-    { text: "Verifying Fuel Surcharge Matrix...", icon: ShieldCheck },
-    { text: "Finalizing Guaranteed Spot Rates...", icon: Globe },
+    { text: "Executing Sovereign Corridor Analysis...", icon: Globe },
+    { text: "Predicting Geopolitical Risk Matrix...", icon: ShieldCheck },
+    { text: "Carbon Compliance Audit: Protocol 2026...", icon: Globe },
+    { text: "Carrier Handshake: Deep Maersk-Alpha...", icon: Zap },
+    { text: "Carrier Handshake: CMA Core-Net...", icon: Zap },
+    { text: "Processing Total Landed Cost Estimate...", icon: Cpu },
+    { text: "Finalizing King-Level Logistics Advisory...", icon: ShieldCheck },
 ];
 
 export function PremiumSearchingState() {
