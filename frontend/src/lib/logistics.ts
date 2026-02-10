@@ -28,7 +28,7 @@ export interface QuoteResult {
     portCongestion: number;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/api";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:8000/api";
 
 export const logisticsClient = {
     /**
@@ -47,7 +47,22 @@ export const logisticsClient = {
 
             if (data && data.success && Array.isArray(data.quotes)) {
 
-                return data.quotes.map((r: any, index: number) => {
+                return data.quotes.map((r: {
+                    id: string;
+                    carrier_name: string;
+                    price: number;
+                    currency?: string;
+                    days: number;
+                    transit_time_days?: number;
+                    expiration_date?: string;
+                    is_real_api_rate?: boolean;
+                    surcharges?: any[];
+                    risk_score?: number;
+                    carbon_emissions?: number;
+                    customs_duty_estimate?: number;
+                    port_congestion_index?: number;
+                    type: string
+                }, index: number) => {
                     let logo = '/logos/maersk.png';
                     const name = r.carrier_name.toLowerCase();
                     if (name.includes('maersk')) logo = '/logos/maersk.png';
@@ -62,7 +77,7 @@ export const logisticsClient = {
                         carrier_logo: logo,
                         price: r.price,
                         currency: r.currency,
-                        days: r.transit_time_days,
+                        days: r.transit_time_days || r.days || 0,
                         validUntil: r.expiration_date || "2026-12-31",
                         isReal: r.is_real_api_rate,
                         tags: ["Direct", "Eco-Select"], // Elite defaults
@@ -89,18 +104,11 @@ export const logisticsClient = {
     trackContainer: async (number: string) => {
         try {
             const { data } = await axios.get(`${BACKEND_URL}/tracking/${number}`);
-            if (data && data.success && data.data) {
-                const b = data.data;
-                // Standardize backend data to UI format
+            if (data && data.success) {
                 return {
-                    status: b.status,
-                    eta: "Check Carrier Site", // Default as simulation
-                    events: b.events.map((e: string, i: number) => ({
-                        event: e,
-                        status: i === 0 ? 'done' : i === 1 ? 'current' : 'pending',
-                        loc: b.current_location,
-                        date: "2026-02-07"
-                    }))
+                    status: data.status,
+                    eta: data.eta,
+                    events: data.events
                 };
             }
             return null;
@@ -125,5 +133,19 @@ export const logisticsClient = {
             console.error("Booking API Error:", error);
             return null;
         }
+    },
+
+    /**
+     * Get Sailing Schedules
+     */
+    getSchedules: async (origin: string, dest: string, date: string) => {
+        try {
+            const params = new URLSearchParams({ origin, destination: dest });
+            const res = await axios.get(`${BACKEND_URL}/schedules?${params.toString()}`);
+            return res.data.schedules || [];
+        } catch {
+            return [];
+        }
     }
 };
+

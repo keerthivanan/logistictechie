@@ -2,65 +2,66 @@
 
 import { useQuoteStore } from "@/hooks/use-quote";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { ArrowRight, Map } from "lucide-react";
+import { ArrowRight, ArrowLeft, MapPin } from "lucide-react";
 import RouteMap from "@/components/ui/RouteMap";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { GooglePlacesInput } from "@/components/ui/GooglePlacesInput";
+import { PortAutocomplete } from "@/components/ui/PortAutocomplete";
 
 export function RouteStep() {
-    const { t } = useLanguage();
     const { formData, updateForm, nextStep, prevStep } = useQuoteStore();
 
     return (
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-stretch">
             {/* Form Side */}
-            <div className="space-y-10">
-                <div className="space-y-4">
-                    <p className="text-xs font-black text-gray-500 uppercase tracking-[0.3em]">Step 02 — Corridor Selection</p>
-                    <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white uppercase leading-[0.9]">{t('quote.wizard.route.title')}</h2>
-                    <p className="text-gray-500 font-light text-lg">Define the global transit points for your cargo.</p>
+            <div className="flex flex-col justify-center">
+                <div className="mb-8">
+                    <span className="text-sm font-medium text-emerald-500 mb-2 block">Step 2 of 6</span>
+                    <h2 className="text-3xl font-bold text-white mb-3">Select Your Route</h2>
+                    <p className="text-zinc-400">Enter your origin and destination ports to get accurate shipping rates.</p>
                 </div>
 
-                <div className="space-y-8 bg-white/[0.02] p-8 rounded-2xl border border-white/10 shadow-2xl">
-                    <div className="space-y-8">
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.origin')}</Label>
-                            <GooglePlacesInput
-                                value={formData.origin}
-                                onChange={(val: string) => updateForm({ origin: val })}
-                                placeholder={t('quote.wizard.route.origin_placeholder')}
-                            />
-                        </div>
+                <div className="space-y-6 mb-8">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Origin Port</label>
+                        <PortAutocomplete
+                            value={formData.origin}
+                            onChange={(val: string) => updateForm({ origin: val })}
+                            placeholder="Search for origin port..."
+                        />
+                    </div>
 
-                        <div className="space-y-3">
-                            <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">{t('quote.wizard.route.destination')}</Label>
-                            <GooglePlacesInput
-                                value={formData.destination}
-                                onChange={(val: string) => updateForm({ destination: val })}
-                                placeholder={t('quote.wizard.route.dest_placeholder')}
-                            />
-                        </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Destination Port</label>
+                        <PortAutocomplete
+                            value={formData.destination}
+                            onChange={(val: string) => updateForm({ destination: val })}
+                            placeholder="Search for destination port..."
+                        />
                     </div>
                 </div>
 
-                <div className="flex gap-4 pt-4">
-                    <Button variant="outline" size="lg" onClick={prevStep} className="w-1/3 h-14 rounded-xl border-white/10 text-gray-400 hover:bg-white hover:text-black transition-all uppercase font-black tracking-tighter">
-                        {t('quote.wizard.route.back')}
+                <div className="flex gap-3">
+                    <Button
+                        variant="outline"
+                        onClick={prevStep}
+                        className="h-12 px-6 rounded-lg border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
                     </Button>
-                    <Button size="lg" onClick={nextStep} className="w-2/3 h-14 rounded-xl bg-white text-black hover:bg-gray-200 group uppercase font-black tracking-tighter text-lg shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white">
-                        {t('quote.wizard.route.next')} <ArrowRight className="ml-2 h-5 w-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                    <Button
+                        onClick={nextStep}
+                        className="flex-1 h-12 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold transition-all"
+                    >
+                        Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 </div>
             </div>
 
-            {/* Map Side - Premium Card */}
-            <div className="aspect-square lg:aspect-auto lg:h-[600px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 relative bg-black group transition-all duration-700 hover:border-white/20">
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
-                <div className="absolute top-8 left-8 z-20 flex items-center gap-3 px-4 py-2 rounded-lg bg-black/80 backdrop-blur-md border border-white/10">
-                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-2">
-                        <Map className="w-3 h-3" /> Satellite Corridor Active
+            {/* Map Side */}
+            <div className="aspect-square lg:aspect-auto lg:h-full min-h-[400px] rounded-xl overflow-hidden border border-zinc-800 relative bg-zinc-900">
+                <div className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 rounded-lg bg-black/80 backdrop-blur-sm border border-zinc-800">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-medium text-zinc-300 flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5" /> Live Route Preview
                     </span>
                 </div>
                 <RouteMap origin={formData.origin} destination={formData.destination} />

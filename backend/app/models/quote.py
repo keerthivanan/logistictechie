@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, JSON
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
 import uuid
@@ -10,8 +11,8 @@ class Quote(Base):
     __tablename__ = "quotes"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    origin = Column(String, nullable=False)
-    destination = Column(String, nullable=False)
+    origin = Column(String, nullable=False, index=True)
+    destination = Column(String, nullable=False, index=True)
     container_type = Column(String, default="40FT")
     
     carrier_name = Column(String)
@@ -31,3 +32,5 @@ class Quote(Base):
     
     request_data = Column(JSON, nullable=True) # Store original request for audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships removed: bookings FK moved to external reference

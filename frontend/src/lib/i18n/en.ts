@@ -8,6 +8,10 @@ export const en = {
         quote: "Request Quote",
         getQuote: "Get Quote"
     },
+    meta: {
+        title: "Phoenix Logistics | The Global Oracle",
+        description: "Real-time freight rates and tracking."
+    },
     hero: {
         badge: "The Future of Logistics",
         title_start: "Global Trade,",
@@ -283,8 +287,19 @@ export const en = {
     },
     tracking: {
         title: "Track Your Shipment",
-        subtitle: "Enter your Container, Bill of Lading, or Booking Number",
-        placeholder: "e.g. MSCU1234567",
+        subtitle: "Enter your container number or bill of lading to view estimated tracking updates.",
+        searchPlaceholder: "Enter container number or B/L (e.g., MSCU1234567)",
+        trackButton: "Track Shipment",
+        estimatedPosition: "Estimated Position",
+        currentStatus: "Current Status",
+        estimatedArrival: "Estimated Arrival",
+        containerId: "Container ID",
+        timelineTitle: "Shipment Timeline",
+        timelineSubtitle: "Estimated tracking based on standard transit milestones",
+        noResults: "No Tracking Results",
+        noResultsDesc: "Enter a container number or bill of lading above to track your shipment in real-time.",
+        loading: "Searching...",
+        enterId: "Please enter a tracking ID",
         track: "Track",
         status: "Status",
         eta: "Estimated Arrival",
@@ -292,11 +307,26 @@ export const en = {
         destination: "Destination"
     },
     dashboard: {
+        title: "Dashboard",
         welcome: "Welcome to",
+        welcomeBack: "Welcome Back",
         command_center: "Command Center",
         subtitle: "Your logistics dashboard is ready for real data",
         notifications: "Notifications",
+        newShipment: "+ New Shipment",
         new_shipment: "+ New Shipment",
+        activeShipments: "Active Shipments",
+        containers: "Containers",
+        totalSpend: "Total Spend",
+        onTimeRate: "On-Time Rate",
+        recentShipments: "Recent Shipments",
+        latestBookingsStatus: "Your latest bookings and their status",
+        viewAll: "View All",
+        loading: "Loading shipments...",
+        noShipments: "No shipments yet",
+        bookFirst: "Book Your First Shipment",
+        recentPayments: "Recent Payments",
+        viewAllPayments: "View All Payments",
         ready_title: "Dashboard Ready for Live Data",
         ready_desc: "This dashboard will display your real shipments once you start booking. All statistics shown will be calculated from your actual shipping activity — no fake numbers.",
         get_quote: "Get Your First Quote",
@@ -318,6 +348,13 @@ export const en = {
             services_desc: "Ocean, Air, and Ground freight"
         }
     },
+    status: {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        paid: "Paid",
+        completed: "Completed",
+        cancelled: "Cancelled"
+    },
     footer: {
         rights: "All rights reserved.",
         terms: "Terms of Service",
@@ -326,6 +363,226 @@ export const en = {
     },
     common: {
         learnMore: "Learn More",
-        getStarted: "Get Started"
+        getStarted: "Get Started",
+        loading: "Loading...",
+        search: "Search",
+        cancel: "Cancel",
+        save: "Save",
+        delete: "Delete",
+        edit: "Edit",
+        view: "View",
+        back: "Back",
+        next: "Next",
+        submit: "Submit"
+    },
+    legal: {
+        terms: {
+            title: "Terms of Service",
+            updated: "Last updated: February 2026",
+            intro: "Welcome to Phoenix Logistics. By accessing our platform, you agree to these terms. Our services are provided 'as is' and we facilitate freight forwarding services through our partner network.",
+            contact: "For full legal details, please contact our legal team at legal@phoenixos.com."
+        },
+        privacy: {
+            title: "Privacy Policy",
+            subtitle: "Your data security is our top priority.",
+            intro: "Phoenix Logistics collects minimal data necessary to provide accurate freight quotes and bookings. We do not sell your data to third parties.",
+            collection_title: "Data Collection",
+            collection_list: [
+                "Account information (Name, Email, Company)",
+                "Booking details (Origin, Destination, Cargo)",
+                "Usage analytics to improve service"
+            ],
+            security_title: "Security",
+            security_text: "We use bank-grade encryption (AES-256) for all sensitive data."
+        }
+    },
+    landing: {
+        hero: {
+            badge: "Global Logistics Platform",
+            title_global: "Global",
+            title_velocity: "Velocity",
+            description: "Enterprise-grade freight intelligence. Real-time rates from Maersk, CMA CGM, and MSC. Built for professionals who demand precision.",
+            trust: {
+                security: "Bank-Grade Security",
+                realtime: "Real-Time Data",
+                support: "24/7 Support"
+            }
+        },
+        features: {
+            badge: "Why Choose Us",
+            title: "Built for Modern Logistics",
+            description: "We've reimagined freight forwarding from the ground up. No more spreadsheets, endless emails, or waiting days for a quote.",
+            list: [
+                {
+                    title: "50+ Carriers",
+                    description: "Access real-time rates from the world's leading shipping lines including Maersk, MSC, CMA CGM, and more."
+                },
+                {
+                    title: "Verified Rates",
+                    description: "Every quote is validated directly with carriers. No hidden fees, no surprises."
+                },
+                {
+                    title: "Instant Booking",
+                    description: "Go from quote to confirmed booking in minutes, not days. Streamlined documentation included."
+                },
+                {
+                    title: "Market Intelligence",
+                    description: "Real-time market insights and rate trends to help you make informed decisions."
+                }
+            ],
+            stats: {
+                carriers: "Carrier Partners",
+                ports: "Ports Covered",
+                uptime: "Uptime",
+                quote: "Quote Time"
+            }
+        },
+        testimonials: {
+            badge: "Testimonials",
+            title: "Trusted by Industry Leaders",
+            description: "Join thousands of companies who have transformed their logistics operations with our platform.",
+            trusted_by: "Trusted by leading companies worldwide",
+            list: [
+                {
+                    quote: "We reduced our freight costs by 23% in the first quarter. The rate comparison feature alone pays for itself.",
+                    author: "Sarah Chen",
+                    role: "Head of Supply Chain",
+                    company: "TechFlow Industries"
+                },
+                {
+                    quote: "Finally, a platform that understands modern logistics. Real-time tracking and instant quotes have transformed our operations.",
+                    author: "Michael Torres",
+                    role: "Logistics Director",
+                    company: "Global Foods Co."
+                },
+                {
+                    quote: "The best investment we've made in our supply chain. Our team saves 15 hours per week on freight management.",
+                    author: "Emma Williams",
+                    role: "Operations Manager",
+                    company: "Retail Dynamics"
+                }
+            ]
+        }
+    },
+    components: {
+        search_bar: {
+            tabs: {
+                rates: "Get Rates",
+                tracking: "Track Shipment",
+                schedules: "Sailing Schedules"
+            },
+            placeholders: {
+                origin: "Origin port",
+                destination: "Destination port",
+                cargo: "Cargo type",
+                tracking_input: "Enter container or B/L number",
+                vessel: "Or search by vessel",
+                from: "From port",
+                to: "To port"
+            },
+            labels: {
+                ready: "Ready to ship",
+                departure_date: "Select departure date",
+                recent: "Recent:"
+            },
+            action: {
+                search: "Search"
+            }
+        }
+    },
+    support: {
+        help: {
+            title: "How can we help?",
+            subtitle: "Search our knowledge base or contact our support team.",
+            cards: {
+                faq: { title: "FAQs", desc: "Common questions about shipments.", btn: "View Articles" },
+                chat: { title: "Live Chat", desc: "Chat with our logistics experts.", btn: "Start Chat" },
+                phone: { title: "Phone Support", desc: "24/7 Global Support Line.", btn: "Call Now" }
+            },
+            common_qs_title: "Common Questions",
+            qs: [
+                "How do I track my shipment?",
+                "What documents are required for customs?",
+                "How are rates calculated?",
+                "Can I cancel a booking?"
+            ]
+        },
+        contact: {
+            title: "Get in Touch",
+            intro: "Our team is ready to help you optimize your supply chain. Reach out for custom quotes, enterprise solutions, or technical support.",
+            hq: { title: "Global Headquarters", line1: "1 King Abdullah Financial District", line2: "Riyadh 13519, Saudi Arabia" },
+            email: "Email",
+            phone: { title: "Phone", number: "+966 11 555 0199 (Global)", hours: "Mon-Fri 9am-6pm AST" },
+            form: {
+                fname: "First Name",
+                lname: "Last Name",
+                email: "Email",
+                message: "Message",
+                submit: "Send Message"
+            }
+        }
+    },
+    profile: {
+        title: "Profile",
+        back: "Back",
+        edit: "Edit Profile",
+        memberSince: "Member Since",
+        totalShipments: "Total Shipments",
+        onTimeRate: "On-Time Rate",
+        email: "Email Address",
+        role: "Role",
+        company: "Company"
+    },
+    settings: {
+        title: "Account Settings",
+        back: "Back",
+        language: {
+            title: "Language & Region",
+            desc: "Manage your language preferences.",
+            interface: "Interface Language",
+            select: "Select your preferred language",
+            en: "English",
+            ar: "Arabic"
+        },
+        security: {
+            title: "Security",
+            desc: "Update password and manage 2FA.",
+            currentPwd: "Current Password",
+            newPwd: "New Password",
+            update: "Update Password"
+        },
+        notifications: {
+            title: "Notifications",
+            desc: "Control what alerts you receive.",
+            email: "Email Notifications",
+            shipment: "Shipment Alerts",
+        }
+    },
+
+    widgets: {
+        marketTrend: {
+            title: "Global Market Trend",
+            bullish: "BULLISH",
+            bearish: "BEARISH",
+            index: "Index",
+            historical: "Historical",
+            prediction: "AI Prediction",
+            confidence: "Confidence",
+            analysis: "AI Analysis:",
+            forecast: "AI Forecast"
+        },
+        officeLocator: {
+            title: "Booking Offices",
+            searchPlaceholder: "Search city...",
+            loading: "Loading offices...",
+            notFound: "No offices found in",
+            locatorTitle: "Office Locator",
+            locatorSubtitle: "Find shipping line offices worldwide",
+            enterCity: "Enter city (e.g., London, Dubai, Singapore)",
+            search: "Search",
+            searching: "Searching...",
+            noResults: "No offices found in this location"
+        }
     }
 };
+

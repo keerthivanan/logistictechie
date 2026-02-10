@@ -4,14 +4,21 @@ from app.models.booking import Booking
 from typing import List, Optional
 import uuid
 
+import json
+
 class CRUDBooking:
     async def create(self, db: AsyncSession, *, quote_id: str, user_id: str, cargo_details: str) -> Booking:
+        try:
+            cargo_dict = json.loads(cargo_details) if isinstance(cargo_details, str) else cargo_details
+        except:
+            cargo_dict = {"raw": cargo_details}
+            
         db_obj = Booking(
             booking_reference=f"BK-{uuid.uuid4().hex[:8].upper()}",
             quote_id=quote_id,
             user_id=user_id,
             status="PENDING",
-            cargo_details=cargo_details
+            cargo_details=cargo_dict
         )
         db.add(db_obj)
         await db.commit()

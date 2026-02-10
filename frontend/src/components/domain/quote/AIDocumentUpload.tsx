@@ -33,7 +33,6 @@ export function AIDocumentUpload() {
             const result = await response.json();
 
             if (result.status === 'success' || result.status === 'simulation') {
-                // Map extracted data to form stores
                 updateForm({
                     origin: result.data.origin || '',
                     destination: result.data.destination || '',
@@ -69,12 +68,12 @@ export function AIDocumentUpload() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
                 className={`
-                    w-full h-24 rounded-2xl border-2 border-dashed transition-all duration-500 flex flex-col items-center justify-center gap-2 group
+                    w-full h-32 rounded-none border-2 border-dashed transition-all duration-700 flex flex-col items-center justify-center gap-3 group
                     ${status === 'success'
                         ? 'border-white bg-white/10'
                         : status === 'error'
-                            ? 'border-red-500/50 bg-red-500/5'
-                            : 'border-white/10 hover:border-white/30 bg-white/[0.01]'
+                            ? 'border-red-911 bg-red-500/5'
+                            : 'border-white/5 hover:border-white/20 bg-white/[0.01]'
                     }
                 `}
             >
@@ -87,28 +86,28 @@ export function AIDocumentUpload() {
                             exit={{ opacity: 0 }}
                             className="flex flex-col items-center"
                         >
-                            <Loader2 className="w-8 h-8 text-white animate-spin mb-2" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-white">Extracting Intelligence...</span>
+                            <Loader2 className="w-8 h-8 text-white animate-spin mb-3" />
+                            <span className="titan-label text-white">Extracting Intelligence.</span>
                         </motion.div>
                     ) : status === 'success' ? (
                         <motion.div
                             key="success"
-                            initial={{ scale: 0.8, opacity: 0 }}
+                            initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className="flex flex-col items-center"
                         >
-                            <CheckCircle2 className="w-8 h-8 text-white mb-2" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-white">Handshake Complete</span>
+                            <CheckCircle2 className="w-8 h-8 text-white mb-3" />
+                            <span className="titan-label text-white">Handshake Complete</span>
                         </motion.div>
                     ) : status === 'error' ? (
                         <motion.div
                             key="error"
-                            initial={{ scale: 0.8, opacity: 0 }}
+                            initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className="flex flex-col items-center"
                         >
-                            <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-red-500">Signal Interrupted</span>
+                            <AlertCircle className="w-8 h-8 text-red-500 mb-3" />
+                            <span className="titan-label text-red-500">Signal Interrupted</span>
                         </motion.div>
                     ) : (
                         <motion.div
@@ -117,22 +116,24 @@ export function AIDocumentUpload() {
                             animate={{ opacity: 1 }}
                             className="flex flex-col items-center"
                         >
-                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                                <FileUp className="w-5 h-5 text-gray-400 group-hover:text-white" />
+                            <div className="w-12 h-12 rounded-none bg-white/5 flex items-center justify-center mb-3 group-hover:bg-white group-hover:text-black transition-all">
+                                <FileUp className="w-5 h-5" />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 group-hover:text-white transition-colors">
-                                AI Document Scan
+                            <span className="titan-label group-hover:text-white transition-colors">
+                                AI SCANN_SYS
                             </span>
-                            <span className="text-[8px] font-bold text-gray-700 uppercase tracking-widest mt-1">Upload B/L or Invoice</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">
+                                UPLOAD_BL_INVOICE
+                            </span>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </Button>
 
-            {/* Holographic Glow behind processing */}
             {isUploading && (
-                <div className="absolute inset-0 -z-10 bg-white/5 blur-[40px] rounded-2xl animate-pulse" />
+                <div className="absolute inset-0 -z-10 bg-white/5 blur-[60px] rounded-none animate-pulse" />
             )}
         </div>
     );
 }
+

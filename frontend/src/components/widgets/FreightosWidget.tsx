@@ -57,7 +57,7 @@ export default function FreightosWidget({ appId, widgetType, config, title }: Fr
     return (
         <div className="w-full bg-black rounded-2xl shadow-2xl border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-500">
             <div className="bg-white/[0.03] px-6 py-4 border-b border-white/10 flex items-center justify-between">
-                <h3 className="font-bold text-white uppercase tracking-tighter text-sm">{title}</h3>
+                <h3 className="font-bold text-white uppercase tracking-tight text-sm">{title}</h3>
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             </div>
             <div className="p-6 min-h-[350px] flex items-center justify-center bg-black relative">
@@ -71,3 +71,4 @@ export default function FreightosWidget({ appId, widgetType, config, title }: Fr
         </div>
     );
 }
+

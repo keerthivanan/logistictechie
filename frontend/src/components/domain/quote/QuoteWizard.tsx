@@ -8,80 +8,78 @@ import { DetailsStep } from "./steps/DetailsStep";
 import { ServicesStep } from "./steps/ServicesStep";
 import { ResultsStep } from "./steps/ResultsStep";
 import { BookingStep } from "./steps/BookingStep";
+import { Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function QuoteWizard() {
-    // const { t } = useLanguage();
-    const { step } = useQuoteStore();
+    const { step, formData, setStep } = useQuoteStore();
+
+    // Auto-Advance from Home Search
+    if (step === 1 && formData.origin && formData.destination) {
+        setStep(2);
+    }
+
+    const { t } = useLanguage();
+
+    const steps = [
+        { num: 1, label: t('quoteWizard.steps.cargo') },
+        { num: 2, label: t('quoteWizard.steps.route') },
+        { num: 3, label: t('quoteWizard.steps.details') },
+        { num: 4, label: t('quoteWizard.steps.services') },
+        { num: 5, label: t('quoteWizard.steps.results') },
+        { num: 6, label: t('quoteWizard.steps.booking') }
+    ];
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-6">
-            {/* Progress Bar (Extracted or Inline specialized) */}
-            <div className="mb-12">
-                {/* Visual Mapping: 
-                    Steps 1-3 = "Search" (Phase 1)
-                    Step 4 = "Recommended Services" (Phase 2)
-                    Step 5 = "Results" (Phase 3)
-                    Step 6 = "Booking" (Phase 4)
-                */}
-                <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden relative">
-                    <motion.div
-                        className="h-full bg-white rtl:origin-right"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(step / 6) * 100}%` }}
-                        transition={{ duration: 0.5 }}
-                    />
-                </div>
-
-                {/* Labels Match Screenshot - Responsive optimized */}
-                <div className="flex justify-between mt-6 text-sm font-bold text-gray-400 relative">
-                    <span className={`flex items-center gap-3 transition-all duration-500 ${step >= 1 ? "text-white" : ""}`}>
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-700 ${step >= 1
-                            ? "bg-white text-black scale-110 shadow-[0_0_30px_rgba(255,255,255,0.2)] rotate-[360deg]"
-                            : "bg-white/5 border border-white/10"}`}>1</div>
-                        <span className="uppercase tracking-[0.2em] text-[10px] hidden sm:block font-black">Search</span>
-                    </span>
-
-                    <span className={`flex items-center gap-3 transition-all duration-500 ${step >= 4 ? "text-white" : ""}`}>
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-700 ${step >= 4
-                            ? "bg-white text-black scale-110 shadow-[0_0_30px_rgba(255,255,255,0.2)] rotate-[360deg]"
-                            : "bg-white/5 border border-white/10"}`}>2</div>
-                        <span className="uppercase tracking-[0.2em] text-[10px] hidden sm:block font-black">Solutions</span>
-                    </span>
-
-                    <span className={`flex items-center gap-3 transition-all duration-500 ${step >= 5 ? "text-white" : ""}`}>
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-700 ${step >= 5
-                            ? "bg-white text-black scale-110 shadow-[0_0_30px_rgba(255,255,255,0.2)] rotate-[360deg]"
-                            : "bg-white/5 border border-white/10"}`}>3</div>
-                        <span className="uppercase tracking-[0.2em] text-[10px] hidden sm:block font-black">Results</span>
-                    </span>
-
-                    <span className={`flex items-center gap-3 transition-all duration-500 ${step >= 6 ? "text-white" : ""}`}>
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black transition-all duration-700 ${step >= 6
-                            ? "bg-white text-black scale-110 shadow-[0_0_30px_rgba(255,255,255,0.2)] rotate-[360deg]"
-                            : "bg-white/5 border border-white/10"}`}>4</div>
-                        <span className="uppercase tracking-[0.2em] text-[10px] hidden sm:block font-black">Checkout</span>
-                    </span>
-                </div>
+        <div className="w-full max-w-5xl mx-auto">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-between mb-8">
+                {steps.map((s, idx) => (
+                    <div key={s.num} className="flex items-center">
+                        <div className="flex flex-col items-center">
+                            <div
+                                className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${step > s.num
+                                    ? "bg-emerald-500 text-white"
+                                    : step === s.num
+                                        ? "bg-white text-black"
+                                        : "bg-zinc-800 text-zinc-500"
+                                    }`}
+                            >
+                                {step > s.num ? <Check className="h-5 w-5" /> : s.num}
+                            </div>
+                            <span className={`text-xs mt-2 font-medium ${step >= s.num ? "text-white" : "text-zinc-500"
+                                }`}>
+                                {s.label}
+                            </span>
+                        </div>
+                        {idx < steps.length - 1 && (
+                            <div className={`h-0.5 w-16 md:w-24 mx-2 ${step > s.num ? "bg-emerald-500" : "bg-zinc-800"
+                                }`} />
+                        )}
+                    </div>
+                ))}
             </div>
 
-            {/* Step Content with Transitions */}
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={step}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="min-h-[500px]"
-                >
-                    {step === 1 && <CargoStep />}
-                    {step === 2 && <RouteStep />}
-                    {step === 3 && <DetailsStep />}
-                    {step === 4 && <ServicesStep />} {/* The New Step */}
-                    {step === 5 && <ResultsStep />}
-                    {step === 6 && <BookingStep />}
-                </motion.div>
-            </AnimatePresence>
+            {/* Step Content Card */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 md:p-12">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={step}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="min-h-[500px]"
+                    >
+                        {step === 1 && <CargoStep />}
+                        {step === 2 && <RouteStep />}
+                        {step === 3 && <DetailsStep />}
+                        {step === 4 && <ServicesStep />}
+                        {step === 5 && <ResultsStep />}
+                        {step === 6 && <BookingStep />}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
         </div>
     );
 }

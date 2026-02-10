@@ -1,87 +1,100 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, Shield, Search } from "lucide-react";
+import { Zap, Shield, Search, Quote } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function TestimonialsSection() {
     const { t } = useLanguage();
 
-    const valueProps = [
+    const testimonials = [
         {
-            title: t('testimonials.card1_title'),
-            desc: t('testimonials.card1_desc'),
-            icon: Search
+            quote: t('landing.testimonials.list.0.quote'),
+            author: t('landing.testimonials.list.0.author'),
+            role: t('landing.testimonials.list.0.role'),
+            company: t('landing.testimonials.list.0.company')
         },
         {
-            title: t('testimonials.card2_title'),
-            desc: t('testimonials.card2_desc'),
-            icon: Shield
+            quote: t('landing.testimonials.list.1.quote'),
+            author: t('landing.testimonials.list.1.author'),
+            role: t('landing.testimonials.list.1.role'),
+            company: t('landing.testimonials.list.1.company')
         },
         {
-            title: t('testimonials.card3_title'),
-            desc: t('testimonials.card3_desc'),
-            icon: Zap
+            quote: t('landing.testimonials.list.2.quote'),
+            author: t('landing.testimonials.list.2.author'),
+            role: t('landing.testimonials.list.2.role'),
+            company: t('landing.testimonials.list.2.company')
         }
     ];
 
     return (
-        <section className="relative py-32 bg-black border-t border-white/5">
-            <div className="container relative z-10 max-w-7xl mx-auto px-6">
+        <section className="relative py-24 bg-zinc-950">
+            <div className="container max-w-7xl mx-auto px-6">
+
+                {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-20"
+                    className="text-center mb-16"
                 >
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-widest mb-4">The Logic of Logistics</p>
-                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6 uppercase">
-                        {t('testimonials.title')}
+                    <span className="text-sm font-medium text-emerald-500 mb-4 block">{t('landing.testimonials.badge')}</span>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                        {t('landing.testimonials.title')}
                     </h2>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
-                        {t('testimonials.subtitle')}
+                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+                        {t('landing.testimonials.description')}
                     </p>
                 </motion.div>
 
-                <div className="grid md:grid-cols-3 gap-8">
-                    {valueProps.map((prop, i) => (
+                {/* Testimonials Grid */}
+                <div className="grid md:grid-cols-3 gap-6">
+                    {testimonials.map((item, idx) => (
                         <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 30 }}
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                            className="group"
+                            transition={{ duration: 0.5, delay: idx * 0.1 }}
+                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 hover:border-zinc-700 transition-all"
                         >
-                            <div className="h-full p-10 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all duration-500 hover:bg-white/[0.04]">
-                                <div className="w-12 h-12 bg-white text-black rounded-lg flex items-center justify-center mb-8 shadow-xl shadow-white/5">
-                                    <prop.icon className="w-6 h-6" />
+                            <Quote className="h-8 w-8 text-zinc-700 mb-6" />
+                            <p className="text-zinc-300 text-lg leading-relaxed mb-8">
+                                "{item.quote}"
+                            </p>
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-white font-semibold">
+                                    {item.author.split(' ').map(n => n[0]).join('')}
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{prop.title}</h3>
-                                <p className="text-gray-400 leading-relaxed font-light text-lg">
-                                    {prop.desc}
-                                </p>
+                                <div>
+                                    <div className="font-semibold text-white">{item.author}</div>
+                                    <div className="text-sm text-zinc-500">{item.role}, {item.company}</div>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Trust indicators */}
+                {/* Trusted By Logos */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    className="mt-32 text-center"
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="mt-20 pt-16 border-t border-zinc-800"
                 >
-                    <p className="text-gray-500 text-xs uppercase tracking-[0.3em] mb-10 font-bold">Standard Carrier Connectivity</p>
-                    <div className="flex flex-wrap justify-center items-center gap-16 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700">
-                        <div className="text-white text-3xl font-black tracking-tighter">DHL</div>
-                        <div className="text-white text-3xl font-black tracking-tighter">FEDEX</div>
-                        <div className="text-white text-3xl font-black tracking-tighter">MAERSK</div>
-                        <div className="text-white text-3xl font-black tracking-tighter">MSC</div>
-                        <div className="text-white text-3xl font-black tracking-tighter">CMA CGM</div>
+                    <p className="text-center text-zinc-500 text-sm mb-10">{t('landing.testimonials.trusted_by')}</p>
+                    <div className="flex flex-wrap justify-center items-center gap-12 opacity-40">
+                        {['Maersk', 'MSC', 'CMA CGM', 'Hapag-Lloyd', 'Evergreen'].map((name, i) => (
+                            <div
+                                key={i}
+                                className="text-white text-2xl font-bold tracking-tight hover:opacity-100 transition-opacity cursor-default"
+                            >
+                                {name}
+                            </div>
+                        ))}
                     </div>
                 </motion.div>
             </div>

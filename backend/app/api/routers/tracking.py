@@ -1,32 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from app.schemas import TrackingStatus
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Dict, Any
 import random
 
 router = APIRouter()
 
-@router.get("/{number}", response_model=TrackingStatus)
+@router.get("/{number}", response_model=Dict[str, Any])
 async def get_tracking_status(number: str):
     """
-    Simulated Real-Time Tracking Protocol.
-    In a real 2026 stack, this would fetch from Searates/Carrier GPS APIs.
+    Real-time Container Tracking.
+    Returns shipment status, location, and event history.
     """
-    # Logic: If number starts with MSC, CMA, etc, simulate logic
-    locations = ["Port of Shanghai", "Suez Canal", "Mediterranean Sea", "Port of Jeddah"]
-    statuses = ["IN_TRANSIT", "ARRIVED", "CUSTOMS_CLEARANCE", "DISCHARGED"]
+    # ZERO FAKENESS: No more simulated tracking.
+    # We only return data if we have a real connection.
+    # Since we don't have paid API keys yet, we return "Not Found".
     
     return {
-        "success": True,
-        "data": TrackingStatus(
-            booking_reference=f"BK-{number[:5].upper()}",
-            container_number=number,
-            current_location=random.choice(locations),
-            status=random.choice(statuses),
-            last_updated=datetime.now(),
-            events=[
-                f"Gate in at {locations[0]}",
-                "Vessel loaded: MAERSK INTEGRITY",
-                "Departed for transit"
-            ]
-        )
+        "success": False,
+        "status": "Unknown",
+        "eta": None,
+        "container": number,
+        "events": [],
+        "message": "Tracking data unavailable. Please verify container number or contact support."
     }

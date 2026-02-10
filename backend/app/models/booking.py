@@ -13,7 +13,7 @@ class Booking(Base):
     id = Column(String, primary_key=True, default=generate_uuid)
     booking_reference = Column(String, unique=True, index=True) # e.g. BK-2026-XYZ
     
-    quote_id = Column(String, ForeignKey("quotes.id"))
+    quote_id = Column(String, nullable=True)  # External quote reference (no FK - quotes from external APIs)
     user_id = Column(String, ForeignKey("users.id"))
     
     status = Column(String, default="PENDING") # PENDING, CONFIRMED, SHIPPED, DELIVERED
@@ -24,3 +24,8 @@ class Booking(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 🔗 Relationships
+    user = relationship("User", back_populates="bookings")
+    payment = relationship("Payment", back_populates="booking", uselist=False)
+

@@ -2,84 +2,91 @@
 
 import { motion } from "framer-motion";
 import FreightosWidget from "@/components/widgets/FreightosWidget";
-import { Calculator, Zap, Ruler, ShieldAlert } from "lucide-react";
+import { OfficeFinder } from "@/components/tools/OfficeFinder";
+import { Calculator, Zap, Ruler, Leaf } from "lucide-react";
 
 export default function ToolsPage() {
 
     const tools = [
         {
-            title: "Volume (CBM) Calculator",
+            title: "Volume Calculator",
             type: "VolumeCalculator" as const,
             icon: Ruler,
-            desc: "Calculate cubic meters for sea and air freight."
+            desc: "Calculate CBM for your cargo dimensions"
         },
         {
             title: "Chargeable Weight",
             type: "ChargeableWeightCalculator" as const,
             icon: Zap,
-            desc: "Determine actual vs volumetric weight ratios."
+            desc: "Compare actual vs volumetric weight"
         },
         {
             title: "Freight Class",
             type: "FreightClassCalculator" as const,
             icon: Calculator,
-            desc: "Identify standard NMFC freight classes."
+            desc: "Determine NMFC freight classification"
         },
         {
             title: "CO₂ Emissions",
             type: "CO2" as const,
-            icon: ShieldAlert,
-            desc: "Environmental impact analysis per shipment."
+            icon: Leaf,
+            desc: "Estimate your shipment's carbon footprint"
         }
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-32 pb-24 bg-mesh-dark">
+        <main className="min-h-screen bg-black pt-32 pb-24">
             <div className="container mx-auto px-6 max-w-7xl">
+
                 {/* Header Section */}
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "circOut" }}
-                    className="mb-20 text-center"
+                    transition={{ duration: 0.6 }}
+                    className="text-center mb-16"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white uppercase tracking-[0.3em] mb-6 holographic-glow">
-                        <Zap className="w-3 h-3 text-white" /> Logistics Intelligence
-                    </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-tighter italic">
-                        Shipment Utilities
+                    <span className="text-sm font-medium text-emerald-500 mb-4 block">Logistics Tools</span>
+                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                        Shipping Calculators
                     </h1>
-                    <p className="text-xl text-gray-500 max-w-2xl mx-auto font-light leading-relaxed">
-                        Professional-grade calculators for precise supply chain planning and cost estimation.
+                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+                        Professional tools to help you plan shipments, calculate costs,
+                        and optimize your logistics operations.
                     </p>
                 </motion.div>
 
-                <div className="grid lg:grid-cols-2 gap-10">
+                {/* Office Finder */}
+                <div className="mb-16">
+                    <OfficeFinder />
+                </div>
+
+                {/* Calculators Grid */}
+                <div className="grid md:grid-cols-2 gap-6 mb-20">
                     {tools.map((tool, i) => (
                         <motion.div
                             key={tool.type}
-                            initial={{ opacity: 0, y: 40 }}
+                            initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: i * 0.1 }}
-                            className="space-y-4"
+                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-700 transition-all"
                         >
-                            <div className="flex items-center gap-4 mb-2">
-                                <div className="p-3 bg-white text-black rounded-xl shadow-2xl">
-                                    <tool.icon className="w-5 h-5" />
+                            <div className="flex items-center gap-4 p-6 border-b border-zinc-800">
+                                <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center">
+                                    <tool.icon className="h-5 w-5 text-white" />
                                 </div>
-                                <div className="">
-                                    <h3 className="text-xl font-bold text-white uppercase tracking-tighter italic">{tool.title}</h3>
-                                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">{tool.desc}</p>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-white">{tool.title}</h3>
+                                    <span className="text-zinc-500 text-sm">{tool.desc}</span>
                                 </div>
                             </div>
 
-                            <div className="ultra-card p-1 rounded-[32px] overflow-hidden">
+                            <div className="p-4">
                                 <FreightosWidget
                                     title={tool.title}
                                     widgetType={tool.type}
                                     config={{
                                         title: tool.title,
-                                        background: { color: '#000000' }, // Force dark inside widget if possible
+                                        background: { color: '#000000' },
                                         appId: ''
                                     }}
                                 />
@@ -88,20 +95,25 @@ export default function ToolsPage() {
                     ))}
                 </div>
 
-                {/* Main Rate Estimator Section */}
+                {/* Rate Estimator Section */}
                 <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    className="mt-24 pt-24 border-t border-white/10"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    className="border-t border-zinc-900 pt-20"
                 >
-                    <div className="mb-10 text-center">
-                        <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 italic holographic-glow inline-block px-8 py-2">Market Rate Estimator</h2>
-                        <p className="text-gray-500 uppercase tracking-widest text-xs font-bold">Benchmark your current logistics costs against global market averages.</p>
+                    <div className="text-center mb-12">
+                        <span className="text-sm font-medium text-emerald-500 mb-4 block">Rate Intelligence</span>
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                            Market Rate Estimator
+                        </h2>
+                        <p className="text-zinc-400 max-w-xl mx-auto">
+                            Get real-time freight rate estimates for ocean, air, and express shipments worldwide.
+                        </p>
                     </div>
 
-                    <div className="ultra-card p-4 rounded-[40px] relative overflow-hidden bg-white/[0.01]">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none" />
+                    <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
                         <FreightosWidget
                             title="Freight Rate Estimator"
                             widgetType="FreightEstimator"
@@ -109,25 +121,25 @@ export default function ToolsPage() {
                                 enabledModes: ['OCEAN', 'AIR', 'EXPRESS'],
                                 enabledResults: ['TRANSIT_TIMES', 'PRICE'],
                                 calcType: 'FreightEstimator',
-                                title: 'Market Benchmark',
+                                title: 'Rate Estimator',
                                 forceFail: false,
                                 noResults: {
-                                    subtitle: 'Real-time estimates are currently being updated.',
-                                    CTA: 'Refresh page'
+                                    subtitle: 'No rates available for this route',
+                                    CTA: 'Try a different route'
                                 },
                                 calculatingScreen: {
-                                    title: 'Syncing Global Data...',
-                                    subtitle: 'Aggregating live rates from across the logistics network.'
+                                    title: 'Calculating rates...',
+                                    subtitle: 'Checking carrier availability'
                                 },
                             }}
                         />
                     </div>
                 </motion.div>
 
-                {/* Footer Attribution */}
-                <div className="mt-20 text-center">
-                    <p className="text-[10px] text-gray-600 uppercase tracking-[0.5em] font-bold">
-                        Powered by Freightos Intelligence Architecture
+                {/* Footer */}
+                <div className="mt-16 text-center">
+                    <p className="text-zinc-600 text-sm">
+                        Powered by Freightos Intelligence • Real-time market data
                     </p>
                 </div>
             </div>

@@ -38,6 +38,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         document.documentElement.lang = language;
         document.documentElement.dir = direction;
+        // Dynamic Title Update
+        // @ts-ignore
+        const title = dictionaries[language].meta?.title;
+        if (title) document.title = title;
     }, [language, direction]);
 
     const t = (key: string): string => {
@@ -70,3 +74,4 @@ export function useLanguage() {
     }
     return context;
 }
+

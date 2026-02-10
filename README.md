@@ -27,6 +27,35 @@ Direct integration with real-world carrier APIs, moving beyond mock data:
 
 ---
 
+## 🔥 What Can This Website Do? (Capabilities)
+
+This is a **Full-Stack Logistics Super-App**. It empowers users to:
+
+1.  **🚀 Instant Rate Discovery**:
+    -   Type any port (e.g., "Shanghai") and any commodity (e.g., "Electronics").
+    -   Get real-time shipping prices from major carriers (Maersk, MSC, CMA CGM).
+    -   Compare transit times and carbon emissions instantly.
+
+2.  **📡 Live Container Tracking**:
+    -   Enter a container number (e.g., `MSCU1234567`) or Booking ID.
+    -   Visualize the exact location on an interactive global map.
+    -   See a precise timeline of events (Gate In, Loaded, Arrived).
+
+3.  **🗓️ Smart Schedule Planning**:
+    -   Search for vessel schedules between any two global ports.
+    -   View detailed voyage information (Vessel Name, Voyage Number, Transit Time).
+    -   Plan supply chains with high-precision arrival dates.
+
+4.  **🏢 Global Network Finder**:
+    -   Locate carrier offices and agents in any city worldwide.
+    -   Get instant access to addresses, phone numbers, and map coordinates.
+
+5.  **🧮 Professional Logistics Tools**:
+    -   Calculate Volume (CBM) and Chargeable Weight.
+    -   Determine Freight Classes and estimated CO2 footprints.
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend

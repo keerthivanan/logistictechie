@@ -1,179 +1,235 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import {
+    Ship,
+    Package,
+    CreditCard,
+    TrendingUp,
+    MapPin,
+    ArrowUpRight,
+    Bell,
+    Plus,
+    Clock,
+    ArrowRight,
+    CheckCircle
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Ship, Plane, Clock, Activity, MapPin, Bell, Info, ArrowRight, Plus, Crown, Shield } from "lucide-react";
 import Link from "next/link";
+import axios from "axios";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { MarketTrendWidget } from "@/components/widgets/MarketTrendWidget";
+
+interface Booking {
+    id: string;
+    ref: string;
+    booking_reference?: string;
+    origin: string;
+    destination: string;
+    status: string;
+    price: number;
+    created_at: string;
+}
+
+interface Payment {
+    id: string;
+    amount: number;
+    currency?: string;
+    status: string;
+    date: string;
+}
 
 export default function DashboardPage() {
-    const { t } = useLanguage();
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [payments, setPayments] = useState<Payment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { t, language } = useLanguage();
+    const isRTL = language === 'ar';
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("user_id");
+
+            if (!token || !userId) {
+                window.location.href = "/login";
+                return;
+            }
+
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const bookRes = await axios.get(`${apiUrl}/api/bookings/user/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setBookings(bookRes.data.data || []);
+
+                setPayments([
+                    { id: '1', amount: 3500, status: 'COMPLETED', date: '2026-02-09', currency: 'USD' },
+                    { id: '2', amount: 1250, status: 'COMPLETED', date: '2026-02-01', currency: 'USD' }
+                ]);
+            } catch (err) {
+                console.error("Dashboard fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
     const stats = [
-        { icon: Activity, value: "14%", label: "Geopolitical Risk" },
-        { icon: Ship, value: "3.2k", label: "Fleet Carbon (kg)" },
-        { icon: Plane, value: "98.2", label: "Route Health Index" },
-        { icon: Clock, value: "0ms", label: "Sync Latency" },
-    ];
-
-    const quickActions = [
-        { icon: Package, title: t('dashboard.quick_actions.quote_title'), desc: "Execute King-Level corridor analysis.", href: "/quote" },
-        { icon: MapPin, title: t('dashboard.quick_actions.track_title'), desc: "Real-time 3D telemetry tracking.", href: "/tracking" },
-        { icon: Crown, title: "Sovereign Audit", desc: "Predictive risk & compliance reporting.", href: "/tools" },
+        { label: t('dashboard.activeShipments') || "Active Shipments", value: bookings.length, icon: Ship },
+        { label: t('dashboard.containers') || "Containers", value: bookings.length * 2, icon: Package },
+        { label: t('dashboard.totalSpend') || "Total Spend", value: `$${(bookings.length * 2000).toLocaleString()}`, icon: CreditCard },
+        { label: t('dashboard.onTimeRate') || "On-Time Rate", value: "99.9%", icon: TrendingUp }
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-24 pb-20 bg-mesh-dark">
-            <div className="container max-w-7xl mx-auto px-6">
-
-                {/* 🚨 Sovereign Alert Banner */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="mb-12 bg-white/[0.03] border-2 border-white/20 p-6 rounded-3xl flex items-center justify-between shadow-2xl overflow-hidden relative"
-                >
-                    <div className="absolute top-0 left-0 h-full w-1 bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
-                    <div className="flex items-center gap-6">
-                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center animate-pulse">
-                            <Shield className="h-6 w-6 text-black" />
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-black text-white uppercase tracking-tighter italic">Sovereign Intel: Suez Corridor Health</h4>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Status: SECURE | Congestion: LOW | Risk: 12%</p>
-                        </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white hover:text-black font-black uppercase tracking-widest text-[9px]">View Detail Intelligence →</Button>
-                </motion.div>
+        <main className={`min-h-screen bg-black text-white pt-32 pb-24 px-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between mb-16 gap-8 border-b border-white/5 pb-12"
-                >
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-white uppercase tracking-[0.3em] mb-6 holographic-glow">
-                            Security Verified
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-4 uppercase italic">
-                            {t('dashboard.welcome')}{' '}
-                            <span className="text-gray-500 not-italic">
-                                {t('dashboard.command_center')}
-                            </span>
+                        <span className="text-sm font-medium text-emerald-500 mb-2 block">{t('dashboard.title') || "Dashboard"}</span>
+                        <h1 className="text-4xl md:text-5xl font-bold text-white">
+                            {t('dashboard.welcomeBack') || "Welcome Back"}
                         </h1>
-                        <p className="text-gray-500 text-xl font-light tracking-tight">{t('dashboard.subtitle')}</p>
                     </div>
-                    <div className="flex gap-4">
-                        <Button variant="outline" className="h-14 px-8 border-white/10 text-white hover:bg-white hover:text-black transition-all rounded-2xl font-black uppercase tracking-tighter shadow-2xl">
-                            <Bell className="mr-3 h-5 w-5" /> {t('dashboard.notifications')}
+                    <div className="flex gap-3">
+                        <Button variant="outline" className="h-12 w-12 rounded-lg border-zinc-700 hover:bg-zinc-800">
+                            <Bell className="h-5 w-5" />
                         </Button>
                         <Link href="/quote">
-                            <Button className="h-14 px-10 bg-white text-black hover:bg-gray-100 font-black uppercase tracking-tighter rounded-2xl border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                                <Plus className="mr-3 h-5 w-5" /> {t('dashboard.new_shipment')}
+                            <Button className="h-12 px-6 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold">
+                                <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                                {t('dashboard.newShipment') || "New Shipment"}
                             </Button>
                         </Link>
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Welcome Banner - Monochrome Ultra */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                >
-                    <Card className="p-12 bg-white/[0.02] border-white/10 rounded-[40px] mb-12 flex flex-col md:flex-row items-center gap-10 ultra-card transition-all group overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.03] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
-
-                        <div className="h-20 w-20 rounded-3xl bg-white flex items-center justify-center flex-shrink-0 shadow-[0_0_40px_rgba(255,255,255,0.2)] group-hover:rotate-[360deg] transition-all duration-700">
-                            <Info className="h-10 w-10 text-black" />
-                        </div>
-                        <div className="flex-1 text-center md:text-left">
-                            <h3 className="font-black text-white text-3xl mb-3 uppercase tracking-tighter italic">{t('dashboard.ready_title')}</h3>
-                            <p className="text-gray-500 mb-8 max-w-3xl leading-relaxed text-lg font-medium">
-                                {t('dashboard.ready_desc')}
-                            </p>
-                            <Link href="/quote">
-                                <Button className="bg-white hover:bg-gray-100 text-black font-black h-14 px-10 rounded-2xl uppercase tracking-tighter shadow-2xl group/btn">
-                                    {t('dashboard.get_quote')} <ArrowRight className="ml-3 h-5 w-5 group-hover/btn:translate-x-2 transition-transform" />
-                                </Button>
-                            </Link>
-                        </div>
-                    </Card>
-                </motion.div>
-
-                {/* Stats Grid - Ultra Monochrome */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
-                >
-                    {stats.map((stat, idx) => (
-                        <Card key={idx} className="p-10 bg-white/[0.01] border border-white/5 hover:border-white/20 transition-all rounded-[32px] ultra-card group">
-                            <div className="flex flex-col gap-6">
-                                <div className="flex items-center gap-4 text-gray-500 group-hover:text-white transition-colors">
-                                    <stat.icon className="h-6 w-6" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.25em]">{stat.label}</span>
-                                </div>
-                                <div className="text-6xl font-black text-white tracking-tighter italic h-14 flex items-center">{stat.value}</div>
-                            </div>
-                        </Card>
-                    ))}
-                </motion.div>
-
-                {/* Empty Shipments State */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="mb-16"
-                >
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">{t('dashboard.shipments_title')}</h2>
-                    </div>
-
-                    <Card className="p-24 bg-black border border-dashed border-white/10 text-center rounded-[40px] ultra-card hover:border-white/30 transition-all relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-white/[0.01] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-white/[0.03] mb-8 group-hover:scale-110 transition-transform">
-                            <Package className="h-12 w-12 text-gray-700" />
-                        </div>
-                        <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter italic">{t('dashboard.no_shipments_title')}</h3>
-                        <p className="text-gray-500 mb-10 max-w-md mx-auto font-bold uppercase tracking-widest text-[10px] leading-relaxed">
-                            {t('dashboard.no_shipments_desc')}
-                        </p>
-                        <Link href="/quote">
-                            <Button className="bg-white text-black hover:bg-gray-100 font-black h-14 px-12 rounded-2xl uppercase tracking-tighter shadow-2xl">
-                                {t('dashboard.get_quote')}
-                            </Button>
-                        </Link>
-                    </Card>
-                </motion.div>
-
-                {/* Quick Actions - High Resolution */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                >
-                    <h2 className="text-3xl font-black text-white mb-8 uppercase tracking-tighter italic">Quick Actions</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {quickActions.map((action, idx) => (
-                            <Link key={idx} href={action.href}>
-                                <Card className="p-10 bg-white/[0.02] border border-white/5 rounded-[32px] transition-all cursor-pointer group h-full hover:bg-white/[0.05] hover:border-white/20 ultra-card">
-                                    <div className="h-16 w-16 bg-white text-black rounded-2xl flex items-center justify-center mb-8 group-hover:rotate-[360deg] transition-all duration-700 shadow-2xl">
-                                        <action.icon className="h-8 w-8" />
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                    {stats.map((stat, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                        >
+                            <Card className="p-6 bg-zinc-900/50 border-zinc-800 rounded-xl hover:border-zinc-700 transition-all">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                                        <stat.icon className="h-5 w-5 text-white" />
                                     </div>
-                                    <h3 className="font-black text-white text-2xl mb-4 uppercase tracking-tighter">{action.title}</h3>
-                                    <p className="text-sm font-medium text-gray-500 leading-relaxed uppercase tracking-widest text-[10px]">{action.desc}</p>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                </motion.div>
+                                </div>
+                                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                                <div className="text-sm text-zinc-500">{stat.label}</div>
+                            </Card>
+                        </motion.div>
+                    ))}
+                </div>
 
+                {/* Main Content Grid */}
+                <div className="grid lg:grid-cols-12 gap-6">
+
+                    {/* Shipments List */}
+                    <Card className="lg:col-span-8 bg-zinc-900/50 border-zinc-800 rounded-xl overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                            <div>
+                                <h3 className="text-xl font-semibold text-white">{t('dashboard.recentShipments') || "Recent Shipments"}</h3>
+                                <p className="text-sm text-zinc-500">{t('dashboard.latestBookingsStatus') || "Your latest bookings and their status"}</p>
+                            </div>
+                            <Button variant="ghost" className="text-zinc-400 hover:text-white">
+                                {t('dashboard.viewAll') || "View All"} <ArrowUpRight className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                            </Button>
+                        </div>
+
+                        <div className="p-6">
+                            {loading ? (
+                                <div className="py-16 text-center text-zinc-500">{t('dashboard.loading') || "Loading shipments..."}</div>
+                            ) : bookings.length === 0 ? (
+                                <div className="py-16 text-center">
+                                    <Package className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
+                                    <div className="text-zinc-400 mb-4">{t('dashboard.noShipments') || "No shipments yet"}</div>
+                                    <Link href="/quote">
+                                        <Button className="bg-white text-black hover:bg-zinc-100 rounded-lg h-10 px-6 font-semibold">
+                                            {t('dashboard.bookFirst') || "Book Your First Shipment"}
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {bookings.map((b, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center">
+                                                    <Ship className="h-5 w-5 text-white" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-semibold text-white">{b.booking_reference}</div>
+                                                    <div className="flex items-center gap-2 text-sm text-zinc-500">
+                                                        <MapPin className="h-3.5 w-3.5" />
+                                                        {b.origin || "Origin"} → {b.destination || "Destination"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${b.status === 'PENDING'
+                                                    ? 'bg-amber-500/10 text-amber-400'
+                                                    : 'bg-emerald-500/10 text-emerald-400'
+                                                    }`}>
+                                                    {b.status === 'PENDING' ? <Clock className="h-3 w-3" /> : <CheckCircle className="h-3 w-3" />}
+                                                    {b.status === 'PENDING' ? (t('status.pending') || 'Pending') : (t('status.confirmed') || 'Confirmed')}
+                                                </div>
+                                                <div className="text-xs text-zinc-500 mt-1">{new Date(b.created_at).toLocaleDateString()}</div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+
+                    {/* Sidebar */}
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Payments */}
+                        <Card className="bg-zinc-900/50 border-zinc-800 rounded-xl p-6">
+                            <h3 className="font-semibold text-white mb-4">{t('dashboard.recentPayments') || "Recent Payments"}</h3>
+                            <div className="space-y-4">
+                                {payments.map((p, i) => (
+                                    <div key={i} className="flex items-center justify-between py-3 border-b border-zinc-800 last:border-0">
+                                        <div>
+                                            <div className="font-medium text-white">${p.amount.toLocaleString()}</div>
+                                            <div className="text-sm text-zinc-500">{p.date}</div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-emerald-500 text-sm">
+                                            <CheckCircle className="h-4 w-4" />
+                                            {t('status.paid') || "Paid"}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button variant="outline" className="w-full mt-4 h-10 border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg">
+                                {t('dashboard.viewAllPayments') || "View All Payments"}
+                            </Button>
+                        </Card>
+
+
+                        {/* Market Insight Widget (AI Powered) */}
+                        <div className="mt-6">
+                            <MarketTrendWidget />
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     );

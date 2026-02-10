@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import quotes, auth, bookings, tracking, ai, documents
+from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references
 from app.core.config import settings
 from app.db.session import engine, Base
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 🔱 Sovereign Database Handshake
+    # Sovereign Database Handshake
     async with engine.begin() as conn:
-        print("🔱 Harmonizing Sovereign Database Schema...")
+        print("[DB] Harmonizing Sovereign Database Schema...")
         await conn.run_sync(Base.metadata.create_all)
     yield
 
@@ -36,6 +36,7 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(tracking.router, prefix="/api/tracking", tags=["Global Tracking"])
 app.include_router(ai.router, prefix="/api/ai", tags=["Creative Cortex AI"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Document AI"])
+app.include_router(references.router, prefix="/api", tags=["Reference Data"]) # Mounts at /api/ports, etc.
 
 @app.get("/")
 def health_check():

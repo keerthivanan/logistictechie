@@ -57,3 +57,4 @@ export const useQuoteStore = create<QuoteState>((set) => ({
     nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 5) })),
     prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
 }));
+

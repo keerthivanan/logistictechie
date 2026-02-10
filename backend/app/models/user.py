@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
 import uuid
@@ -14,6 +15,14 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     full_name = Column(String)
     company_name = Column(String)
+    phone_number = Column(String)
+    avatar_url = Column(String) # For hosted avatars or Gravatar links
+    preferences = Column(String) # JSON stored as string for compatibility, or use JSON type
     role = Column(String, default="user") # user, admin
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # 🔗 Relationships
+    bookings = relationship("Booking", back_populates="user")
+    payments = relationship("Payment", back_populates="user")
+

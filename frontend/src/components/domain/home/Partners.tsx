@@ -73,36 +73,51 @@ export function PartnersSection() {
     ];
 
     return (
-        <section className="relative py-20 bg-black">
-            {/* Top gradient for seamless blend with Hero */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black to-transparent pointer-events-none" />
-
+        <section className="relative py-20 bg-black border-t border-zinc-900">
             <div className="container max-w-7xl mx-auto px-6">
+
+                {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12"
+                    className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8"
                 >
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-[0.2em] mb-3">Trusted Partners</p>
-                    <h3 className="text-lg md:text-xl text-gray-400">
-                        Connected with <span className="text-white font-semibold">50+ Major Shipping Lines</span>
-                    </h3>
+                    <div>
+                        <h3 className="text-2xl font-semibold text-white mb-2">
+                            Our Carrier Network
+                        </h3>
+                        <p className="text-zinc-500">
+                            Direct integrations with the world's leading shipping lines
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-6 text-center md:text-right">
+                        <div>
+                            <div className="text-3xl font-bold text-white">50+</div>
+                            <div className="text-sm text-zinc-500">Carriers</div>
+                        </div>
+                        <div className="h-8 w-px bg-zinc-800" />
+                        <div>
+                            <div className="text-3xl font-bold text-white">200+</div>
+                            <div className="text-sm text-zinc-500">Ports</div>
+                        </div>
+                    </div>
                 </motion.div>
 
-                <div className="relative h-12 overflow-hidden text-gray-500">
+                {/* Logo Carousel */}
+                <div className="relative h-16 overflow-hidden text-zinc-600 opacity-50 hover:opacity-80 transition-opacity duration-500">
                     <LogoLoop
                         logos={logos}
-                        speed={40}
+                        speed={60}
                         direction="left"
                         logoHeight={32}
-                        gap={80}
+                        gap={120}
                         hoverSpeed={0}
                         scaleOnHover={false}
                         fadeOut={true}
                         fadeOutColor="#000000"
-                        ariaLabel="Shipping Partners"
+                        ariaLabel="Partner Carriers"
                     />
                 </div>
             </div>

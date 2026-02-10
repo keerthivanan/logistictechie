@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     
     MAERSK_CONSUMER_KEY: str = ""
     MAERSK_CONSUMER_SECRET: str = ""
+    MAERSK_INTEGRATION_ID: str = ""
     
     CMA_API_KEY: str = ""
     MSC_API_KEY: str = ""
@@ -30,6 +31,10 @@ class Settings(BaseSettings):
     GOOGLE_CLOUD_PROJECT: str = os.getenv("GOOGLE_CLOUD_PROJECT", "phoenix-logistics-2026")
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+
+    # 💳 PAYMENTS & NOTIFICATIONS (Production Ready)
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
+    SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
 
     ALLOWED_ORIGINS: list = ["*"]
 

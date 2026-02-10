@@ -43,3 +43,4 @@ export default function InfogramChart({ dataId, title, className }: InfogramChar
         </div>
     );
 }
+

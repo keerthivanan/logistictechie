@@ -1,7 +1,8 @@
 "use client";
 
-import { ShieldCheck, Zap, Ship, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
+import { Ship, Shield, Clock, TrendingUp } from "lucide-react";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function FeaturesSection() {
@@ -10,98 +11,86 @@ export function FeaturesSection() {
     const features = [
         {
             icon: Ship,
-            title: t('features.api_title'),
-            desc: t('features.api_desc'),
+            title: t('landing.features.list.0.title'),
+            description: t('landing.features.list.0.description')
         },
         {
-            icon: Zap,
-            title: t('features.accuracy_title'),
-            desc: t('features.accuracy_desc'),
+            icon: Shield,
+            title: t('landing.features.list.1.title'),
+            description: t('landing.features.list.1.description')
         },
         {
-            icon: ShieldCheck,
-            title: t('features.insured_title'),
-            desc: t('features.insured_desc'),
+            icon: Clock,
+            title: t('landing.features.list.2.title'),
+            description: t('landing.features.list.2.description')
         },
         {
-            icon: Trophy,
-            title: t('features.tech_title'),
-            desc: t('features.tech_desc'),
+            icon: TrendingUp,
+            title: t('landing.features.list.3.title'),
+            description: t('landing.features.list.3.description')
         }
     ];
 
     return (
-        <section className="relative py-32 bg-background border-t border-white/5">
-            <div className="container relative z-10 max-w-7xl mx-auto px-6">
+        <section className="relative py-24 bg-black">
+            <div className="container max-w-7xl mx-auto px-6">
+
+                {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-20"
+                    className="text-center mb-16"
                 >
-                    <p className="text-sm font-medium text-gray-500 uppercase tracking-widest mb-4">Why Choose Us</p>
-                    <div className="space-y-4">
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white">
-                            Built for the Future of Logistics.
-                        </h2>
-                        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed font-light">
-                            Reliability meets speed. We stripped away the noise to give you the tool you requested.
-                        </p>
-                    </div>
+                    <span className="text-sm font-medium text-emerald-500 mb-4 block">{t('landing.features.badge')}</span>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                        {t('landing.features.title')}
+                    </h2>
+                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+                        {t('landing.features.description')}
+                    </p>
                 </motion.div>
 
+                {/* Features Grid */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {features.map((f, i) => (
+                    {features.map((feature, idx) => (
                         <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 30 }}
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                            className="group relative"
+                            transition={{ duration: 0.5, delay: idx * 0.1 }}
+                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 hover:border-zinc-700 transition-all group"
                         >
-                            {/* Card - Classic Minimalist */}
-                            <div className="relative h-full p-8 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300">
-                                {/* Icon */}
-                                <div className="inline-flex items-center justify-center h-12 w-12 rounded-lg bg-white text-black mb-6">
-                                    <f.icon className="h-6 w-6" />
-                                </div>
-
-                                <h3 className="text-xl font-bold text-white mb-3 tracking-tight">{f.title}</h3>
-
-                                <p className="text-gray-400 leading-relaxed text-sm">
-                                    {f.desc}
-                                </p>
+                            <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-black transition-colors">
+                                <feature.icon className="h-6 w-6" />
                             </div>
+                            <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                            <p className="text-zinc-400 leading-relaxed">{feature.description}</p>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Stats Row - High Contrast */}
+                {/* Stats Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-t border-b border-white/10"
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-zinc-800 pt-16"
                 >
-                    <div className="text-center">
-                        <div className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">50+</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Shipping Lines</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">200+</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Countries</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">99.9%</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Uptime</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">&lt;2s</div>
-                        <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Quote Time</div>
-                    </div>
+                    {[
+                        { value: "50+", label: t('landing.features.stats.carriers') },
+                        { value: "200+", label: t('landing.features.stats.ports') },
+                        { value: "99.9%", label: t('landing.features.stats.uptime') },
+                        { value: "<1min", label: t('landing.features.stats.quote') }
+                    ].map((stat, idx) => (
+                        <div key={idx} className="text-center">
+                            <div className="text-4xl md:text-5xl font-bold text-white mb-2">{stat.value}</div>
+                            <div className="text-zinc-500 text-sm">{stat.label}</div>
+                        </div>
+                    ))}
                 </motion.div>
             </div>
         </section>

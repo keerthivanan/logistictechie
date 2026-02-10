@@ -56,3 +56,4 @@ export function GooglePlacesInput({ value, onChange, placeholder, className }: G
         </Autocomplete>
     );
 }
+

@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, X, Minimize2, Maximize2, Sparkles, Terminal, Activity } from "lucide-react";
+import { Bot, Send, X, Minimize2, Maximize2, Sparkles, Terminal, Activity, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+
+import { usePathname, useRouter } from "next/navigation";
 
 interface Message {
     role: 'user' | 'assistant';
@@ -14,6 +16,8 @@ interface Message {
 }
 
 export function CreativeCortex() {
+    const pathname = usePathname();
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
@@ -23,27 +27,57 @@ export function CreativeCortex() {
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
+    // 🧠 CONTEXT AWARE SUGGESTIONS
+    const getSuggestions = () => {
+        if (pathname?.includes('/tracking')) return ["Where is container MSCU123?", "How accurate is the ETA?", "Show me the map"];
+        if (pathname?.includes('/quote')) return ["Find rates from Shanghai to LA", "What are the hidden fees?", "Is this the best price?"];
+        if (pathname?.includes('/schedules')) return ["When is the next ship to Dubai?", "Show me Maersk schedules", "Fastest route to Hamburg"];
+        return ["My recent shipments", "Track a Shipment", "Get a Quote", "What is my last booking?"];
+    };
+
+    const handleSuggestion = (text: string) => {
+        handleSend(text);
+    };
+
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages]);
 
-    const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
+    const handleSend = async (overrideText?: string) => {
+        const textToSend = overrideText || input;
+        if (!textToSend.trim() || isLoading) return;
 
-        const userMsg = input.trim();
+        const userMsg = textToSend.trim();
         setInput("");
         setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
         setIsLoading(true);
 
         try {
-            const response = await axios.post("http://localhost:8000/api/ai/chat", {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await axios.post(`${apiUrl}/api/ai/chat`, {
                 message: userMsg,
-                history: messages.map(m => ({ role: m.role, content: m.content }))
+                history: messages.map(m => ({ role: m.role, content: m.content })),
+                context: {
+                    page: pathname || '/home',
+                    timestamp: new Date().toISOString()
+                }
             });
 
             setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
+
+            // 🚀 AI ACTION HANDLER
+            if (response.data.action && response.data.action.type === 'NAVIGATE') {
+                const path = response.data.action.payload;
+                // Add a system log message
+                setMessages(prev => [...prev, { role: 'assistant', content: `[SYSTEM]: Navigating to ${path}...` }]);
+
+                setTimeout(() => {
+                    setIsMinimized(true);
+                    router.push(path);
+                }, 1500); // Small delay to let user read
+            }
         } catch (error) {
             setMessages(prev => [...prev, { role: 'assistant', content: "ERROR: Synchronization failed. Please verify neural link." }]);
         } finally {
@@ -54,18 +88,37 @@ export function CreativeCortex() {
     return (
         <div className="fixed bottom-8 right-8 z-[100]">
             <AnimatePresence>
+
                 {!isOpen && (
-                    <motion.button
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 180 }}
-                        onClick={() => setIsOpen(true)}
-                        className="h-16 w-16 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-110 transition-transform group relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent animate-pulse" />
-                        <Bot className="h-8 w-8 relative z-10" />
-                        <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-black animate-ping" />
-                    </motion.button>
+                    <div className="relative group">
+                        {/* 🔔 Proactive Helper Hint */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20, scale: 0.8 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            transition={{ delay: 2, duration: 0.5 }}
+                            className="absolute right-20 top-4 bg-white text-black px-4 py-2 rounded-xl rounded-tr-none shadow-2xl flex items-center gap-3 whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors"
+                            onClick={() => setIsOpen(true)}
+                        >
+                            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                            <span className="text-xs font-bold uppercase tracking-widest">
+                                {pathname?.includes('/quote') ? "Need help with rates?" :
+                                    pathname?.includes('/tracking') ? "Track your cargo?" :
+                                        "I can help you."}
+                            </span>
+                        </motion.div>
+
+                        <motion.button
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, rotate: 180 }}
+                            onClick={() => setIsOpen(true)}
+                            className="h-16 w-16 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.3)] hover:scale-110 transition-transform relative overflow-hidden"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent animate-pulse" />
+                            <Bot className="h-8 w-8 relative z-10" />
+                            <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-black animate-ping" />
+                        </motion.button>
+                    </div>
                 )}
             </AnimatePresence>
 
@@ -84,10 +137,10 @@ export function CreativeCortex() {
                                     <Sparkles className="h-6 w-6 text-black" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-black text-white uppercase tracking-tighter italic">Creative Cortex</h3>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-tight">Creative Cortex</h3>
                                     <div className="flex items-center gap-2">
                                         <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
-                                        <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Neural Link Active</span>
+                                        <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Neural Link Active</span>
                                     </div>
                                 </div>
                             </div>
@@ -113,10 +166,10 @@ export function CreativeCortex() {
                                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
                                             <div className={`max-w-[85%] p-4 rounded-2xl text-xs font-medium leading-relaxed uppercase tracking-widest ${msg.role === 'user'
-                                                ? 'bg-white text-black font-black'
+                                                ? 'bg-white text-black font-bold'
                                                 : 'bg-white/5 border border-white/10 text-gray-300'}`}>
                                                 {msg.role === 'assistant' && (
-                                                    <div className="flex items-center gap-2 mb-2 text-[8px] text-gray-500 font-black">
+                                                    <div className="flex items-center gap-2 mb-2 text-[8px] text-gray-500 font-bold">
                                                         <Terminal className="h-3 w-3" />
                                                         <span>LOG_STREAM_0x{idx.toString(16).toUpperCase()}</span>
                                                     </div>
@@ -138,23 +191,65 @@ export function CreativeCortex() {
 
                                 {/* Input */}
                                 <div className="p-6 border-t border-white/5 bg-white/[0.01]">
+                                    {/* 💡 Context Suggestions */}
+                                    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-2">
+                                        {getSuggestions().map((s, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleSuggestion(s)}
+                                                className="whitespace-nowrap px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors"
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
                                     <div className="relative flex gap-3">
                                         <Input
                                             value={input}
                                             onChange={(e) => setInput(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                                            placeholder="SYNC QUERY..."
-                                            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 font-black uppercase tracking-widest text-[10px] rounded-xl focus-visible:ring-white/20"
+                                            placeholder="SYNC QUERY OR USE VOICE..."
+                                            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 font-bold uppercase tracking-widest text-xs rounded-xl focus-visible:ring-white/20"
                                         />
+
+                                        {/* 🎙️ 2026 VOICE COMMAND */}
                                         <Button
-                                            onClick={handleSend}
+                                            onClick={() => {
+                                                if ('webkitSpeechRecognition' in window) {
+                                                    const recognition = new (window as any).webkitSpeechRecognition();
+                                                    recognition.lang = 'en-US';
+                                                    recognition.start();
+                                                    setIsLoading(true); // Show listening state
+
+                                                    recognition.onresult = (event: any) => {
+                                                        const transcript = event.results[0][0].transcript;
+                                                        setInput(transcript);
+                                                        handleSuggestion(transcript); // Auto-send
+                                                        setIsLoading(false);
+                                                    };
+
+                                                    recognition.onerror = () => setIsLoading(false);
+                                                } else {
+                                                    alert("Voice Command requires Chrome/Edge.");
+                                                }
+                                            }}
+                                            className="h-12 w-12 bg-white/10 text-white hover:bg-white hover:text-black rounded-xl flex-shrink-0 border border-white/10 transition-all hover:scale-105"
+                                        >
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-green-500 rounded-full blur-md opacity-20 animate-pulse" />
+                                                <Mic className="h-5 w-5 relative z-10" />
+                                            </div>
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => handleSend()}
                                             disabled={isLoading}
                                             className="h-12 w-12 bg-white text-black hover:bg-gray-100 rounded-xl flex-shrink-0 shadow-2xl"
                                         >
                                             <Send className="h-5 w-5" />
                                         </Button>
                                     </div>
-                                    <div className="mt-4 flex items-center justify-between text-[8px] font-black text-gray-600 uppercase tracking-[0.2em]">
+                                    <div className="mt-4 flex items-center justify-between text-[8px] font-bold text-gray-600 uppercase tracking-[0.2em]">
                                         <div className="flex items-center gap-2">
                                             <Activity className="h-3 w-3" />
                                             <span>Processing Latency: 45ms</span>
@@ -170,3 +265,4 @@ export function CreativeCortex() {
         </div>
     );
 }
+

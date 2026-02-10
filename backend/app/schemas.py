@@ -11,6 +11,7 @@ class Surcharge(BaseModel):
     name: str
     amount: float
     currency: Currency
+    category: str = "Local" # Local, Freight, Documentation, Fuel
 
 class OceanQuote(BaseModel):
     """
@@ -52,18 +53,25 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_id: str
+    user_name: str
 
 class UserResponse(BaseModel):
     id: str
     email: str
-    full_name: str
-    company: str
+    full_name: Optional[str] = None
+    company_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar_url: Optional[str] = None
+    preferences: Optional[str] = None
     role: str
 # --- Booking Models ---
 class BookingCreate(BaseModel):
     quote_id: str
     user_id: str
     cargo_details: str
+    price: float = 0.0
+    quote_data: Optional[dict] = None # For implicit quote creation
 
 class BookingResponse(BaseModel):
     id: str

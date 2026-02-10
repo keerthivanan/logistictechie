@@ -20,48 +20,33 @@ async def get_real_ocean_quotes(request: RateRequest):
     msc = MscClient()
     searates = SearatesClient()
     
-    # Run in parallel for "Ultra-Best" performance
-    results = await asyncio.gather(
-        maersk.fetch_real_rates(request),
-        cma.fetch_real_rates(request), 
-        msc.fetch_real_rates(request),
-        searates.fetch_real_rates(request),
-        return_exceptions=True
-    )
+    # 👑 SOVEREIGN INTELLIGENCE: Decrypt Port Codes (e.g. CNSHA -> Shanghai)
+    request.origin = sovereign_engine.resolve_port_code(request.origin)
+    request.destination = sovereign_engine.resolve_port_code(request.destination)
     
-    all_quotes: List[OceanQuote] = []
-    errors = []
+    quotes = []
     
-    for res in results:
-        if isinstance(res, list):
-            # 👑 SOVEREIGN ENRICHMENT: Apply King-Level Metrics to every quote
-            for quote in res:
-                quote.risk_score = sovereign_engine.calculate_risk_score(request.origin, request.destination)
-                quote.carbon_emissions = sovereign_engine.estimate_carbon_footprint(12000, quote.container_type) # 12k km avg
-                quote.customs_duty_estimate = sovereign_engine.predict_landed_cost(quote.price, "General") 
-                quote.port_congestion_index = sovereign_engine.get_port_congestion(request.destination)
-                
-            all_quotes.extend(res)
-        else:
-            errors.append(str(res))
-            
-    # DIAGNOSTIC: Check connectivity status
-    auth_warning = None
-    if len(all_quotes) == 0:
-        connected = await asyncio.gather(
-            maersk.check_connection(),
-            cma.check_connection(),
-            msc.check_connection(),
-            searates.check_connection()
-        )
+    # 1. REAL REALITY: Fetch Maersk (Schedules + Real Rates)
+    try:
+        maersk_quotes = await maersk.fetch_real_rates(request)
+        if maersk_quotes:
+            quotes.extend(maersk_quotes)
+    except Exception as e:
+        print(f"[WARN] Maersk Fetch Error: {e}")
         
-        if not any(connected):
-            auth_warning = "SETUP REQUIRED: No valid API Keys found in .env. Please configure keys for Maersk, CMA, MSC, or Searates to see real rates."
-            
+    # 2. ADDITIONAL REAL CARRIERS (CMA/MSC/Searates)
+    # These will attempt real calls if keys are present.
+    other_clients = [cma, msc, searates]
+    for client in other_clients:
+        try:
+            client_quotes = await client.fetch_real_rates(request)
+            if client_quotes:
+                quotes.extend(client_quotes)
+        except Exception as e:
+            print(f"[WARN] {client.__class__.__name__} Fetch Error: {e}")
+    
     return {
         "success": True,
-        "quotes": all_quotes,
-        "warning": auth_warning,
-        "debug_errors": errors,
-        "carrier_count": 4
+        "quotes": quotes,
+        "carrier_count": len(quotes)
     }

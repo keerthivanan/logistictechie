@@ -3,108 +3,119 @@
 import { useQuoteStore } from "@/hooks/use-quote";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { Box } from "lucide-react";
-
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Box, ArrowRight, ArrowLeft, Calendar, Scale, Ruler } from "lucide-react";
 
 export function DetailsStep() {
-    const { t } = useLanguage();
     const { nextStep, prevStep, formData, updateForm } = useQuoteStore();
 
     return (
-        <div className="max-w-3xl mx-auto space-y-12">
-            <div className="text-center space-y-4">
-                <p className="text-xs font-black text-gray-500 uppercase tracking-[0.3em]">Step 03 — Cargo Calibration</p>
-                <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white uppercase leading-[0.9]">
-                    Shipment Details
-                </h2>
-                <p className="text-gray-500 font-light text-xl max-w-xl mx-auto">{t('quote.wizard.details.subtitle')}</p>
+        <div className="max-w-2xl mx-auto">
+            <div className="mb-8 text-center">
+                <span className="text-sm font-medium text-emerald-500 mb-2 block">Step 3 of 6</span>
+                <h2 className="text-3xl font-bold text-white mb-3">Shipment Details</h2>
+                <p className="text-zinc-400">Provide additional information about your cargo for accurate quotes.</p>
             </div>
 
-            <Card className="p-10 space-y-10 bg-white/[0.02] backdrop-blur-3xl border-white/10 rounded-3xl shadow-2xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Ready Date */}
-                    <div className="space-y-3">
-                        <Label className="text-xs font-black uppercase tracking-widest text-gray-400">{t('quote.wizard.details.ready_date')}</Label>
-                        <Input
-                            type="date"
-                            className="bg-black/40 border-white/10 h-14 rounded-xl focus:border-white transition-all invert brightness-200"
-                            value={formData.readyDate}
-                            onChange={(e) => updateForm({ readyDate: e.target.value })}
-                        />
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Cargo Ready Date</label>
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Input
+                                type="date"
+                                className="pl-10 bg-zinc-800/50 border-zinc-700 h-12 rounded-lg text-white focus:border-zinc-500"
+                                value={formData.readyDate}
+                                onChange={(e) => updateForm({ readyDate: e.target.value })}
+                            />
+                        </div>
                     </div>
 
                     {/* Incoterms */}
-                    <div className="space-y-3">
-                        <Label className="text-xs font-black uppercase tracking-widest text-gray-400">{t('quote.wizard.details.incoterms')}</Label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Incoterms</label>
                         <Select
                             defaultValue={formData.incoterm}
                             onValueChange={(val: string) => updateForm({ incoterm: val as 'EXW' | 'FCA' | 'FOB' | 'CFR' | 'CIF' | 'DAP' | 'DDP' })}
                         >
-                            <SelectTrigger className="bg-black/40 border-white/10 h-14 rounded-xl focus:border-white transition-all text-white rtl:flex-row-reverse">
-                                <SelectValue placeholder={t('quote.wizard.details.select_incoterms')} />
+                            <SelectTrigger className="bg-zinc-800/50 border-zinc-700 h-12 rounded-lg text-white focus:border-zinc-500">
+                                <SelectValue placeholder="Select terms" />
                             </SelectTrigger>
-                            <SelectContent className="bg-black border-white/20 text-white rounded-xl overflow-hidden" align="end">
-                                <SelectItem value="FOB" className="hover:bg-white/10 focus:bg-white/10 transition-colors">{t('quote.wizard.details.incoterm_opts.fob')}</SelectItem>
-                                <SelectItem value="EXW" className="hover:bg-white/10 focus:bg-white/10 transition-colors">{t('quote.wizard.details.incoterm_opts.exw')}</SelectItem>
-                                <SelectItem value="CIF" className="hover:bg-white/10 focus:bg-white/10 transition-colors">{t('quote.wizard.details.incoterm_opts.cif')}</SelectItem>
-                                <SelectItem value="DDP" className="hover:bg-white/10 focus:bg-white/10 transition-colors">{t('quote.wizard.details.incoterm_opts.ddp')}</SelectItem>
+                            <SelectContent className="bg-zinc-900 border-zinc-700 text-white rounded-lg">
+                                <SelectItem value="FOB" className="py-3">FOB - Free On Board</SelectItem>
+                                <SelectItem value="EXW" className="py-3">EXW - Ex Works</SelectItem>
+                                <SelectItem value="CIF" className="py-3">CIF - Cost, Insurance & Freight</SelectItem>
+                                <SelectItem value="DDP" className="py-3">DDP - Delivered Duty Paid</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
+                </div>
 
-                    {/* Commodity */}
-                    <div className="col-span-2 space-y-3">
-                        <Label className="text-xs font-black uppercase tracking-widest text-gray-400">{t('quote.wizard.details.commodity')}</Label>
-                        <div className="relative">
-                            <Input
-                                placeholder={t('quote.wizard.details.commodity_placeholder')}
-                                className="bg-black/40 border-white/10 h-14 rounded-xl pl-12 focus:border-white transition-all text-white rtl:text-right"
-                                value={formData.commodity}
-                                onChange={(e) => updateForm({ commodity: e.target.value })}
-                            />
-                            <Box className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                        </div>
-                    </div>
-
-                    {/* Total Weight */}
-                    <div className="space-y-3">
-                        <Label className="text-xs font-black uppercase tracking-widest text-gray-400">{t('quote.wizard.details.weight')}</Label>
+                {/* Commodity */}
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-300">Commodity / Goods Description</label>
+                    <div className="relative">
+                        <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                         <Input
-                            type="number"
-                            placeholder="1000"
-                            className="bg-black/40 border-white/10 h-14 rounded-xl focus:border-white transition-all text-white rtl:text-right"
-                            value={formData.weight}
-                            onChange={(e) => updateForm({ weight: Number(e.target.value) })}
-                        />
-                    </div>
-
-                    {/* Total Volume */}
-                    <div className="space-y-3">
-                        <Label className="text-xs font-black uppercase tracking-widest text-gray-400">{t('quote.wizard.details.volume')}</Label>
-                        <Input
-                            type="number"
-                            placeholder="2.5"
-                            className="bg-black/40 border-white/10 h-14 rounded-xl focus:border-white transition-all text-white rtl:text-right"
-                            value={formData.volume}
-                            onChange={(e) => updateForm({ volume: Number(e.target.value) })}
+                            placeholder="e.g., Electronics, Furniture, Machinery"
+                            className="pl-10 bg-zinc-800/50 border-zinc-700 h-12 rounded-lg text-white placeholder:text-zinc-500 focus:border-zinc-500"
+                            value={formData.commodity}
+                            onChange={(e) => updateForm({ commodity: e.target.value })}
                         />
                     </div>
                 </div>
-            </Card>
 
-            <div className="flex justify-between items-center pt-8">
-                <Button onClick={prevStep} variant="ghost" className="text-gray-500 hover:text-white uppercase font-black tracking-tighter">
-                    ← Back to Route
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Weight */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Total Weight (kg)</label>
+                        <div className="relative">
+                            <Scale className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Input
+                                type="number"
+                                placeholder="1000"
+                                className="pl-10 bg-zinc-800/50 border-zinc-700 h-12 rounded-lg text-white placeholder:text-zinc-500 focus:border-zinc-500"
+                                value={formData.weight || ""}
+                                onChange={(e) => updateForm({ weight: Number(e.target.value) })}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Volume */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-zinc-300">Total Volume (CBM)</label>
+                        <div className="relative">
+                            <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Input
+                                type="number"
+                                placeholder="2.5"
+                                step="0.1"
+                                className="pl-10 bg-zinc-800/50 border-zinc-700 h-12 rounded-lg text-white placeholder:text-zinc-500 focus:border-zinc-500"
+                                value={formData.volume || ""}
+                                onChange={(e) => updateForm({ volume: Number(e.target.value) })}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex gap-3">
+                <Button
+                    onClick={prevStep}
+                    variant="outline"
+                    className="h-12 px-6 rounded-lg border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
                 </Button>
-                <Button onClick={nextStep} size="lg" className="bg-white text-black hover:bg-gray-200 h-16 px-12 rounded-2xl uppercase font-black tracking-tighter text-xl shadow-[0_0_50px_rgba(255,255,255,0.05)] border-2 border-white">
-                    Fetch Real Rates →
+                <Button
+                    onClick={nextStep}
+                    className="flex-1 h-12 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold transition-all"
+                >
+                    Get Quotes <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </div>
         </div>
     );
 }
-

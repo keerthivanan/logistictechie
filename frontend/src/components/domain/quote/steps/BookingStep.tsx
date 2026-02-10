@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useQuoteStore } from "@/hooks/use-quote";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CheckCircle2, Ship, Package, Calendar, Download, ArrowLeft } from "lucide-react";
+import { CheckCircle, Ship, Package, Calendar, ArrowLeft, LayoutDashboard, Download, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { logisticsClient } from "@/lib/logistics";
+import axios from "axios";
 
 export function BookingStep() {
     const { selectedQuote, formData } = useQuoteStore();
@@ -17,19 +17,33 @@ export function BookingStep() {
         const createBooking = async () => {
             if (!selectedQuote) return;
 
-            // Call Backend to verify and book
-            const result = await logisticsClient.bookQuote({
-                quote_id: selectedQuote.id,
-                contact_name: "Guest User",
-                contact_email: "guest@example.com",
-                company_name: "Guest Company",
-                cargo_details: JSON.stringify(formData) // Ensure cargo details are stringified if backend expects string
-            });
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("user_id");
 
-            if (result && result.success) {
-                setBookingRef(result.booking_reference); // Backend returns booking_reference
-            } else {
-                setBookingRef("ERR-FAILED");
+            if (!token || !userId) {
+                // Redirect if not logged in - critical for real booking
+                window.location.href = "/login";
+                return;
+            }
+
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const response = await axios.post(`${apiUrl}/api/bookings`, {
+                    quote_id: selectedQuote.id,
+                    user_id: userId,
+                    cargo_details: JSON.stringify(formData),
+                    price: selectedQuote.price
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (response.data && response.data.booking_reference) {
+                    setBookingRef(response.data.booking_reference);
+                }
+            } catch (error) {
+                console.error("Booking Creation Failed", error);
+                // Fallback for demo or show error
+                alert("Booking failed. Please try again or contact support.");
             }
             setLoading(false);
         };
@@ -37,108 +51,139 @@ export function BookingStep() {
         createBooking();
     }, [selectedQuote, formData]);
 
-    if (!selectedQuote) return <div className="text-white">No quote selected.</div>;
+    if (!selectedQuote) return <div className="text-zinc-400 text-center py-20">No quote selected.</div>;
 
     if (loading) {
         return (
-            <div className="max-w-xl mx-auto text-center space-y-8 py-24">
-                <div className="relative w-20 h-20 mx-auto">
-                    <div className="absolute inset-0 border-t-2 border-white rounded-full animate-spin"></div>
-                    <div className="absolute inset-2 border-t-2 border-white/30 rounded-full animate-spin direction-reverse"></div>
-                </div>
-                <div>
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic mb-2">Securing Space...</h2>
-                    <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Negotiating with {selectedQuote.carrier}</p>
-                </div>
+            <div className="max-w-md mx-auto text-center py-20">
+                <Loader2 className="h-12 w-12 text-white animate-spin mx-auto mb-6" />
+                <h2 className="text-2xl font-bold text-white mb-2">Submitting Your Booking Request</h2>
+                <p className="text-zinc-400">Reserving space with {selectedQuote.carrier}...</p>
             </div>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-12 py-10">
-            <div className="text-center">
+        <div className="max-w-3xl mx-auto">
+            {/* Success Header */}
+            <div className="text-center mb-10">
                 <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(255,255,255,0.3)]"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"
                 >
-                    <CheckCircle2 className="w-12 h-12" />
+                    <CheckCircle className="w-8 h-8 text-white" />
                 </motion.div>
-                <h2 className="text-5xl md:text-6xl font-black text-white uppercase tracking-tighter italic mb-6">Booking Confirmed</h2>
-                <div className="inline-flex items-center gap-4 bg-white/[0.05] border border-white/10 px-8 py-4 rounded-2xl">
-                    <span className="text-gray-500 uppercase tracking-widest text-xs font-bold">Reference ID</span>
-                    <span className="font-mono text-2xl text-white tracking-widest font-black">{bookingRef}</span>
+                <h2 className="text-3xl font-bold text-white mb-2">Booking Request Submitted!</h2>
+                <p className="text-zinc-400">Our operations team will confirm your booking within 24 hours.</p>
+
+                <div className="mt-6 inline-flex items-center gap-4 bg-zinc-800/50 border border-zinc-700 px-6 py-3 rounded-lg">
+                    <span className="text-zinc-500 text-sm">Booking Reference</span>
+                    <span className="font-mono text-xl text-white font-bold">{bookingRef}</span>
                 </div>
             </div>
 
-            <Card className="p-10 bg-black border border-white/10 rounded-[40px] shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/[0.02] rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-
-                <div className="relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-8 mb-8 gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center">
-                                {/* Use Carrier Logo if available, else Ship icon */}
-                                {selectedQuote.carrier_logo ? (
-                                    <img src={selectedQuote.carrier_logo} alt={selectedQuote.carrier} className="h-8 w-auto" />
-                                ) : (
-                                    <Ship className="w-8 h-8 text-black" />
-                                )}
-                            </div>
-                            <div>
-                                <h3 className="text-3xl font-black text-white uppercase tracking-tighter italic">
-                                    {selectedQuote.carrier}
-                                </h3>
-                                <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.2em] mt-1">Ocean Service • Verified</p>
-                            </div>
+            {/* Booking Details Card */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden mb-8">
+                {/* Carrier Header */}
+                <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                    <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center">
+                            {selectedQuote.carrier_logo ? (
+                                <img src={selectedQuote.carrier_logo} alt={selectedQuote.carrier} className="h-6 w-auto" />
+                            ) : (
+                                <Ship className="w-6 h-6 text-black" />
+                            )}
                         </div>
-                        <div className="text-right rtl:text-left">
-                            <div className="text-4xl font-black text-white tracking-tighter">${selectedQuote.price?.toLocaleString()}</div>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">Total Paid (USD)</p>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">{selectedQuote.carrier}</h3>
+                            <p className="text-sm text-zinc-500">Verified Carrier</p>
                         </div>
                     </div>
+                    <div className="text-right">
+                        <div className="text-2xl font-bold text-white">${selectedQuote.price?.toLocaleString()}</div>
+                        <p className="text-sm text-zinc-500">Total Amount</p>
+                    </div>
+                </div>
 
-                    <div className="grid md:grid-cols-2 gap-10">
-                        <div className="space-y-6">
-                            <div className="group">
-                                <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] block mb-2">Origin Port</span>
-                                <div className="text-2xl font-bold text-white group-hover:pl-2 transition-all">{formData.origin}</div>
+                {/* Shipment Details */}
+                <div className="p-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <div>
+                                <span className="text-sm text-zinc-500 block mb-1">Origin</span>
+                                <div className="text-lg font-semibold text-white">{formData.origin}</div>
                             </div>
-                            <div className="group">
-                                <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] block mb-2">Destination Port</span>
-                                <div className="text-2xl font-bold text-white group-hover:pl-2 transition-all">{formData.destination}</div>
+                            <div>
+                                <span className="text-sm text-zinc-500 block mb-1">Destination</span>
+                                <div className="text-lg font-semibold text-white">{formData.destination}</div>
                             </div>
                         </div>
 
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div>
-                                <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] block mb-2">Cargo Specifications</span>
-                                <div className="flex items-center gap-3 text-white text-lg font-medium bg-white/[0.03] p-4 rounded-xl border border-white/5">
-                                    <Package className="w-5 h-5 text-gray-400" />
-                                    <span>{formData.cargoType.toUpperCase()} ({formData.containerSize})</span>
+                                <span className="text-sm text-zinc-500 block mb-1">Cargo</span>
+                                <div className="flex items-center gap-2 text-white">
+                                    <Package className="w-4 h-4 text-zinc-500" />
+                                    <span>{formData.cargoType} ({formData.containerSize})</span>
                                 </div>
                             </div>
                             <div>
-                                <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] block mb-2">Estimated Arrival</span>
-                                <div className="flex items-center gap-3 text-white text-lg font-medium bg-white/[0.03] p-4 rounded-xl border border-white/5">
-                                    <Calendar className="w-5 h-5 text-gray-400" />
-                                    <span>{selectedQuote.days} Days Transit Time</span>
+                                <span className="text-sm text-zinc-500 block mb-1">Transit Time</span>
+                                <div className="flex items-center gap-2 text-white">
+                                    <Calendar className="w-4 h-4 text-zinc-500" />
+                                    <span>{selectedQuote.days} Days</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </Card>
 
-            <div className="flex flex-col md:flex-row justify-center gap-6 pt-4">
-                <Button variant="outline" className="h-16 px-10 rounded-2xl border-white/20 text-white hover:bg-white hover:text-black transition-all hover:scale-105" onClick={() => window.location.reload()}>
-                    <ArrowLeft className="w-5 h-5 mr-2" />
+                {/* Legal Disclaimer - PROTECTS THE USER */}
+                <div className="bg-amber-500/10 border-t border-amber-500/20 p-4">
+                    <p className="text-xs text-amber-500 text-center">
+                        <strong>Note:</strong> Rate subject to final carrier confirmation.
+                        Valid for 24 hours. Our operations team will contact you if any adjustments are needed.
+                    </p>
+                </div>
+
+                {/* Next Steps */}
+                <div className="bg-zinc-800/30 p-6 border-t border-zinc-800">
+                    <h4 className="font-medium text-white mb-3">What Happens Next?</h4>
+                    <ul className="space-y-2 text-sm text-zinc-400">
+                        <li className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5" />
+                            Our operations team will review and confirm your booking
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5" />
+                            You&apos;ll receive a confirmation email with shipping documents
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5" />
+                            Track your shipment status from your dashboard
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Button
+                    variant="outline"
+                    className="h-12 px-6 rounded-lg border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                    onClick={() => window.location.href = '/'}
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Home
                 </Button>
-                <Button className="h-16 px-12 rounded-2xl bg-white text-black hover:bg-gray-200 font-black text-lg uppercase tracking-tight shadow-2xl hover:scale-105 transition-all">
-                    <Download className="w-5 h-5 mr-3" />
-                    Download Bill of Lading
+                <Button
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="h-12 px-8 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold transition-all"
+                >
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Go to Dashboard
                 </Button>
             </div>
         </div>
