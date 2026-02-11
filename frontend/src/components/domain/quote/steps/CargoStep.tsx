@@ -3,56 +3,65 @@
 import { useQuoteStore } from "@/hooks/use-quote";
 import { CargoSelectionPopover } from "../CargoSelectionPopover";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Package, FileUp } from "lucide-react";
+import { ArrowRight, Package, FileUp, Zap } from "lucide-react";
 import { AIDocumentUpload } from "../AIDocumentUpload";
 
 export function CargoStep() {
     const { nextStep } = useQuoteStore();
 
     return (
-        <div className="max-w-3xl mx-auto">
-            <div className="mb-8 text-center">
-                <span className="text-sm font-medium text-emerald-500 mb-2 block">Step 1 of 6</span>
-                <h2 className="text-3xl font-bold text-white mb-3">What are you shipping?</h2>
-                <p className="text-zinc-400">Select your cargo type or upload shipping documents for automatic detection.</p>
+        <div className="max-w-4xl mx-auto">
+            <div className="mb-20">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-[1px] bg-emerald-500" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">PROTOCOL_STEP_01</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-6 leading-none">
+                    Identify. <span className="text-zinc-900 group-hover:text-white transition-colors duration-1000">Cargo.</span>
+                </h2>
+                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed max-w-xl">
+                    Select your operational unit type or synchronize via encrypted document upload for automated intelligence extraction.
+                </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <div className="grid md:grid-cols-2 gap-10 mb-20">
                 {/* Cargo Selection */}
-                <div className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                            <Package className="h-5 w-5 text-white" />
+                <div className="bg-zinc-950/40 border border-white/5 p-12 relative group hover:bg-zinc-950/60 transition-all duration-700">
+                    <div className="flex items-center gap-6 mb-10">
+                        <div className="h-16 w-16 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-white group-hover:text-black group-hover:rotate-12">
+                            <Package className="h-8 w-8" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Cargo Type</h3>
-                            <p className="text-zinc-500 text-sm">Select container size and type</p>
+                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">UNIT_SPECIFICATION</h3>
+                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">Select dimensional parameters</p>
                         </div>
                     </div>
                     <CargoSelectionPopover />
+                    <div className="absolute bottom-0 left-0 h-[1px] bg-emerald-500 w-0 group-hover:w-full transition-all duration-1000" />
                 </div>
 
-                {/* Document Upload */}
-                <div className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                            <FileUp className="h-5 w-5 text-white" />
+                {/* Document Sync */}
+                <div className="bg-zinc-950/40 border border-white/5 p-12 relative group hover:bg-zinc-950/60 transition-all duration-700">
+                    <div className="flex items-center gap-6 mb-10">
+                        <div className="h-16 w-16 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-emerald-500 group-hover:text-black group-hover:-rotate-12">
+                            <FileUp className="h-8 w-8" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-white">Upload Documents</h3>
-                            <p className="text-zinc-500 text-sm">We'll extract details automatically</p>
+                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">NEURAL_EXTRACTION</h3>
+                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">Auto-sync shipping data</p>
                         </div>
                     </div>
                     <AIDocumentUpload />
+                    <div className="absolute bottom-0 left-0 h-[1px] bg-white w-0 group-hover:w-full transition-all duration-1000" />
                 </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-end border-t border-white/5 pt-12">
                 <Button
                     onClick={nextStep}
-                    className="h-12 px-8 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold transition-all"
+                    className="h-20 px-16 bg-white text-black hover:bg-emerald-500 rounded-none font-black text-[11px] uppercase tracking-[0.6em] transition-all duration-700 shadow-[0_20px_60px_rgba(255,255,255,0.05)] flex items-center gap-6"
                 >
-                    Continue to Route <ArrowRight className="ml-2 h-4 w-4" />
+                    INITIALIZE_ROUTE <ArrowRight className="h-5 w-5" />
                 </Button>
             </div>
         </div>

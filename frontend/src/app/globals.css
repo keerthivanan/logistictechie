@@ -3,311 +3,183 @@
 @tailwind utilities;
 
 /* ============================================
-   APPLE-GRADE DESIGN SYSTEM
-   Pure Black • Premium Gradients • Subtle Glow
+   SOVEREIGN DESIGN SYSTEM (V2: ELITE)
+   Pure Black • Kinetic Energy • Cinematic Focus
    ============================================ */
 
 @layer base {
   :root {
-    /* CLASSIC THEME: Pure Black & Stark White */
     --background: 0 0% 0%;
-    /* #000000 */
     --foreground: 0 0% 100%;
-    /* #FFFFFF */
 
-    /* Cards - Minimal separation */
-    --card: 0 0% 3%;
+    --card: 0 0% 2%;
     --card-foreground: 0 0% 100%;
 
-    /* Popovers */
-    --popover: 0 0% 3%;
+    --popover: 0 0% 2%;
     --popover-foreground: 0 0% 100%;
 
-    /* Primary - Stark White Action */
     --primary: 0 0% 100%;
     --primary-foreground: 0 0% 0%;
-    /* Black text on White button */
 
-    /* Secondary - Subtle Gray */
-    --secondary: 0 0% 13%;
+    --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted */
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent */
-    --accent: 0 0% 13%;
+    --accent: 0 0% 10%;
     --accent-foreground: 0 0% 100%;
 
-    /* Destructive */
-    --destructive: 0 62% 30%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders - Ultra subtle */
-    --border: 0 0% 13%;
-    --input: 0 0% 13%;
+    --border: 0 0% 8%;
+    --input: 0 0% 8%;
     --ring: 0 0% 100%;
 
-    --radius: 0.5rem;
-    /* Classic, slightly squarer */
+    --radius: 0rem;
+    /* SHARP CORNERS ARE MANDATORY */
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    cursor: default;
+  }
+
+  a,
+  button {
+    cursor: pointer;
   }
 
   html {
     scroll-behavior: smooth;
+    background-color: black;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-inter), sans-serif;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.01em;
+    overflow-x: hidden;
+    position: relative;
   }
 
-  /* Premium Heading Typography - Outfit font */
+  /* Body Background Texture */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Cinematic Typography */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-outfit), sans-serif;
+    @apply tracking-tighter uppercase;
+    font-variant-ligatures: none;
+  }
+
+  p,
+  span,
+  div,
+  li,
+  a,
+  label {
+    font-family: var(--font-inter), sans-serif;
     @apply tracking-tight;
   }
 
-  /* Refined Content Typography - Inter font */
-  p,
-  span,
-  li,
-  label,
-  a,
-  div,
-  td,
-  th {
-    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    letter-spacing: -0.01em;
+  .italic-heading {
+    font-style: italic;
+    @apply font-black leading-[0.85] tracking-[-0.04em];
+  }
+}
+
+@layer components {
+
+  /* Elite Card System */
+  .elite-card {
+    @apply bg-zinc-950/20 border border-white/5 backdrop-blur-3xl transition-all duration-700 hover:border-white/10;
   }
 
-  /* Paragraph styling */
-  p {
-    line-height: 1.7;
+  /* High-Impact Spacing */
+  .section-padding {
+    @apply py-32 md:py-48 lg:py-64;
   }
 
-  /* Small text refinement */
-  .text-sm,
-  .text-xs {
-    letter-spacing: 0.01em;
-  }
-
-  /* Uppercase labels - wide tracking */
-  .uppercase {
-    letter-spacing: 0.1em;
-  }
-
-  /* Arabic Font Support */
-  [dir="rtl"] body {
-    font-family: var(--font-cairo), sans-serif;
-  }
-
-  [dir="rtl"] h1,
-  [dir="rtl"] h2,
-  [dir="rtl"] h3,
-  [dir="rtl"] h4,
-  [dir="rtl"] h5,
-  [dir="rtl"] h6 {
-    font-family: var(--font-cairo), sans-serif;
-  }
-
-  [dir="rtl"] p,
-  [dir="rtl"] span,
-  [dir="rtl"] li,
-  [dir="rtl"] label,
-  [dir="rtl"] a,
-  [dir="rtl"] div {
-    font-family: var(--font-cairo), sans-serif;
-    letter-spacing: 0;
-  }
-
-  .font-heading {
-    font-family: var(--font-outfit), sans-serif;
-  }
-
-  .font-mono {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  }
-
-  /* Selection Color */
-  ::selection {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+  /* Kinetic Interactives */
+  .kinetic-hover {
+    @apply transition-transform duration-500 ease-[0.16, 1, 0.3, 1] hover:scale-[1.02] active:scale-[0.98];
   }
 }
 
 /* ============================================
-   PREMIUM UTILITY CLASSES
+   ULTRA-PREMIUM UTILITIES
    ============================================ */
 
-/* Glass Panel - Apple-style frosted glass */
-.glass-panel {
-  @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] shadow-2xl;
+/* Glassmorphism V3 */
+.glass-v3 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Premium gradient text */
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-gray-400;
+/* Premium Gradient Mask */
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
 
-.gradient-text-blue {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500;
+.mask-fade-top {
+  mask-image: linear-gradient(to top, black 50%, transparent 100%);
 }
 
-.gradient-text-premium {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-200 to-gray-500;
-}
-
-/* Apple-style subtle glow effects */
-.glow-blue {
-  box-shadow: 0 0 60px -15px rgba(255, 255, 255, 0.2);
-}
-
-.glow-white {
-  box-shadow: 0 0 80px -20px rgba(255, 255, 255, 0.15);
-}
-
-/* Premium card hover effect */
-.premium-card {
-  @apply bg-white/[0.02] border border-white/[0.05] rounded-2xl transition-all duration-300;
-}
-
-.premium-card:hover {
-  @apply bg-white/[0.04] border-white/[0.1];
-  transform: translateY(-2px);
-}
-
-/* Subtle animated gradient border */
-.gradient-border {
-  position: relative;
-  background: linear-gradient(hsl(0 0% 4%), hsl(0 0% 4%)) padding-box,
-    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(150, 150, 150, 0.2), rgba(200, 200, 200, 0.2)) border-box;
-  border: 1px solid transparent;
-}
-
-/* Professional button hover - sharp contrast */
-.btn-glow {
-  @apply relative overflow-hidden transition-all duration-300;
-}
-
-.btn-glow:hover {
-  @apply bg-white text-black;
-}
-
-/* Text shadow for premium headlines */
-.text-shadow-glow {
-  text-shadow: 0 0 80px rgba(255, 255, 255, 0.3);
-}
-
-/* Premium input styling */
-input,
-textarea,
-select {
-  @apply transition-all duration-200;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  @apply ring-2 ring-white/20 border-white/40;
-}
-
-/* Smooth page transitions */
-main {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Premium scrollbar */
+/* Scrollbar Elite */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(0 0% 0%);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 15%);
-  border-radius: 4px;
-  border: 2px solid black;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background 0.3s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 25%);
+  background: rgba(255, 255, 255, 0.3);
 }
 
-
-/* ============================================
-   TITAN THEME UTILITIES (Professional Executive)
-   Clean • Sharp • High Visibility • Greatest of All Time
-   ============================================ */
-
-.titan-heading {
-  @apply text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight uppercase text-white;
-}
-
-.titan-subheading {
-  @apply text-2xl md:text-4xl font-semibold tracking-tight uppercase text-white mb-6;
-}
-
-.titan-paragraph {
-  @apply text-base md:text-lg text-gray-300 font-normal leading-relaxed max-w-3xl;
-}
-
-.titan-border-left {
-  @apply border-l-2 border-white/30 pl-6 py-2;
-}
-
-.titan-label {
-  @apply text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4;
-}
-
-.titan-card {
-  @apply bg-zinc-900/50 border border-zinc-800 p-8 transition-all duration-300;
-}
-
-.titan-card:hover {
-  @apply bg-zinc-900 border-zinc-700;
-}
-
-.bg-mesh-dark {
-  background-color: #000000;
-}
-
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
+/* Selection */
+::selection {
   background: white;
-  transform-origin: 0%;
-  z-index: 1000;
+  color: black;
+}
+
+/* Animated Grid Background */
+.bg-grid-premium {
+  background-size: 80px 80px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Titan Heading Utility */
+.titan-text {
+  @apply text-7xl md:text-9xl lg:text-[12rem] font-black italic tracking-tighter leading-none uppercase;
 }

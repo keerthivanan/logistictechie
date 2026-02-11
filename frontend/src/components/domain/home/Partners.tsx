@@ -73,34 +73,33 @@ export function PartnersSection() {
     ];
 
     return (
-        <section className="relative py-20 bg-black border-t border-zinc-900">
+        <section className="relative py-32 bg-black">
             <div className="container max-w-7xl mx-auto px-6">
 
-                {/* Section Header */}
+                {/* Section Header - Apple Style */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="flex flex-col md:flex-row items-center justify-between mb-12 gap-8"
+                    className="flex flex-col md:flex-row items-end justify-between mb-20 gap-8"
                 >
-                    <div>
-                        <h3 className="text-2xl font-semibold text-white mb-2">
-                            Our Carrier Network
-                        </h3>
-                        <p className="text-zinc-500">
-                            Direct integrations with the world's leading shipping lines
+                    <div className="max-w-2xl">
+                        <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight uppercase italic leading-none">
+                            Our Network. <span className="text-zinc-800">Global Coverage.</span>
+                        </h2>
+                        <p className="text-zinc-600 text-lg font-bold uppercase tracking-widest">
+                            Direct integrations with 50+ world leading ocean carriers.
                         </p>
                     </div>
-                    <div className="flex items-center gap-6 text-center md:text-right">
-                        <div>
-                            <div className="text-3xl font-bold text-white">50+</div>
-                            <div className="text-sm text-zinc-500">Carriers</div>
+                    <div className="flex gap-12">
+                        <div className="text-right">
+                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2">Live Nodes</div>
+                            <div className="text-4xl font-black text-white tracking-tighter">200+</div>
                         </div>
-                        <div className="h-8 w-px bg-zinc-800" />
-                        <div>
-                            <div className="text-3xl font-bold text-white">200+</div>
-                            <div className="text-sm text-zinc-500">Ports</div>
+                        <div className="text-right">
+                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2">Active Ships</div>
+                            <div className="text-4xl font-black text-white tracking-tighter">5,000+</div>
                         </div>
                     </div>
                 </motion.div>

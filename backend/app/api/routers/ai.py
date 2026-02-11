@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from app.services.ai import cortex
 from langchain_core.messages import HumanMessage, AIMessage
+from sse_starlette.sse import EventSourceResponse
+import json
 
 router = APIRouter()
 
@@ -91,3 +93,33 @@ async def get_market_trends(country: str = "GLOBAL", commodity: str = "General C
         return {"success": True, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/chat/stream")
+async def stream_chat(message: str, history: str = "[]"):
+    """
+    🌊 SOVEREIGN SYNAPSE STREAM
+    Real-time SSE endpoint for token-by-token AI responses.
+    """
+    try:
+        # Parse history from query param
+        history_list = json.loads(history)
+        langchain_history = []
+        for msg in history_list:
+             if msg["role"] == "user":
+                langchain_history.append(HumanMessage(content=msg["content"]))
+             elif msg["role"] == "assistant":
+                langchain_history.append(AIMessage(content=msg["content"]))
+        
+        async def event_generator():
+            async for token in cortex.stream_chat(message, langchain_history):
+                # Format as SSE data
+                yield {"data": token}
+            
+            # End of stream signal
+            yield {"data": "[DONE]"}
+
+        return EventSourceResponse(event_generator())
+
+    except Exception as e:
+        print(f"Stream Error: {e}")
+        return EventSourceResponse(iter([]))

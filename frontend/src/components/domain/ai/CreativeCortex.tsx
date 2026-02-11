@@ -145,6 +145,9 @@ export function CreativeCortex() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
+                                <button onClick={() => router.push('/assistant')} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white" title="Open Full Screen">
+                                    <Maximize2 className="h-4 w-4" />
+                                </button>
                                 <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
                                     {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
                                 </button>

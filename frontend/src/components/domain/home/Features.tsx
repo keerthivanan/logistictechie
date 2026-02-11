@@ -35,41 +35,51 @@ export function FeaturesSection() {
         <section className="relative py-24 bg-black">
             <div className="container max-w-7xl mx-auto px-6">
 
-                {/* Section Header */}
+                {/* Section Header - Apple "The latest" Style */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-16"
+                    className="mb-16"
                 >
-                    <span className="text-sm font-medium text-emerald-500 mb-4 block">{t('landing.features.badge')}</span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                        {t('landing.features.title')}
+                    <h2 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight uppercase italic">
+                        The Core. <span className="text-zinc-800">Operational Excellence.</span>
                     </h2>
-                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-                        {t('landing.features.description')}
+                    <p className="text-zinc-600 text-lg font-bold uppercase tracking-widest">
+                        High-frequency logistics data at your fingertips.
                     </p>
                 </motion.div>
 
-                {/* Features Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {features.map((feature, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 hover:border-zinc-700 transition-all group"
-                        >
-                            <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-black transition-colors">
-                                <feature.icon className="h-6 w-6" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                            <p className="text-zinc-400 leading-relaxed">{feature.description}</p>
-                        </motion.div>
-                    ))}
+                {/* Apple Style Horizontal Shelf */}
+                <div className="relative -mx-6 px-6 overflow-x-auto no-scrollbar pb-12">
+                    <div className="flex gap-8 w-max">
+                        {features.map((feature, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: 50 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                                className="w-[350px] md:w-[450px] aspect-[4/5] bg-zinc-950 border border-white/5 rounded-[2rem] p-12 hover:border-white/20 transition-all group relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 transition-opacity">
+                                    <feature.icon className="h-32 w-32" />
+                                </div>
+                                <div className="h-16 w-16 bg-white flex items-center justify-center mb-10 rounded-none group-hover:rotate-12 transition-transform duration-500 shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
+                                    <feature.icon className="h-8 w-8 text-black" />
+                                </div>
+                                <h3 className="text-3xl font-black text-white mb-6 uppercase italic leading-none">{feature.title}</h3>
+                                <p className="text-zinc-500 text-lg font-bold uppercase tracking-tight leading-relaxed">{feature.description}</p>
+
+                                <div className="absolute bottom-12 left-12">
+                                    <div className="h-2 w-24 bg-white/5 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 h-full bg-white w-0 group-hover:w-full transition-all duration-700" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Stats Section */}

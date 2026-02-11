@@ -5,8 +5,35 @@ export const ar = {
         pricing: "الأسعار",
         company: "الشركة",
         signIn: "تسجيل الدخول",
-        quote: "اطلب عرض سعر",
-        getQuote: "احصل على عرض سعر"
+        quote: "احصل على عرض سعرك",
+        getQuote: "احصل على عرض سعرك",
+        profile: "الملف الشخصي",
+        settings: "الإعدادات",
+        dashboard: "لوحة التحكم"
+    },
+    dashboard: {
+        title: "لوحة التحكم اللوجستية",
+        welcomeBack: "مرحباً بك، أيها القائد",
+        newShipment: "شحنة جديدة",
+        activeShipments: "الشحنات النشطة",
+        containers: "إجمالي الوحدات",
+        totalSpend: "إجمالي الإنفاق",
+        onTimeRate: "الأداء في الوقت المحدد",
+        recentShipments: "قياس تتبع الأسطول المباشر",
+        latestBookingsStatus: "الحالة الحقيقية للممرات النشطة الخاصة بك",
+        viewAll: "عرض جميع العقد",
+        loading: "جاري المزامنة مع القمر الصناعي...",
+        noShipments: "لم يتم العثور على أصول نشطة",
+        bookFirst: "بدء أول حجز لك",
+        recentPayments: "السجل المالي",
+        viewAllPayments: "تدقيق جميع المعاملات"
+    },
+    status: {
+        pending: "في انتظار التأكيد",
+        confirmed: "تم تأكيد الحجز",
+        paid: "اكتملت المعاملة",
+        shipped: "في العبور",
+        delivered: "تم التسليم للميناء"
     },
     meta: {
         title: "فينيكس للخدمات اللوجستية | العراف العالمي",
@@ -37,6 +64,7 @@ export const ar = {
                 cargo: "نوع الشحنة",
                 route: "المسار",
                 details: "التفاصيل",
+                services: "الخدمات",
                 results: "النتائج",
                 booking: "الحجز"
             },
@@ -306,55 +334,6 @@ export const ar = {
         origin: "المصدر",
         destination: "الوجهة"
     },
-    dashboard: {
-        title: "لوحة التحكم",
-        welcome: "مرحباً بك في",
-        welcomeBack: "مرحباً بعودتك",
-        command_center: "مركز القيادة",
-        subtitle: "لوحة التحكم اللوجستية الخاصة بك جاهزة للبيانات الحقيقية",
-        notifications: "الإشعارات",
-        newShipment: "+ شحنة جديدة",
-        new_shipment: "+ شحنة جديدة",
-        activeShipments: "الشحنات النشطة",
-        containers: "الحاويات",
-        totalSpend: "إجمالي الإنفاق",
-        onTimeRate: "معدل الالتزام بالوقت",
-        recentShipments: "أحدث الشحنات",
-        latestBookingsStatus: "أحدث حجوزاتك وحالتها الحالية",
-        viewAll: "عرض الكل",
-        loading: "جارٍ تحميل الشحنات...",
-        noShipments: "لا توجد شحنات حتى الآن",
-        bookFirst: "احجز شحنتك الأولى",
-        recentPayments: "المدفوعات الأخيرة",
-        viewAllPayments: "عرض كل المدفوعات",
-        ready_title: "لوحة التحكم جاهزة للبيانات الحية",
-        ready_desc: "ستعرض هذه اللوحة شحناتك الحقيقية بمجرد البدء في الحجز. يتم حساب جميع الإحصائيات المعروضة من نشاط الشحن الفعلي الخاص بك — لا أرقام وهمية.",
-        get_quote: "احصل على عرض السعر الأول",
-        stats: {
-            active: "الشحنات النشطة",
-            quotes: "إجمالي العروض",
-            transit: "متوسط وقت العبور",
-            routes: "المسارات المستخدمة"
-        },
-        shipments_title: "شحناتك",
-        no_shipments_title: "لا توجد شحنات بعد",
-        no_shipments_desc: "ستظهر شحناتك المحجوزة هنا. ابدأ بالحصول على عرض سعر لرؤية أسعار الناقلين الحقيقية.",
-        quick_actions: {
-            quote_title: "احصل على عرض فوري",
-            quote_desc: "أسعار في الوقت الفعلي من APIs حية",
-            track_title: "تتبع الشحنة",
-            track_desc: "تتبع الحاويات في الوقت الفعلي",
-            services_title: "استكشف الخدمات",
-            services_desc: "شحن بحري، جوي، وبري"
-        }
-    },
-    status: {
-        pending: "قيد الانتظار",
-        confirmed: "مؤكد",
-        paid: "مدفوع",
-        completed: "مكتمل",
-        cancelled: "ملغى"
-    },
     footer: {
         rights: "جميع الحقوق محفوظة.",
         terms: "شروط الخدمة",
@@ -556,6 +535,7 @@ export const ar = {
             desc: "تحكم في التنبيهات التي تتلقاها.",
             email: "إشعارات البريد الإلكتروني",
             shipment: "تنبيهات الشحنات",
+            logout: "تسجيل الخروج من الحساب"
         }
     },
 

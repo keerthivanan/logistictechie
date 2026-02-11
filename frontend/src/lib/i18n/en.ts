@@ -5,8 +5,35 @@ export const en = {
         pricing: "Pricing",
         company: "Company",
         signIn: "Sign In",
-        quote: "Request Quote",
-        getQuote: "Get Quote"
+        quote: "Get Your Quote",
+        getQuote: "Get Your Quote",
+        profile: "Profile",
+        settings: "Settings",
+        dashboard: "Dashboard"
+    },
+    dashboard: {
+        title: "Logistics Dashboard",
+        welcomeBack: "Welcome Back, Commander",
+        newShipment: "New Shipment",
+        activeShipments: "Active Shipments",
+        containers: "Total Units",
+        totalSpend: "Total Spend",
+        onTimeRate: "On-Time Performance",
+        recentShipments: "Live Fleet Telemetry",
+        latestBookingsStatus: "Real-time status of your active corridors",
+        viewAll: "View All Nodes",
+        loading: "Synchronizing with Satellite...",
+        noShipments: "No Active Assets Found",
+        bookFirst: "Initiate First Booking",
+        recentPayments: "Financial Ledger",
+        viewAllPayments: "Audit All Transactions"
+    },
+    status: {
+        pending: "Pending confirmation",
+        confirmed: "Booking confirmed",
+        paid: "Transaction complete",
+        shipped: "In transit",
+        delivered: "Delivered to port"
     },
     meta: {
         title: "Phoenix Logistics | The Global Oracle",
@@ -37,6 +64,7 @@ export const en = {
                 cargo: "Cargo Type",
                 route: "Route",
                 details: "Details",
+                services: "Services",
                 results: "Results",
                 booking: "Booking"
             },
@@ -306,55 +334,6 @@ export const en = {
         origin: "Origin",
         destination: "Destination"
     },
-    dashboard: {
-        title: "Dashboard",
-        welcome: "Welcome to",
-        welcomeBack: "Welcome Back",
-        command_center: "Command Center",
-        subtitle: "Your logistics dashboard is ready for real data",
-        notifications: "Notifications",
-        newShipment: "+ New Shipment",
-        new_shipment: "+ New Shipment",
-        activeShipments: "Active Shipments",
-        containers: "Containers",
-        totalSpend: "Total Spend",
-        onTimeRate: "On-Time Rate",
-        recentShipments: "Recent Shipments",
-        latestBookingsStatus: "Your latest bookings and their status",
-        viewAll: "View All",
-        loading: "Loading shipments...",
-        noShipments: "No shipments yet",
-        bookFirst: "Book Your First Shipment",
-        recentPayments: "Recent Payments",
-        viewAllPayments: "View All Payments",
-        ready_title: "Dashboard Ready for Live Data",
-        ready_desc: "This dashboard will display your real shipments once you start booking. All statistics shown will be calculated from your actual shipping activity — no fake numbers.",
-        get_quote: "Get Your First Quote",
-        stats: {
-            active: "Active Shipments",
-            quotes: "Total Quotes",
-            transit: "Avg Transit Time",
-            routes: "Routes Used"
-        },
-        shipments_title: "Your Shipments",
-        no_shipments_title: "No Shipments Yet",
-        no_shipments_desc: "Your booked shipments will appear here. Start by getting a quote to see real carrier rates.",
-        quick_actions: {
-            quote_title: "Get Instant Quote",
-            quote_desc: "Real-time rates from live APIs",
-            track_title: "Track Shipment",
-            track_desc: "Real-time container tracking",
-            services_title: "Explore Services",
-            services_desc: "Ocean, Air, and Ground freight"
-        }
-    },
-    status: {
-        pending: "Pending",
-        confirmed: "Confirmed",
-        paid: "Paid",
-        completed: "Completed",
-        cancelled: "Cancelled"
-    },
     footer: {
         rights: "All rights reserved.",
         terms: "Terms of Service",
@@ -556,6 +535,7 @@ export const en = {
             desc: "Control what alerts you receive.",
             email: "Email Notifications",
             shipment: "Shipment Alerts",
+            logout: "Logout From Account"
         }
     },
 

@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Building, Calendar, ArrowLeft } from "lucide-react";
+import { User, Mail, Building, Calendar, ArrowLeft, Shield, Globe, Zap, Phone, Camera } from "lucide-react";
 import axios from "axios";
 import { useLanguage } from "@/contexts/LanguageContext";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function ProfilePage() {
+    const { data: session, status } = useSession();
     const router = useRouter();
     const { t, direction, language } = useLanguage();
     const isRTL = direction === 'rtl';
@@ -18,14 +21,11 @@ export default function ProfilePage() {
     const [editData, setEditData] = useState<any>({});
     const [saving, setSaving] = useState(false);
 
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
+        if (status !== "authenticated" || !session?.user) return;
         setLoading(true);
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                router.push("/login");
-                return;
-            }
+            const token = (session.user as any).accessToken;
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const res = await axios.get(`${apiUrl}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -34,20 +34,26 @@ export default function ProfilePage() {
             setEditData(res.data);
         } catch (e) {
             console.error("Profile Fetch Error", e);
-            router.push("/login");
         } finally {
             setLoading(false);
         }
-    };
+    }, [status, session]);
 
     useEffect(() => {
-        fetchProfile();
-    }, []);
+        if (status === "unauthenticated") {
+            router.push("/login");
+            return;
+        }
+        if (status === "authenticated") {
+            fetchProfile();
+        }
+    }, [status, fetchProfile, router]);
 
     const handleSave = async () => {
+        if (status !== "authenticated" || !session?.user) return;
         setSaving(true);
         try {
-            const token = localStorage.getItem("token");
+            const token = (session.user as any).accessToken;
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             await axios.put(`${apiUrl}/api/auth/update-profile`, editData, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -61,136 +67,201 @@ export default function ProfilePage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t('dashboard.loading')}</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center bg-grid-premium">
+            <Zap className="h-8 w-8 text-emerald-500 animate-pulse mb-8" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800">SYNCHRONIZING_IDENTITY</span>
+        </div>
+    );
+
+    const avatarSource = user?.avatar_url || session?.user?.image;
 
     return (
-        <main className="min-h-screen bg-black text-white pt-24 px-6" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="max-w-2xl mx-auto">
-                <Button onClick={() => router.back()} variant="ghost" className="mb-6 text-zinc-400 hover:text-white">
-                    <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} /> {t('profile.back')}
-                </Button>
+        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
 
-                <Card className="bg-zinc-900/50 border-zinc-800 p-8 rounded-2xl overflow-hidden relative">
-                    {/* Background Pattern */}
-                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-emerald-900/20 to-black"></div>
+            <div className="container max-w-[1400px] mx-auto px-8 pt-48 pb-48 relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <Button onClick={() => router.back()} variant="ghost" className="mb-12 text-zinc-700 hover:text-white hover:bg-zinc-950 rounded-none h-12 px-6 font-black text-[10px] uppercase tracking-[0.4em]">
+                        <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-4 rotate-180' : 'mr-4'}`} /> REVERT_TO_NODE
+                    </Button>
 
-                    <div className="relative pt-10">
-                        <div className="flex flex-col md:flex-row items-center gap-6 mb-8 text-center md:text-left">
-                            <div className="h-24 w-24 rounded-full bg-zinc-800 border-4 border-black flex items-center justify-center text-3xl font-bold text-emerald-500 shadow-xl overflow-hidden">
-                                {user.avatar_url ? (
-                                    <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
-                                ) : (
-                                    (user.full_name || "U").charAt(0).toUpperCase()
-                                )}
-                            </div>
+                    <div className="grid lg:grid-cols-12 gap-16 items-start">
+                        {/* Identity Card */}
+                        <div className="lg:col-span-8">
+                            <div className="elite-card overflow-hidden group">
+                                <div className="h-32 bg-zinc-950 border-b border-white/5 relative">
+                                    <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,#80808012_1px,transparent_1px),linear-gradient(-45deg,#80808012_1px,transparent_1px)] bg-[size:20px_20px]" />
+                                </div>
+                                <div className="p-12 -mt-24 relative z-10">
+                                    <div className="flex flex-col md:flex-row items-end gap-10 mb-16">
+                                        <div className="relative group/avatar">
+                                            <div className="h-40 w-40 bg-black border-4 border-black ring-1 ring-white/5 flex items-center justify-center overflow-hidden transition-all duration-700 group-hover/avatar:scale-105">
+                                                {avatarSource ? (
+                                                    <Image
+                                                        src={avatarSource}
+                                                        alt={user?.full_name || "Profile"}
+                                                        fill
+                                                        className="object-cover grayscale hover:grayscale-0 transition-all duration-1000"
+                                                    />
+                                                ) : (
+                                                    <span className="text-5xl font-black italic text-zinc-900">{(user?.full_name || "U").charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            {isEditing && (
+                                                <div className="absolute inset-0 bg-emerald-500/80 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer">
+                                                    <Camera className="h-8 w-8 text-black" />
+                                                </div>
+                                            )}
+                                        </div>
 
-                            <div className="flex-1">
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        className="bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-2xl font-bold text-white w-full mb-2"
-                                        value={editData.full_name || ""}
-                                        onChange={(e) => setEditData({ ...editData, full_name: e.target.value })}
-                                    />
-                                ) : (
-                                    <h1 className="text-3xl font-bold text-white mb-1">{user.full_name || "Logistics User"}</h1>
-                                )}
-                                <div className="flex items-center justify-center md:justify-start gap-2 text-zinc-400 text-sm">
-                                    <Building className="h-3 w-3" />
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            className="bg-zinc-800/50 border border-zinc-700 rounded px-2 py-0.5"
-                                            value={editData.company_name || ""}
-                                            onChange={(e) => setEditData({ ...editData, company_name: e.target.value })}
-                                        />
-                                    ) : (
-                                        user.company_name || "Independent Trader"
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">IDENTITY_CONFIRMED</span>
+                                            </div>
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    className="bg-zinc-950/40 border border-white/5 h-20 w-full px-8 text-4xl font-black text-white italic tracking-tighter uppercase focus:border-white transition-all ring-0 outline-none"
+                                                    value={editData.full_name || ""}
+                                                    onChange={(e) => setEditData({ ...editData, full_name: e.target.value })}
+                                                />
+                                            ) : (
+                                                <h1 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none">
+                                                    {user.full_name || "LOGISTICS_OPERATOR"}
+                                                </h1>
+                                            )}
+                                            <div className="flex items-center gap-4 text-zinc-700 text-[10px] font-black uppercase tracking-[0.4em]">
+                                                <Building className="h-4 w-4 text-zinc-900" />
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        className="bg-zinc-950/40 border-b border-white/5 px-4 py-1 text-white focus:border-emerald-500 transition-all ring-0 outline-none"
+                                                        value={editData.company_name || ""}
+                                                        onChange={(e) => setEditData({ ...editData, company_name: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    <span>{user.company_name || "INDEPENDENT_TRADER"}</span>
+                                                )}
+                                                <span className="text-zinc-950">/</span>
+                                                <span className="text-emerald-500">{user.role || "CORE_ACCESS"}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-4">
+                                            {isEditing ? (
+                                                <>
+                                                    <Button onClick={() => setIsEditing(false)} variant="ghost" className="h-16 px-8 rounded-none text-zinc-700 hover:text-white hover:bg-zinc-950 font-black text-[10px] uppercase tracking-[0.4em]">
+                                                        {t('common.cancel')}
+                                                    </Button>
+                                                    <Button onClick={handleSave} disabled={saving} className="h-16 px-10 bg-white text-black hover:bg-emerald-500 transition-all rounded-none font-black text-[10px] uppercase tracking-[0.6em]">
+                                                        {saving ? "SYNCING..." : "COMMIT"}
+                                                    </Button>
+                                                </>
+                                            ) : (
+                                                <Button onClick={() => setIsEditing(true)} className="h-16 px-12 bg-white text-black hover:bg-emerald-500 transition-all rounded-none font-black text-[10px] uppercase tracking-[0.4em]">
+                                                    RECONFIGURE
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {isEditing && (
+                                        <div className="mb-16 p-10 bg-zinc-950/40 border border-white/5">
+                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] mb-4 block">AVATAR_TELEMETRY_STRING</label>
+                                            <input
+                                                type="text"
+                                                placeholder="HTTPS://MANIFEST.IO/PHOTO.JPG"
+                                                className="bg-transparent border-b border-white/5 w-full py-4 text-emerald-500 font-black text-[11px] uppercase tracking-widest focus:border-white transition-all ring-0 outline-none"
+                                                value={editData.avatar_url || ""}
+                                                onChange={(e) => setEditData({ ...editData, avatar_url: e.target.value })}
+                                            />
+                                        </div>
                                     )}
-                                    <span className="text-zinc-600">•</span>
-                                    <span className="text-emerald-500 font-medium">{user.role || "Standard User"}</span>
-                                </div>
-                            </div>
 
-                            <div className="flex gap-2">
-                                {isEditing ? (
-                                    <>
-                                        <Button onClick={() => setIsEditing(false)} variant="ghost" className="text-zinc-400">
-                                            {t('common.cancel')}
-                                        </Button>
-                                        <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 text-white hover:bg-emerald-500 px-6">
-                                            {saving ? "..." : t('common.save')}
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <Button onClick={() => setIsEditing(true)} className="bg-white text-black hover:bg-zinc-200 font-semibold rounded-lg">
-                                        {t('profile.edit')}
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-
-                        {isEditing && (
-                            <div className="mb-8 p-4 bg-zinc-800/20 border border-zinc-700 rounded-xl">
-                                <label className="text-xs text-zinc-500 uppercase tracking-wider font-bold mb-2 block">Avatar URL</label>
-                                <input
-                                    type="text"
-                                    placeholder="https://example.com/photo.jpg"
-                                    className="bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-sm text-white w-full"
-                                    value={editData.avatar_url || ""}
-                                    onChange={(e) => setEditData({ ...editData, avatar_url: e.target.value })}
-                                />
-                            </div>
-                        )}
-
-                        <div className="grid gap-4">
-                            <div className="p-4 bg-zinc-800/30 rounded-xl flex items-center gap-4 border border-zinc-800">
-                                <Mail className="h-5 w-5 text-zinc-500" />
-                                <div className="flex-1">
-                                    <div className="text-xs text-zinc-500 uppercase tracking-wider font-bold">{t('profile.email')}</div>
-                                    <div className="text-white font-medium">{user.email}</div>
-                                </div>
-                            </div>
-                            <div className="p-4 bg-zinc-800/30 rounded-xl flex items-center gap-4 border border-zinc-800">
-                                <User className="h-5 w-5 text-zinc-500" />
-                                <div className="flex-1">
-                                    <div className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Phone Number</div>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            className="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1 text-sm text-white w-full mt-1"
-                                            value={editData.phone_number || ""}
-                                            onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })}
-                                        />
-                                    ) : (
-                                        <div className="text-white font-medium">{user.phone_number || "Not provided"}</div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="p-4 bg-zinc-800/30 rounded-xl flex items-center gap-4 border border-zinc-800">
-                                <Calendar className="h-5 w-5 text-zinc-500" />
-                                <div>
-                                    <div className="text-xs text-zinc-500 uppercase tracking-wider font-bold">{t('profile.memberSince')}</div>
-                                    <div className="text-white font-medium">
-                                        {new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { month: 'long', year: 'numeric' })}
+                                    <div className="grid gap-4 md:grid-cols-3 border-t border-white/5 pt-16">
+                                        <div className="p-8 group/field hover:bg-zinc-950 transition-colors">
+                                            <div className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em] mb-4 group-hover/field:text-emerald-500 transition-colors">ACCESS_IDENTIFIER</div>
+                                            <div className="flex items-center gap-4">
+                                                <Mail className="h-4 w-4 text-zinc-900 group-hover/field:text-white transition-colors" />
+                                                <span className="text-[11px] font-black text-zinc-600 group-hover/field:text-white transition-colors uppercase tracking-widest">{user.email}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-8 group/field hover:bg-zinc-950 transition-colors border-l border-white/5">
+                                            <div className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em] mb-4 group-hover/field:text-emerald-500 transition-colors">COMMS_LINK</div>
+                                            <div className="flex items-center gap-4">
+                                                <Phone className="h-4 w-4 text-zinc-900 group-hover/field:text-white transition-colors" />
+                                                {isEditing ? (
+                                                    <input
+                                                        type="text"
+                                                        className="bg-transparent border-b border-white/5 text-[11px] font-black text-white uppercase tracking-widest focus:border-white transition-all ring-0 outline-none"
+                                                        value={editData.phone_number || ""}
+                                                        onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })}
+                                                    />
+                                                ) : (
+                                                    <span className="text-[11px] font-black text-zinc-600 group-hover/field:text-white transition-colors uppercase tracking-widest">{user.phone_number || "NULL"}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="p-8 group/field hover:bg-zinc-950 transition-colors border-l border-white/5">
+                                            <div className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em] mb-4 group-hover/field:text-emerald-500 transition-colors">TEMPORAL_ORIGIN</div>
+                                            <div className="flex items-center gap-4">
+                                                <Calendar className="h-4 w-4 text-zinc-900 group-hover/field:text-white transition-colors" />
+                                                <span className="text-[11px] font-black text-zinc-600 group-hover/field:text-white transition-colors uppercase tracking-widest">
+                                                    {user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase() : "RECENT_ENTRY"}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Stats Section Placeholder */}
-                        <div className="mt-8 grid grid-cols-2 gap-4">
-                            <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                                <div className="text-3xl font-bold text-white mb-1">100% Honest</div>
-                                <div className="text-xs text-emerald-400 uppercase tracking-wider font-bold">Data Legitimacy</div>
+                        {/* Tactical Status Hub */}
+                        <div className="lg:col-span-4 space-y-12">
+                            <div className="elite-card p-12 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                                    <Shield className="h-24 w-24 text-white" />
+                                </div>
+                                <h3 className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] mb-10">OPERATIONAL_CREDENTIALS</h3>
+                                <div className="space-y-8">
+                                    <div className="flex items-center justify-between group/stat">
+                                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] group-hover/stat:text-emerald-500 transition-colors">DATA_LEGITIMACY</span>
+                                        <span className="text-2xl font-black italic text-emerald-500">100%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between group/stat">
+                                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] group-hover/stat:text-blue-500 transition-colors">VERIFICATION_LVL</span>
+                                        <span className="text-2xl font-black italic text-blue-500 uppercase">LVL_IV</span>
+                                    </div>
+                                </div>
+                                <div className="mt-12 pt-8 border-t border-white/5">
+                                    <p className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em] leading-relaxed">
+                                        IDENTITY_VERIFIED via SOVEREIGN_PROTOCOL_782.
+                                    </p>
+                                </div>
                             </div>
-                            <div className="p-6 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
-                                <div className="text-3xl font-bold text-white mb-1">Sovereign</div>
-                                <div className="text-xs text-blue-400 uppercase tracking-wider font-bold">Level-1 Verified</div>
+
+                            <div className="p-12 border border-white/5 bg-zinc-950/40 relative group overflow-hidden">
+                                <span className="text-[9px] font-black text-zinc-900 block mb-6 tracking-[0.6em]">MISSION_SYNC</span>
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 group-hover:scale-150 transition-transform" />
+                                        <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Active Manifests: 0</span>
+                                    </div>
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-1.5 h-1.5 bg-zinc-900" />
+                                        <span className="text-[10px] font-black text-zinc-800 uppercase tracking-[0.2em]">Completed Trajectories: 0</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </Card>
+                </motion.div>
             </div>
         </main>
     );

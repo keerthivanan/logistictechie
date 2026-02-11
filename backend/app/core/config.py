@@ -32,11 +32,17 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
-    # 💳 PAYMENTS & NOTIFICATIONS (Production Ready)
+    # 🔔 NOTIFICATIONS & COMMUNICATION (Production Ready)
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
 
-    ALLOWED_ORIGINS: list = ["*"]
+    # 🔐 AUTHENTICATION
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "LOGISTICS_OS_SUPER_SECRET_KEY_2026_CHANGE_THIS")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # 24 hours
+
+    ALLOWED_ORIGINS: list = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    RATE_LIMIT_PER_MINUTE: int = 60
+    AI_PERSONA: str = "Logistics Oracle"
 
     class Config:
         # Load .env from backend/ directory (one level up from app/)

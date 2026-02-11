@@ -5,14 +5,14 @@ Write-Host "🚀 INITIALIZING PHOENIX LOGISTICS OS..." -ForegroundColor Cyan
 
 # 1. Start Backend (New Window)
 Write-Host "1. Igniting Backend Engines (FastAPI)..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {cd backend; .\venv\Scripts\activate; uvicorn app.main:app --reload}"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {cd backend; ..\venv\Scripts\activate; uvicorn app.main:app --reload}"
 
 # 2. Wait for Backend
 Start-Sleep -Seconds 5
 
 # 3. Start Frontend (New Window)
 Write-Host "2. Launching Frontend Interface (Next.js)..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {cd frontend; npm run dev}"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {cd frontend; npm run start}"
 
 # 4. Open Browser
 Start-Sleep -Seconds 5

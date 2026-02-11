@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Ship, Plane, Package, Truck, Globe, Shield, Clock, DollarSign, ArrowRight, Check } from "lucide-react";
+import { Ship, Plane, Package, Truck, Globe, Shield, Clock, DollarSign, ArrowRight, Check, Zap } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -12,145 +12,156 @@ export default function ServicesPage() {
     const services = [
         {
             icon: Ship,
-            title: "Ocean Freight",
-            description: "Full container and LCL shipping solutions with competitive rates from leading carriers worldwide.",
-            features: ["FCL & LCL Options", "Door-to-Door Service", "Real-Time Tracking"],
+            title: "OCEAN_FREIGHT_V2",
+            description: "Full container (FCL) and segmented (LCL) high-velocity shipping protocols with direct carrier sync.",
+            features: ["CARRIER_DIRECT_API", "REAL_TIME_TELEMETRY", "QUANTUM_TRACKING"],
         },
         {
             icon: Plane,
-            title: "Air Freight",
-            description: "Express and standard air cargo services for time-sensitive shipments to any destination.",
-            features: ["Express Delivery", "Charter Services", "Temperature Control"],
+            title: "AIR_INTELLIGENCE",
+            description: "Express orbital cargo services for time-critical manifests. Mission-critical deployment to all nodes.",
+            features: ["EXPRESS_ORBITAL", "CHARTER_PROTOCOL", "THERMAL_CONTROL"],
         },
         {
             icon: Truck,
-            title: "Ground Transport",
-            description: "Reliable trucking and rail solutions for first and last mile delivery across continents.",
-            features: ["FTL & LTL Options", "Cross-Border", "Multi-Modal"],
+            title: "GROUND_LOGISTICS",
+            description: "Tactical land-based unit maneuvers for first/last-mile synchronization across continental grids.",
+            features: ["FTL_LTL_PRECISION", "CROSS_GRID_LOGIC", "MULTIMODAL_SYNC"],
         },
         {
             icon: Package,
-            title: "Warehousing",
-            description: "Strategic warehouse locations with inventory management and distribution services.",
-            features: ["Inventory Management", "Pick & Pack", "Distribution"],
+            title: "BASE_OPERATIONS",
+            description: "Strategic fulfillment nodes with neural inventory management and autonomous distribution logic.",
+            features: ["NEURAL_INVENTORY", "PICK_PACK_SYNC", "GLOBAL_HUB_SYNC"],
         },
     ];
 
     const benefits = [
         {
             icon: Globe,
-            title: "Global Network",
-            description: "Access to 200+ ports and airports worldwide with local expertise in every market."
+            title: "GLOBAL_NETWORK",
+            description: "Direct access to 200+ sovereign port nodes and terminal intelligence layers."
         },
         {
             icon: Shield,
-            title: "Cargo Insurance",
-            description: "Comprehensive coverage options to protect your shipments from origin to destination."
+            title: "ASSET_PROTECTION",
+            description: "End-to-end indemnity protocols securing every unit against maritime contingency."
         },
         {
             icon: Clock,
-            title: "24/7 Support",
-            description: "Dedicated team available around the clock to assist with your logistics needs."
+            title: "24/7_OPS_LINK",
+            description: "Constant operational surveillance and high-bandwidth support for every manifest."
         },
         {
-            icon: DollarSign,
-            title: "Best Rates",
-            description: "Competitive pricing through our volume agreements with major carriers."
+            icon: Zap,
+            title: "MAX_VELOCITY",
+            description: "Optimized trajectory calculations ensuring mission completion at peak efficiency."
         },
     ];
 
     return (
-        <main className="min-h-screen bg-black pt-32 pb-24">
-            {/* Hero Section */}
-            <section className="container max-w-5xl mx-auto px-6 text-center mb-20">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <span className="text-sm font-medium text-emerald-500 mb-4 block">Our Services</span>
-                    <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-                        End-to-End Logistics Solutions
-                    </h1>
-                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-                        From ocean freight to last-mile delivery, we provide comprehensive shipping
-                        services tailored to your business needs.
-                    </p>
-                </motion.div>
-            </section>
+        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium">
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
 
-            {/* Services Grid */}
-            <section className="container max-w-7xl mx-auto px-6 mb-24">
-                <div className="grid md:grid-cols-2 gap-6">
+            <div className="container max-w-[1400px] mx-auto px-8 pt-48 pb-48 relative z-10">
+                {/* Cinematic Header */}
+                <div className="flex flex-col mb-32">
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-[1px] bg-emerald-500" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">CAPABILITIES_&_INFRASTRUCTURE</span>
+                        </div>
+                        <h1 className="titan-text mb-8">
+                            Global. <br />
+                            <span className="text-zinc-900 group">Deployment.</span>
+                        </h1>
+                        <p className="max-w-3xl text-zinc-600 text-sm md:text-xl font-black uppercase tracking-[0.4em] leading-relaxed">
+                            A unified operating system for global trade. From deep-sea freight intelligence <br />
+                            <span className="text-zinc-800">to autonomous last-mile maneuvers.</span>
+                        </p>
+                    </motion.div>
+                </div>
+
+                {/* Services Grid */}
+                <div className="grid md:grid-cols-2 gap-0 border-t border-white/5 mb-48">
                     {services.map((service, idx) => (
                         <motion.div
                             key={idx}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 hover:border-zinc-700 transition-all group"
+                            transition={{ duration: 1, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                            className="p-16 border-l border-b border-white/5 relative group hover:bg-zinc-950/40 transition-all duration-700 flex flex-col h-full"
                         >
-                            <div className="h-14 w-14 rounded-lg bg-zinc-800 flex items-center justify-center mb-6 group-hover:bg-white group-hover:text-black transition-colors">
-                                <service.icon className="h-7 w-7" />
+                            <div className="h-20 w-20 bg-zinc-950 border border-white/5 flex items-center justify-center mb-16 transition-all duration-700 group-hover:bg-white group-hover:text-black group-hover:rotate-12">
+                                <service.icon className="h-8 w-8" />
                             </div>
 
-                            <h2 className="text-2xl font-bold text-white mb-4">{service.title}</h2>
-                            <p className="text-zinc-400 mb-6 leading-relaxed">{service.description}</p>
+                            <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-8 leading-tight transition-all duration-700 group-hover:translate-x-4">
+                                {service.title}
+                            </h2>
+                            <p className="text-zinc-700 text-[11px] font-black uppercase tracking-[0.4em] mb-12 leading-loose max-w-md group-hover:text-zinc-400 transition-colors">
+                                {service.description}
+                            </p>
 
-                            <ul className="space-y-3 mb-8">
+                            <ul className="space-y-6 mb-20 flex-1">
                                 {service.features.map((f, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-zinc-300">
-                                        <Check className="h-4 w-4 text-emerald-500" />
-                                        <span className="text-sm">{f}</span>
+                                    <li key={i} className="flex items-center gap-6 group/item cursor-default">
+                                        <div className="h-1.5 w-1.5 bg-emerald-500 group-hover/item:scale-150 transition-transform" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.6em] text-zinc-800 group-hover/item:text-white transition-colors">{f}</span>
                                     </li>
                                 ))}
                             </ul>
 
-                            <Link href="/quote">
-                                <Button className="bg-white text-black hover:bg-zinc-100 rounded-lg h-12 px-6 font-semibold transition-all">
-                                    Get Quote <ArrowRight className="ml-2 h-4 w-4" />
+                            <Link href="/quote" className="w-full">
+                                <Button className="w-full h-20 bg-zinc-950 border border-white/5 text-zinc-600 group-hover:bg-white group-hover:text-black group-hover:border-transparent transition-all duration-700 rounded-none font-black text-[11px] uppercase tracking-[0.6em] flex items-center justify-center gap-6">
+                                    INITIALIZE_PROTOCOL <ArrowRight className="h-5 w-5" />
                                 </Button>
                             </Link>
-                        </motion.div>
-                    ))}
-                </div>
-            </section>
 
-            {/* Benefits Section */}
-            <section className="container max-w-7xl mx-auto px-6 border-t border-zinc-900 pt-20">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="text-center mb-16"
-                >
-                    <span className="text-sm font-medium text-emerald-500 mb-4 block">Why Choose Us</span>
-                    <h2 className="text-3xl md:text-4xl font-bold text-white">
-                        The Phoenix Advantage
-                    </h2>
-                </motion.div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {benefits.map((b, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className="text-center"
-                        >
-                            <div className="h-14 w-14 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-4">
-                                <b.icon className="h-6 w-6 text-white" />
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] italic font-black text-9xl text-white select-none pointer-events-none group-hover:opacity-[0.06] transition-opacity">
+                                0{idx + 1}
                             </div>
-                            <h4 className="font-semibold text-white mb-2">{b.title}</h4>
-                            <p className="text-zinc-500 text-sm leading-relaxed">{b.description}</p>
                         </motion.div>
                     ))}
                 </div>
-            </section>
+
+                {/* Tactical Advantage Matrix */}
+                <div className="mb-24 pt-32 border-t border-white/5">
+                    <div className="flex items-end justify-between mb-24">
+                        <div>
+                            <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none mb-6">
+                                The Edge.
+                            </h2>
+                            <div className="text-[11px] font-black text-zinc-800 uppercase tracking-[0.8em]">STRATEGIC_OPERATIONAL_DOMINANCE</div>
+                        </div>
+                        <div className="w-24 h-[1px] bg-white/5 mb-8" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-white/5">
+                        {benefits.map((b, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: idx * 0.1 }}
+                                className="p-12 border-r border-white/5 last:border-r-0 group hover:bg-zinc-950/40 transition-all duration-700 cursor-default"
+                            >
+                                <div className="h-14 w-14 bg-zinc-950 border border-white/5 flex items-center justify-center mb-10 transition-all duration-700 group-hover:rotate-12 group-hover:border-emerald-500/50">
+                                    <b.icon className="h-6 w-6 text-zinc-800 group-hover:text-white transition-colors" />
+                                </div>
+                                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-6 group-hover:text-emerald-500 transition-colors">{b.title}</h4>
+                                <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest leading-loose group-hover:text-zinc-500 transition-colors">{b.description}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </main>
     );
 }

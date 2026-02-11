@@ -4,153 +4,211 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { UserPlus, Loader2, ArrowLeft, Mail, User, Lock } from "lucide-react";
+import { Lock, Loader2, Mail, ShieldCheck, User, Building2, Globe, Zap } from "lucide-react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
 export default function SignupPage() {
-    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [fullName, setFullName] = useState("");
+    const [companyName, setCompanyName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
     const router = useRouter();
 
-    const handleSignup = async () => {
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
         setError("");
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setError("PROTOCOL_ERROR: Passwords mismatch.");
+            setIsLoading(false);
             return;
         }
 
-        if (password.length < 6) {
-            setError("Password must be at least 6 characters");
-            return;
-        }
-
-        setIsLoading(true);
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
             const response = await axios.post(`${apiUrl}/api/auth/register`, {
-                full_name: name,
-                email: email,
-                password: password
+                email,
+                password,
+                confirm_password: confirmPassword,
+                full_name: fullName,
+                company_name: companyName
             });
 
             if (response.data.success) {
-                router.push('/login');
+                setSuccess(true);
+                setTimeout(() => {
+                    router.push("/login");
+                }, 3000);
             }
-        } catch (error: any) {
-            console.error("Signup Failed", error);
-            setError(error.response?.data?.detail || "Registration failed. Please try again.");
+        } catch (err: any) {
+            setError(err.response?.data?.detail || "REGISTRATION_FAILURE: Access denied.");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <main className="min-h-screen w-full flex items-center justify-center bg-black px-6 py-12">
-            <div className="w-full max-w-md">
-                <Card className="p-8 bg-zinc-900/50 border-zinc-800 rounded-xl">
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <div className="inline-flex h-14 w-14 items-center justify-center bg-white rounded-xl mb-4">
-                            <UserPlus className="h-6 w-6 text-black" />
-                        </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
-                        <p className="text-zinc-500 text-sm">Get started with free access to shipping quotes</p>
-                    </div>
+        <main className="min-h-screen w-full flex items-center justify-center bg-black px-8 py-24 selection:bg-emerald-500/30 overflow-hidden relative bg-grid-premium">
+            <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black pointer-events-none" />
 
-                    {/* Error Message */}
-                    {error && (
-                        <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center">
-                            {error}
-                        </div>
-                    )}
-
-                    {/* Form */}
-                    <div className="space-y-4 mb-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Full Name</label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                                <Input
-                                    placeholder="John Smith"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-zinc-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Email</label>
-                            <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                                <Input
-                                    type="email"
-                                    placeholder="you@company.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-zinc-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-zinc-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-zinc-300">Confirm Password</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="pl-10 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-zinc-500"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <Button
-                        onClick={handleSignup}
-                        disabled={isLoading}
-                        className="w-full bg-white hover:bg-zinc-100 text-black h-12 rounded-lg font-semibold transition-all"
+            <div className="w-full max-w-[580px] relative z-10">
+                {/* Branding Focus */}
+                <div className="flex flex-col items-center mb-16 text-center">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-4 mb-8"
                     >
-                        {isLoading ? (
+                        <div className="w-8 h-[1px] bg-emerald-500" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">INITIATE_ENROLLMENT</span>
+                        <div className="w-8 h-[1px] bg-emerald-500" />
+                    </motion.div>
+                    <h1 className="text-5xl font-black tracking-tighter text-white uppercase italic leading-none mb-6">
+                        Join the<span className="text-zinc-900">Sovereign.</span>
+                    </h1>
+                    <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm leading-loose">
+                        Synchronizing global logistics nodes via encrypted neural link.
+                    </p>
+                </div>
+
+                <div className="elite-card p-10 md:p-16 relative overflow-hidden group">
+                    <AnimatePresence mode="wait">
+                        {success ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="py-12 text-center"
+                            >
+                                <div className="h-24 w-24 bg-white flex items-center justify-center mx-auto mb-12 shadow-[0_0_80px_rgba(255,255,255,0.1)]">
+                                    <ShieldCheck className="h-12 w-12 text-black" />
+                                </div>
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">DEPLOYMENT_SUCCESSFUL</h3>
+                                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.3em]">Redirecting to authentication node...</p>
+                            </motion.div>
+                        ) : (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating account...
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="mb-10 p-5 bg-white text-black text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-4"
+                                    >
+                                        <Zap className="w-4 h-4 fill-black" />
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={handleSignup} className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Commander_Name</label>
+                                            <div className="relative">
+                                                <User className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
+                                                <Input
+                                                    required
+                                                    placeholder="NAME"
+                                                    value={fullName}
+                                                    onChange={(e) => setFullName(e.target.value)}
+                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Entity_ID</label>
+                                            <div className="relative">
+                                                <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
+                                                <Input
+                                                    placeholder="ENTITY"
+                                                    value={companyName}
+                                                    onChange={(e) => setCompanyName(e.target.value)}
+                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3 group">
+                                        <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Neural_Link</label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
+                                            <Input
+                                                type="email"
+                                                required
+                                                placeholder="EMAIL_ADDR"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Access_Key</label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
+                                                <Input
+                                                    type="password"
+                                                    required
+                                                    placeholder="••••••••"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Verify_Key</label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
+                                                <Input
+                                                    type="password"
+                                                    required
+                                                    placeholder="••••••••"
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className="w-full h-20 rounded-none bg-white text-black hover:bg-emerald-500 transition-all duration-700 font-black uppercase tracking-[0.6em] text-[11px] shadow-[0_20px_60px_rgba(255,255,255,0.05)] mt-8"
+                                    >
+                                        {isLoading ? (
+                                            <Loader2 className="h-5 w-5 animate-spin mx-auto text-black" />
+                                        ) : "EXECUTE_ENROLLMENT"}
+                                    </Button>
+                                </form>
+
+                                <div className="mt-16 pt-12 border-t border-white/5 text-center">
+                                    <Link href="/login" className="group flex items-center justify-center gap-6">
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-zinc-400 transition-colors">Existing_Identity?</span>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white py-3 px-8 border border-white/10 group-hover:bg-emerald-500 group-hover:text-black transition-all">SIGN_IN</span>
+                                    </Link>
+                                </div>
                             </>
-                        ) : "Create Account"}
-                    </Button>
+                        )}
+                    </AnimatePresence>
+                </div>
 
-                    {/* Footer */}
-                    <div className="text-center mt-8 pt-6 border-t border-zinc-800">
-                        <span className="text-zinc-500 text-sm">Already have an account? </span>
-                        <Link href="/login" className="text-white text-sm font-medium hover:underline">
-                            Sign in
-                        </Link>
-                    </div>
-                </Card>
-
-                <Link href="/" className="flex items-center justify-center gap-2 text-zinc-500 hover:text-white text-sm mt-6 transition-colors">
-                    <ArrowLeft className="h-4 w-4" /> Back to home
-                </Link>
+                <div className="flex justify-center mt-20 gap-12 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800">
+                    <button className="hover:text-white transition-colors">TERMS_CORE</button>
+                    <button className="hover:text-white transition-colors">PRIVACY_PROTOCOL</button>
+                    <button className="hover:text-white transition-colors flex items-center gap-4">
+                        <Globe className="w-4 h-4" /> SECURE_OS
+                    </button>
+                </div>
             </div>
         </main>
     );

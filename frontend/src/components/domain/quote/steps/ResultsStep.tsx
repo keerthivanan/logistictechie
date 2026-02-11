@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState, useMemo } from "react";
 import { logisticsClient } from "@/lib/logistics";
-import { Anchor, Filter } from "lucide-react";
+import { Anchor, Filter, Zap, Globe, Shield, Ship, ArrowRight, X } from "lucide-react";
 import { PremiumSearchingState } from "../PremiumSearchingState";
 import RouteMap from "@/components/ui/RouteMap";
 import { QuoteResult } from "@/lib/logistics";
@@ -25,6 +25,8 @@ export function ResultsStep() {
     useEffect(() => {
         const fetch = async () => {
             try {
+                // Tactical artificial delay for search feel
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 const data = await logisticsClient.getRates({
                     origin: formData.origin,
                     destination: formData.destination,
@@ -69,40 +71,40 @@ export function ResultsStep() {
 
     const bestPrice = metrics?.cheapest?.price || 0;
 
+    if (loading) return <PremiumSearchingState />;
+
     return (
-        <div className="space-y-12 bg-black">
-            {/* Titan Header Summary */}
-            <div className="bg-white/[0.01] border border-white/10 flex flex-wrap divide-x divide-white/5 items-stretch text-sm">
-                <div className="flex-1 p-8 flex flex-col min-w-[200px]">
-                    <span className="titan-label mb-2">Transit Origin</span>
-                    <span className="font-bold text-white flex items-center gap-3 text-lg uppercase tracking-tight">
-                        <Anchor className="w-4 h-4 text-white/30" />
+        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            {/* Tactical Telemetry Header */}
+            <div className="grid grid-cols-1 md:grid-cols-4 border border-white/5 divide-x divide-white/5 bg-zinc-950/40">
+                <div className="p-10 flex flex-col group">
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">ORIGIN_NODE</span>
+                    <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
                         {formData.origin.split(',')[0]}
                     </span>
                 </div>
-                <div className="flex-1 p-8 flex flex-col min-w-[200px]">
-                    <span className="titan-label mb-2">Destination Point</span>
-                    <span className="font-bold text-white flex items-center gap-3 text-lg uppercase tracking-tight">
-                        <Anchor className="w-4 h-4 text-white/30" />
+                <div className="p-10 flex flex-col group">
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">TARGET_DESTINATION</span>
+                    <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
                         {formData.destination.split(',')[0]}
                     </span>
                 </div>
-                <div className="flex-1 p-8 flex flex-col min-w-[200px]">
-                    <span className="titan-label mb-2">Inventory Data</span>
-                    <span className="font-bold text-white text-lg uppercase tracking-tight">
-                        {formData.containerSize}' HC Protocol
+                <div className="p-10 flex flex-col group">
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">SPEC_UNIT</span>
+                    <span className="text-xl font-black text-white italic tracking-tighter uppercase">
+                        {formData.containerSize}' HC_PROTOCOL
                     </span>
                 </div>
-                <div className="p-8 flex items-center">
-                    <Button variant="outline" size="sm" className="h-12 rounded-none px-8 border-white/10 text-gray-500 font-bold text-xs tracking-widest uppercase hover:bg-white hover:text-black">
-                        RESET CORE
+                <div className="p-10 flex items-center justify-center">
+                    <Button variant="outline" className="h-16 w-full rounded-none border-white/5 bg-zinc-900 text-zinc-600 font-black text-[10px] uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all">
+                        RECONFIG_CORE
                     </Button>
                 </div>
             </div>
 
-            {/* AI PROPHETIC WIDGET (NEW) */}
+            {/* AI Analysis Interface */}
             {bestPrice > 0 && (
-                <div className="px-0">
+                <div className="border border-emerald-500/10 bg-emerald-500/[0.02] p-[1px]">
                     <PropheticRateWidget
                         origin={formData.origin}
                         destination={formData.destination}
@@ -111,87 +113,91 @@ export function ResultsStep() {
                 </div>
             )}
 
-            {/* WORLD CLASS MAP VISUALIZATION - Square */}
-            <div className="h-[400px] w-full rounded-none overflow-hidden border border-white/10 relative group transition-all duration-1000">
-                <RouteMap
-                    origin={formData.origin}
-                    destination={formData.destination}
-                    className="w-full h-full grayscale opacity-60 hover:opacity-100 transition-all duration-1000"
-                />
-                <div className="absolute top-10 right-10 z-20 bg-black/95 p-6 border border-white/5 shadow-2xl">
-                    <span className="text-xs font-bold text-white uppercase tracking-widest">NODE: GLOBAL_TRANSIT_ACTIVE</span>
-                </div>
-            </div>
-
-            {/* Sorting Tabs - Titan Block Style */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-white/10 divide-x divide-white/10">
-                {([
-                    { id: 'best', label: 'OPTIMAL', sub: metrics ? `${metrics.best.days} DAYS • $${metrics.best.price.toLocaleString()}` : '--' },
-                    { id: 'fastest', label: 'VELOCITY', sub: metrics ? `${metrics.fastest.days} DAYS • $${metrics.fastest.price.toLocaleString()}` : '--' },
-                    { id: 'cheapest', label: 'EFFICIENCY', sub: metrics ? `${metrics.cheapest.days} DAYS • $${metrics.cheapest.price.toLocaleString()}` : '--' },
-                    { id: 'greenest', label: 'ECO_CORE', sub: metrics ? `${metrics.greenest.days} DAYS • $${metrics.greenest.price.toLocaleString()}` : '--' }
-                ] as const).map((mode) => (
-                    <button
-                        key={mode.id}
-                        onClick={() => setSortMode(mode.id)}
-                        className={`p-10 flex flex-col items-center justify-center transition-all ${sortMode === mode.id ? 'bg-white text-black' : 'text-gray-500 hover:bg-white/[0.02] hover:text-white'}`}
-                    >
-                        <span className={`font-bold uppercase tracking-tight text-2xl mb-1 ${sortMode === mode.id ? 'text-black' : 'text-white'}`}>{mode.label}</span>
-                        <span className={`text-xs font-bold tracking-widest ${sortMode === mode.id ? 'text-black/60' : 'text-gray-600'}`}>
-                            {mode.sub}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
-            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-16">
-                {/* Sidebar Filters */}
+            {/* Visualization Grid */}
+            <div className="grid lg:grid-cols-12 gap-16">
+                {/* Side Control Deck */}
                 <div className="lg:col-span-3 space-y-12">
-                    <div className="space-y-12 sticky top-32">
-                        <div className="flex items-center justify-between border-b border-white/5 pb-6">
-                            <h3 className="titan-label flex items-center gap-3"><Filter className="w-3 h-3" /> TELEMETRY FILTERS</h3>
-                            <button className="text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">DE-SYNC</button>
-                        </div>
+                    <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white flex items-center gap-4">
+                            <Filter className="w-3 h-3 text-emerald-500" /> FILTERS
+                        </h3>
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                    </div>
 
+                    <div className="space-y-8">
                         <div className="space-y-6">
-                            <h4 className="titan-label">BUDGET BOUNDARY</h4>
+                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700">BUDGET_THRESHOLD</label>
                             <Slider defaultValue={[100]} max={100} step={1} className="w-full" />
-                            <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-                                <span className="text-white">${bestPrice}</span>
+                            <div className="flex justify-between text-[9px] font-black text-zinc-800 uppercase tracking-widest">
+                                <span className="text-emerald-500">${bestPrice}</span>
                                 <span>${Math.round(bestPrice * 2)}</span>
                             </div>
                         </div>
 
-                        <div className="space-y-6 border-t border-white/5 pt-10">
-                            <h4 className="titan-label">CAPACITY STATUS</h4>
+                        <div className="space-y-6 pt-10 border-t border-white/5">
+                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700">MODAL_PROTOCOL</label>
                             <div className="space-y-4">
-                                <div className="flex items-center gap-4"><Checkbox id="guaranteed" checked className="rounded-none border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black" /><Label htmlFor="guaranteed" className="text-xs font-bold uppercase tracking-widest text-white leading-none">GUARANTEED_SPACE</Label></div>
-                                <div className="flex items-center gap-4"><Checkbox id="standard" className="rounded-none border-white/20" /><Label htmlFor="standard" className="text-xs font-bold uppercase tracking-widest text-gray-600 leading-none">FLEX_STANDARD</Label></div>
+                                <div className="flex items-center gap-6 group cursor-pointer">
+                                    <Checkbox id="ocean" checked className="rounded-none border-white/5 data-[state=checked]:bg-white data-[state=checked]:text-black" />
+                                    <Label htmlFor="ocean" className="text-[10px] font-black uppercase tracking-[0.2em] text-white cursor-pointer group-hover:text-emerald-500 transition-colors">OCEAN_FCL</Label>
+                                </div>
+                                <div className="flex items-center gap-6 group cursor-pointer opacity-30">
+                                    <Checkbox id="air" disabled className="rounded-none border-white/5" />
+                                    <Label htmlFor="air" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-800 cursor-pointer">BETA_AIR_UNIT</Label>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="space-y-6 border-t border-white/5 pt-10">
-                            <h4 className="titan-label">MODAL PROTOCOL</h4>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4"><Checkbox id="ocean" checked className="rounded-none border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black" /><Label htmlFor="ocean" className="text-xs font-bold uppercase tracking-widest text-white leading-none">OCEAN_FCL</Label></div>
-                                <div className="flex items-center gap-4"><Checkbox id="air" className="rounded-none border-white/20" /><Label htmlFor="air" className="text-xs font-bold uppercase tracking-widest text-gray-600 leading-none">BETA_AIR_UNIT</Label></div>
-                            </div>
-                        </div>
+                    {/* Live Support Badge */}
+                    <div className="mt-20 p-8 border border-white/5 bg-zinc-950/40 group hover:border-white/20 transition-all">
+                        <span className="text-[9px] font-black text-zinc-800 block mb-4 tracking-[0.4em]">LIVE_INTELLIGENCE</span>
+                        <p className="text-[10px] font-black uppercase text-zinc-600 leading-relaxed mb-6 group-hover:text-zinc-400 transition-colors">
+                            Need custom routing logic? Our strategic ops group is active.
+                        </p>
+                        <Button className="w-full h-12 bg-white text-black font-black text-[9px] uppercase tracking-[0.4em] rounded-none hover:bg-emerald-500 transition-colors">
+                            OPEN_COMMS
+                        </Button>
                     </div>
                 </div>
 
-                {/* Main Results Feed */}
-                <div className="lg:col-span-9 space-y-10">
-                    <div className="flex items-center justify-between pb-8 border-b border-white/5">
-                        <h2 className="text-2xl font-bold tracking-tight text-white uppercase">
-                            {sortedQuotes.length} <span className="text-white/30 not-italic font-bold">Identified Results.</span>
+                {/* Primary Intelligence Feed */}
+                <div className="lg:col-span-9 space-y-12">
+                    {/* Sorting Matrix */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-white/5">
+                        {([
+                            { id: 'best', label: 'OPTIMAL', sub: metrics ? `${metrics.best.days} DAYS • $${metrics.best.price.toLocaleString()}` : '--' },
+                            { id: 'fastest', label: 'VELOCITY', sub: metrics ? `${metrics.fastest.days} DAYS • $${metrics.fastest.price.toLocaleString()}` : '--' },
+                            { id: 'cheapest', label: 'EFFICIENCY', sub: metrics ? `${metrics.cheapest.days} DAYS • $${metrics.cheapest.price.toLocaleString()}` : '--' },
+                            { id: 'greenest', label: 'ECO_CORE', sub: metrics ? `${metrics.greenest.days} DAYS • $${metrics.greenest.price.toLocaleString()}` : '--' }
+                        ] as const).map((mode) => (
+                            <button
+                                key={mode.id}
+                                onClick={() => setSortMode(mode.id)}
+                                className={`p-10 flex flex-col items-center justify-center transition-all duration-700 relative overflow-hidden group ${sortMode === mode.id ? 'bg-white' : 'hover:bg-zinc-950/40'
+                                    }`}
+                            >
+                                <span className={`text-2xl font-black italic uppercase tracking-tighter mb-2 transition-all duration-700 ${sortMode === mode.id ? 'text-black' : 'text-zinc-600 group-hover:text-white'
+                                    }`}>
+                                    {mode.label}
+                                </span>
+                                <span className={`text-[10px] font-black uppercase tracking-widest transition-all duration-700 ${sortMode === mode.id ? 'text-zinc-500' : 'text-zinc-800'
+                                    }`}>
+                                    {mode.sub}
+                                </span>
+                                {sortMode === mode.id && <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-500" />}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center justify-between pb-8">
+                        <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
+                            {sortedQuotes.length} <span className="text-zinc-800 not-italic ml-4">IDENTIFIED_RESULTS_SYNCED</span>
                         </h2>
                     </div>
 
-                    {loading ? (
-                        <PremiumSearchingState />
-                    ) : quotes.length > 0 ? (
-                        <div className="space-y-6">
+                    {quotes.length > 0 ? (
+                        <div className="grid gap-8">
                             {sortedQuotes.map((q, i) => (
                                 <CarrierCard
                                     key={i}
@@ -206,14 +212,14 @@ export function ResultsStep() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-32 border border-white/10 bg-white/[0.01]">
-                            <Anchor className="w-12 h-12 text-gray-400 mx-auto mb-8" />
-                            <h3 className="text-4xl font-bold text-white uppercase tracking-tight">NO INSTANT RATES</h3>
-                            <p className="text-gray-500 max-w-sm mx-auto mt-6 text-xs font-bold uppercase tracking-widest leading-loose px-10">
-                                REAL-TIME DATA UNAVAILABLE FOR THIS ROUTE. PLEASE REQUEST A MANUAL QUOTE FROM OUR TEAM.
+                        <div className="py-48 text-center border-t border-white/5 bg-zinc-950/10">
+                            <Ship className="w-16 h-16 text-zinc-900 mx-auto mb-10 opacity-20" />
+                            <h3 className="text-3xl font-black text-zinc-800 uppercase italic tracking-tighter mb-6">NO_INSTANT_SYNC</h3>
+                            <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.6em] max-w-sm mx-auto leading-loose mb-12">
+                                Real-time telemetry unavailable for this trajectory. Manual protocol suggested.
                             </p>
-                            <Button variant="outline" className="mt-12 border-white/10 text-white hover:bg-white hover:text-black transition-all h-16 px-12 rounded-none uppercase font-bold tracking-widest text-xs">
-                                REQUEST CUSTOM QUOTE
+                            <Button className="h-20 px-16 bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] rounded-none hover:bg-emerald-500 transition-colors">
+                                REQUEST_CUSTOM_INITIATIVE
                             </Button>
                         </div>
                     )}

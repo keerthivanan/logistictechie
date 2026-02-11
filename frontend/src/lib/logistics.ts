@@ -36,6 +36,7 @@ export const logisticsClient = {
      */
     /**
      * Fetch Shipping Rates from Logistics Engine
+     * Supports Maersk, CMA CGM, MSC, and Hapag-Lloyd integrations.
      */
     getRates: async (req: QuoteRequest): Promise<QuoteResult[]> => {
         try {

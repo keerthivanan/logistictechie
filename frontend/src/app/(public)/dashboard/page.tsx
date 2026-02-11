@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
     Ship,
     Package,
-    CreditCard,
     TrendingUp,
     MapPin,
     ArrowUpRight,
     Bell,
     Plus,
-    Clock,
-    ArrowRight,
-    CheckCircle
+    Globe,
+    Zap,
+    Anchor
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import Link from "next/link";
 import axios from "axios";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MarketTrendWidget } from "@/components/widgets/MarketTrendWidget";
+import { VesselTrackerWidget } from "@/components/widgets/VesselTrackerWidget";
+import { BookingOfficeLocator } from "@/components/widgets/BookingOfficeLocator";
 
 interface Booking {
     id: string;
@@ -33,200 +36,209 @@ interface Booking {
     created_at: string;
 }
 
-interface Payment {
-    id: string;
-    amount: number;
-    currency?: string;
-    status: string;
-    date: string;
-}
-
 export default function DashboardPage() {
+    const { data: session, status } = useSession();
     const [bookings, setBookings] = useState<Booking[]>([]);
-    const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
-    const { t, language } = useLanguage();
-    const isRTL = language === 'ar';
+    const { language } = useLanguage();
+    const [statsData, setStatsData] = useState({ active_shipments: 0, containers: 0, on_time_rate: "99.9%" });
+
+    const userName = (session?.user?.name || "COMMAND_USER").split(' ')[0];
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchData = async () => {
-            const token = localStorage.getItem("token");
-            const userId = localStorage.getItem("user_id");
+        if (status === "unauthenticated") {
+            router.push("/login");
+            return;
+        }
 
-            if (!token || !userId) {
-                window.location.href = "/login";
-                return;
-            }
+        if (status === "authenticated" && session?.user) {
+            const fetchData = async () => {
+                try {
+                    const token = (session.user as any).accessToken;
+                    const userId = (session.user as any).id;
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                const bookRes = await axios.get(`${apiUrl}/api/bookings/user/${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setBookings(bookRes.data.data || []);
+                    const [bookRes, statsRes] = await Promise.all([
+                        axios.get(`${apiUrl}/api/bookings/user/${userId}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        }),
+                        axios.get(`${apiUrl}/api/dashboard/stats/${userId}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        })
+                    ]);
 
-                setPayments([
-                    { id: '1', amount: 3500, status: 'COMPLETED', date: '2026-02-09', currency: 'USD' },
-                    { id: '2', amount: 1250, status: 'COMPLETED', date: '2026-02-01', currency: 'USD' }
-                ]);
-            } catch (err) {
-                console.error("Dashboard fetch error:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+                    setBookings(bookRes.data.data || []);
+                    if (statsRes.data.success) {
+                        setStatsData({
+                            active_shipments: statsRes.data.active_shipments,
+                            containers: statsRes.data.containers,
+                            on_time_rate: statsRes.data.on_time_rate
+                        });
+                    }
+                } catch (err) {
+                    console.error("DATA_SYNC_ISSUE:", err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [status, session, router]);
 
     const stats = [
-        { label: t('dashboard.activeShipments') || "Active Shipments", value: bookings.length, icon: Ship },
-        { label: t('dashboard.containers') || "Containers", value: bookings.length * 2, icon: Package },
-        { label: t('dashboard.totalSpend') || "Total Spend", value: `$${(bookings.length * 2000).toLocaleString()}`, icon: CreditCard },
-        { label: t('dashboard.onTimeRate') || "On-Time Rate", value: "99.9%", icon: TrendingUp }
+        { label: "Active_Shipments", value: statsData.active_shipments, icon: Ship, trend: "+12.4%" },
+        { label: "Global_Inventory", value: statsData.containers, icon: Package, trend: "Optimal" },
+        { label: "Transit_Reliability", value: statsData.on_time_rate, icon: TrendingUp, trend: "Elite" }
     ];
 
     return (
-        <main className={`min-h-screen bg-black text-white pt-32 pb-24 px-6 ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="max-w-7xl mx-auto">
+        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium">
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-                    <div>
-                        <span className="text-sm font-medium text-emerald-500 mb-2 block">{t('dashboard.title') || "Dashboard"}</span>
-                        <h1 className="text-4xl md:text-5xl font-bold text-white">
-                            {t('dashboard.welcomeBack') || "Welcome Back"}
+            <div className="container max-w-[1400px] mx-auto px-8 pt-32 pb-48 relative z-10">
+
+                {/* Cinematic Header */}
+                <div className="flex flex-col mb-32">
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-[1px] bg-emerald-500" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">OPERATIONAL_INITIALIZED</span>
+                        </div>
+                        <h1 className="titan-text mb-4">
+                            Welcome Back, <br />
+                            <span className="text-zinc-900 group">{userName}.</span>
                         </h1>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" className="h-12 w-12 rounded-lg border-zinc-700 hover:bg-zinc-800">
-                            <Bell className="h-5 w-5" />
-                        </Button>
-                        <Link href="/quote">
-                            <Button className="h-12 px-6 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold">
-                                <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                                {t('dashboard.newShipment') || "New Shipment"}
-                            </Button>
-                        </Link>
-                    </div>
+                        <p className="text-zinc-600 text-xs font-black uppercase tracking-[0.4em] mt-8 flex items-center gap-4">
+                            <Zap className="w-4 h-4 text-emerald-500" />
+                            All systems operating at maximum efficiency.
+                        </p>
+                    </motion.div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                {/* Elite Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mb-32 border-t border-white/5">
                     {stats.map((stat, i) => (
                         <motion.div
                             key={i}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                            className="p-12 border-l border-b border-white/5 relative group hover:bg-zinc-950/40 transition-colors cursor-default"
                         >
-                            <Card className="p-6 bg-zinc-900/50 border-zinc-800 rounded-xl hover:border-zinc-700 transition-all">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
-                                        <stat.icon className="h-5 w-5 text-white" />
-                                    </div>
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 group-hover:text-emerald-500 transition-colors">
+                                    {stat.label}
                                 </div>
-                                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                                <div className="text-sm text-zinc-500">{stat.label}</div>
-                            </Card>
+                                <stat.icon className="w-5 h-5 text-zinc-800 group-hover:text-white transition-all transform group-hover:rotate-12" />
+                            </div>
+                            <div className="text-7xl font-black italic tracking-tighter mb-4">{stat.value}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500/50">
+                                Status: {stat.trend}
+                            </div>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid lg:grid-cols-12 gap-6">
+                {/* Operational Interface */}
+                <div className="grid lg:grid-cols-12 gap-16 mb-32">
 
-                    {/* Shipments List */}
-                    <Card className="lg:col-span-8 bg-zinc-900/50 border-zinc-800 rounded-xl overflow-hidden">
-                        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                    {/* Primary Control Log */}
+                    <div className="lg:col-span-8">
+                        <div className="flex items-end justify-between mb-12">
                             <div>
-                                <h3 className="text-xl font-semibold text-white">{t('dashboard.recentShipments') || "Recent Shipments"}</h3>
-                                <p className="text-sm text-zinc-500">{t('dashboard.latestBookingsStatus') || "Your latest bookings and their status"}</p>
+                                <h2 className="text-4xl font-black italic uppercase italic-heading text-white tracking-widest leading-none mb-4">
+                                    Operational_Manifest
+                                </h2>
+                                <div className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">Real-time Cargo telemetry synchronization</div>
                             </div>
-                            <Button variant="ghost" className="text-zinc-400 hover:text-white">
-                                {t('dashboard.viewAll') || "View All"} <ArrowUpRight className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
-                            </Button>
+                            <Link href="/quote">
+                                <Button className="h-14 px-10 rounded-none bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-500 hover:scale-105 transition-all">
+                                    NEW_DEPLOYMENT
+                                </Button>
+                            </Link>
                         </div>
 
-                        <div className="p-6">
+                        <div className="space-y-2">
                             {loading ? (
-                                <div className="py-16 text-center text-zinc-500">{t('dashboard.loading') || "Loading shipments..."}</div>
+                                <div className="py-32 text-center text-zinc-800 font-black uppercase tracking-[1em] animate-pulse">Synchronizing_Neural_Link...</div>
                             ) : bookings.length === 0 ? (
-                                <div className="py-16 text-center">
-                                    <Package className="h-12 w-12 text-zinc-600 mx-auto mb-4" />
-                                    <div className="text-zinc-400 mb-4">{t('dashboard.noShipments') || "No shipments yet"}</div>
+                                <div className="py-48 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/20">
+                                    <Anchor className="w-16 h-16 text-zinc-900 mb-8" />
+                                    <div className="text-zinc-800 font-black uppercase tracking-[0.5em] mb-12">No manifests detected in active sector.</div>
                                     <Link href="/quote">
-                                        <Button className="bg-white text-black hover:bg-zinc-100 rounded-lg h-10 px-6 font-semibold">
-                                            {t('dashboard.bookFirst') || "Book Your First Shipment"}
+                                        <Button className="h-16 px-16 border border-white/10 bg-transparent text-white font-black uppercase tracking-[0.4em] text-[10px] hover:bg-white hover:text-black transition-all">
+                                            INITIATE_FIRST_MANIFEST
                                         </Button>
                                     </Link>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
-                                    {bookings.map((b, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center">
-                                                    <Ship className="h-5 w-5 text-white" />
+                                bookings.map((b, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="group p-8 flex items-center justify-between bg-zinc-950/20 border border-white/5 hover:border-white/20 hover:bg-zinc-950/40 transition-all cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-12">
+                                            <div className="w-16 h-16 bg-zinc-900 flex items-center justify-center group-hover:bg-white group-hover:rotate-12 transition-all duration-500">
+                                                <Ship className="w-8 h-8 text-zinc-600 group-hover:text-black" />
+                                            </div>
+                                            <div>
+                                                <div className="text-2xl font-black italic uppercase tracking-tighter text-white group-hover:text-emerald-500 transition-colors mb-2">
+                                                    {b.booking_reference || "GEN_CARGO_01"}
                                                 </div>
-                                                <div>
-                                                    <div className="font-semibold text-white">{b.booking_reference}</div>
-                                                    <div className="flex items-center gap-2 text-sm text-zinc-500">
-                                                        <MapPin className="h-3.5 w-3.5" />
-                                                        {b.origin || "Origin"} → {b.destination || "Destination"}
-                                                    </div>
+                                                <div className="flex items-center gap-4 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
+                                                    <MapPin className="w-3 h-3 text-emerald-500" />
+                                                    {b.origin} <span className="text-zinc-900 mx-2">{">>"}</span> {b.destination}
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${b.status === 'PENDING'
-                                                    ? 'bg-amber-500/10 text-amber-400'
-                                                    : 'bg-emerald-500/10 text-emerald-400'
-                                                    }`}>
-                                                    {b.status === 'PENDING' ? <Clock className="h-3 w-3" /> : <CheckCircle className="h-3 w-3" />}
-                                                    {b.status === 'PENDING' ? (t('status.pending') || 'Pending') : (t('status.confirmed') || 'Confirmed')}
-                                                </div>
-                                                <div className="text-xs text-zinc-500 mt-1">{new Date(b.created_at).toLocaleDateString()}</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">
+                                                STATUS_ACTIVE
                                             </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                                            <div className="text-[10px] font-black text-zinc-800 uppercase tracking-widest">
+                                                {new Date(b.created_at).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))
                             )}
                         </div>
-                    </Card>
+                    </div>
 
-                    {/* Sidebar */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* Payments */}
-                        <Card className="bg-zinc-900/50 border-zinc-800 rounded-xl p-6">
-                            <h3 className="font-semibold text-white mb-4">{t('dashboard.recentPayments') || "Recent Payments"}</h3>
-                            <div className="space-y-4">
-                                {payments.map((p, i) => (
-                                    <div key={i} className="flex items-center justify-between py-3 border-b border-zinc-800 last:border-0">
-                                        <div>
-                                            <div className="font-medium text-white">${p.amount.toLocaleString()}</div>
-                                            <div className="text-sm text-zinc-500">{p.date}</div>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-emerald-500 text-sm">
-                                            <CheckCircle className="h-4 w-4" />
-                                            {t('status.paid') || "Paid"}
-                                        </div>
-                                    </div>
-                                ))}
+                    {/* Elite Intelligence Widgets */}
+                    <div className="lg:col-span-4 flex flex-col gap-12">
+                        <div className="p-8 bg-zinc-950/40 border border-white/5 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-8 opacity-5 italic font-black text-6xl text-white pointer-events-none">
+                                INTEL
                             </div>
-                            <Button variant="outline" className="w-full mt-4 h-10 border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white rounded-lg">
-                                {t('dashboard.viewAllPayments') || "View All Payments"}
-                            </Button>
-                        </Card>
+                            <div className="relative z-10">
+                                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-emerald-500 mb-6">Market_Intelligence</h3>
+                                <MarketTrendWidget />
+                            </div>
+                        </div>
 
+                        <div className="p-8 bg-zinc-950/40 border border-white/5">
+                            <h3 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-700 mb-6 px-2">Global_Vessel_Tracking</h3>
+                            <VesselTrackerWidget />
+                        </div>
 
-                        {/* Market Insight Widget (AI Powered) */}
-                        <div className="mt-6">
-                            <MarketTrendWidget />
+                        <div className="p-8 bg-white text-black group hover:bg-emerald-500 transition-colors duration-700 cursor-pointer">
+                            <div className="flex justify-between items-start mb-8">
+                                <h3 className="text-xs font-black uppercase tracking-[0.4em] leading-none">Security_Protocol_Active</h3>
+                                <Zap className="w-5 h-5 fill-black" />
+                            </div>
+                            <p className="text-[10px] font-black uppercase tracking-widest leading-loose mb-12">
+                                Encrypted neural link established between all global logistics nodes. Deployment status: SECURE.
+                            </p>
+                            <ArrowUpRight className="w-8 h-8 transform group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
                         </div>
                     </div>
                 </div>

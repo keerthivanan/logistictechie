@@ -52,6 +52,7 @@ class UserLogin(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
     user_id: str
     user_name: str
@@ -65,6 +66,7 @@ class UserResponse(BaseModel):
     avatar_url: Optional[str] = None
     preferences: Optional[str] = None
     role: str
+    created_at: Optional[datetime] = None
 # --- Booking Models ---
 class BookingCreate(BaseModel):
     quote_id: str

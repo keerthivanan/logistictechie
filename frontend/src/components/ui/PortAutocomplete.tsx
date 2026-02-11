@@ -100,7 +100,7 @@ export function PortAutocomplete({ value, onChange, placeholder, className, mini
                     </div>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[450px] p-0 shadow-2xl border-white/10 rounded-none bg-black" align="start">
+            <PopoverContent className="w-[calc(100vw-2rem)] md:w-[450px] p-0 shadow-2xl border-white/10 rounded-none bg-black" align="start">
                 <Command shouldFilter={false} className="bg-black">
                     <CommandInput
                         placeholder="SEARCH GLOBAL PORTS..."
@@ -114,38 +114,75 @@ export function PortAutocomplete({ value, onChange, placeholder, className, mini
                             <CommandEmpty className="py-8 text-center text-xs font-bold text-gray-600 uppercase tracking-widest">Protocol error: no matches found.</CommandEmpty>
                         )}
                         {!loading && ports.length > 0 && (
-                            <CommandGroup heading="TELEMETRY RESULTS" className="text-gray-600 font-bold text-xs tracking-[0.3em] px-4 py-2 uppercase">
-                                {ports.map((port) => (
-                                    <CommandItem
-                                        key={port.code}
-                                        value={port.code}
-                                        onSelect={() => {
-                                            const formatted = `${port.name}, ${port.country_code || port.country.substring(0, 2).toUpperCase()}`;
-                                            onChange(formatted);
-                                            setOpen(false);
-                                        }}
-                                        className="cursor-pointer hover:bg-white/[0.05] aria-selected:bg-white/[0.05] transition-colors py-4 px-4 border-b border-white/[0.03]"
-                                    >
-                                        <div className="flex items-center justify-between w-full">
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-xl leading-none grayscale contrast-125">
-                                                    {getFlagEmoji(port.country_code)}
-                                                </span>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-white text-sm uppercase tracking-tight">
-                                                        {port.name}, <span className="text-gray-500">{port.country_code}</span>
+                            <CommandGroup heading="TELEMETRY RESULTS" className="text-gray-500 font-bold text-[10px] tracking-[0.4em] px-4 py-3 uppercase border-b border-white/5">
+                                {ports.map((port, idx) => {
+                                    const isSelected = value === `${port.name} (${port.code})`;
+                                    return (
+                                        <CommandItem
+                                            key={port.code + idx}
+                                            value={port.name + " " + port.code}
+                                            onSelect={() => {
+                                                const formatted = `${port.name} (${port.code})`;
+                                                onChange(formatted);
+                                                setOpen(false);
+                                            }}
+                                            className={cn(
+                                                "cursor-pointer transition-all duration-200 py-5 px-6 border-b border-white/[0.02] relative group outline-none",
+                                                "aria-selected:bg-white/10 hover:bg-white/10",
+                                                isSelected && "bg-white/[0.07]"
+                                            )}
+                                        >
+                                            {/* Selection Highlight Bar */}
+                                            <div className={cn(
+                                                "absolute left-0 top-0 bottom-0 w-1 bg-white opacity-0 transition-opacity",
+                                                "group-aria-selected:opacity-100 group-hover:opacity-100",
+                                                isSelected && "opacity-100 bg-emerald-500"
+                                            )} />
+
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-5">
+                                                    <span className="text-2xl leading-none grayscale brightness-125 contrast-125 group-hover:grayscale-0 transition-all duration-500">
+                                                        {getFlagEmoji(port.country_code)}
                                                     </span>
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className={cn(
+                                                            "font-bold text-base uppercase tracking-tight transition-colors",
+                                                            isSelected ? "text-emerald-400" : "text-white group-aria-selected:text-white"
+                                                        )}>
+                                                            {port.name}
+                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] text-zinc-500 font-bold tracking-[0.1em] uppercase">
+                                                                {port.country}
+                                                            </span>
+                                                            <span className="h-1 w-1 rounded-full bg-zinc-700" />
+                                                            <span className="text-[10px] text-zinc-400 font-black tracking-widest uppercase bg-zinc-800/50 px-1.5 py-0.5 rounded">
+                                                                {port.code}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-4">
+                                                    <div className={cn(
+                                                        "px-3 py-1 rounded-none border text-[9px] font-black tracking-widest uppercase transition-all",
+                                                        port.type === 'port'
+                                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                                                            : "bg-blue-500/10 border-blue-500/20 text-blue-500"
+                                                    )}>
+                                                        {port.type === 'port' ? 'OFFSHORE' : 'INLAND'}
+                                                    </div>
+
+                                                    {isSelected && (
+                                                        <div className="h-6 w-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                                                            <Check className="h-3.5 w-3.5 text-black stroke-[3]" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
-
-                                            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/5 uppercase">
-                                                <span className="text-xs font-bold text-white tracking-widest">
-                                                    {port.type === 'port' ? 'STATION' : 'NODE'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </CommandItem>
-                                ))}
+                                        </CommandItem>
+                                    );
+                                })}
                             </CommandGroup>
                         )}
                     </CommandList>

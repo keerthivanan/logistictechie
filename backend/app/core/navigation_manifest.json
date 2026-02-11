@@ -1,0 +1,54 @@
+{
+    "routes": [
+        {
+            "path": "/",
+            "name": "Landing Page",
+            "description": "Home of Phoenix Logistics OS"
+        },
+        {
+            "path": "/quote",
+            "name": "Quote Engine",
+            "description": "Search for real-time ocean freight rates"
+        },
+        {
+            "path": "/tracking",
+            "name": "Sovereign Tracking",
+            "description": "Track containers with predictive logic"
+        },
+        {
+            "path": "/dashboard",
+            "name": "Sovereign Dashboard",
+            "description": "User overview and live shipments"
+        },
+        {
+            "path": "/profile",
+            "name": "User Profile",
+            "description": "Manage user settings and identity"
+        },
+        {
+            "path": "/services",
+            "name": "Services Protocol",
+            "description": "Our logistics and technology offerings"
+        },
+        {
+            "path": "/pricing",
+            "name": "Pricing Index",
+            "description": "General pricing information"
+        },
+        {
+            "path": "/login",
+            "name": "Secure Login",
+            "description": "Access the Sovereign network"
+        },
+        {
+            "path": "/signup",
+            "name": "Join Phoenix",
+            "description": "Create a new logistics account"
+        }
+    ],
+    "protocols": {
+        "market_quotes": "/api/quotes",
+        "live_tracking": "/api/tracking",
+        "dashboard_stats": "/api/dashboard/stats"
+    }
+}

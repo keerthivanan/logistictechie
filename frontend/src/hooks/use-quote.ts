@@ -8,6 +8,7 @@ interface QuoteState {
         destination: string;
         cargoType: 'fcl' | 'lcl' | 'air';
         containerSize: '20' | '40' | '40HC';
+        quantity: number;
 
         // Detailed Logistics Data
         incoterm: 'EXW' | 'FCA' | 'FOB' | 'CFR' | 'CIF' | 'DAP' | 'DDP';
@@ -38,6 +39,7 @@ export const useQuoteStore = create<QuoteState>((set) => ({
         destination: '',
         cargoType: 'fcl',
         containerSize: '20',
+        quantity: 1,
         incoterm: 'FOB',
         commodity: 'General Cargo',
         weight: 1000,
@@ -54,7 +56,7 @@ export const useQuoteStore = create<QuoteState>((set) => ({
     })),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectQuote: (quote: QuoteResult & Record<string, any>) => set({ selectedQuote: quote }),
-    nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 5) })),
+    nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 6) })),
     prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
 }));
 

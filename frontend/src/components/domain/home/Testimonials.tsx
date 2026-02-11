@@ -29,48 +29,41 @@ export function TestimonialsSection() {
     ];
 
     return (
-        <section className="relative py-24 bg-zinc-950">
+        <section className="relative py-32 bg-black border-t border-white/5">
             <div className="container max-w-7xl mx-auto px-6">
-
                 {/* Section Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-16"
+                    className="mb-20"
                 >
-                    <span className="text-sm font-medium text-emerald-500 mb-4 block">{t('landing.testimonials.badge')}</span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                        {t('landing.testimonials.title')}
+                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight uppercase italic leading-none">
+                        The Verdict. <span className="text-zinc-800">Industry Standard.</span>
                     </h2>
-                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-                        {t('landing.testimonials.description')}
-                    </p>
                 </motion.div>
 
                 {/* Testimonials Grid */}
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
                     {testimonials.map((item, idx) => (
                         <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 hover:border-zinc-700 transition-all"
+                            transition={{ duration: 0.8, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative group pt-10"
                         >
-                            <Quote className="h-8 w-8 text-zinc-700 mb-6" />
-                            <p className="text-zinc-300 text-lg leading-relaxed mb-8">
+                            <Quote className="absolute top-0 left-0 h-10 w-10 text-zinc-900 -z-10" />
+                            <p className="text-zinc-400 text-2xl font-bold uppercase italic leading-tight mb-8 tracking-tighter">
                                 "{item.quote}"
                             </p>
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-white font-semibold">
-                                    {item.author.split(' ').map(n => n[0]).join('')}
-                                </div>
+                                <div className="h-0.5 w-8 bg-emerald-500" />
                                 <div>
-                                    <div className="font-semibold text-white">{item.author}</div>
-                                    <div className="text-sm text-zinc-500">{item.role}, {item.company}</div>
+                                    <div className="font-black text-white uppercase text-[10px] tracking-widest">{item.author}</div>
+                                    <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{item.role}, {item.company}</div>
                                 </div>
                             </div>
                         </motion.div>

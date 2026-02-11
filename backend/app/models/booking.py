@@ -27,5 +27,4 @@ class Booking(Base):
 
     # 🔗 Relationships
     user = relationship("User", back_populates="bookings")
-    payment = relationship("Payment", back_populates="booking", uselist=False)
 

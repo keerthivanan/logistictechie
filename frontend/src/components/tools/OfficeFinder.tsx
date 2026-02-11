@@ -38,9 +38,9 @@ export function OfficeFinder() {
     };
 
     return (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="bg-card/50 border border-border rounded-xl p-8" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex items-center gap-4 mb-8">
-                <div className="h-12 w-12 rounded-lg bg-zinc-800 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-lg bg-card border border-border flex items-center justify-center">
                     <Building2 className="h-5 w-5 text-white" />
                 </div>
                 <div>
@@ -56,7 +56,7 @@ export function OfficeFinder() {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder={t('widgets.officeLocator.enterCity')}
-                        className={`${isRTL ? 'pr-12' : 'pl-12'} bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-zinc-500 transition-all`}
+                        className={`${isRTL ? 'pr-12' : 'pl-12'} bg-card/50 border-border text-white placeholder:text-zinc-500 h-12 rounded-lg focus:border-white/20 transition-all`}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     />
                 </div>
@@ -76,7 +76,7 @@ export function OfficeFinder() {
                             key={i}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 hover:border-zinc-700 transition-all"
+                            className="p-4 bg-card/30 rounded-lg border border-border hover:border-white/10 transition-all"
                         >
                             <div className="font-semibold text-white mb-2">{office.name}</div>
                             <div className="text-zinc-400 text-sm flex items-center gap-2 mb-1">

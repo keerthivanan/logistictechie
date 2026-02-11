@@ -4,152 +4,138 @@ import { useQuoteStore } from "@/hooks/use-quote";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Ship, Shield, FileText, ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { Ship, Shield, FileText, ArrowRight, ArrowLeft, Check, Zap, Globe, Package } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function ServicesStep() {
     const { formData, updateForm, nextStep, prevStep } = useQuoteStore();
 
     return (
-        <div className="max-w-3xl mx-auto">
-            {/* Summary Bar */}
-            <div className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-4 mb-8 flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                    <Ship className="h-4 w-4 text-zinc-500" />
-                    <span className="text-zinc-400">From:</span>
-                    <span className="text-white font-medium">{formData.origin?.split(',')[0]}</span>
+        <div className="max-w-4xl mx-auto">
+            {/* Tactical Mission Summary */}
+            <div className="bg-zinc-950/40 border-l-2 border-emerald-500 p-10 mb-16 flex flex-wrap items-center gap-12 text-[10px] font-black uppercase tracking-[0.4em] relative overflow-hidden group">
+                <div className="flex items-center gap-4">
+                    <Globe className="h-4 w-4 text-emerald-500 group-hover:rotate-45 transition-transform" />
+                    <span className="text-zinc-700">TRAJECTORY:</span>
+                    <span className="text-white">{formData.origin?.split(',')[0].trim() || "UNDEFINED"}</span>
+                    <ArrowRight className="h-3 w-3 text-zinc-900" />
+                    <span className="text-white">{formData.destination?.split(',')[0].trim() || "UNDEFINED"}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <ArrowRight className="h-4 w-4 text-zinc-600" />
-                    <span className="text-zinc-400">To:</span>
-                    <span className="text-white font-medium">{formData.destination?.split(',')[0]}</span>
+                <div className="flex items-center gap-4">
+                    <Package className="h-4 w-4 text-zinc-700" />
+                    <span className="text-zinc-700">UNIT:</span>
+                    <span className="text-white">{formData.containerSize} {formData.cargoType?.toUpperCase()}</span>
                 </div>
-                <div className="flex items-center gap-2 ml-auto">
-                    <span className="text-zinc-400">Container:</span>
-                    <span className="text-white font-medium">{formData.containerSize}' {formData.cargoType}</span>
+                <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.05] select-none pointer-events-none italic text-4xl">
+                    TELEMETRY_SYNC
                 </div>
             </div>
 
-            <div className="mb-8 text-center">
-                <span className="text-sm font-medium text-emerald-500 mb-2 block">Step 4 of 6</span>
-                <h2 className="text-3xl font-bold text-white mb-3">Additional Services</h2>
-                <p className="text-zinc-400">Select optional services to add to your shipment.</p>
+            <div className="mb-20">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-[1px] bg-emerald-500" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">PROTOCOL_STEP_04</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-6 leading-none">
+                    Enhance. <span className="text-zinc-900 hover:text-white transition-colors duration-1000">Intelligence.</span>
+                </h2>
+                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed max-w-xl">
+                    Activate specialized tactical modules to ensure mission-critical security, regulatory compliance, and asset protection.
+                </p>
             </div>
 
-            <div className="space-y-4 mb-8">
-                {/* Port Charges - Agent */}
-                <div
-                    className={`p-5 rounded-xl border transition-all cursor-pointer ${formData.portChargesCoveredBy === 'agent'
-                            ? 'bg-emerald-500/10 border-emerald-500/50'
-                            : 'bg-zinc-800/30 border-zinc-800 hover:border-zinc-700'
-                        }`}
-                    onClick={() => updateForm({ portChargesCoveredBy: 'agent' })}
-                >
-                    <div className="flex items-start gap-4">
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${formData.portChargesCoveredBy === 'agent' ? 'border-emerald-500 bg-emerald-500' : 'border-zinc-600'
-                            }`}>
-                            {formData.portChargesCoveredBy === 'agent' && <Check className="h-3 w-3 text-white" />}
-                        </div>
-                        <div>
-                            <Label className="text-lg font-semibold text-white cursor-pointer">
-                                Agent Pays Port Charges
-                            </Label>
-                            <p className="text-sm text-zinc-500 mt-1">
-                                Terminal handling and port charges will be covered by the destination agent
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Port Charges - Supplier */}
-                <div
-                    className={`p-5 rounded-xl border transition-all cursor-pointer ${formData.portChargesCoveredBy === 'supplier'
-                            ? 'bg-emerald-500/10 border-emerald-500/50'
-                            : 'bg-zinc-800/30 border-zinc-800 hover:border-zinc-700'
-                        }`}
-                    onClick={() => updateForm({ portChargesCoveredBy: 'supplier' })}
-                >
-                    <div className="flex items-start gap-4">
-                        <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${formData.portChargesCoveredBy === 'supplier' ? 'border-emerald-500 bg-emerald-500' : 'border-zinc-600'
-                            }`}>
-                            {formData.portChargesCoveredBy === 'supplier' && <Check className="h-3 w-3 text-white" />}
-                        </div>
-                        <div>
-                            <Label className="text-lg font-semibold text-white cursor-pointer">
-                                Supplier Pays Port Charges
-                            </Label>
-                            <p className="text-sm text-zinc-500 mt-1">
-                                Terminal handling and port charges will be covered at origin by the supplier
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Insurance */}
-                <div className={`p-5 rounded-xl border transition-all ${formData.needsInsurance
-                        ? 'bg-blue-500/10 border-blue-500/50'
-                        : 'bg-zinc-800/30 border-zinc-800'
-                    }`}>
-                    <div className="flex items-start gap-4">
-                        <Switch
-                            id="insurance"
-                            checked={formData.needsInsurance}
-                            onCheckedChange={(c) => updateForm({ needsInsurance: c })}
-                            className="mt-1"
-                        />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <Shield className="h-5 w-5 text-blue-400" />
-                                <Label htmlFor="insurance" className="text-lg font-semibold text-white cursor-pointer">
-                                    Cargo Insurance
-                                </Label>
+            <div className="space-y-10 mb-20">
+                {/* Deployment Matrix */}
+                <div className="grid md:grid-cols-2 gap-8">
+                    <div
+                        className={cn(
+                            "p-10 border transition-all duration-700 cursor-pointer relative overflow-hidden group/tile",
+                            formData.portChargesCoveredBy === 'agent'
+                                ? "bg-white text-black border-transparent"
+                                : "bg-zinc-950/40 border-white/5 text-zinc-500 hover:border-white/20"
+                        )}
+                        onClick={() => updateForm({ portChargesCoveredBy: 'agent' })}
+                    >
+                        <div className="flex items-start justify-between relative z-10">
+                            <div className="space-y-2">
+                                <Label className="text-base font-black uppercase tracking-tighter italic cursor-pointer">AGENT_SETTLEMENT</Label>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">DIRECT_PORT_CLEARANCE</p>
                             </div>
-                            <p className="text-sm text-zinc-500 mt-1">
-                                Protect your shipment with full coverage up to $500,000. Includes damage, loss, and theft protection.
-                            </p>
+                            <div className={cn(
+                                "w-6 h-6 border flex items-center justify-center transition-all",
+                                formData.portChargesCoveredBy === 'agent' ? "border-black bg-black text-white" : "border-zinc-800"
+                            )}>
+                                {formData.portChargesCoveredBy === 'agent' && <Check className="w-4 h-4" />}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        className={cn(
+                            "p-10 border transition-all duration-700 cursor-pointer relative overflow-hidden group/tile",
+                            formData.portChargesCoveredBy === 'carrier'
+                                ? "bg-white text-black border-transparent"
+                                : "bg-zinc-950/40 border-white/5 text-zinc-500 hover:border-white/20"
+                        )}
+                        onClick={() => updateForm({ portChargesCoveredBy: 'carrier' })}
+                    >
+                        <div className="flex items-start justify-between relative z-10">
+                            <div className="space-y-2">
+                                <Label className="text-base font-black uppercase tracking-tighter italic cursor-pointer">CARRIER_HANDLING</Label>
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">INTEGRATED_HUB_PROTOCOL</p>
+                            </div>
+                            <div className={cn(
+                                "w-6 h-6 border flex items-center justify-center transition-all",
+                                formData.portChargesCoveredBy === 'carrier' ? "border-black bg-black text-white" : "border-zinc-800"
+                            )}>
+                                {formData.portChargesCoveredBy === 'carrier' && <Check className="w-4 h-4" />}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Customs Brokerage */}
-                <div className={`p-5 rounded-xl border transition-all ${formData.needsCustomsBrokerage
-                        ? 'bg-purple-500/10 border-purple-500/50'
-                        : 'bg-zinc-800/30 border-zinc-800'
-                    }`}>
-                    <div className="flex items-start gap-4">
-                        <Switch
-                            id="customs"
-                            checked={formData.needsCustomsBrokerage}
-                            onCheckedChange={(c) => updateForm({ needsCustomsBrokerage: c })}
-                            className="mt-1"
-                        />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-purple-400" />
-                                <Label htmlFor="customs" className="text-lg font-semibold text-white cursor-pointer">
-                                    Customs Brokerage
-                                </Label>
+                <div className="grid gap-6">
+                    {[
+                        { id: 'insurance', label: 'SOVEREIGN_INSURANCE', icon: Shield, desc: 'Advanced asset protection against global volatility' },
+                        { id: 'customs', label: 'REGULATORY_BYPASS', icon: FileText, desc: 'Automated customs clearance and document verification' },
+                        { id: 'warehousing', label: 'STORAGE_NODE_SYNC', icon: Ship, desc: 'Climate-controlled strategic warehousing modules' }
+                    ].map((service) => (
+                        <div key={service.id} className="p-10 bg-zinc-950/40 border border-white/5 hover:border-white/20 transition-all duration-700 relative overflow-hidden group/service">
+                            <div className="flex items-center justify-between relative z-10">
+                                <div className="flex items-center gap-8">
+                                    <div className="w-16 h-16 bg-zinc-900 flex items-center justify-center group-hover/service:bg-emerald-500 group-hover/service:text-black transition-all duration-700 group-hover/service:rotate-12">
+                                        <service.icon className="w-6 h-6" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">{service.label}</h3>
+                                        <p className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em]">{service.desc}</p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    checked={!!(formData as any)[service.id]}
+                                    onCheckedChange={(val) => updateForm({ [service.id]: val })}
+                                    className="data-[state=checked]:bg-emerald-500"
+                                />
                             </div>
-                            <p className="text-sm text-zinc-500 mt-1">
-                                Let us handle all customs documentation and clearance. Includes duty calculation and compliance checks.
-                            </p>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex justify-between items-center pt-16 border-t border-white/5">
                 <Button
+                    variant="ghost"
                     onClick={prevStep}
-                    variant="outline"
-                    className="h-12 px-6 rounded-lg border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                    className="h-16 px-12 rounded-none text-zinc-600 hover:text-white hover:bg-zinc-950 font-black text-[10px] uppercase tracking-[0.4em] transition-all"
                 >
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                    <ArrowLeft className="w-4 h-4 mr-6" /> BACK_TO_MANIFEST
                 </Button>
                 <Button
                     onClick={nextStep}
-                    className="flex-1 h-12 rounded-lg bg-white text-black hover:bg-zinc-100 font-semibold transition-all"
+                    className="h-16 px-16 rounded-none bg-white text-black hover:bg-emerald-500 font-black text-[10px] uppercase tracking-[0.6em] transition-all duration-700 shadow-[0_20px_60px_rgba(255,255,255,0.05)]"
                 >
-                    Get Carrier Rates <ArrowRight className="ml-2 h-4 w-4" />
+                    COMMIT_INTELLIGENCE <ArrowRight className="w-4 h-4 ml-6" />
                 </Button>
             </div>
         </div>

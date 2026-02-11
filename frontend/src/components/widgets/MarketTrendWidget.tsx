@@ -19,10 +19,16 @@ interface MarketData {
     summary: string;
 }
 
-export function MarketTrendWidget() {
+interface MarketTrendWidgetProps {
+    initialCountry?: string;
+    initialCommodity?: string;
+    className?: string;
+}
+
+export function MarketTrendWidget({ initialCountry, initialCommodity, className }: MarketTrendWidgetProps) {
     const [market, setMarket] = useState<MarketData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [country, setCountry] = useState("GLOBAL");
+    const [country, setCountry] = useState(initialCountry || "GLOBAL");
     const [searchInput, setSearchInput] = useState("");
     const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
     const { t, direction } = useLanguage();
@@ -47,8 +53,8 @@ export function MarketTrendWidget() {
     };
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        fetchData(initialCountry || "GLOBAL");
+    }, [initialCountry]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,7 +64,7 @@ export function MarketTrendWidget() {
     };
 
     if (loading || !market) return (
-        <div className="h-64 w-full bg-zinc-900/50 rounded-xl animate-pulse border border-zinc-800" />
+        <div className="h-64 w-full bg-card/50 rounded-xl animate-pulse border border-border" />
     );
 
     // Chart Dimensions
@@ -80,7 +86,7 @@ export function MarketTrendWidget() {
     const areaPoints = `${getX(0)},${height} ${points} ${getX(market.data.length - 1)},${height}`;
 
     return (
-        <div className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 relative overflow-hidden group" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`w-full bg-card/50 border border-border rounded-xl p-6 relative overflow-hidden group ${className}`} dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -98,7 +104,7 @@ export function MarketTrendWidget() {
                     <input
                         type="text"
                         placeholder={t('widgets.officeLocator.searchPlaceholder')}
-                        className="bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 w-32 md:w-40"
+                        className="bg-card/30 border border-border rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/20 w-32 md:w-40"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                     />
@@ -176,7 +182,7 @@ export function MarketTrendWidget() {
                             transform: 'translate(-50%, -120%)'
                         }}
                     >
-                        <div className="bg-zinc-900 border border-zinc-700 px-3 py-2 rounded-lg shadow-xl text-center min-w-[100px]" dir="ltr">
+                        <div className="bg-card border border-border px-3 py-2 rounded-lg shadow-xl text-center min-w-[100px]" dir="ltr">
                             <div className="text-xs text-zinc-500 mb-1">{market.data[hoveredPoint].date}</div>
                             <div className="text-lg font-bold text-white">${market.data[hoveredPoint].price}</div>
                             {market.data[hoveredPoint].type === 'projected' && (
