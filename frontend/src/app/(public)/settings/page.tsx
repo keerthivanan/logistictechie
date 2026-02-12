@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
 export default function SettingsPage() {
+    const { t } = useLanguage();
     const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState("account");
     const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
@@ -43,9 +45,9 @@ export default function SettingsPage() {
     };
 
     const sections = [
-        { id: "01", label: "SECURITY", icon: Lock, desc: "Manage cryptographic access and system credentials." },
-        { id: "02", label: "NOTIFICATIONS", icon: Bell, desc: "Configure millisecond telemetry alerts and mission updates." },
-        { id: "03", label: "LOCALIZATION", icon: Globe, desc: "Adjust temporal regional nodes and linguistic frameworks." }
+        { id: "01", label: t('settings.security.title').toUpperCase(), value: 'security', icon: Lock, desc: t('settings.security.desc') },
+        { id: "02", label: t('settings.notifications.title').toUpperCase(), value: 'notifications', icon: Bell, desc: t('settings.notifications.desc') },
+        { id: "03", label: t('settings.language.title').toUpperCase(), value: 'localization', icon: Globe, desc: t('settings.language.desc') }
     ];
 
     return (
@@ -60,7 +62,7 @@ export default function SettingsPage() {
                     className="mb-64"
                 >
                     <span className="arch-label mb-12 block">CONFIGURATION</span>
-                    <h1 className="arch-heading">System <br />Parameters</h1>
+                    <h1 className="arch-heading">{t('audit.sysParams').split(' ')[0]} <br />{t('audit.sysParams').split(' ').slice(1).join(' ')}</h1>
                 </motion.div>
 
                 <div className="grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
@@ -70,8 +72,8 @@ export default function SettingsPage() {
                         {sections.map((section) => (
                             <div
                                 key={section.id}
-                                onClick={() => setActiveTab(section.label.toLowerCase())}
-                                className={`arch-detail-line group cursor-pointer transition-all ${activeTab === section.label.toLowerCase() ? 'border-white opacity-100' : 'opacity-40 hover:opacity-100'}`}
+                                onClick={() => setActiveTab(section.value)}
+                                className={`arch-detail-line group cursor-pointer transition-all ${activeTab === section.value ? 'border-white opacity-100' : 'opacity-40 hover:opacity-100'}`}
                             >
                                 <span className="arch-number block mb-4">{section.id}</span>
                                 <h3 className="text-3xl font-light text-white uppercase tracking-tight mb-2">
@@ -98,7 +100,7 @@ export default function SettingsPage() {
                                     <h2 className="text-4xl font-light text-white uppercase tracking-tighter italic">Credential_Sync</h2>
                                     <form onSubmit={handlePasswordChange} className="space-y-10">
                                         <div className="space-y-4">
-                                            <label className="arch-label">CURRENT_KEY</label>
+                                            <label className="arch-label">{t('settings.security.currentPwd').toUpperCase().replace(' ', '_')}</label>
                                             <input
                                                 type="password"
                                                 value={passwords.current}
@@ -107,7 +109,7 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <label className="arch-label">NEW_ALLOCATION</label>
+                                            <label className="arch-label">{t('settings.security.newPwd').toUpperCase().replace(' ', '_')}</label>
                                             <input
                                                 type="password"
                                                 value={passwords.new}
@@ -125,7 +127,7 @@ export default function SettingsPage() {
                                             />
                                         </div>
                                         <button className="h-24 px-16 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200">
-                                            COMMIT_SECURITY_UPDATE
+                                            {t('settings.security.update').toUpperCase().replace(' ', '_')}
                                         </button>
                                         {msg.text && (
                                             <div className={`p-8 border-l-2 ${msg.type === 'success' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-500' : 'border-red-500 bg-red-500/5 text-red-500'} text-[10px] font-bold uppercase tracking-[0.4em]`}>
@@ -155,7 +157,7 @@ export default function SettingsPage() {
                 {/* Sub-footer Metric Context */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
                     <span className="arch-label mb-12 block">SYSTEM_INTEGRITY</span>
-                    <h2 className="arch-heading mb-16 italic">Encrypted. Always.</h2>
+                    <h2 className="arch-heading mb-16 italic">{t('legal.privacy.security_title')}</h2>
                     <div className="flex justify-center gap-12 mt-24 opacity-20">
                         <Lock className="w-8 h-8" />
                         <Shield className="w-8 h-8" />

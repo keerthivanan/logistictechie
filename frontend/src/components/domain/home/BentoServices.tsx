@@ -63,7 +63,7 @@ export function BentoServices() {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: idx * 0.1 }}
-                            className={`${cat.size} ${cat.color === 'white' ? 'bg-white text-black' : 'bg-zinc-950 border border-white/5'} p-12 group relative overflow-hidden flex flex-col justify-end rounded-none hover:border-white/20 transition-all`}
+                            className={`${cat.size} ${cat.color === 'white' ? 'bg-white text-black' : 'bg-zinc-950 border border-white/5 holographic-glow'} p-12 group relative overflow-hidden flex flex-col justify-end rounded-none hover:border-white/20 transition-all`}
                         >
                             <div className={`absolute top-12 left-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12`}>
                                 <cat.icon className={`h-12 w-12 ${cat.color === 'white' ? 'text-black' : 'text-emerald-500'}`} />

@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import FreightosWidget from "@/components/widgets/FreightosWidget";
 import { OfficeFinder } from "@/components/tools/OfficeFinder";
 import { Calculator, Zap, Ruler, Leaf, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ToolsPage() {
+    const { t } = useLanguage();
     const tools = [
         {
             id: "01",
@@ -49,19 +51,19 @@ export default function ToolsPage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">INSTRUMENTS</span>
-                        <h1 className="arch-heading">Shipping <br />Calculators</h1>
+                        <span className="arch-label mb-12 block">{t('toolsPage.instruments')}</span>
+                        <h1 className="arch-heading">{t('toolsPage.title')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
-                            High-precision <strong className="text-white">logistics tools</strong> for architectural supply chain planning.
+                            {t('toolsPage.planning')}
                         </p>
                     </div>
                 </motion.div>
 
                 {/* Office Finder Node */}
                 <div className="mb-64 border-t border-white/5 pt-32">
-                    <span className="arch-label mb-16 block">GLOBAL_LOCATOR</span>
+                    <span className="arch-label mb-16 block">{t('toolsPage.globalLocator')}</span>
                     <OfficeFinder />
                 </div>
 
@@ -101,8 +103,8 @@ export default function ToolsPage() {
                 {/* Secondary Feature: Rate Estimator */}
                 <div className="mt-96 grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
                     <div>
-                        <span className="arch-label mb-12 block">INTEL</span>
-                        <h2 className="text-5xl font-light text-white leading-tight">Market <br />Estimator</h2>
+                        <span className="arch-label mb-12 block">{t('toolsPage.intel')}</span>
+                        <h2 className="text-5xl font-light text-white leading-tight">{t('toolsPage.marketEstimator')}</h2>
                         <div className="arch-detail-line h-48 opacity-20 hidden lg:block" />
                     </div>
                     <div className="bg-zinc-950/20 border border-white/5 p-8 grayscale">
@@ -130,8 +132,8 @@ export default function ToolsPage() {
 
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">TOOLS_ACTIVE</span>
-                    <h2 className="arch-heading italic mb-16">Design. Plan. Move.</h2>
+                    <span className="arch-label mb-12 block">{t('toolsPage.active')}</span>
+                    <h2 className="arch-heading italic mb-16">{t('toolsPage.designPlanMove')}</h2>
                 </div>
             </div>
         </main>

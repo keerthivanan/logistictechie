@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Any
 from enum import Enum
 from datetime import datetime
 
@@ -35,9 +35,21 @@ class OceanQuote(BaseModel):
     customs_duty_estimate: float = 0.0
     port_congestion_index: float = 0.0
     
+    # 🧠 The Wisdom Layer
+    wisdom: Optional[str] = None
+    thc_fee: float = 0.0
+    pss_fee: float = 0.0
+    fuel_fee: float = 0.0
+    
+    # 🚢 Multi-Schedule Intelligence
+    vessel_name: Optional[str] = None
+    departure_date: Optional[str] = None
+    is_featured: bool = False
+    
     # 🔒 Security Verification
     is_real_api_rate: bool = True
     source_endpoint: str 
+    contact_office: Optional[str] = None
 
 class RateRequest(BaseModel):
     origin: str  # e.g., "Shanghai" or "CNSHA"
@@ -71,7 +83,7 @@ class UserResponse(BaseModel):
 class BookingCreate(BaseModel):
     quote_id: str
     user_id: str
-    cargo_details: str
+    cargo_details: Any # Accept string or dict for robustness
     price: float = 0.0
     quote_data: Optional[dict] = None # For implicit quote creation
 

@@ -26,6 +26,18 @@ export interface QuoteResult {
     carbonEmissions: number;
     customsDuty: number;
     portCongestion: number;
+
+    // 🧠 The Wisdom Layer
+    wisdom?: string;
+    thc_fee?: number;
+    pss_fee?: number;
+    fuel_fee?: number;
+    contactOffice?: string;
+
+    // 🚢 Multi-Schedule Intelligence
+    vesselName?: string;
+    departureDate?: string;
+    isFeatured?: boolean;
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:8000/api";
@@ -62,6 +74,14 @@ export const logisticsClient = {
                     carbon_emissions?: number;
                     customs_duty_estimate?: number;
                     port_congestion_index?: number;
+                    wisdom?: string;
+                    thc_fee?: number;
+                    pss_fee?: number;
+                    fuel_fee?: number;
+                    contact_office?: string;
+                    vessel_name?: string;
+                    departure_date?: string;
+                    is_featured?: boolean;
                     type: string
                 }, index: number) => {
                     let logo = '/logos/maersk.png';
@@ -69,6 +89,10 @@ export const logisticsClient = {
                     if (name.includes('maersk')) logo = '/logos/maersk.png';
                     else if (name.includes('cma')) logo = '/logos/cma.png';
                     else if (name.includes('msc')) logo = '/logos/msc.png';
+                    else if (name.includes('hapag')) logo = '/logos/hapag-lloyd.jpeg';
+                    else if (name.includes('hmm')) logo = '/logos/hmm.png';
+                    else if (name.includes('one')) logo = '/logos/one.png';
+                    else if (name.includes('evergreen')) logo = '/logos/evergreen.png';
                     else if (name.includes('searates')) logo = '/logos/searates.png';
                     else logo = '/logos/carrier-generic.png';
 
@@ -77,18 +101,30 @@ export const logisticsClient = {
                         carrier: r.carrier_name,
                         carrier_logo: logo,
                         price: r.price,
-                        currency: r.currency,
+                        currency: r.currency || "USD",
                         days: r.transit_time_days || r.days || 0,
                         validUntil: r.expiration_date || "2026-12-31",
                         isReal: r.is_real_api_rate,
-                        tags: ["Direct", "Eco-Select"], // Elite defaults
+                        tags: r.is_featured ? ["AI_PROPHETIC", "OPTIMAL_CORRIDOR"] : ["Direct", "Eco-Select"],
                         fee_breakdown: r.surcharges ? r.surcharges.map((s: any) => ({ name: s.name, amount: s.amount })) : [],
 
                         // 👑 Sovereign Metrics Mapping
                         riskScore: r.risk_score || 0,
                         carbonEmissions: r.carbon_emissions || 0,
                         customsDuty: r.customs_duty_estimate || 0,
-                        portCongestion: r.port_congestion_index || 0
+                        portCongestion: r.port_congestion_index || 0,
+
+                        // 🧠 Wisdom Layer
+                        wisdom: r.wisdom,
+                        thc_fee: r.thc_fee,
+                        pss_fee: r.pss_fee,
+                        fuel_fee: r.fuel_fee,
+                        contactOffice: r.contact_office,
+
+                        // 🚢 Schedule
+                        vesselName: r.vessel_name,
+                        departureDate: r.departure_date,
+                        isFeatured: r.is_featured
                     };
                 });
             }
@@ -142,10 +178,35 @@ export const logisticsClient = {
     getSchedules: async (origin: string, dest: string, date: string) => {
         try {
             const params = new URLSearchParams({ origin, destination: dest });
-            const res = await axios.get(`${BACKEND_URL}/schedules?${params.toString()}`);
+            const res = await axios.get(`${BACKEND_URL}/references/schedules?${params.toString()}`);
             return res.data.schedules || [];
         } catch {
             return [];
+        }
+    },
+
+    /**
+     * Get Market Discovery Indices
+     */
+    getMarketIndices: async () => {
+        try {
+            const res = await axios.get(`${BACKEND_URL}/references/market/indices`);
+            return res.data.indices || [];
+        } catch {
+            return [];
+        }
+    },
+
+    /**
+     * Get Market Trends (AI Forecast)
+     */
+    getMarketTrends: async (country: string = "GLOBAL", commodity: string = "General Cargo") => {
+        try {
+            const params = new URLSearchParams({ country, commodity });
+            const res = await axios.get(`${BACKEND_URL}/references/market/trends?${params.toString()}`);
+            return res.data.trend || null;
+        } catch {
+            return null;
         }
     }
 };

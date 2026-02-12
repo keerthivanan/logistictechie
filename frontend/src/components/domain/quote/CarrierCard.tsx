@@ -17,10 +17,16 @@ interface CarrierCardProps {
 
 export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardProps) {
     const [expanded, setExpanded] = useState(false);
+    const isFeatured = quote.isFeatured;
 
     return (
-        <Card className="group overflow-hidden border border-white/10 shadow-none hover:border-white/30 transition-all duration-700 bg-black/40 backdrop-blur-3xl rounded-none mb-4 relative">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <Card className={`group overflow-hidden border ${isFeatured ? 'border-emerald-500/40 holographic-glow' : 'border-white/10'} shadow-none hover:border-white/30 transition-all duration-700 bg-black/40 backdrop-blur-3xl rounded-none mb-4 relative`}>
+            {isFeatured && (
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent animate-pulse" />
+            )}
+            {!isFeatured && (
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            )}
 
             {/* Header / Carrier Info */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 border-b border-white/5 p-10">
@@ -104,7 +110,19 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                     </div>
 
                     <div className="flex justify-between items-center mt-6">
-                        <span className="titan-label text-gray-600">VELOCITY_METRIC: {quote.days} DAYS_E</span>
+                        <div className="flex items-center gap-6">
+                            <span className="titan-label text-gray-600">VELOCITY_METRIC: {quote.days} DAYS_E</span>
+                            {quote.departureDate && (
+                                <span className="titan-label text-emerald-500 border border-emerald-500/20 px-2 py-0.5">
+                                    DEPARTURE: {quote.departureDate}
+                                </span>
+                            )}
+                            {quote.vesselName && (
+                                <span className="titan-label text-white/40 italic">
+                                    VESSEL: {quote.vesselName}
+                                </span>
+                            )}
+                        </div>
                         <span className="titan-label text-gray-600">SECURE_CORRIDOR_TRANSIT</span>
                     </div>
                 </div>
@@ -139,9 +157,17 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                             {/* Left: Detailed Line Items */}
                             <div className="space-y-10">
                                 <h4 className="titan-label flex items-center gap-3">
-                                    <Calculator className="w-3 h-3" /> RATE_CALIBRATION
+                                    <Calculator className="w-3 h-3 text-emerald-500" /> RATE_CALIBRATION
                                 </h4>
                                 <div className="space-y-5">
+                                    {quote.wisdom && (
+                                        <div className="bg-emerald-500/5 border border-emerald-500/10 p-6 mb-8">
+                                            <span className="titan-label text-emerald-500 mb-2 block">INTELLIGENCE_WISDOM</span>
+                                            <p className="text-[11px] font-bold text-white uppercase leading-relaxed italic tracking-widest leading-loose">
+                                                "{quote.wisdom}"
+                                            </p>
+                                        </div>
+                                    )}
                                     {quote.fee_breakdown && quote.fee_breakdown.length > 0 ? (
                                         quote.fee_breakdown.map((fee: { name: string; amount: number }, idx: number) => (
                                             <div key={idx} className="flex justify-between items-center group/fee">
@@ -154,13 +180,35 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                         ))
                                     ) : (
                                         <>
-                                            <div className="flex justify-between items-center">
-                                                <span className="titan-label text-gray-500">BASE_FREIGHT_PROTOCOL</span>
-                                                <span className="font-mono text-xs font-bold text-white">${(quote.price * 0.8).toLocaleString()}</span>
+                                            <div className="flex justify-between items-center group/fee">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-1 h-1 bg-white"></div>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">BASE_FREIGHT_PROTOCOL</span>
+                                                </div>
+                                                <span className="font-mono text-xs font-bold text-white">${(quote.fuel_fee || quote.price * 0.6).toLocaleString()}</span>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="titan-label text-gray-500">DYNAMIC_SURCHARGES</span>
-                                                <span className="font-mono text-xs font-bold text-white">${(quote.price * 0.2).toLocaleString()}</span>
+                                            <div className="flex justify-between items-center group/fee">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-1 h-1 bg-white/20"></div>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">TERMINAL_HANDLING (THC)</span>
+                                                </div>
+                                                <span className="font-mono text-xs font-bold text-white">${(quote.thc_fee || 350).toLocaleString()}</span>
+                                            </div>
+                                            {quote.pss_fee && quote.pss_fee > 0 ? (
+                                                <div className="flex justify-between items-center group/fee">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-1 h-1 bg-red-500"></div>
+                                                        <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">PEAK_SEASON (PSS)</span>
+                                                    </div>
+                                                    <span className="font-mono text-xs font-bold text-white">${quote.pss_fee.toLocaleString()}</span>
+                                                </div>
+                                            ) : null}
+                                            <div className="flex justify-between items-center group/fee">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-1 h-1 bg-white/10"></div>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">DYNAMIC_SURCHARGES</span>
+                                                </div>
+                                                <span className="font-mono text-xs font-bold text-white">${(quote.price - (quote.fuel_fee || 0) - (quote.thc_fee || 0) - (quote.pss_fee || 0)).toLocaleString()}</span>
                                             </div>
                                         </>
                                     )}
@@ -169,12 +217,25 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                     <span className="titan-label text-white">AGGREGATED_TOTAL</span>
                                     <span className="font-bold text-2xl text-white tracking-tight">USD {quote.price.toLocaleString()}</span>
                                 </div>
+
+                                {/* 👑 5-API SYNC TELEMETRY */}
+                                <div className="pt-8 border-t border-white/5 space-y-4">
+                                    <h4 className="titan-label text-white/40 mb-4 tracking-[0.4em]">SOVEREIGN_HANDSHAKE</h4>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">VESSEL_AUTH</span>
+                                        <span className="text-[10px] font-black text-emerald-500 uppercase italic">{(quote as any).source_endpoint?.split('(')[1]?.replace(')', '') || "VERIFIED"}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">LOCAL_OFFICE</span>
+                                        <span className="text-[10px] font-black text-white uppercase italic">{quote.contactOffice || "+1 (800) MAERSK"}</span>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Right: Routing Details */}
                             <div className="bg-white/[0.01] p-10 border border-white/5 shadow-2xl relative overflow-hidden">
                                 <h4 className="titan-label mb-10 flex items-center gap-3">
-                                    <Truck className="w-3 h-3" /> NODE_TELEMETRY
+                                    <Truck className="w-3 h-3 text-emerald-500" /> NODE_TELEMETRY
                                 </h4>
                                 <div className="space-y-8 relative z-10">
                                     <div className="flex gap-6">

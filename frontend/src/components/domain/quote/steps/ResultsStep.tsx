@@ -119,33 +119,21 @@ export function ResultsStep() {
                 <div className="lg:col-span-3 space-y-12">
                     <div className="flex items-center justify-between border-b border-white/5 pb-8">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white flex items-center gap-4">
-                            <Filter className="w-3 h-3 text-emerald-500" /> FILTERS
+                            <Globe className="w-3 h-3 text-emerald-500" /> TRAJECTORY_MAP
                         </h3>
                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     </div>
 
-                    <div className="space-y-8">
-                        <div className="space-y-6">
-                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700">BUDGET_THRESHOLD</label>
-                            <Slider defaultValue={[100]} max={100} step={1} className="w-full" />
-                            <div className="flex justify-between text-[9px] font-black text-zinc-800 uppercase tracking-widest">
-                                <span className="text-emerald-500">${bestPrice}</span>
-                                <span>${Math.round(bestPrice * 2)}</span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6 pt-10 border-t border-white/5">
-                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700">MODAL_PROTOCOL</label>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-6 group cursor-pointer">
-                                    <Checkbox id="ocean" checked className="rounded-none border-white/5 data-[state=checked]:bg-white data-[state=checked]:text-black" />
-                                    <Label htmlFor="ocean" className="text-[10px] font-black uppercase tracking-[0.2em] text-white cursor-pointer group-hover:text-emerald-500 transition-colors">OCEAN_FCL</Label>
-                                </div>
-                                <div className="flex items-center gap-6 group cursor-pointer opacity-30">
-                                    <Checkbox id="air" disabled className="rounded-none border-white/5" />
-                                    <Label htmlFor="air" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-800 cursor-pointer">BETA_AIR_UNIT</Label>
-                                </div>
-                            </div>
+                    <div className="h-96 border border-white/5 bg-zinc-950/40 relative overflow-hidden group">
+                        <RouteMap
+                            origin={formData.origin}
+                            destination={formData.destination}
+                            className="w-full h-full grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000"
+                        />
+                        <div className="absolute inset-0 pointer-events-none border border-white/10" />
+                        <div className="absolute top-4 right-4 flex flex-col gap-2">
+                            <div className="px-3 py-1 bg-black/80 border border-white/10 text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">SAT_LINK_ACTIVE</div>
+                            <div className="px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-widest whitespace-nowrap">SOVEREIGN_NODE_V2</div>
                         </div>
                     </div>
 

@@ -3,9 +3,11 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Shield, Crown, ArrowUpRight, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
 
 export default function PricingPage() {
+    const { t } = useLanguage();
     const plans = [
         {
             id: "01",
@@ -59,12 +61,12 @@ export default function PricingPage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">PRICING</span>
-                        <h1 className="arch-heading">Tiered <br />Hierarchy</h1>
+                        <span className="arch-label mb-12 block">{t('pricingPage.label')}</span>
+                        <h1 className="arch-heading">{t('pricingPage.title')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
-                            Direct carrier rates with <strong className="text-white">zero latent fees</strong>. Pure. Unfiltered. Velocity.
+                            {t('pricingPage.unfiltered')}
                         </p>
                     </div>
                 </motion.div>
@@ -101,7 +103,7 @@ export default function PricingPage() {
                                 </div>
                                 <Link href="/quote" className="block pt-8">
                                     <button className="w-full h-20 border border-white/10 text-white text-[11px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
-                                        INITIALIZE_PROTOCOL
+                                        {t('pricingPage.initProtocol')}
                                     </button>
                                 </Link>
                             </div>
@@ -112,16 +114,16 @@ export default function PricingPage() {
                 {/* Sub-Interface: Enterprise */}
                 <div className="mt-96 grid lg:grid-cols-[2fr,1fr] gap-32 border-t border-white/5 pt-32">
                     <div className="space-y-12">
-                        <span className="arch-label mb-12 block">BESPOKE</span>
-                        <h2 className="text-5xl font-light text-white leading-tight">Complex <br />Deployment</h2>
+                        <span className="arch-label mb-12 block">{t('pricingPage.bespoke')}</span>
+                        <h2 className="text-5xl font-light text-white leading-tight">{t('pricingPage.complexDeployment')}</h2>
                         <p className="text-2xl text-zinc-500 leading-relaxed max-w-2xl">
-                            Connect with our <strong className="text-white text-3xl italic">Strategic Operations Group</strong> for specialized global deployment and custom neural link training.
+                            {t('pricingPage.strategist')}
                         </p>
                     </div>
                     <div className="flex flex-col justify-end items-end pb-12">
                         <Link href="/contact">
                             <button className="h-24 px-16 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200 flex items-center gap-6">
-                                FORGE_ALLIANCE <ArrowRight className="w-5 h-5" />
+                                {t('pricingPage.forgeAlliance')} <ArrowRight className="w-5 h-5" />
                             </button>
                         </Link>
                     </div>
@@ -129,8 +131,8 @@ export default function PricingPage() {
 
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">PRICING_HIERARCHY</span>
-                    <h2 className="arch-heading italic mb-16">Pure. Unfiltered.</h2>
+                    <span className="arch-label mb-12 block">{t('pricingPage.priceHierarchy')}</span>
+                    <h2 className="arch-heading italic mb-16">{t('pricingPage.pureUnfiltered')}</h2>
                 </div>
             </div>
         </main>

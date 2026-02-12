@@ -3,12 +3,14 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Lock, Loader2, Mail, ShieldCheck, Globe, Zap, ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 function LoginForm() {
+    const { t } = useLanguage();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -19,11 +21,11 @@ function LoginForm() {
     useEffect(() => {
         const errorParam = searchParams.get("error");
         if (errorParam === "CredentialsSignin") {
-            setError("DENIED: Access credentials mismatch.");
+            setError(t('auth.errors.credentialsMismatch'));
         } else if (errorParam) {
-            setError("SECURITY: Unexpected authentication failure.");
+            setError(t('auth.errors.unexpectedFailure'));
         }
-    }, [searchParams]);
+    }, [searchParams, t]);
 
     const handleCredentialsLogin = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -38,13 +40,13 @@ function LoginForm() {
             });
 
             if (result?.error) {
-                setError("DENIED: Credentials mismatch.");
+                setError(t('auth.errors.credentialsMismatch'));
             } else {
                 router.push("/dashboard");
                 router.refresh();
             }
         } catch (err) {
-            setError("OFFLINE: Connection refusal.");
+            setError(t('auth.errors.offline'));
         } finally {
             setIsLoading(false);
         }
@@ -111,7 +113,7 @@ function LoginForm() {
                         disabled={isLoading}
                         className="w-full h-24 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200"
                     >
-                        {isLoading ? "AUTHENTICATING..." : "INITIALIZE_SESSION"}
+                        {isLoading ? t('auth.login.authenticating') : t('auth.login.initSession')}
                     </button>
 
                     <button
@@ -135,6 +137,8 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+    const { t } = useLanguage();
+
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <div className="container max-w-[1400px] mx-auto px-8 py-48">
@@ -148,11 +152,11 @@ export default function LoginPage() {
                 >
                     <div>
                         <span className="arch-label mb-12 block">AUTHENTICATION</span>
-                        <h1 className="arch-heading">Welcome <br />Back.</h1>
+                        <h1 className="arch-heading">{t('audit.welcomeBack').split(' ')[0]} <br />{t('audit.welcomeBack').split(' ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
-                            Unlock the <strong className="text-white">OS grid</strong>. Synchronize your missions and orbital status.
+                            {t('auth.login.subtitle_part1')} <strong className="text-white">{t('auth.login.subtitle_highlight')}</strong>. {t('auth.login.subtitle_part2')}
                         </p>
                     </div>
                 </motion.div>
@@ -163,8 +167,8 @@ export default function LoginPage() {
                     <div className="space-y-32">
                         <div className="space-y-16">
                             {[
-                                { id: "01", title: "Encrypted Node", desc: "All sessions are synchronized via military-grade relay." },
-                                { id: "02", title: "Global Sync", desc: "Resume missions across any sovereign location." }
+                                { id: "01", title: t('auth.login.feature1_title'), desc: t('auth.login.feature1_desc') },
+                                { id: "02", title: t('auth.login.feature2_title'), desc: t('auth.login.feature2_desc') }
                             ].map((item) => (
                                 <div key={item.id} className="arch-detail-line">
                                     <span className="arch-number block mb-4">{item.id}</span>
@@ -178,7 +182,7 @@ export default function LoginPage() {
                             <Link href="/signup" className="group inline-flex items-center gap-6">
                                 <span className="arch-label text-zinc-800 group-hover:text-white transition-colors">NEW_OPERATIVE?</span>
                                 <span className="text-xl font-light italic text-white flex items-center gap-4">
-                                    Create Account <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                                    {t('auth.login.createAccount')} <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                                 </span>
                             </Link>
                         </div>

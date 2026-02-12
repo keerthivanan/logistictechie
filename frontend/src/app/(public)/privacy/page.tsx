@@ -1,14 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PrivacyPage() {
+    const { t } = useLanguage();
+
     const protocols = [
-        { id: "01", title: "Information Gathering", content: "We collect only the essential telemetry data required to synchronize your global logistics manifests and neural identifiers." },
-        { id: "02", title: "Data Governance", content: "Your operational intelligence is encrypted at the source and stored in sovereign, high-security nodes in NEOM." },
-        { id: "03", title: "Third Party Relay", content: "Data is only transmitted to authorized carriers and customs nodes strictly for the execution of your missions." },
-        { id: "04", title: "Cookie Policy", content: "Our system uses minimal session nodes to maintain your architectural link. No predatory tracking algorithms are utilized." },
-        { id: "05", title: "Right to Erasure", content: "Operatives may terminate their neural link and request complete data depletion from the central ledger at any time." }
+        { id: "01", title: t('audit.privacy.p1_title'), content: t('audit.privacy.p1_desc') },
+        { id: "02", title: t('audit.privacy.p2_title'), content: t('audit.privacy.p2_desc') },
+        { id: "03", title: t('audit.privacy.p3_title'), content: t('audit.privacy.p3_desc') },
+        { id: "04", title: t('audit.privacy.p4_title'), content: t('audit.privacy.p4_desc') },
+        { id: "05", title: t('audit.privacy.p5_title'), content: t('audit.privacy.p5_desc') }
     ];
 
     return (
@@ -24,11 +27,11 @@ export default function PrivacyPage() {
                 >
                     <div>
                         <span className="arch-label mb-12 block">DATA_GOVERNANCE</span>
-                        <h1 className="arch-heading">Privacy <br />Protocols</h1>
+                        <h1 className="arch-heading">{t('audit.privacyProtocols').split(' ')[0]} <br />{t('audit.privacyProtocols').split(' ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
-                            Ensuring the <strong className="text-white">sovereignty</strong> of your operational data across all global logistics nodes.
+                            {t('legal.privacy.subtitle')}
                         </p>
                     </div>
                 </motion.div>
@@ -51,7 +54,7 @@ export default function PrivacyPage() {
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
                     <span className="arch-label mb-12 block">PRIVACY_SHIELD_V2</span>
-                    <h2 className="arch-heading italic mb-16">Secure. Private.</h2>
+                    <h2 className="arch-heading italic mb-16">{t('legal.privacy.title')}</h2>
                 </div>
             </div>
         </main>

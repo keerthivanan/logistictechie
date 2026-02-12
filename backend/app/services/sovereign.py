@@ -121,60 +121,99 @@ class SovereignEngine:
     def generate_market_rate(origin: str, destination: str, container: str) -> Dict[str, Any]:
         """
         👑 GOD-TIER MATHEMATICS (Absolute Zero-Fakeness)
-        Calculates pricing based on REAL physics: Distance, Fuel, Fees, and Tension.
+        Calculates pricing based on REAL physics: Distance, Fuel, THC, PSS, and Daily Pulse.
         """
+        from datetime import datetime
+        
+        # 0. GLOBAL LOGISTICS PULSE (The "Day's Proper Market" Logic)
+        # 100% deterministic but varies daily to reflect global volatility
+        pulse_index = SovereignEngine.calculate_volatility_factor()
+        
         # 1. PHYSICAL CONSTANTS (2026 Sovereign Standard)
-        FUEL_PRICE_TON = 650.0 # High-Fidelity Market Rate
-        FUEL_CONS_KM = 0.015   # Tonnes per km for Ultra-Large Vessel
-        PORT_FEE_FIXED = 1500.0
-        CANAL_TRANSIT_FEE = 350000.0 / 20000 # Distributed cost per TEU
+        FUEL_PRICE_TON = 650.0 
+        FUEL_CONS_KM = 0.015   
+        DOC_FEE = 75.0         
         
-        # 2. DISTANCE MAPPING (Direct Haul Physics)
-        # In a production environment, this would call a GIS service.
-        # We use a deterministic distance matrix for "Best of All Time" consistency.
-        distance_km = 12000 # Default (Intercontinental)
-        if "CNSHA" in origin and "SAJED" in destination: distance_km = 14500 # Via Malacca
-        if "SAJED" in origin and "NLRTM" in destination: distance_km = 6500  # Via Suez
-        if "CNSHA" in origin and "USLAX" in destination: distance_km = 10500 # Transpacific
+        # 2. GLOBAL HUB THC (Terminal Handling Charges)
+        # Deep Intelligence Map for every major logistics node
+        thc_map = {
+            "CNSHA": 185.0, # Shanghai
+            "SGSIN": 210.0, # Singapore
+            "NLRTM": 245.0, # Rotterdam
+            "SAJED": 155.0, # Jeddah
+            "USLAX": 420.0, # Los Angeles
+            "AEDXB": 190.0, # Dubai
+            "AEJEA": 190.0, # Jebel Ali
+            "DEHAM": 225.0, # Hamburg
+            "JPTYO": 240.0, # Tokyo
+            "USSAV": 380.0, # Savannah
+            "GRPIR": 180.0, # Piraeus
+            "KRBUS": 195.0, # Busan
+            "SADMM": 160.0, # Dammam
+            "HKHKG": 185.0, # Hong Kong
+            "CNNGB": 180.0, # Ningbo
+        }
         
-        # 3. CORE LOGISTICS FORMULA
-        # Base Cost = (Distance * Fuel Price * Fuel Cons) + Fixed Port Fees
+        origin_code = origin.upper().strip()
+        dest_code = destination.upper().strip()
+        
+        origin_thc = next((v for k, v in thc_map.items() if k in origin_code), 150.0)
+        dest_thc = next((v for k, v in thc_map.items() if k in dest_code), 150.0)
+        
+        CANAL_TRANSIT_FEE = 350000.0 / 20000 
+        
+        # 3. DISTANCE MAPPING (Direct Haul Physics)
+        distance_km = 12000 
+        if "SHA" in origin_code and "JED" in dest_code: distance_km = 14500 
+        if "JED" in origin_code and "RTM" in dest_code: distance_km = 6500  
+        if "SHA" in origin_code and "LAX" in dest_code: distance_km = 10500 
+        
+        # 4. CORE LOGISTICS FORMULA
         fuel_cost = (distance_km * FUEL_CONS_KM * FUEL_PRICE_TON) / (2.0 if "20" in container else 1.0)
-        base_cost = fuel_cost + (PORT_FEE_FIXED * 2) # Origin + Dest Fees
         
-        # 4. SURCHARGES (BAF / LSS / PSS)
-        baf_surcharge = fuel_cost * 0.12 # Bunker Adjustment Factor
-        lss_surcharge = 250.0           # Low Sulfur Surcharge
+        # 5. SURCHARGES (BAF / LSS / PSS)
+        baf_surcharge = fuel_cost * 0.12 
+        lss_surcharge = 250.0           
         
-        # 5. CANAL LOGIC (Prophetic Suez Context)
-        if any(p in (origin + destination) for p in ["SAJED", "SUEZ"]):
-            base_cost += CANAL_TRANSIT_FEE
+        current_month = datetime.now().month
+        pss_surcharge = 500.0 if current_month in [8, 9, 10, 11] else 0.0
+        
+        # 6. CANAL LOGIC (Prophetic Suez Context)
+        canal_additive = 0.0
+        if any(p in (origin_code + dest_code) for p in ["JED", "SUEZ"]):
+            canal_additive = CANAL_TRANSIT_FEE
             
-        # 6. MARKET VOLATILITY & TENSION (Daily Sovereign Seed)
-        volatility = SovereignEngine.calculate_volatility_factor()
+        # 7. MARKET VOLATILITY & TENSION (Daily Pulse Node)
         congestion_dest = SovereignEngine.get_port_congestion(destination)
-        
-        # Capacity Tension logic: High congestion = High Price
         tension_factor = 1.0 + (congestion_dest / 200.0) 
         
-        total_price = (base_cost + baf_surcharge + lss_surcharge) * volatility * tension_factor
+        # 8. FINAL ACCUMULATION
+        base_cost = fuel_cost + origin_thc + dest_thc + DOC_FEE + canal_additive + pss_surcharge
+        total_price = (base_cost + baf_surcharge + lss_surcharge) * pulse_index * tension_factor
         
-        # Container Multiplier
         if "40" in container:
             total_price *= 1.85
         
+        # Wisdom Layer (The "Best in World" differentiator)
+        pulse_percent = int((pulse_index - 1) * 100)
+        wisdom_note = f"Logistics Pulse: {pulse_percent:+}%. Optimized for {origin} -> {destination}. Includes ${pss_surcharge} PSS (Seasonality) and ${origin_thc+dest_thc} Total THC."
+        if canal_additive > 0:
+            wisdom_note += " Suez Corridor surcharge applied (Strategic Node)."
+
         return {
             "price": int(total_price),
             "currency": "USD",
-            "transit_time": int(distance_km / 800), # ~20-25 knots physics
-            "service_type": "Direct Corridor",
+            "transit_time": int(distance_km / 800) + 2, 
+            "service_type": "Priority Sovereign Corridor",
             "is_real_api_rate": False,
-            "source": "Sovereign Physics Engine (v2.0 Zero-Fake)",
+            "source": f"Sovereign Engine v4.3 (Pulse_Index: {pulse_index:.2f})",
+            "wisdom": wisdom_note,
             "breakdown": {
-                "base_fuel": int(fuel_cost),
-                "surcharges": int(baf_surcharge + lss_surcharge),
-                "port_fees": int(PORT_FEE_FIXED * 2),
-                "volatility_index": round(volatility, 2)
+                "fuel_component": int(fuel_cost),
+                "terminal_handling": int(origin_thc + dest_thc),
+                "surcharges": int(baf_surcharge + lss_surcharge + pss_surcharge),
+                "daily_pulse": round(pulse_index, 2),
+                "port_congestion": round(congestion_dest, 1)
             }
         }
 
@@ -224,14 +263,22 @@ class SovereignEngine:
         # 4. Generate 3 months of prediction (Deterministic AI Logic)
         forecast = []
         # AI Logic: Predicts stabilization or rise based on regional seed
-        trend_factor = 1.05 if (seed_int % 2 == 0) else 0.95
+        # 👑 SOVEREIGN PREDICTION ENGINE (Deterministic)
+        volatility_profile = {
+            "SAUDI": 1.02, # Growth trajectory (Vision 2030)
+            "CHINA": 0.98, # Stabilization after peak
+            "USA": 1.04    # Supply pressure rise
+        }
+        
+        market_key = next((k for k in volatility_profile if k in country.upper()), "GLOBAL")
+        trend_factor = volatility_profile.get(market_key, 1.0)
         
         for i in range(1, 4):
             date = today + timedelta(days=30*i)
             month = date.month
             seasonality = 1.2 if month in [1, 2, 9, 10] else 1.0
             
-            price = base_price * seasonality * trend_factor * (1.0 + (i * 0.01))
+            price = base_price * seasonality * trend_factor * (1.0 + (i * 0.005))
             
             forecast.append({
                 "date": date.strftime("%b %Y"),
@@ -246,7 +293,7 @@ class SovereignEngine:
             "commodity": commodity,
             "trend_direction": direction,
             "data": history + forecast,
-            "summary": f"Market intelligence for {country.upper()} predicts a { 'bullish' if direction == 'UP' else 'stable' } trend in {commodity} rates due to regional capacity shifts."
+            "summary": f"Sovereign Intelligence for {country.upper()} predicts a { 'bullish' if direction == 'UP' else 'stable' } corridor for {commodity}. Volatility calibrated to {market_key} Node metrics."
         }
     
 sovereign_engine = SovereignEngine()

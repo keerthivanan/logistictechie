@@ -27,6 +27,7 @@ class MaerskClient(OceanCarrierProtocol):
     async def _get_access_token(self) -> str:
         """
         Exchanges Consumer Key/Secret for an OAuth Token.
+        👑 MULTI-PROTOCOL HANDSHAKE
         """
         if self._circuit_broken:
             raise Exception("Maersk Circuit Breaker Active")
@@ -35,23 +36,38 @@ class MaerskClient(OceanCarrierProtocol):
             raise ValueError("Maersk API Credentials Missing in .env")
 
         url = f"{self.BASE_URL}/oauth2/access_token"
+        
+        # Protocol A: Client Credentials as data
         params = {
             "grant_type": "client_credentials",
             "client_id": settings.MAERSK_CONSUMER_KEY,
             "client_secret": settings.MAERSK_CONSUMER_SECRET
         }
         
-        headers = {}
+        headers = {"X-System-ID": "PHOENIX-OS-KSA-2026"}
         if hasattr(settings, "MAERSK_INTEGRATION_ID") and settings.MAERSK_INTEGRATION_ID:
             headers["Integration-ID"] = settings.MAERSK_INTEGRATION_ID
             
         client = self.get_client()
         try:
             resp = await client.post(url, data=params, headers=headers)
-            if resp.status_code != 200:
-                self._circuit_broken = True
-                raise Exception(f"Maersk Auth Failed: {resp.text}")
-            return resp.json().get("access_token")
+            if resp.status_code == 200:
+                print("[MAERSK] OAuth Link Established (Protocol A)")
+                return resp.json().get("access_token")
+            
+            # Protocol B: Basic Auth Handshake (Fallback for stricter Gateways)
+            import base64
+            auth_str = f"{settings.MAERSK_CONSUMER_KEY}:{settings.MAERSK_CONSUMER_SECRET}"
+            encoded = base64.b64encode(auth_str.encode()).decode()
+            headers["Authorization"] = f"Basic {encoded}"
+            
+            resp_b = await client.post(url, data={"grant_type": "client_credentials"}, headers=headers)
+            if resp_b.status_code == 200:
+                print("[MAERSK] OAuth Link Established (Protocol B - Basic)")
+                return resp_b.json().get("access_token")
+                
+            self._circuit_broken = True
+            raise Exception(f"Maersk Auth Critical Failure: {resp_b.status_code} - {resp_b.text}")
         except Exception as e:
             self._circuit_broken = True
             raise e
@@ -114,26 +130,29 @@ class MaerskClient(OceanCarrierProtocol):
     async def get_active_vessels(self) -> List[Dict]:
         """
         Fetch live list of active vessels.
-        Uses Direct Key Support (verified working).
-        Verified Keys: ['carrierVesselCode', 'vesselShortName', 'vesselLongName', 'vesselCallSign']
+        👑 FLEET SYNCHRONIZATION
         """
         try:
             url = "https://api.maersk.com/reference-data/vessels"
             headers = await self._get_auth_headers(strict_oauth=False, direct_key_support=True)
             params = {"limit": 20}
             
+            print(f"[SOVEREIGN SYNC] Scanning Maersk Active Fleet...")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.get(url, params=params, headers=headers)
                 if resp.status_code == 200:
-                    return resp.json()
+                    data = resp.json()
+                    print(f"[SUCCESS] {len(data)} vessels identified in active corridor.")
+                    return data
                 return []
-        except Exception:
+        except Exception as e:
+            print(f"[ERROR] Fleet Sync Failed: {e}")
             return []
 
     async def get_commodities(self, query: str = "") -> List[Dict]:
         """
         Fetch commodity classifications.
-        Uses Direct Key Support (verified working).
+        👑 COMMODITY CLASSIFICATION SYNC
         """
         try:
             url = "https://api.maersk.com/commodity-classifications"
@@ -142,12 +161,16 @@ class MaerskClient(OceanCarrierProtocol):
             if query:
                 params["commodityName"] = query
                 
+            print(f"[SOVEREIGN SYNC] Classifying Commodity: {query or 'Global Search'}")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.get(url, params=params, headers=headers)
                 if resp.status_code == 200:
-                    return resp.json().get("commodities", [])
+                    data = resp.json().get("commodities", [])
+                    print(f"[SUCCESS] {len(data)} classifications retrieved.")
+                    return data
                 return []
-        except Exception:
+        except Exception as e:
+            print(f"[ERROR] Commodity Sync Failed: {e}")
             return []
 
     async def get_booking_offices(self, city: str) -> List[Dict]:
@@ -263,7 +286,11 @@ class MaerskClient(OceanCarrierProtocol):
                     risk_score=sovereign_engine.calculate_risk_score(request.origin, request.destination),
                     carbon_emissions=sovereign_engine.estimate_carbon_footprint(12000, request.container),
                     port_congestion_index=sovereign_engine.get_port_congestion(request.destination),
-                    contact_office=office_info
+                    contact_office=office_info,
+                    wisdom=market_rate["wisdom"],
+                    thc_fee=market_rate["breakdown"]["terminal_handling"],
+                    pss_fee=market_rate["breakdown"]["surcharges"] - 250, # Rough calc for PSS
+                    fuel_fee=market_rate["breakdown"]["fuel_component"]
                 ))
             
             return quotes
@@ -279,7 +306,8 @@ class MaerskClient(OceanCarrierProtocol):
         """
         try:
             url = f"{self.BASE_URL}/schedules/point-to-point"
-            headers = await self._get_auth_headers(strict_oauth=False)
+            # 👑 STRICT OAUTH MANDATORY FOR P2P
+            headers = await self._get_auth_headers(strict_oauth=True)
             params = {
                 "carrierMaersk": "true",
                 "originGeoId": origin_geo_id,

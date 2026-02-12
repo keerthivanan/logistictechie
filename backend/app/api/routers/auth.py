@@ -22,6 +22,62 @@ class RegisterRequest(BaseModel):
     full_name: Optional[str] = None
     company_name: Optional[str] = None
 
+class SocialSyncRequest(BaseModel):
+    email: str
+    name: Optional[str] = None
+    image: Optional[str] = None
+    provider: str = "google"
+
+@router.post("/social-sync", response_model=Token)
+async def social_sync(
+    request: SocialSyncRequest,
+    db: AsyncSession = Depends(deps.get_db)
+):
+    """
+    👑 SOCIAL SYNC PROTOCOL
+    Harmonizes Google/Social Auth with Phoenix Native JWTs.
+    Ensures social users are recognized as 'Elite Citizens' of the platform.
+    """
+    user = await crud.user.get_by_email(db, email=request.email)
+    
+    if not user:
+        # Create a Shadow User for the Social Provider
+        from app.models.user import User
+        import uuid
+        
+        # Generate a high-entropy random password for the shadow record
+        shadow_password = security.get_password_hash(str(uuid.uuid4()))
+        
+        user = await crud.user.create(
+            db,
+            email=request.email,
+            password=str(uuid.uuid4()), # We use a random string and it gets hashed in crud.create
+            full_name=request.name,
+            company_name="Social_Identity_Link",
+            avatar_url=request.image
+        )
+        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {request.email}")
+
+    if not user.is_active:
+        raise HTTPException(status_code=401, detail="Account Inactive")
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security.create_access_token(
+        data={"sub": user.email, "user_id": user.id, "name": user.full_name or "Social User"},
+        expires_delta=access_token_expires
+    )
+    refresh_token = security.create_refresh_token(
+        data={"sub": user.email, "user_id": user.id}
+    )
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user_id": str(user.id),
+        "user_name": user.full_name or "Elite User"
+    }
+
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
     form_data: UserLogin,

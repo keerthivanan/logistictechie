@@ -65,5 +65,5 @@ async def get_booking_by_ref(ref: str, db: AsyncSession = Depends(get_db)):
     """Get a specific booking by reference number."""
     db_booking = await crud.booking.get_by_reference(db, ref=ref)
     if not db_booking:
-        return {"success": False, "error": "Booking not found"}
+        raise HTTPException(status_code=404, detail="Booking not found")
     return {"success": True, "data": booking_to_dict(db_booking)}

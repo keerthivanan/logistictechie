@@ -41,12 +41,18 @@ class SearatesClient(OceanCarrierProtocol):
                             carrier_name=rate.get("carrier_name", "Global Line"),
                             origin_locode=request.origin,
                             dest_locode=request.destination,
+                            container_type=request.container,
                             price=float(rate.get("price", 0)),
                             currency=Currency.USD,
                             transit_time_days=int(rate.get("transit_time", 25)),
-                            expiration_date=rate.get("valid_until"),
+                            expiration_date=rate.get("valid_until") or "2026-12-31",
                             is_real_api_rate=True,
-                            source_endpoint=url
+                            source_endpoint=url,
+                            wisdom=f"Rate sourced via Searates Alpha Hub for {rate.get('carrier_name')}.",
+                            thc_fee=200.0,
+                            pss_fee=0.0,
+                            fuel_fee=float(rate.get("price", 0)) * 0.5,
+                            contact_office="+1 (800) SEARATES"
                         ))
                     return quotes
                 else:

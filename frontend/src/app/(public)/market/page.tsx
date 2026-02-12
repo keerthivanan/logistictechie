@@ -1,15 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, Globe, Shield, TrendingUp, BarChart3, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import InfogramChart from "@/components/widgets/InfogramChart";
+import { useEffect, useState } from "react";
+import { logisticsClient } from "@/lib/logistics";
+import { SovereignTrendChart } from "@/components/domain/market/SovereignTrendChart";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MarketPage() {
-    const marketIndices = [
-        { id: "01", name: "SCFI_INDEX", value: "2,143.50", change: "+1.2%", status: "UPWARD" },
-        { id: "02", name: "BDI_DRY_BULK", value: "1,894.00", change: "-0.5%", status: "STABLE" },
-        { id: "03", name: "AIR_FREIGHT_G2", value: "4.82/KG", change: "+2.4%", status: "URGENT" }
-    ];
+    const { t } = useLanguage();
+    const [marketIndices, setMarketIndices] = useState<any[]>([]);
+    const [trendData, setTrendData] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const [indices, trend] = await Promise.all([
+                logisticsClient.getMarketIndices(),
+                logisticsClient.getMarketTrends("GLOBAL", "General Cargo")
+            ]);
+            setMarketIndices(indices);
+            setTrendData(trend);
+        };
+        fetchData();
+    }, []);
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
@@ -22,13 +36,13 @@ export default function MarketPage() {
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     className="mb-48"
                 >
-                    <span className="arch-label mb-12 block">INTELLIGENCE</span>
-                    <h1 className="arch-heading">Market Data</h1>
+                    <span className="arch-label mb-12 block">{t('marketPage.intelligence')}</span>
+                    <h1 className="arch-heading">{t('marketPage.title')}</h1>
                 </motion.div>
 
                 {/* Index Matrix - Numbered Pattern */}
                 <div className="grid md:grid-cols-3 gap-16 border-t border-white/5 pt-32 mb-64">
-                    {marketIndices.map((idx) => (
+                    {marketIndices.length > 0 ? marketIndices.map((idx) => (
                         <div key={idx.id} className="arch-detail-line group cursor-default">
                             <span className="arch-number block mb-8 transition-all group-hover:text-white">{idx.id}</span>
                             <div className="space-y-4">
@@ -37,28 +51,48 @@ export default function MarketPage() {
                                     {idx.value}
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <span className="arch-label">{idx.change}</span>
+                                    <span className="arch-label text-emerald-500">{idx.change}</span>
                                     <div className="h-[1px] flex-1 bg-white/5" />
                                     <span className={`text-[9px] font-black uppercase tracking-widest ${idx.status === 'URGENT' ? 'text-red-500' : 'text-zinc-800'}`}>{idx.status}</span>
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        [1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse bg-white/5 h-48 border border-white/5" />
+                        ))
+                    )}
                 </div>
+
+                {/* Native Sovereign Trend Analyzer */}
+                {trendData && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="mb-64 border-t border-white/5 pt-32"
+                    >
+                        <SovereignTrendChart
+                            data={trendData.data}
+                            title={trendData.commodity + " _ " + trendData.country}
+                            summary={trendData.summary}
+                        />
+                    </motion.div>
+                )}
 
                 {/* Primary Visualization Nodes */}
                 <div className="space-y-64">
                     <div className="grid lg:grid-cols-[1fr,2.5fr] gap-32 border-t border-white/5 pt-32">
                         <div className="space-y-12">
-                            <span className="arch-label block">GLOBAL_CORRIDORS</span>
-                            <h2 className="text-5xl font-light text-white leading-tight">Maritime <br />Intelligence</h2>
+                            <span className="arch-label block">{t('marketPage.globalCorridors')}</span>
+                            <h2 className="text-5xl font-light text-white leading-tight">{t('marketPage.maritimeIntel')}</h2>
                             <p className="text-xl text-zinc-500 leading-relaxed max-w-sm">
-                                High-fidelity tracking of trans-pacific and trans-atlantic freight corridors using sovereign AI prediction.
+                                {t('marketPage.intelDesc')}
                             </p>
                             <div className="arch-detail-line p-8 bg-zinc-950/20">
-                                <span className="arch-label block mb-4 italic text-zinc-400">TECHNICAL_NOTE</span>
+                                <span className="arch-label block mb-4 italic text-zinc-400">{t('marketPage.techNote')}</span>
                                 <p className="text-[11px] font-bold text-zinc-700 leading-normal uppercase tracking-widest leading-loose">
-                                    Data extracted from 12,000+ autonomous maritime logs and refreshed via millisecond API linkage.
+                                    {t('marketPage.techDesc')}
                                 </p>
                             </div>
                         </div>
@@ -72,15 +106,15 @@ export default function MarketPage() {
                             <InfogramChart dataId="d2c0b6b2-ef67-4632-9cb9-897d91cb61d8" title="Global Vessel Capacity Index" />
                         </div>
                         <div className="space-y-12 order-1 lg:order-2 lg:text-right">
-                            <span className="arch-label block">ECONOMIC_LOAD</span>
-                            <h2 className="text-5xl font-light text-white leading-tight">Vessel <br />Capacity</h2>
+                            <span className="arch-label block">{t('marketPage.economicLoad')}</span>
+                            <h2 className="text-5xl font-light text-white leading-tight">{t('marketPage.vesselCapacity')}</h2>
                             <p className="text-xl text-zinc-500 leading-relaxed max-w-sm lg:ml-auto">
-                                Analyzing total available planetary tonnage to predict capacity crunches and optimize routing windows.
+                                {t('marketPage.capacityDesc')}
                             </p>
                             <div className="arch-detail-line lg:border-l-0 lg:border-r lg:pr-8 bg-zinc-950/20">
-                                <span className="arch-label block mb-4 italic text-zinc-400">DATA_RELIABILITY</span>
+                                <span className="arch-label block mb-4 italic text-zinc-400">{t('marketPage.dataReliability')}</span>
                                 <p className="text-[11px] font-bold text-zinc-700 leading-normal uppercase tracking-widest leading-loose">
-                                    100% Honest Data Legitimacy sourced directly from Port Authorities and Global Node Monitors.
+                                    {t('marketPage.reliabilityDesc')}
                                 </p>
                             </div>
                         </div>
@@ -89,8 +123,8 @@ export default function MarketPage() {
 
                 {/* Sub-footer Context */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">SENSORS_ACTIVE</span>
-                    <h2 className="arch-heading italic mb-16">Global Pulse.</h2>
+                    <span className="arch-label mb-12 block">{t('marketPage.sensorsActive')}</span>
+                    <h2 className="arch-heading italic mb-16">{t('marketPage.globalPulse')}</h2>
                     <div className="flex justify-center gap-12 mt-24">
                         <ArrowUpRight className="w-12 h-12 text-zinc-900 animate-pulse" />
                         <ArrowUpRight className="w-12 h-12 text-zinc-900 animate-pulse [animation-delay:0.2s]" />
@@ -102,8 +136,8 @@ export default function MarketPage() {
             {/* Minimal Sub-footer */}
             <div className="border-t border-white/5 py-32 bg-black">
                 <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-[0.8em] text-zinc-900 uppercase">
-                    <span>LIVE_MARKET_FEED_V2.0</span>
-                    <span>STRUCTURAL_INTEGRITY_SAFE</span>
+                    <span>{t('marketPage.liveFeed')}</span>
+                    <span>{t('marketPage.structuralIntegrity')}</span>
                 </div>
             </div>
         </main>

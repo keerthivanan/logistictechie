@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Package, MapPin, Clock, Loader2, Ship, Zap, Globe, Shield, ArrowRight } from "lucide-react";
 import RouteMap from "@/components/ui/RouteMap";
 import { logisticsClient } from "@/lib/logistics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TrackingEvent {
     event: string;
@@ -20,6 +21,7 @@ interface TrackingResult {
 }
 
 export default function TrackingPage() {
+    const { t } = useLanguage();
     const [id, setId] = useState("");
     const [result, setResult] = useState<TrackingResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -44,12 +46,12 @@ export default function TrackingPage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">TELEMETRY</span>
-                        <h1 className="arch-heading">Live <br />Tracking</h1>
+                        <span className="arch-label mb-12 block">{t('trackingPage.telemetry')}</span>
+                        <h1 className="arch-heading">{t('trackingPage.title')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
-                            Orbital monitoring of <strong className="text-white">global cargo flows</strong>. High-fidelity data streams with millisecond sync.
+                            {t('trackingPage.orbital')}
                         </p>
                     </div>
                 </motion.div>
@@ -60,10 +62,10 @@ export default function TrackingPage() {
                     {/* Left: Input Node */}
                     <div className="space-y-32">
                         <div className="arch-detail-line">
-                            <span className="arch-label block mb-8">NODE_COMMAND</span>
+                            <span className="arch-label block mb-8">{t('trackingPage.nodeCommand')}</span>
                             <div className="relative group">
                                 <input
-                                    placeholder="ENTER_UNIT_ID"
+                                    placeholder={t('trackingPage.placeholder')}
                                     value={id}
                                     onChange={(e) => setId(e.target.value)}
                                     className="bg-transparent border-b border-white/10 w-full py-8 text-4xl font-light text-white italic outline-none focus:border-white transition-all tracking-tighter"
@@ -102,11 +104,11 @@ export default function TrackingPage() {
                             >
                                 <div className="grid md:grid-cols-2 gap-16">
                                     <div className="arch-detail-line border-white">
-                                        <span className="arch-label mb-4 block">STATUS</span>
+                                        <span className="arch-label mb-4 block">{t('trackingPage.status')}</span>
                                         <div className="text-5xl font-light italic text-white tracking-widest">{result.status}</div>
                                     </div>
                                     <div className="arch-detail-line">
-                                        <span className="arch-label mb-4 block">EST_ARRIVAL</span>
+                                        <span className="arch-label mb-4 block">{t('trackingPage.estArrival')}</span>
                                         <div className="text-5xl font-light text-white tracking-tighter">{result.eta}</div>
                                     </div>
                                 </div>
@@ -115,12 +117,12 @@ export default function TrackingPage() {
                                     <RouteMap
                                         origin={result.events[0].loc}
                                         destination={result.events[result.events.length - 1].loc}
-                                        className="w-full h-full grayscale invert opacity-20"
+                                        className="w-full h-full grayscale-0 invert-0"
                                     />
                                 </div>
 
                                 <div className="space-y-16 border-t border-white/5 pt-32">
-                                    <span className="arch-label block mb-24">OPERATION_LOG</span>
+                                    <span className="arch-label block mb-24">{t('trackingPage.operationLog')}</span>
                                     <div className="grid gap-8">
                                         {result.events.map((ev, i) => (
                                             <div key={i} className="arch-detail-line group flex items-center justify-between">
@@ -145,7 +147,7 @@ export default function TrackingPage() {
                                 className="h-full flex flex-col items-center justify-center border border-white/5 bg-zinc-950/10"
                             >
                                 <Zap className="w-12 h-12 text-zinc-900 mb-8 animate-pulse" />
-                                <span className="arch-label text-zinc-800">WAITING_FOR_TELEMETRY</span>
+                                <span className="arch-label text-zinc-800">{t('trackingPage.waiting')}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -153,8 +155,8 @@ export default function TrackingPage() {
 
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">GLOBAL_TRACKER</span>
-                    <h2 className="arch-heading italic mb-16">Always. On.</h2>
+                    <span className="arch-label mb-12 block">{t('trackingPage.globalTracker')}</span>
+                    <h2 className="arch-heading italic mb-16">{t('trackingPage.alwaysOn')}</h2>
                 </div>
             </div>
         </main>

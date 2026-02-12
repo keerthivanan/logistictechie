@@ -3,30 +3,33 @@
 import { motion, Variants } from "framer-motion";
 import { Ship, Plane, Package, Truck, Globe, Shield, Clock, DollarSign, ArrowRight, Check, Zap } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ServicesPage() {
+    const { t } = useLanguage();
+
     const mainServices = [
         {
             id: "01",
-            title: "OCEAN_STRATEGY",
-            desc: "Architecting global maritime corridors with zero-latency coordination and autonomous vessel integration.",
+            title: t('servicesPage.items.ocean'),
+            desc: t('servicesPage.tacticalDesc'),
             details: "Full Container Load (FCL), Less than Container Load (LCL), Specialized Equipment Deployment."
         },
         {
             id: "02",
-            title: "AERIAL_LOGISTICS",
+            title: t('servicesPage.items.aerial'),
             desc: "High-velocity atmospheric transit for time-critical mission assets and high-value payloads.",
             details: "Express Cargo, Charter Operations, Temperature Controlled Atmospheric Transit."
         },
         {
             id: "03",
-            title: "GROUND_DEVICES",
+            title: t('servicesPage.items.ground'),
             desc: "Precision terrestrial routing across continental networks using tactical fleet synchronization.",
             details: "Last-mile autonomous delivery, Heavy-haul logistics, Multi-modal rail integration."
         },
         {
             id: "04",
-            title: "WAREHOUSE_NODES",
+            title: t('servicesPage.items.warehouse'),
             desc: "Strategic asset positioning within climate-controlled, high-security regional storage frameworks.",
             details: "Automated fulfillment nodes, Cold-chain integrity, Secure perimeter storage."
         }
@@ -56,8 +59,8 @@ export default function ServicesPage() {
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     className="mb-48"
                 >
-                    <span className="arch-label mb-12 block">SERVICES</span>
-                    <h1 className="arch-heading">What We Do</h1>
+                    <span className="arch-label mb-12 block">{t('servicesPage.label')}</span>
+                    <h1 className="arch-heading">{t('servicesPage.title')}</h1>
                 </motion.div>
 
                 {/* Service Grid - Numbered Pattern */}
@@ -99,14 +102,14 @@ export default function ServicesPage() {
                         className="grid lg:grid-cols-2 gap-32 items-start"
                     >
                         <div>
-                            <span className="arch-label mb-12 block">APPROACH</span>
-                            <h2 className="text-6xl font-light text-white mb-16 leading-tight">Tactical <br />Advantage</h2>
+                            <span className="arch-label mb-12 block">{t('servicesPage.approach')}</span>
+                            <h2 className="text-6xl font-light text-white mb-16 leading-tight">{t('servicesPage.tacticalAdvantage')}</h2>
                             <p className="text-xl text-zinc-500 max-w-lg mb-16 leading-relaxed">
-                                Our practice focus on creating logistic pipelines that are both functional and poetic, respecting the natural volatility of global trade while ensuring absolute delivery integrity.
+                                {t('servicesPage.tacticalDesc')}
                             </p>
                             <Link href="/quote">
                                 <button className="h-20 px-16 border border-white text-[11px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
-                                    INITIALIZE_MISSION
+                                    {t('servicesPage.initMission')}
                                 </button>
                             </Link>
                         </div>
@@ -130,8 +133,8 @@ export default function ServicesPage() {
             {/* Minimal Sub-footer */}
             <div className="border-t border-white/5 py-32">
                 <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-[0.8em] text-zinc-800 uppercase">
-                    <span>PHOENIX_OS_OPERATIONS</span>
-                    <span>V4.1.0_STABLE</span>
+                    <span>{t('servicesPage.operations')}</span>
+                    <span>{t('servicesPage.stable')}</span>
                 </div>
             </div>
         </main>

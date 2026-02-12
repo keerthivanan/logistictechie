@@ -123,6 +123,36 @@
   .arch-grid {
     @apply grid gap-24 md:grid-cols-2 lg:gap-32;
   }
+
+  /* 💎 HOLOGRAPHIC ACCENTS (Best of All Time Status) */
+  .holographic-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .holographic-glow::after {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent;
+    animation: holographic-sweep 8s ease-in-out infinite;
+    transform: skewX(-20deg) translateX(-100%);
+  }
+
+  .titan-label {
+    @apply text-[10px] font-black uppercase tracking-[0.4em] leading-none;
+  }
+
+  @keyframes holographic-sweep {
+    0% {
+      transform: skewX(-20deg) translateX(-150%);
+    }
+
+    50% {
+      transform: skewX(-20deg) translateX(150%);
+    }
+
+    100% {
+      transform: skewX(-20deg) translateX(150%);
+    }
+  }
 }
 
 /* Scrollbar Refinement */

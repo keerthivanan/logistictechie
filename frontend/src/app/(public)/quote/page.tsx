@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import { QuoteWizard } from "@/components/domain/quote/QuoteWizard";
 import { Zap, Shield, Globe } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function QuotePage() {
+    const { t } = useLanguage();
+
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <div className="container max-w-[1400px] mx-auto px-8 py-48">
@@ -17,12 +20,12 @@ export default function QuotePage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">INITIALIZATION</span>
-                        <h1 className="arch-heading">Initialize <br />Deployment</h1>
+                        <span className="arch-label mb-12 block">{t('quotePage.initialization')}</span>
+                        <h1 className="arch-heading">{t('quotePage.title')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
-                            Configure your <strong className="text-white">logistical parameters</strong>. Automated Routing. Millisecond Accuracy.
+                            {t('quotePage.configure')}
                         </p>
                     </div>
                 </motion.div>
@@ -62,8 +65,8 @@ export default function QuotePage() {
 
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">DEPLOYMENT_PROTOCOL_READY</span>
-                    <h2 className="arch-heading italic mb-16">Forge. Link. Move.</h2>
+                    <span className="arch-label mb-12 block">{t('quotePage.protocolReady')}</span>
+                    <h2 className="arch-heading italic mb-16">{t('quotePage.forgeLinkMove')}</h2>
                 </div>
             </div>
         </main>

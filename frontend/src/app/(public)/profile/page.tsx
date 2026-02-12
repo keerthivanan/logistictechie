@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Building, Calendar, ArrowLeft, Shield, Globe, Zap, Phone, Camera } from "lucide-react";
 import axios from "axios";
@@ -11,6 +12,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
+    const { t } = useLanguage();
     const { data: session, status } = useSession();
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
@@ -86,8 +88,8 @@ export default function ProfilePage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">PROFILE</span>
-                        <h1 className="arch-heading">Operator <br />Details</h1>
+                        <span className="arch-label mb-12 block">{t('nav.profile').toUpperCase()}</span>
+                        <h1 className="arch-heading">{t('audit.operatorDetails').split(' ')[0]} <br />{t('audit.operatorDetails').split(' ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end space-y-12">
                         <div className="arch-detail-line">
@@ -175,7 +177,7 @@ export default function ProfilePage() {
                 {/* Sub-context Metrics */}
                 <div className="mt-64 grid md:grid-cols-3 gap-16 border-t border-white/5 pt-32">
                     {[
-                        { label: "MEMBER_SINCE", val: user.created_at ? new Date(user.created_at).getFullYear() : "2026" },
+                        { label: t('profile.memberSince').toUpperCase().replace(' ', '_'), val: user.created_at ? new Date(user.created_at).getFullYear() : "2026" },
                         { label: "ACTIVE_MANIFESTS", val: "0" },
                         { label: "DATA_LEGITIMACY", val: "100%" }
                     ].map((stat, idx) => (

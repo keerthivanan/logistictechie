@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, MapPin, Globe, Shield } from "lucide-react";
 import RouteMap from "@/components/ui/RouteMap";
 import { PortAutocomplete } from "@/components/ui/PortAutocomplete";
+import { cn } from "@/lib/utils";
 
 export function RouteStep() {
     const { formData, updateForm, nextStep, prevStep } = useQuoteStore();
@@ -84,7 +85,12 @@ export function RouteStep() {
                     </div>
                 </div>
 
-                <div className="w-full h-full grayscale invert opacity-30 contrast-150 saturate-0 scale-105 group-hover:scale-110 transition-transform duration-[3000ms]">
+                <div className={cn(
+                    "w-full h-full transition-all duration-[3000ms]",
+                    !formData.origin && !formData.destination
+                        ? "grayscale invert opacity-30 contrast-150 saturate-0 scale-105"
+                        : "grayscale-0 invert-0 opacity-100 contrast-100 saturate-100 scale-100"
+                )}>
                     <RouteMap origin={formData.origin} destination={formData.destination} />
                 </div>
 

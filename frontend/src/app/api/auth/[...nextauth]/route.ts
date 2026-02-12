@@ -50,10 +50,34 @@ const handler = NextAuth({
         error: "/login",
     },
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.accessToken = (user as any).accessToken;
+        async jwt({ token, user, account, profile }) {
+            // Initial sign-in
+            if (user && account) {
+                if (account.provider === "credentials") {
+                    token.accessToken = (user as any).accessToken;
+                    token.id = user.id;
+                } else if (account.provider === "google") {
+                    // 👑 SOCIAL SYNC HANDSHAKE
+                    try {
+                        const res = await fetch("http://localhost:8000/api/auth/social-sync", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                email: user.email,
+                                name: user.name,
+                                image: user.image,
+                                provider: "google"
+                            }),
+                            headers: { "Content-Type": "application/json" }
+                        });
+                        if (res.ok) {
+                            const syncData = await res.json();
+                            token.accessToken = syncData.access_token;
+                            token.id = syncData.user_id;
+                        }
+                    } catch (e) {
+                        console.error("Social Sync Failed:", e);
+                    }
+                }
             }
             return token;
         },

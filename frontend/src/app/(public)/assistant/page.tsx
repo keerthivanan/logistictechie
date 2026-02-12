@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Cpu,
@@ -29,6 +30,7 @@ interface Message {
 }
 
 export default function AssistantPage() {
+    const { t } = useLanguage();
     const { user, logout } = useAuth();
     const router = useRouter();
     const [messages, setMessages] = useState<Message[]>([]);
@@ -44,15 +46,16 @@ export default function AssistantPage() {
 
     useEffect(() => {
         if (messages.length === 0) {
+            const operatorId = user?.name?.toUpperCase() || "CORE";
             setMessages([
                 {
                     role: "assistant",
-                    content: `Greetings, OPERATIVE_${user?.name?.toUpperCase() || "CORE"}. I am the Sovereign Oracle. Synchronizing real-time logistics nodes... How may I architect your supply chain today?`,
+                    content: t('assistant.greeting').replace('{name}', operatorId),
                     timestamp: new Date(),
                 }
             ]);
         }
-    }, [user, messages.length]);
+    }, [user, messages.length, t]);
 
     const handleSendMessage = async () => {
         if (!input.trim() || isThinking) return;
@@ -105,7 +108,7 @@ export default function AssistantPage() {
                 >
                     <div>
                         <span className="arch-label mb-12 block">NEURAL_INTERFACE</span>
-                        <h1 className="arch-heading">Oracle <br />Intelligence</h1>
+                        <h1 className="arch-heading">{t('audit.oracleIntel').split(' ')[0]} <br />{t('audit.oracleIntel').split(' ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <div className="grid grid-cols-3 gap-8">
@@ -131,9 +134,9 @@ export default function AssistantPage() {
                     <div className="space-y-32 hidden lg:block">
                         <div className="space-y-16">
                             {[
-                                { id: "01", label: "MARKET_SYNC", desc: "Live freight rate indices." },
-                                { id: "02", label: "RISK_VIVID", desc: "Neural delay projections." },
-                                { id: "03", label: "SECURE_LINK", desc: "Military relay encryption." }
+                                { id: "01", label: "MARKET_SYNC", desc: t('assistant.parameters.market_desc') },
+                                { id: "02", label: "RISK_VIVID", desc: t('assistant.parameters.risk_desc') },
+                                { id: "03", label: "SECURE_LINK", desc: t('assistant.parameters.secure_desc') }
                             ].map((item) => (
                                 <div key={item.id} className="arch-detail-line opacity-40">
                                     <span className="arch-number block mb-2">{item.id}</span>

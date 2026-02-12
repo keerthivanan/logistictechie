@@ -2,12 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowRight, Ship, Globe, Zap, Shield } from "lucide-react";
 import { PartnersSection } from "@/components/domain/home/Partners";
 import { BentoServices } from "@/components/domain/home/BentoServices";
 import { LogisticsSearchBar } from "@/components/domain/home/LogisticsSearchBar";
 
 export default function HomePage() {
+  const { t } = useLanguage();
+
   return (
     <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
 
@@ -20,15 +23,33 @@ export default function HomePage() {
         >
           <span className="arch-label mb-12 block">GLOBAL_LOGISTICS</span>
           <h1 className="arch-heading mb-24 max-w-6xl">
-            Architecting <br />
-            <span className="italic">Global Velocity</span>
+            {t('audit.home.architecting')} <br />
+            <span className="italic">{t('audit.home.globalVelocity')}</span>
           </h1>
 
           <div className="grid lg:grid-cols-2 gap-32 border-t border-white/5 pt-32">
             <div className="space-y-12">
               <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
-                We design functional <strong className="text-white">transit ecosystems</strong> that enhance the human experience while respecting the natural environment.
+                {t('home.hero.description_part1')} <strong className="text-white">{t('audit.home.transitEcosystems')}</strong> {t('home.hero.description_part2')}
               </p>
+
+              {/* 👑 LIVE CARRIER HEALTH NODE */}
+              <div className="flex gap-12 pt-8 border-t border-white/[0.02]">
+                <div className="flex flex-col gap-2">
+                  <span className="text-[9px] font-black text-zinc-700 tracking-[0.4em] uppercase">MAERSK_NODE</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
+                    <span className="text-[10px] font-black text-white uppercase italic tracking-widest">AUTHENTICATED_200</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[9px] font-black text-zinc-700 tracking-[0.4em] uppercase">GLOBAL_FLEET</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="text-[10px] font-black text-white uppercase italic tracking-widest">5,142_VESSELS_LIVE</span>
+                  </div>
+                </div>
+              </div>
 
               {/* Functional Node - Search */}
               <div className="pt-24 border-t border-white/5">
@@ -38,8 +59,8 @@ export default function HomePage() {
 
             <div className="space-y-16">
               {[
-                { id: "01", title: "Structural Precision", desc: "Military-grade logistics engineered for the modern epoch." },
-                { id: "02", title: "Neural Sync", desc: "Real-time AI orchestration across 4,000+ global nodes." }
+                { id: "01", title: t('home.features.precision_title'), desc: t('home.features.precision_desc') },
+                { id: "02", title: t('home.features.ai_title'), desc: t('home.features.ai_desc') }
               ].map((feature) => (
                 <div key={feature.id} className="flex gap-8">
                   <span className="arch-number">{feature.id}</span>
@@ -71,16 +92,16 @@ export default function HomePage() {
       <section className="container max-w-[1400px] mx-auto px-8 py-64">
         <div className="grid lg:grid-cols-[1fr,2fr] gap-32 border-b border-white/5 pb-64">
           <div>
-            <span className="arch-label mb-12 block">APPROACH</span>
-            <h2 className="text-6xl font-light text-white mb-16 leading-tight">Design <br />Philosophy</h2>
+            <span className="arch-label mb-12 block">{t('audit.home.approach')}</span>
+            <h2 className="text-6xl font-light text-white mb-16 leading-tight">{t('audit.home.designPhilosophy').split(' ')[0]} <br />{t('audit.home.designPhilosophy').split(' ').slice(1).join(' ')}</h2>
             <div className="arch-detail-line h-48 opacity-20 hidden lg:block" />
           </div>
           <div className="grid md:grid-cols-2 gap-24">
             {[
-              { title: "Research", desc: "Deep understanding of context, culture, and climate in global supply chains." },
-              { title: "Collaboration", desc: "Close partnership with carriers, customs, and logistics craftspeople." },
-              { title: "Innovation", desc: "Autonomous materials and forward-thinking route design solutions." },
-              { title: "Poetic Logistics", desc: "Transit flows that are both functional and aesthetic masterpieces." }
+              { title: t('company.approach.research'), desc: t('company.approach.researchDesc') },
+              { title: t('company.approach.collab'), desc: t('company.approach.collabDesc') },
+              { title: t('company.approach.innovation'), desc: t('company.approach.innovationDesc') },
+              { title: t('company.approach.poetic'), desc: t('company.approach.poeticDesc') }
             ].map((item, idx) => (
               <div key={idx} className="arch-detail-line">
                 <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
@@ -95,10 +116,10 @@ export default function HomePage() {
       <section className="py-96 bg-zinc-950/20">
         <div className="container max-w-[1400px] mx-auto px-8 text-center">
           <span className="arch-label mb-12 block">THE_FINAL_NODE</span>
-          <h2 className="arch-heading italic mb-24">Transform. Your. <br /><span className="text-white">Supply Chain.</span></h2>
+          <h2 className="arch-heading italic mb-24">{t('audit.home.transformSupply').split('. ')[0]}. {t('audit.home.transformSupply').split('. ').slice(1, 2)}. <br /><span className="text-white">{t('audit.home.transformSupply').split('. ').slice(2).join(' ')}</span></h2>
           <Link href="/quote">
             <button className="h-24 px-24 border border-white text-[12px] font-bold uppercase tracking-[1em] transition-all hover:bg-white hover:text-black">
-              INITIALIZE_PROTOCOL
+              {t('pricingPage.initProtocol')}
             </button>
           </Link>
         </div>

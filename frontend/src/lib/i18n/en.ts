@@ -13,6 +13,7 @@ export const en = {
     },
     dashboard: {
         title: "Logistics Dashboard",
+        welcome: "Welcome,",
         welcomeBack: "Welcome Back, Commander",
         newShipment: "New Shipment",
         activeShipments: "Active Shipments",
@@ -26,7 +27,33 @@ export const en = {
         noShipments: "No Active Assets Found",
         bookFirst: "Initiate First Booking",
         recentPayments: "Financial Ledger",
-        viewAllPayments: "Audit All Transactions"
+        viewAllPayments: "Audit All Transactions",
+        commandHub: "COMMAND_HUB",
+        osStatus: "OS_STATUS",
+        coreOnline: "CORE_ONLINE",
+        stats: {
+            activeShipments: "Active_Shipments",
+            globalInventory: "Global_Inventory",
+            systemReliability: "System_Reliability",
+            optimal: "OPTIMAL",
+            synced: "SYNCED",
+            elite: "ELITE"
+        },
+        manifest: {
+            title: "Operational Manifest",
+            activeOps: "ACTIVE_OPERATIONS",
+            newDeployment: "NEW_DEPLOYMENT",
+            syncingLedger: "SYNCING_LEDGER",
+            zeroManifests: "ZERO_MANIFESTS_DETECTED",
+            genCargo: "GEN_CARGO_01",
+            active: "ACTIVE"
+        },
+        intel: {
+            marketIntel: "MARKET_INTEL",
+            globalVessels: "GLOBAL_VESSELS",
+            securityProtocol: "SECURITY_PROTOCOL",
+            encryptedLink: "Encrypted Node Link"
+        }
     },
     status: {
         pending: "Pending confirmation",
@@ -338,7 +365,24 @@ export const en = {
         rights: "All rights reserved.",
         terms: "Terms of Service",
         privacy: "Privacy Policy",
-        contact: "Contact Us"
+        contact: "Contact Us",
+        strategic: "STRATEGIC",
+        operational: "OPERATIONAL",
+        architecture: "ARCHITECTURE",
+        labels: {
+            quoteEngine: "QUOTE_ENGINE",
+            marketIntel: "MARKET_INTEL",
+            capabilities: "CAPABILITIES",
+            globalNodes: "GLOBAL_NODES",
+            trackMission: "TRACK_MISSION",
+            documentation: "DOCUMENTATION",
+            systemStatus: "SYSTEM_STATUS",
+            supportLink: "SUPPORT_LINK",
+            designPhilosophy: "DESIGN_PHILOSOPHY",
+            coreLegal: "CORE_LEGAL",
+            dataPrivacy: "DATA_PRIVACY",
+            securityProto: "SECURITY_PROTO"
+        }
     },
     common: {
         learnMore: "Learn More",
@@ -409,6 +453,9 @@ export const en = {
                     description: "Real-time market insights and rate trends to help you make informed decisions."
                 }
             ],
+            core: "The Core.",
+            excellence: "Operational Excellence.",
+            highFreq: "High-frequency logistics data at your fingertips.",
             stats: {
                 carriers: "Carrier Partners",
                 ports: "Ports Covered",
@@ -538,6 +585,12 @@ export const en = {
             logout: "Logout From Account"
         }
     },
+    market: {
+        forecast: "SOVEREIGN_FORECAST",
+        historical: "HISTORICAL_CORE",
+        projection: "SOVEREIGN_PROJECTION",
+        stable: "SYSTEM_STABLE_V4.2"
+    },
 
     widgets: {
         marketTrend: {
@@ -551,6 +604,36 @@ export const en = {
             analysis: "AI Analysis:",
             forecast: "AI Forecast"
         },
+        contact: {
+            label: "CONTACT",
+            title: "Get In Touch",
+            subtitle: "Global Node Communication",
+            missionCritical: "We are always interested in joining new mission-critical projects. Our studio is open to global collaboration.",
+            strategicHub: "Strategic Hub",
+            strategicHubDesc: "NEOM, Saudi Arabia. High-security regional operational command.",
+            secureTransmission: "Secure Transmission",
+            secureTransmissionDesc: "ops@phoenix.io. Encrypted military-grade mail relay.",
+            voiceLink: "Voice Link",
+            voiceLinkDesc: "+966 800 ORA CLE. Direct operational voice override.",
+            viewMap: "VIEW_MAP",
+            sendMail: "SEND_MAIL",
+            callNow: "CALL_NOW",
+            form: {
+                title: "Transmission_Form",
+                name: "NAME_IDENTIFIER",
+                email: "EMAIL_ENDPOINT",
+                message: "TRANSMISSION_DATA",
+                submit: "EXECUTE_TRANSMISSION",
+                sending: "UPLOADING_PACKETS...",
+                success: "TRANSMISSION_VERIFIED",
+                placeholderName: "ENTER_FULL_NAME",
+                placeholderEmail: "OPERATOR@NODE.COM",
+                placeholderMsg: "DESCRIBE_THE_LOGISTIC_ARCHITECTURE_REPLACEMENT"
+            },
+            globalSync: "GLOBAL_SYNC",
+            globalBase: "Global Base.",
+            encryptionActive: "END_TO_END_ENCRYPTION_ACTIVE"
+        },
         officeLocator: {
             title: "Booking Offices",
             searchPlaceholder: "Search city...",
@@ -562,6 +645,169 @@ export const en = {
             search: "Search",
             searching: "Searching...",
             noResults: "No offices found in this location"
+        }
+    },
+    marketPage: {
+        intelligence: "INTELLIGENCE",
+        title: "Market Data",
+        globalCorridors: "GLOBAL_CORRIDORS",
+        maritimeIntel: "Maritime Intelligence",
+        intelDesc: "High-fidelity tracking of trans-pacific and trans-atlantic freight corridors using sovereign AI prediction.",
+        techNote: "TECHNICAL_NOTE",
+        techDesc: "Data extracted from 12,000+ autonomous maritime logs and refreshed via millisecond API linkage.",
+        economicLoad: "ECONOMIC_LOAD",
+        vesselCapacity: "Vessel Capacity",
+        capacityDesc: "Analyzing total available planetary tonnage to predict capacity crunches and optimize routing windows.",
+        dataReliability: "DATA_RELIABILITY",
+        reliabilityDesc: "100% Honest Data Legitimacy sourced directly from Port Authorities and Global Node Monitors.",
+        sensorsActive: "SENSORS_ACTIVE",
+        globalPulse: "Global Pulse.",
+        liveFeed: "LIVE_MARKET_FEED_V2.0",
+        structuralIntegrity: "STRUCTURAL_INTEGRITY_SAFE"
+    },
+    servicesPage: {
+        label: "SERVICES",
+        title: "What We Do",
+        approach: "APPROACH",
+        tacticalAdvantage: "Tactical Advantage",
+        tacticalDesc: "Our practice focus on creating logistic pipelines that are both functional and poetic, respecting the natural volatility of global trade.",
+        initMission: "INITIALIZE_MISSION",
+        operations: "PHOENIX_OS_OPERATIONS",
+        stable: "V4.1.0_STABLE",
+        items: {
+            ocean: "OCEAN_STRATEGY",
+            aerial: "AERIAL_LOGISTICS",
+            ground: "GROUND_DEVICES",
+            warehouse: "WAREHOUSE_NODES"
+        }
+    },
+    schedulesPage: {
+        version: "Vessel_Timeline_v4.1",
+        title: "Carrier Schedules",
+        origin: "ORIGIN_NODE",
+        destination: "DESTINATION_NODE",
+        sync: "SYNC_Schedules",
+        syncData: "SYNC_VESSEL_DATA",
+        zeroAssets: "ZERO_ASSETS_DETECTED_ON_CORRIDOR",
+        sovereignEst: "SOVEREIGN_EST",
+        departure: "DEPARTURE",
+        arrival: "EST_ARRIVAL",
+        reserve: "RESERVE_SPACE",
+        sensors: "GLOBAL_VESSEL_SENSORS",
+        maritimeFlow: "Maritime. Flow."
+    },
+    trackingPage: {
+        telemetry: "TELEMETRY",
+        title: "Live Tracking",
+        orbital: "Orbital monitoring of global cargo flows. High-fidelity data streams with millisecond sync.",
+        nodeCommand: "NODE_COMMAND",
+        placeholder: "ENTER_UNIT_ID",
+        status: "STATUS",
+        estArrival: "EST_ARRIVAL",
+        operationLog: "OPERATION_LOG",
+        waiting: "WAITING_FOR_TELEMETRY",
+        globalTracker: "GLOBAL_TRACKER",
+        alwaysOn: "Always. On."
+    },
+    quotePage: {
+        initialization: "INITIALIZATION",
+        title: "Initialize Deployment",
+        configure: "Configure your logistical parameters. Automated Routing. Millisecond Accuracy.",
+        tacticalSensors: "TACTICAL_SENSORS",
+        protocolReady: "DEPLOYMENT_PROTOCOL_READY",
+        forgeLinkMove: "Forge. Link. Move."
+    },
+    companyPage: {
+        label: "ABOUT",
+        title: "Design Philosophy",
+        philosophy: "We believe logistics should enhance human experience while respecting the natural environment. Our practice focuses on creating spaces that are both functional and poetic.",
+        narrative: "Founded in 2015, our studio has completed over 200 projects across maritime, aerial, and terrestrial sectors. Each project begins with careful listening and ends with thoughtful execution.",
+        systems: "SYSTEMS",
+        networkTitle: "Network Architecture",
+        networkDesc: "Crafting supply chains that reflect modern velocity while maintaining operational integrity.",
+        syncTitle: "Dynamic Synchronization",
+        syncDesc: "Designing functional transit flows that enhance global trade environments.",
+        founded: "FOUNDED",
+        projects: "PROJECTS",
+        nodes: "NODES",
+        operatives: "OPERATIVES",
+        nextPhase: "NEXT_PHASE",
+        migrate: "Ready to Migrate?",
+        contactArch: "CONTACT_ARCHITECTURE",
+        os: "© 2026 PHOENIX_OS",
+        integrityVerified: "STRUCTURAL_INTEGRITY_VERIFIED"
+    },
+    toolsPage: {
+        instruments: "INSTRUMENTS",
+        title: "Shipping Calculators",
+        planning: "High-precision logistics tools for architectural supply chain planning.",
+        globalLocator: "GLOBAL_LOCATOR",
+        active: "TOOLS_ACTIVE",
+        designPlanMove: "Design. Plan. Move.",
+        intel: "INTEL",
+        marketEstimator: "Market Estimator"
+    },
+    pricingPage: {
+        label: "PRICING",
+        title: "Tiered Hierarchy",
+        unfiltered: "Direct carrier rates with zero latent fees. Pure. Unfiltered. Velocity.",
+        priceHierarchy: "PRICING_HIERARCHY",
+        pureUnfiltered: "Pure. Unfiltered.",
+        bespoke: "BESPOKE",
+        complexDeployment: "Complex Deployment",
+        strategist: "Connect with our Strategic Operations Group for specialized global deployment and custom neural link training.",
+        forgeAlliance: "FORGE_ALLIANCE",
+        initProtocol: "INITIALIZE_PROTOCOL"
+    },
+    audit: {
+        termsEngage: "Terms of Engagement",
+        sysParams: "System Parameters",
+        operatorDetails: "Operator Details",
+        privacyProtocols: "Privacy Protocols",
+        designPhilosophy: "Design Philosophy",
+        welcomeBack: "Welcome Back.",
+        supportInfra: "Support Infrastructure",
+        frequentOps: "Frequent Operations",
+        oracleIntel: "Oracle Intelligence",
+        terms: {
+            s1_title: "Operational Use",
+            s1_desc: "By accessing the Phoenix OS, you agree to comply with all global maritime and terrestrial logistics regulations.",
+            s2_title: "Data Integrity",
+            s2_desc: "All data submitted must be legitimate. Any intentional corruption of the manifests will result in immediate link termination.",
+            s3_title: "Intellectual Property",
+            s3_desc: "The architectural design, neural logic, and operational frameworks are sovereign property of Phoenix Logistics Firm.",
+            s4_title: "Liability",
+            s4_desc: "Phoenix OS provides high-fidelity data streams but is not responsible for physical vessel delays caused by climate or geopolitical flux.",
+            s5_title: "Security Protocols",
+            s5_desc: "Users are responsible for the confidentiality of their access keys. Any unauthorized node entry must be reported within milliseconds."
+        },
+        privacy: {
+            p1_title: "Information Gathering",
+            p1_desc: "We collect only the essential telemetry data required to synchronize your global logistics manifests and neural identifiers.",
+            p2_title: "Data Governance",
+            p2_desc: "Your operational intelligence is encrypted at the source and stored in sovereign, high-security nodes in NEOM.",
+            p3_title: "Third Party Relay",
+            p3_desc: "Data is only transmitted to authorized carriers and customs nodes strictly for the execution of your missions.",
+            p4_title: "Cookie Policy",
+            p4_desc: "Our system uses minimal session nodes to maintain your architectural link. No predatory tracking algorithms are utilized.",
+            p5_title: "Right to Erasure",
+            p5_desc: "Operatives may terminate their neural link and request complete data depletion from the central ledger at any time."
+        },
+        home: {
+            architecting: "Architecting",
+            globalVelocity: "Global Velocity",
+            transitEcosystems: "transit ecosystems",
+            designPhilosophy: "Design Philosophy",
+            approach: "APPROACH",
+            transformSupply: "Transform. Your. Supply Chain."
+        },
+        support: {
+            infrastructure: "Infrastructure",
+            assistance: "ASSISTANCE",
+            knowledgeBase: "Knowledge Base",
+            tacticalChat: "Tactical Chat",
+            voiceCall: "Voice Call",
+            frequentOps: "Frequent Operations"
         }
     }
 };

@@ -44,10 +44,10 @@ export function FeaturesSection() {
                     className="mb-16"
                 >
                     <h2 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight uppercase italic">
-                        The Core. <span className="text-zinc-800">Operational Excellence.</span>
+                        {t('landing.features.core')} <span className="text-zinc-800">{t('landing.features.excellence')}</span>
                     </h2>
                     <p className="text-zinc-600 text-lg font-bold uppercase tracking-widest">
-                        High-frequency logistics data at your fingertips.
+                        {t('landing.features.highFreq')}
                     </p>
                 </motion.div>
 

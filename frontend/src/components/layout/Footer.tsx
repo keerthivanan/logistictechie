@@ -1,36 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { Ship, Linkedin, Twitter, Github, Globe, Shield, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { Ship, Linkedin, Twitter, Github } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
+    const { t } = useLanguage();
+
     const sections = [
         {
-            title: "STRATEGIC",
+            title: t('footer.strategic'),
             links: [
-                { label: "QUOTE_ENGINE", href: "/quote" },
-                { label: "MARKET_INTEL", href: "/market" },
-                { label: "CAPABILITIES", href: "/services" },
-                { label: "GLOBAL_NODES", href: "/schedules" }
+                { label: t('footer.labels.quoteEngine'), href: "/quote" },
+                { label: t('footer.labels.marketIntel'), href: "/market" },
+                { label: t('footer.labels.capabilities'), href: "/services" },
+                { label: t('footer.labels.globalNodes'), href: "/schedules" }
             ]
         },
         {
-            title: "OPERATIONAL",
+            title: t('footer.operational'),
             links: [
-                { label: "TRACK_MISSION", href: "/tracking" },
-                { label: "DOCUMENTATION", href: "/docs" },
-                { label: "SYSTEM_STATUS", href: "/health" },
-                { label: "SUPPORT_LINK", href: "/contact" }
+                { label: t('footer.labels.trackMission'), href: "/tracking" },
+                { label: t('footer.labels.documentation'), href: "/docs" },
+                { label: t('footer.labels.systemStatus'), href: "/health" },
+                { label: t('footer.labels.supportLink'), href: "/contact" }
             ]
         },
         {
-            title: "ARCHITECTURE",
+            title: t('footer.architecture'),
             links: [
-                { label: "DESIGN_PHILOSOPHY", href: "/company" },
-                { label: "CORE_LEGAL", href: "/terms" },
-                { label: "DATA_PRIVACY", href: "/privacy" },
-                { label: "SECURITY_PROTO", href: "/security" }
+                { label: t('footer.labels.designPhilosophy'), href: "/company" },
+                { label: t('footer.labels.coreLegal'), href: "/terms" },
+                { label: t('footer.labels.dataPrivacy'), href: "/privacy" },
+                { label: t('footer.labels.securityProto'), href: "/security" }
             ]
         }
     ];
@@ -80,7 +82,7 @@ export function Footer() {
                         <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
                         <span>SYSTEM_ID: PHOENIX_OS_V4.1.0</span>
                     </div>
-                    <span>© 2026 LOGISTIC_ARCHITECTURE_FIRM</span>
+                    <span>© 2026 {t('footer.rights')}</span>
                     <div className="flex gap-8">
                         <Linkedin className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
                         <Twitter className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />

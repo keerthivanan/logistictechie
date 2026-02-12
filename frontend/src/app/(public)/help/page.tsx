@@ -1,14 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { HelpCircle, MessageSquare, Phone, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function HelpPage() {
+    const { t } = useLanguage();
+
     const supportChannels = [
-        { id: "01", title: "Knowledge Base", desc: "Access the full technical specifications and operational manuals.", link: "READ_DOCS" },
-        { id: "02", title: "Tactical Chat", desc: "Direct link to our global operations command team.", link: "OPEN_LINK" },
-        { id: "03", title: "Voice Call", desc: "24/7 global emergency support line for critical issues.", link: "CALL_NOW" }
+        { id: "01", title: t('audit.support.knowledgeBase'), desc: t('help.channels.kb_desc'), link: "READ_DOCS" },
+        { id: "02", title: t('audit.support.tacticalChat'), desc: t('help.channels.chat_desc'), link: "OPEN_LINK" },
+        { id: "03", title: t('audit.support.voiceCall'), desc: t('help.channels.phone_desc'), link: "CALL_NOW" }
     ];
 
     const faqs = [0, 1, 2, 3];
@@ -25,12 +28,12 @@ export default function HelpPage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">ASSISTANCE</span>
-                        <h1 className="arch-heading">Support <br />Infrastructure</h1>
+                        <span className="arch-label mb-12 block">{t('audit.support.assistance')}</span>
+                        <h1 className="arch-heading">{t('audit.supportInfrastructure').split(' ')[0]} <br />{t('audit.supportInfrastructure').split(' ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
-                            Comprehensive <strong className="text-white">documentation</strong> and direct support channels for the Phoenix Logistics OS.
+                            {t('help.hero.subtitle_part1')} <strong className="text-white">{t('help.hero.subtitle_highlight')}</strong> {t('help.hero.subtitle_part2')}
                         </p>
                     </div>
                 </motion.div>
@@ -57,7 +60,7 @@ export default function HelpPage() {
                 <div className="mt-96 grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
                     <div>
                         <span className="arch-label mb-12 block">QUERIES</span>
-                        <h2 className="text-5xl font-light text-white leading-tight">Frequent <br />Operations</h2>
+                        <h2 className="text-5xl font-light text-white leading-tight">{t('audit.support.frequentOps').split(' ')[0]} <br />{t('audit.support.frequentOps').split(' ').slice(1).join(' ')}</h2>
                         <div className="arch-detail-line h-48 opacity-20 hidden lg:block" />
                     </div>
                     <div className="space-y-4">
@@ -65,7 +68,7 @@ export default function HelpPage() {
                             <div key={i} className="arch-detail-line group flex items-center justify-between cursor-pointer hover:pl-12 transition-all duration-700 py-8">
                                 <div className="space-y-2">
                                     <span className="arch-label text-zinc-800">QUESTION_0{i + 1}</span>
-                                    <h4 className="text-2xl font-light text-white italic group-hover:text-white">Operational query regarding protocol implementation.</h4>
+                                    <h4 className="text-2xl font-light text-white italic group-hover:text-white">{t('help.faq.default_q')}</h4>
                                 </div>
                                 <ArrowRight className="w-6 h-6 text-zinc-900 group-hover:text-white transition-colors" />
                             </div>
@@ -76,7 +79,7 @@ export default function HelpPage() {
                 {/* Sub-footer Section */}
                 <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
                     <span className="arch-label mb-12 block">GLOBAL_SUPPORT</span>
-                    <h2 className="arch-heading italic mb-16">Always. Integrated.</h2>
+                    <h2 className="arch-heading italic mb-16">{t('help.footer.always_integrated')}</h2>
                 </div>
             </div>
         </main>

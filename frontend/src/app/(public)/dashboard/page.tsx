@@ -41,7 +41,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const [statsData, setStatsData] = useState({ active_shipments: 0, containers: 0, on_time_rate: "99.9%" });
 
     const userName = (session?.user?.name || "OPERATIVE").split(' ')[0].toUpperCase();
@@ -88,9 +88,9 @@ export default function DashboardPage() {
     }, [status, session, router]);
 
     const stats = [
-        { id: "01", label: "Active_Shipments", value: statsData.active_shipments, trend: "OPTIMAL" },
-        { id: "02", label: "Global_Inventory", value: statsData.containers, trend: "SYNCED" },
-        { id: "03", label: "System_Reliability", value: statsData.on_time_rate, trend: "ELITE" }
+        { id: "01", label: t('dashboard.stats.activeShipments'), value: statsData.active_shipments, trend: t('dashboard.stats.optimal') },
+        { id: "02", label: t('dashboard.stats.globalInventory'), value: statsData.containers, trend: t('dashboard.stats.synced') },
+        { id: "03", label: t('dashboard.stats.systemReliability'), value: statsData.on_time_rate, trend: t('dashboard.stats.elite') }
     ];
 
     return (
@@ -105,15 +105,15 @@ export default function DashboardPage() {
                     className="grid lg:grid-cols-2 gap-32 mb-64"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">COMMAND_HUB</span>
-                        <h1 className="arch-heading">Welcome, <br /><span className="italic">{userName}</span>.</h1>
+                        <span className="arch-label mb-12 block">{t('dashboard.commandHub')}</span>
+                        <h1 className="arch-heading">{t('dashboard.welcome')} <br /><span className="italic">{userName}</span>.</h1>
                     </div>
                     <div className="flex flex-col justify-end items-end">
                         <div className="arch-detail-line h-32 border-white flex flex-col justify-center px-12">
-                            <span className="arch-label mb-2">OS_STATUS</span>
+                            <span className="arch-label mb-2">{t('dashboard.osStatus')}</span>
                             <div className="text-4xl font-light text-white italic tracking-widest flex items-center gap-6">
                                 <div className="w-3 h-3 bg-emerald-500 animate-pulse" />
-                                CORE_ONLINE
+                                {t('dashboard.coreOnline')}
                             </div>
                         </div>
                     </div>
@@ -140,12 +140,12 @@ export default function DashboardPage() {
                     <div className="space-y-32">
                         <div className="flex justify-between items-end mb-16 px-4">
                             <div>
-                                <span className="arch-label mb-4 block">ACTIVE_OPERATIONS</span>
-                                <h2 className="text-5xl font-light text-white italic tracking-tighter">Operational Manifest</h2>
+                                <span className="arch-label mb-4 block">{t('dashboard.manifest.activeOps')}</span>
+                                <h2 className="text-5xl font-light text-white italic tracking-tighter">{t('dashboard.manifest.title')}</h2>
                             </div>
                             <Link href="/quote">
                                 <button className="h-16 px-12 bg-white text-black font-bold uppercase tracking-[0.6em] text-[10px] transition-all hover:bg-zinc-200">
-                                    NEW_DEPLOYMENT
+                                    {t('dashboard.manifest.newDeployment')}
                                 </button>
                             </Link>
                         </div>
@@ -154,12 +154,12 @@ export default function DashboardPage() {
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-48 opacity-20">
                                     <div className="w-1 h-32 bg-white animate-pulse" />
-                                    <span className="arch-label mt-8">SYNCING_LEDGER</span>
+                                    <span className="arch-label mt-8">{t('dashboard.manifest.syncingLedger')}</span>
                                 </div>
                             ) : bookings.length === 0 ? (
                                 <div className="py-64 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/10 grayscale opacity-20">
                                     <Anchor className="w-16 h-16 mb-8" />
-                                    <span className="arch-label">ZERO_MANIFESTS_DETECTED</span>
+                                    <span className="arch-label">{t('dashboard.manifest.zeroManifests')}</span>
                                 </div>
                             ) : (
                                 bookings.map((b, i) => (
@@ -167,7 +167,7 @@ export default function DashboardPage() {
                                         <div className="flex items-center gap-16">
                                             <span className="arch-number text-zinc-900 group-hover:text-white transition-all">0{i + 1}</span>
                                             <div>
-                                                <h3 className="text-4xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{b.booking_reference || "GEN_CARGO_01"}</h3>
+                                                <h3 className="text-4xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{b.booking_reference || t('dashboard.manifest.genCargo')}</h3>
                                                 <div className="flex items-center gap-8 mt-2">
                                                     <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">{b.origin}</span>
                                                     <ArrowRight className="w-3 h-3 text-zinc-800" />
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-bold tracking-[1em] text-emerald-500 mb-2">ACTIVE</div>
+                                            <div className="text-[10px] font-bold tracking-[1em] text-emerald-500 mb-2">{t('dashboard.manifest.active')}</div>
                                             <div className="text-xl font-bold text-zinc-800 tracking-tighter tabular-nums">{new Date(b.created_at).toLocaleDateString()}</div>
                                         </div>
                                     </div>
@@ -188,14 +188,14 @@ export default function DashboardPage() {
                     {/* Right Side: High-Security Intel */}
                     <div className="space-y-32">
                         <div className="arch-detail-line border-white">
-                            <span className="arch-label block mb-8">MARKET_INTEL</span>
+                            <span className="arch-label block mb-8">{t('dashboard.intel.marketIntel')}</span>
                             <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale saturate-50 hover:grayscale-0 transition-all duration-1000">
                                 <MarketTrendWidget />
                             </div>
                         </div>
 
                         <div className="arch-detail-line border-zinc-800 hover:border-white transition-all duration-1000">
-                            <span className="arch-label block mb-8">GLOBAL_VESSELS</span>
+                            <span className="arch-label block mb-8">{t('dashboard.intel.globalVessels')}</span>
                             <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale">
                                 <VesselTrackerWidget />
                             </div>
@@ -203,8 +203,8 @@ export default function DashboardPage() {
 
                         <div className="bg-white p-12 text-black flex flex-col justify-between h-96 group hover:translate-x-4 transition-all duration-700">
                             <div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em]">SECURITY_PROTOCOL</span>
-                                <h4 className="text-5xl font-light italic leading-none mt-4 transition-all group-hover:pl-4 tracking-tighter">Encrypted <br />Node Link</h4>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em]">{t('dashboard.intel.securityProtocol')}</span>
+                                <h4 className="text-5xl font-light italic leading-none mt-4 transition-all group-hover:pl-4 tracking-tighter">{t('dashboard.intel.encryptedLink')}</h4>
                             </div>
                             <div className="flex justify-between items-end">
                                 <Zap className="w-12 h-12 fill-black" />
