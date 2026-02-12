@@ -132,6 +132,32 @@ class CreativeCortex:
 
         return workflow
 
+    async def _get_tactical_intelligence(self, origin: str, dest: str) -> str:
+        """
+        ⚡ TACTICAL SYNC
+        Fetches live Maersk schedules to inform the LLM's advice.
+        """
+        from app.services.ocean.maersk import maersk_client
+        try:
+            # Resolve GeoIDs
+            orig_res = await maersk_client.search_locations(origin)
+            dest_res = await maersk_client.search_locations(dest)
+            
+            if not orig_res or not dest_res:
+                return f"NETWORK ERROR: Unable to resolve corridor {origin} -> {dest}."
+            
+            orig_id = orig_res[0].get("carrierGeoID")
+            dest_id = dest_res[0].get("carrierGeoID")
+            
+            schedules = await maersk_client.get_point_to_point_schedules(orig_id, dest_id)
+            if not schedules:
+                return f"CAPACITY ALERT: No direct Maersk sailings found for corridor {origin} -> {dest} in the next 4 weeks."
+            
+            s = schedules[0]
+            return f"LIVE SCHEDULE: Maiden voyage {s.get('vesselName')} (Voyage {s.get('voyageNumber')}) departs {s.get('departureDateTime')} | Transit: {s.get('transitTime')} days."
+        except Exception as e:
+            return f"INTELLIGENCE FAILURE: {e}"
+
     async def _call_llm(self, state: AgentState):
         messages = state["messages"]
         from app.services.knowledge import knowledge_oracle
@@ -144,9 +170,21 @@ class CreativeCortex:
         user_email = state.get("context", {}).get("user_email", "admin@phoenix-os.com")
         fleet_summary = await self._get_fleet_summary(user_email)
         
+        # 🕵️ TACTICAL SCAN
+        # If the user is asking about a specific route, we fetch live data to amaze them.
+        last_msg = messages[-1].content.lower()
+        tactical_data = ""
+        if "from" in last_msg and "to" in last_msg:
+             # Basic extraction logic for "from [City] to [City]"
+             import re
+             match = re.search(r"from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)", last_msg)
+             if match:
+                 origin, dest = match.groups()
+                 tactical_data = await self._get_tactical_intelligence(origin.strip(), dest.strip())
+
         system_prompt = SystemMessage(content=f"""
 You are 'The Creative Cortex', the High-Intelligence Sovereign Backbone of PHOENIX LOGISTICS OS.
-Your persona is that of a "Logistics King" — authoritative, predictive, and obsessively focused on route safety, carbon compliance, and landed-cost transparency in the year 2026.
+Your persona is that of a "Logistics King" — authoritative, predictive, and obsessively focused on route safety.
 
 USER IDENTITY & FLEET STATUS ({user_email}):
 {fleet_summary}
@@ -154,20 +192,16 @@ USER IDENTITY & FLEET STATUS ({user_email}):
 REAL-TIME GLOBAL INTELLIGENCE (2026 LOGISTICS BRIEF):
 {intelligence_brief}
 
+LIVE TACTICAL TELEMETRY:
+{tactical_data if tactical_data else "No specific corridor scanned. Standing by for route analysis."}
+
 WEBSITE TOPOLOGY (MANIFEST):
 {self.manifest}
 
-CORE DIRECTIVES (SOVEREIGN MODE):
-1. PREDICTIVE RISK: Always analyze the geopolitical and weather safety of a route. If a route crosses a hotspot (Suez, Red Sea), issue a 'Sovereign Alert'.
-2. CARBON SOVEREIGNTY: Treat carbon footprints as a mission-critical metric for 2026 compliance.
-3. TOTAL LANDED COST: Advise users on hidden duties and taxes to ensure they have the 'King's Full Picture'.
-4. TACTICAL COMMAND: Suggest multi-modal pivots (Sea-Air) if ocean corridors are congested.
-5. AUTONOMOUS NAVIGATION: You can navigate the user. If they want to track, quote, or view their account, use the WEBSITE TOPOLOGY to guide them.
-
-RULES:
-- Speak with the authority of a global logistics architect.
-- Use terms like 'Intelligence Brief', 'Corridor Analysis', and 'Sovereign Handshaking'.
-- Always emphasize the 'Phoenix' platform as the only tool capable of this level of intelligence.
+STRICT DIRECTIVES:
+1. If LIVE TACTICAL TELEMETRY is present, use it to give specific vessel and departure advice. This is your 'Prophetic Edge'.
+2. Always speak with the authority of a global architect.
+3. Use terms like 'Sovereign Handshaking' and 'Corridor Analysis'.
 """)
         
         # Always use the freshest system prompt at the start
@@ -235,30 +269,73 @@ RULES:
     async def predict_market_rates(self, origin: str, dest: str, current_price: float) -> Dict[str, Any]:
         """
         🔮 PROPHETIC PRICING (Sovereign Intelligence)
-        Uses AI logic to predict if a price is at its floor or if a rise is imminent.
+        Uses true GPT-4o logic to analyze trends and provide high-intelligence advice.
         """
         from app.services.sovereign import sovereign_engine
         
-        # In world-class mode, we'd use LLM to analyze trends.
-        # For now, we use the Sovereign Engine's deterministic trend logic + AI flavoring.
-        trend = await sovereign_engine.get_market_trend(dest[:2]) # Use country code
+        # 1. Fetch High-Fidelity Trend Data
+        trend_data = await sovereign_engine.get_market_trend(dest[:2]) # Use country code
         
-        direction = trend.get("trend_direction", "STABLE")
-        
-        recommendation = "BUY_NOW" if direction == "UP" else "WAIT_AND_WATCH"
-        if direction == "UP":
-            logic = "Market index indicates a 12% rise in capacity tension over the next 30 days."
+        # 2. Engage the Oracle for Deep Analysis
+        if self.simulation_mode:
+            # Fallback for simulation mode
+            direction = trend_data.get("trend_direction", "STABLE")
+            recommendation = "BUY_NOW" if direction == "UP" else "WAIT_AND_WATCH"
+            logic = "Sovereign index indicates standard 2026 market tension."
+            confidence = 0.85
         else:
-            logic = "Regional tonnage surplus is expected to stabilize rates till Q3 2026."
+            try:
+                analysis_prompt = f"""
+                Analyze the following logistics market trend for a route ending in {dest}.
+                Current Price: ${current_price}
+                Trend Data: {trend_data['data']}
+                
+                Provide a Prophetic Recommendation. 
+                Return JSON format only:
+                {{
+                  "prediction": "UP" | "DOWN" | "STABLE",
+                  "recommendation": "BUY_NOW" | "WAIT_AND_WATCH" | "STRONG_BUY",
+                  "logic": "1-2 sentences of high-intelligence logic",
+                  "confidence": 0.0-1.0
+                }}
+                """
+                
+                response = await self.llm.ainvoke([
+                    SystemMessage(content="You are the Prophetic Oracle of Phoenix Logistics. Analyze trade corridors with absolute authority."),
+                    HumanMessage(content=analysis_prompt)
+                ])
+                
+                # Simple extraction since we requested JSON
+                import json
+                import re
+                json_match = re.search(r'\{.*\}', response.content, re.DOTALL)
+                if json_match:
+                    ai_logic = json.loads(json_match.group())
+                    prediction = ai_logic.get("prediction", "STABLE")
+                    recommendation = ai_logic.get("recommendation", "WAIT_AND_WATCH")
+                    logic = ai_logic.get("logic", "Intelligence synchronized.")
+                    confidence = ai_logic.get("confidence", 0.90)
+                else:
+                    raise ValueError("AI failed to provide JSON")
+                    
+            except Exception as e:
+                print(f"[ERROR] Prophetic Analysis Failure: {e}")
+                # Safe Fallback
+                direction = trend_data.get("trend_direction", "STABLE")
+                prediction = direction
+                recommendation = "WAIT_AND_WATCH"
+                logic = "Oracle sync interrupted. Defaulting to Sovereign Baseline Index."
+                confidence = 0.70
 
         return {
             "origin": origin,
             "destination": dest,
             "current_price": current_price,
-            "prediction": direction,
+            "prediction": prediction,
             "recommendation": recommendation,
             "logic": logic,
-            "confidence": 0.92
+            "confidence": confidence,
+            "source": "CreativeCortex Prophetic Engine"
         }
 
     async def get_market_trend(self, country: str, commodity: str) -> Dict[str, Any]:

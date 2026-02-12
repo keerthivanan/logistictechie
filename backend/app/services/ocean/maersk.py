@@ -256,8 +256,7 @@ class MaerskClient(OceanCarrierProtocol):
     async def get_point_to_point_schedules(self, origin_geo_id: str, dest_geo_id: str) -> List[Dict]:
         """
         API: 'Point to Point Schedules'
-        Schema: schedules-api.json
-        Path: /schedules/point-to-point
+        👑 SOVEREIGN SYNCHRONIZATION
         """
         try:
             url = f"{self.BASE_URL}/schedules/point-to-point"
@@ -269,17 +268,21 @@ class MaerskClient(OceanCarrierProtocol):
                 "dateRange": "P4W" # Next 4 Weeks
             }
             
+            print(f"[SOVEREIGN SYNC] Initiating P2P Handshake: {origin_geo_id} -> {dest_geo_id}")
+            
             async with httpx.AsyncClient(timeout=8.0) as client:
                 resp = await client.get(url, params=params, headers=headers)
                 
                 if resp.status_code == 200:
                     data = resp.json()
-                    return data.get("products", [])
+                    products = data.get("products", [])
+                    print(f"[SUCCESS] Handshake Complete. {len(products)} sailings synchronized.")
+                    return products
                 else:
                     print(f"[WARN] Schedule API Error: {resp.status_code} - {resp.text[:100]}")
                     return []
         except Exception as e:
-            print(f"[ERROR] Schedule Exception: {e}")
+            print(f"[ERROR] Sovereign Handshake Exception: {e}")
             return []
 
     async def check_connection(self) -> bool:
@@ -289,3 +292,5 @@ class MaerskClient(OceanCarrierProtocol):
             return len(res) > 0
         except Exception:
             return False
+
+maersk_client = MaerskClient()

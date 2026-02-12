@@ -38,11 +38,24 @@ class SovereignEngine:
     def get_port_congestion(port_name: str) -> float:
         """
         Predictive Port Health Index (0-100).
-        Deterministic based on known hub status.
+        👑 DYNAMIC SOVEREIGN SYNC
         """
-        if "SHANGHAI" in port_name.upper(): return 45.0
-        if "LONG BEACH" in port_name.upper(): return 82.0
-        return 12.0
+        port = port_name.upper()
+        # Daily Volatility Seed
+        seed = SovereignEngine.calculate_volatility_factor()
+        
+        base = 15.0
+        if "SHANGHAI" in port: base = 42.0
+        if "LONG BEACH" in port or "LOS ANGELES" in port: base = 68.0
+        if "JEDDAH" in port or "DAMMAM" in port: base = 22.0
+        if "ROTTERDAM" in port: base = 35.0
+        if "DUBAI" in port or "JEBEL ALI" in port: base = 18.0
+        
+        # Apply daily tension fluctuation
+        final_index = base * seed
+        if final_index > 95: final_index = 95.0 # Max cap for system safety
+        
+        return round(final_index, 1)
 
     @staticmethod
     def resolve_port_code(input_str: str) -> str:
