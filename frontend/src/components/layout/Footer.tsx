@@ -1,129 +1,93 @@
 "use client";
 
 import Link from "next/link";
-import { Twitter, Linkedin, Mail, Ship, Zap, Globe, Shield, ArrowUpRight } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Ship, Linkedin, Twitter, Github, Globe, Shield, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function Footer() {
-    const { t } = useLanguage();
-
     const sections = [
         {
-            title: "OPERATIONAL_TOOLS",
+            title: "STRATEGIC",
             links: [
-                { href: "/quote", label: "QUOTE_ENGINE" },
-                { href: "/tracking", label: "LIVE_TELEMETRY" },
-                { href: "/market", label: "MARKET_INTELLIGENCE" },
-                { href: "/schedules", label: "VESSEL_SCHEDULES" },
+                { label: "QUOTE_ENGINE", href: "/quote" },
+                { label: "MARKET_INTEL", href: "/market" },
+                { label: "CAPABILITIES", href: "/services" },
+                { label: "GLOBAL_NODES", href: "/schedules" }
             ]
         },
         {
-            title: "NETWORK_NODE",
+            title: "OPERATIONAL",
             links: [
-                { href: "/company", label: "ORIGIN_STORY" },
-                { href: "/services", label: "CAPABILITIES" },
-                { href: "/pricing", label: "INVESTMENT_PLANS" },
-                { href: "/careers", label: "JOIN_COLLECTIVE" },
+                { label: "TRACK_MISSION", href: "/tracking" },
+                { label: "DOCUMENTATION", href: "/docs" },
+                { label: "SYSTEM_STATUS", href: "/health" },
+                { label: "SUPPORT_LINK", href: "/contact" }
             ]
         },
         {
-            title: "PROTOCOL_SUPPORT",
+            title: "ARCHITECTURE",
             links: [
-                { href: "/contact", label: "CRISIS_LINK" },
-                { href: "/help", label: "KNOWLEDGE_BASE" },
-                { href: "/terms", label: "LEGAL_TERMS" },
-                { href: "/privacy", label: "DATA_PRIVACY" },
+                { label: "DESIGN_PHILOSOPHY", href: "/company" },
+                { label: "CORE_LEGAL", href: "/terms" },
+                { label: "DATA_PRIVACY", href: "/privacy" },
+                { label: "SECURITY_PROTO", href: "/security" }
             ]
         }
     ];
 
     return (
-        <footer className="border-t border-white/5 bg-black relative overflow-hidden">
-            <div className="absolute inset-0 bg-grid-premium opacity-10 pointer-events-none" />
+        <footer className="bg-black text-white border-t border-white/5 pt-48 pb-24">
+            <div className="container max-w-[1400px] mx-auto px-8">
 
-            <div className="container max-w-[1400px] mx-auto px-8 relative z-10">
+                {/* Structural Foundation Grid */}
+                <div className="grid lg:grid-cols-4 gap-32 mb-48">
 
-                {/* Tactical Footer Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-0 border-x border-white/5">
-
-                    {/* Brand Manifest */}
-                    <div className="lg:col-span-3 p-12 lg:p-16 border-b border-white/5 lg:border-r">
-                        <Link href="/" className="flex items-center gap-6 mb-12 group">
-                            <div className="w-14 h-14 bg-white flex items-center justify-center relative transition-all duration-700 group-hover:bg-emerald-500 group-hover:rotate-12">
-                                <Ship className="h-8 w-8 text-black" />
-                            </div>
-                            <h2 className="text-3xl font-black text-white italic tracking-[0.2em] uppercase">
-                                PHOENIX<span className="text-zinc-900 font-bold not-italic">OS</span>
-                            </h2>
-                        </Link>
-                        <p className="text-zinc-700 text-[11px] font-black uppercase tracking-[0.4em] leading-loose max-w-xl mb-12">
-                            A global engineering collective dedicated to neutralizing the fundamental complexity of international trade.
-                            Architecting the future of velocity through autonomous logistics.
-                        </p>
-
-                        <div className="flex gap-8">
-                            {[
-                                { icon: Twitter, href: "#" },
-                                { icon: Linkedin, href: "#" },
-                                { icon: Mail, href: "mailto:ops@phoenix.io" }
-                            ].map((social, i) => (
-                                <a
-                                    key={i}
-                                    href={social.href}
-                                    className="h-12 w-12 border border-white/5 flex items-center justify-center text-zinc-800 hover:text-white hover:border-white/20 transition-all duration-500"
-                                >
-                                    <social.icon className="w-4 h-4" />
-                                </a>
-                            ))}
+                    {/* Brand Node */}
+                    <div className="space-y-12">
+                        <div className="w-12 h-12 border border-white flex items-center justify-center">
+                            <Ship className="h-6 w-6" />
                         </div>
+                        <h2 className="text-xl font-bold tracking-[0.6em] text-white">PHOENIX</h2>
+                        <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-800 leading-loose uppercase">
+                            NEOM_OPERATIONAL_HUB<br />
+                            SAUDI_ARABIA_UNIT_1<br />
+                            CORE_ARCHITECTURE_FIRM
+                        </p>
                     </div>
 
-                    {/* Navigation Clusters */}
+                    {/* Links Matrix */}
                     {sections.map((section, idx) => (
-                        <div key={idx} className="lg:col-span-1 p-12 border-b border-white/5 border-r last:border-r-0">
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.6em] mb-12">{section.title}</h4>
-                            <ul className="space-y-6">
-                                {section.links.map((link, li) => (
-                                    <li key={li}>
-                                        <Link
-                                            href={link.href}
-                                            className="text-[9px] font-black text-zinc-800 hover:text-emerald-500 uppercase tracking-[0.4em] transition-all flex items-center group"
-                                        >
-                                            {link.label}
-                                            <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 transition-all" />
-                                        </Link>
-                                    </li>
+                        <div key={idx} className="arch-detail-line">
+                            <span className="arch-label mb-12 block">{section.title}</span>
+                            <div className="flex flex-col gap-6">
+                                {section.links.map((link, lIdx) => (
+                                    <Link
+                                        key={lIdx}
+                                        href={link.href}
+                                        className="text-[10px] font-bold tracking-[0.4em] text-zinc-700 hover:text-white transition-colors uppercase"
+                                    >
+                                        {link.label}
+                                    </Link>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                {/* System Status & Ledger Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-x border-b border-white/5">
-                    <div className="p-8 border-b md:border-b-0 md:border-r border-white/5 flex items-center gap-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-emerald-500 animate-pulse" />
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.6em]">ALL_SYSTEMS_OPERATIONAL</span>
-                        </div>
-                        <div className="w-[1px] h-4 bg-white/5" />
-                        <span className="text-[9px] font-black text-zinc-900 uppercase tracking-[0.4em]">SYNC_DELAY: 14MS</span>
+                {/* Sub-terrain Footer */}
+                <div className="mt-48 pt-24 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-12 text-[9px] font-bold tracking-[0.8em] text-zinc-900 uppercase">
+                    <div className="flex items-center gap-6">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
+                        <span>SYSTEM_ID: PHOENIX_OS_V4.1.0</span>
                     </div>
-
-                    <div className="p-8 flex items-center justify-between">
-                        <p className="text-[9px] font-black text-zinc-900 uppercase tracking-[0.6em]">
-                            © 2026 PHOENIX_OS_OPERATIONS. ALL_RIGHTS_RESERVED.
-                        </p>
-                        <div className="flex items-center gap-4 text-[9px] font-black text-zinc-950 uppercase tracking-[0.4em]">
-                            <span>V4.1.0_STABLE</span>
-                            <Shield className="w-3 h-3" />
-                        </div>
+                    <span>© 2026 LOGISTIC_ARCHITECTURE_FIRM</span>
+                    <div className="flex gap-8">
+                        <Linkedin className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+                        <Twitter className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+                        <Github className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
                     </div>
                 </div>
             </div>
-
-            {/* Cinematic Gradient Finish */}
-            <div className="h-24 bg-gradient-to-t from-emerald-500/5 to-transparent pointer-events-none" />
         </footer>
     );
 }

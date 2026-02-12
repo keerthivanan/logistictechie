@@ -1,273 +1,175 @@
 "use client";
 
-import * as React from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Bell, Lock, Globe, Shield, ArrowLeft, LogOut, Zap, Eye, EyeOff } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Shield, Lock, Bell, Globe, ArrowLeft, Check, Zap, Eye, EyeOff } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { motion } from "framer-motion";
 
 export default function SettingsPage() {
-    const { data: session, status } = useSession();
-    const router = useRouter();
-    const { language, setLanguage, t, direction } = useLanguage();
-    const isRTL = direction === 'rtl';
+    const { data: session } = useSession();
+    const [activeTab, setActiveTab] = useState("account");
+    const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
     const [loading, setLoading] = useState(false);
+    const [msg, setMsg] = useState({ type: "", text: "" });
 
-    // Password state
-    const [passwords, setPasswords] = useState({ current: "", new: "" });
-    const [updatingPassword, setUpdatingPassword] = useState(false);
-    const [passwordFeedback, setPasswordFeedback] = useState("");
-
-    // Notification state
-    const [notifications, setNotifications] = useState({
-        email: true,
-        shipment: true,
-        marketing: false
-    });
-
-    React.useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/login");
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passwords.new !== passwords.confirm) {
+            setMsg({ type: "error", text: "NEW_PASSWORDS_DO_NOT_SYNC" });
             return;
         }
-
-        if (status === "authenticated" && session?.user) {
-            const fetchProfile = async () => {
-                try {
-                    const token = (session.user as any).accessToken;
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                    const res = await axios.get(`${apiUrl}/api/auth/me`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (res.data.preferences) {
-                        try {
-                            const prefs = JSON.parse(res.data.preferences);
-                            setNotifications(prev => ({ ...prev, ...prefs }));
-                        } catch (e) {
-                            console.error("Failed to parse preferences", e);
-                        }
-                    }
-                } catch (err) {
-                    console.error("Failed to fetch profile", err);
-                }
-            };
-            fetchProfile();
-        }
-    }, [status, session, router]);
-
-    const handleLogout = () => {
-        signOut({ callbackUrl: "/" });
-    };
-
-    const handlePasswordUpdate = async () => {
-        if (!passwords.current || !passwords.new || !session) return;
-        setUpdatingPassword(true);
-        setPasswordFeedback("");
+        setLoading(true);
         try {
-            const token = (session.user as any).accessToken;
+            const token = (session?.user as any).accessToken;
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            await axios.post(`${apiUrl}/api/auth/change-password`, {
+            await axios.put(`${apiUrl}/api/auth/change-password`, {
                 current_password: passwords.current,
                 new_password: passwords.new
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setPasswordFeedback("SUCCESS: Security Baseline Updated.");
-            setPasswords({ current: "", new: "" });
-        } catch (e: any) {
-            setPasswordFeedback(e.response?.data?.detail || "PROTOCOL_ERROR: Update Inhibited.");
+            setMsg({ type: "success", text: "SECURITY_PROTOCOL_UPDATED" });
+            setPasswords({ current: "", new: "", confirm: "" });
+        } catch (err) {
+            setMsg({ type: "error", text: "CREDENTIAL_VERIFICATION_FAILED" });
         } finally {
-            setUpdatingPassword(false);
+            setLoading(false);
         }
     };
 
-    const toggleNotification = async (key: keyof typeof notifications) => {
-        if (!session) return;
-        const newValue = !notifications[key];
-        setNotifications({ ...notifications, [key]: newValue });
-
-        try {
-            const token = (session.user as any).accessToken;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-            await axios.put(`${apiUrl}/api/auth/update-profile`, {
-                preferences: JSON.stringify({ ...notifications, [key]: newValue })
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-        } catch (e) {
-            console.error("Failed to sync notifications", e);
-        }
-    };
+    const sections = [
+        { id: "01", label: "SECURITY", icon: Lock, desc: "Manage cryptographic access and system credentials." },
+        { id: "02", label: "NOTIFICATIONS", icon: Bell, desc: "Configure millisecond telemetry alerts and mission updates." },
+        { id: "03", label: "LOCALIZATION", icon: Globe, desc: "Adjust temporal regional nodes and linguistic frameworks." }
+    ];
 
     return (
-        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-            <div className="container max-w-[1400px] mx-auto px-8 pt-48 pb-48 relative z-10">
+                {/* Architectural Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="max-w-4xl mx-auto"
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="mb-64"
                 >
-                    <div className="flex flex-col mb-16">
-                        <Button onClick={() => router.back()} variant="ghost" className="mb-12 p-0 text-zinc-700 hover:text-white hover:bg-transparent rounded-none h-12 w-fit font-black text-[10px] uppercase tracking-[0.4em]">
-                            <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-4 rotate-180' : 'mr-4'}`} /> REVERT_TO_NODE
-                        </Button>
-                        <h1 className="titan-text mb-4">
-                            System. <br />
-                            <span className="text-zinc-900 group">Parameters.</span>
-                        </h1>
-                        <div className="text-[11px] font-black text-zinc-800 uppercase tracking-[0.8em] mt-8">OPERATIONAL_PROTOCOL_CONTROL</div>
-                    </div>
-
-                    <div className="grid gap-12">
-                        {/* Language & Dialect */}
-                        <div className="elite-card p-12 relative overflow-hidden group hover:bg-zinc-950/40 transition-all duration-700">
-                            <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-                                <Globe className="h-24 w-24 text-white" />
-                            </div>
-                            <div className="flex items-center gap-6 mb-12">
-                                <div className="h-14 w-14 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-white group-hover:text-black group-hover:rotate-12">
-                                    <Globe className="h-6 w-6" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter transition-all duration-700 group-hover:translate-x-2">INTERFACE_DIALECT</h2>
-                                    <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">Select your primary neural interface language</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between p-8 bg-zinc-950 border border-white/5 group hover:border-white/10 transition-all duration-700">
-                                <div className="space-y-2">
-                                    <div className="text-[10px] font-black text-white uppercase tracking-[0.3em]">ACTIVE_TRANSLATION</div>
-                                    <div className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em]">CURRENT_LOCALE: {language.toUpperCase()}</div>
-                                </div>
-                                <div className="flex gap-4">
-                                    {['EN', 'AR'].map((lang) => (
-                                        <Button
-                                            key={lang}
-                                            onClick={() => setLanguage(lang.toLowerCase() as any)}
-                                            className={`h-16 px-10 rounded-none font-black text-[11px] uppercase tracking-[0.4em] transition-all duration-700 ${language === lang.toLowerCase()
-                                                    ? 'bg-white text-black'
-                                                    : 'bg-zinc-950 text-zinc-800 border-white/5 border hover:text-white'
-                                                }`}
-                                        >
-                                            {lang}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Security Keys */}
-                        <div className="elite-card p-12 relative overflow-hidden group hover:bg-zinc-950/40 transition-all duration-700">
-                            <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-                                <Shield className="h-24 w-24 text-white" />
-                            </div>
-                            <div className="flex items-center gap-6 mb-12">
-                                <div className="h-14 w-14 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-emerald-500 group-hover:text-black group-hover:-rotate-12">
-                                    <Shield className="h-6 w-6" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter transition-all duration-700 group-hover:translate-x-2">SOVEREIGN_ENCRYPTION</h2>
-                                    <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">Rotate your strategic access credentials</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-8">
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-4 group/input">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700 group-focus-within/input:text-emerald-500 transition-colors">PRIMARY_KEY</label>
-                                        <Input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="bg-zinc-950/40 border border-white/5 h-16 px-8 text-white uppercase tracking-[0.4em] focus:border-white transition-all ring-0 outline-none rounded-none"
-                                            value={passwords.current}
-                                            onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-4 group/input">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-700 group-focus-within/input:text-emerald-500 transition-colors">NEW_SOVEREIGN_KEY</label>
-                                        <Input
-                                            type="password"
-                                            placeholder="••••••••"
-                                            className="bg-zinc-950/40 border border-white/5 h-16 px-8 text-white uppercase tracking-[0.4em] focus:border-white transition-all ring-0 outline-none rounded-none"
-                                            value={passwords.new}
-                                            onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                {passwordFeedback && (
-                                    <p className={`text-[10px] font-black uppercase tracking-[0.4em] text-center p-4 bg-zinc-950 border border-white/5 ${passwordFeedback.includes("SUCCESS") ? "text-emerald-500" : "text-emerald-900"}`}>
-                                        {passwordFeedback}
-                                    </p>
-                                )}
-                                <Button
-                                    onClick={handlePasswordUpdate}
-                                    disabled={updatingPassword}
-                                    className="w-full h-20 bg-white text-black hover:bg-emerald-500 transition-all rounded-none font-black uppercase tracking-[0.6em] text-[11px] shadow-[0_20px_60px_rgba(255,255,255,0.05)]"
-                                >
-                                    {updatingPassword ? "ROTATING_KEYS..." : "COMMIT_SECURITY_RECONFIG"}
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Oracle Signals */}
-                        <div className="elite-card p-12 relative overflow-hidden group hover:bg-zinc-950/40 transition-all duration-700">
-                            <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
-                                <Bell className="h-24 w-24 text-white" />
-                            </div>
-                            <div className="flex items-center gap-6 mb-12">
-                                <div className="h-14 w-14 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-amber-500 group-hover:text-black group-hover:rotate-12">
-                                    <Bell className="h-6 w-6" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter transition-all duration-700 group-hover:translate-x-2">ORACLE_SIGNALS</h2>
-                                    <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">Manage real-time operational push telemetry</p>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-6">
-                                {[
-                                    { id: 'email', label: 'UNIVERSAL_EMAIL_LINK' },
-                                    { id: 'shipment', label: 'TRANSIT_TELEMETRY' },
-                                    { id: 'marketing', label: 'MARKET_INTELLIGENCE' }
-                                ].map((note) => (
-                                    <div key={note.id} className="flex items-center justify-between p-8 bg-zinc-950 border border-white/5 group/note hover:border-white/10 transition-all duration-500">
-                                        <span className="text-zinc-600 font-black uppercase tracking-[0.4em] text-[10px] group-hover/note:text-white transition-colors">{note.label}</span>
-                                        <Switch
-                                            checked={notifications[note.id as keyof typeof notifications]}
-                                            onCheckedChange={() => toggleNotification(note.id as keyof typeof notifications)}
-                                            className="data-[state=checked]:bg-emerald-500"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Session Termination */}
-                        <div className="p-16 border-2 border-emerald-900/10 bg-emerald-950/5 relative group overflow-hidden">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
-                                <div className="text-center md:text-left space-y-4">
-                                    <h2 className="text-3xl font-black text-emerald-950 uppercase italic tracking-tighter">TERMINATE_SESSION</h2>
-                                    <p className="text-[10px] font-black text-zinc-900 uppercase tracking-[0.4em] max-w-sm leading-loose">Disconnect all strategic nodes and clear local identity cache.</p>
-                                </div>
-                                <Button
-                                    onClick={handleLogout}
-                                    className="h-20 px-16 bg-white text-black hover:bg-emerald-950 hover:text-white transition-all duration-700 rounded-none font-black text-[11px] uppercase tracking-[0.8em] flex items-center gap-6 shadow-[0_20px_60px_rgba(0,0,0,0.1)]"
-                                >
-                                    <LogOut className="h-5 w-5" /> DISCONNECT
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                    <span className="arch-label mb-12 block">CONFIGURATION</span>
+                    <h1 className="arch-heading">System <br />Parameters</h1>
                 </motion.div>
+
+                <div className="grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
+
+                    {/* Navigation Sidebar */}
+                    <div className="space-y-16">
+                        {sections.map((section) => (
+                            <div
+                                key={section.id}
+                                onClick={() => setActiveTab(section.label.toLowerCase())}
+                                className={`arch-detail-line group cursor-pointer transition-all ${activeTab === section.label.toLowerCase() ? 'border-white opacity-100' : 'opacity-40 hover:opacity-100'}`}
+                            >
+                                <span className="arch-number block mb-4">{section.id}</span>
+                                <h3 className="text-3xl font-light text-white uppercase tracking-tight mb-2">
+                                    {section.label}
+                                </h3>
+                                <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">{section.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="min-h-[600px] p-16 bg-zinc-950/20 border border-white/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none italic text-6xl uppercase">{activeTab}</div>
+
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'security' && (
+                                <motion.div
+                                    key="security"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    className="space-y-12 max-w-2xl"
+                                >
+                                    <h2 className="text-4xl font-light text-white uppercase tracking-tighter italic">Credential_Sync</h2>
+                                    <form onSubmit={handlePasswordChange} className="space-y-10">
+                                        <div className="space-y-4">
+                                            <label className="arch-label">CURRENT_KEY</label>
+                                            <input
+                                                type="password"
+                                                value={passwords.current}
+                                                onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                                                className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="arch-label">NEW_ALLOCATION</label>
+                                            <input
+                                                type="password"
+                                                value={passwords.new}
+                                                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                                                className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <label className="arch-label">CONFIRM_ALLOCATION</label>
+                                            <input
+                                                type="password"
+                                                value={passwords.confirm}
+                                                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                                                className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                            />
+                                        </div>
+                                        <button className="h-24 px-16 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200">
+                                            COMMIT_SECURITY_UPDATE
+                                        </button>
+                                        {msg.text && (
+                                            <div className={`p-8 border-l-2 ${msg.type === 'success' ? 'border-emerald-500 bg-emerald-500/5 text-emerald-500' : 'border-red-500 bg-red-500/5 text-red-500'} text-[10px] font-bold uppercase tracking-[0.4em]`}>
+                                                {msg.text}
+                                            </div>
+                                        )}
+                                    </form>
+                                </motion.div>
+                            )}
+
+                            {activeTab !== 'security' && (
+                                <motion.div
+                                    key="placeholder"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex flex-col items-center justify-center h-[400px] text-center"
+                                >
+                                    <Zap className="w-12 h-12 text-zinc-900 mb-8 animate-pulse" />
+                                    <p className="arch-label">MODAL_PARAMETER_LOCKED</p>
+                                    <p className="text-zinc-700 text-[10px] mt-4 uppercase tracking-[0.4em]">Awaiting high-level operational override.</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
+                {/* Sub-footer Metric Context */}
+                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
+                    <span className="arch-label mb-12 block">SYSTEM_INTEGRITY</span>
+                    <h2 className="arch-heading mb-16 italic">Encrypted. Always.</h2>
+                    <div className="flex justify-center gap-12 mt-24 opacity-20">
+                        <Lock className="w-8 h-8" />
+                        <Shield className="w-8 h-8" />
+                        <Zap className="w-8 h-8" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Sub-footer Section */}
+            <div className="border-t border-white/5 py-32 bg-black">
+                <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-[0.8em] text-zinc-900 uppercase">
+                    <span>SECURITY_CLEARANCE_ALPHA</span>
+                    <span>© 2026 PHOENIX_OS</span>
+                </div>
             </div>
         </main>
     );

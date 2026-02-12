@@ -14,7 +14,8 @@ import {
     Plus,
     Globe,
     Zap,
-    Anchor
+    Anchor,
+    ArrowRight
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ export default function DashboardPage() {
     const { language } = useLanguage();
     const [statsData, setStatsData] = useState({ active_shipments: 0, containers: 0, on_time_rate: "99.9%" });
 
-    const userName = (session?.user?.name || "COMMAND_USER").split(' ')[0];
+    const userName = (session?.user?.name || "OPERATIVE").split(' ')[0].toUpperCase();
     const router = useRouter();
 
     useEffect(() => {
@@ -87,160 +88,136 @@ export default function DashboardPage() {
     }, [status, session, router]);
 
     const stats = [
-        { label: "Active_Shipments", value: statsData.active_shipments, icon: Ship, trend: "+12.4%" },
-        { label: "Global_Inventory", value: statsData.containers, icon: Package, trend: "Optimal" },
-        { label: "Transit_Reliability", value: statsData.on_time_rate, icon: TrendingUp, trend: "Elite" }
+        { id: "01", label: "Active_Shipments", value: statsData.active_shipments, trend: "OPTIMAL" },
+        { id: "02", label: "Global_Inventory", value: statsData.containers, trend: "SYNCED" },
+        { id: "03", label: "System_Reliability", value: statsData.on_time_rate, trend: "ELITE" }
     ];
 
     return (
-        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium">
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-            <div className="container max-w-[1400px] mx-auto px-8 pt-32 pb-48 relative z-10">
-
-                {/* Cinematic Header */}
-                <div className="flex flex-col mb-32">
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-[1px] bg-emerald-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">OPERATIONAL_INITIALIZED</span>
+                {/* Architectural Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                >
+                    <div>
+                        <span className="arch-label mb-12 block">COMMAND_HUB</span>
+                        <h1 className="arch-heading">Welcome, <br /><span className="italic">{userName}</span>.</h1>
+                    </div>
+                    <div className="flex flex-col justify-end items-end">
+                        <div className="arch-detail-line h-32 border-white flex flex-col justify-center px-12">
+                            <span className="arch-label mb-2">OS_STATUS</span>
+                            <div className="text-4xl font-light text-white italic tracking-widest flex items-center gap-6">
+                                <div className="w-3 h-3 bg-emerald-500 animate-pulse" />
+                                CORE_ONLINE
+                            </div>
                         </div>
-                        <h1 className="titan-text mb-4">
-                            Welcome Back, <br />
-                            <span className="text-zinc-900 group">{userName}.</span>
-                        </h1>
-                        <p className="text-zinc-600 text-xs font-black uppercase tracking-[0.4em] mt-8 flex items-center gap-4">
-                            <Zap className="w-4 h-4 text-emerald-500" />
-                            All systems operating at maximum efficiency.
-                        </p>
-                    </motion.div>
-                </div>
+                    </div>
+                </motion.div>
 
-                {/* Elite Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mb-32 border-t border-white/5">
-                    {stats.map((stat, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 1, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className="p-12 border-l border-b border-white/5 relative group hover:bg-zinc-950/40 transition-colors cursor-default"
-                        >
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600 group-hover:text-emerald-500 transition-colors">
-                                    {stat.label}
-                                </div>
-                                <stat.icon className="w-5 h-5 text-zinc-800 group-hover:text-white transition-all transform group-hover:rotate-12" />
+                {/* Structured Stats Matrix */}
+                <div className="grid lg:grid-cols-3 gap-0 border-y border-white/5 mb-64">
+                    {stats.map((stat) => (
+                        <div key={stat.id} className="p-16 border-r last:border-r-0 border-white/5 group hover:bg-zinc-950/20 transition-all duration-700">
+                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all block mb-12">{stat.id}</span>
+                            <div className="space-y-4">
+                                <span className="arch-label text-zinc-600 block mb-8">{stat.label}</span>
+                                <div className="text-8xl font-light text-white tracking-tighter tabular-nums transition-all group-hover:pl-4">{stat.value}</div>
+                                <div className="text-[10px] font-bold text-emerald-500 tracking-[0.6em] mt-8 uppercase">{stat.trend}</div>
                             </div>
-                            <div className="text-7xl font-black italic tracking-tighter mb-4">{stat.value}</div>
-                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500/50">
-                                Status: {stat.trend}
-                            </div>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
 
-                {/* Operational Interface */}
-                <div className="grid lg:grid-cols-12 gap-16 mb-32">
+                {/* Primary Operational Grid */}
+                <div className="grid lg:grid-cols-[2fr,1fr] gap-32 border-t border-white/5 pt-32">
 
-                    {/* Primary Control Log */}
-                    <div className="lg:col-span-8">
-                        <div className="flex items-end justify-between mb-12">
+                    {/* Left Side: Manifest Log */}
+                    <div className="space-y-32">
+                        <div className="flex justify-between items-end mb-16 px-4">
                             <div>
-                                <h2 className="text-4xl font-black italic uppercase italic-heading text-white tracking-widest leading-none mb-4">
-                                    Operational_Manifest
-                                </h2>
-                                <div className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em]">Real-time Cargo telemetry synchronization</div>
+                                <span className="arch-label mb-4 block">ACTIVE_OPERATIONS</span>
+                                <h2 className="text-5xl font-light text-white italic tracking-tighter">Operational Manifest</h2>
                             </div>
                             <Link href="/quote">
-                                <Button className="h-14 px-10 rounded-none bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-500 hover:scale-105 transition-all">
+                                <button className="h-16 px-12 bg-white text-black font-bold uppercase tracking-[0.6em] text-[10px] transition-all hover:bg-zinc-200">
                                     NEW_DEPLOYMENT
-                                </Button>
+                                </button>
                             </Link>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-8">
                             {loading ? (
-                                <div className="py-32 text-center text-zinc-800 font-black uppercase tracking-[1em] animate-pulse">Synchronizing_Neural_Link...</div>
+                                <div className="flex flex-col items-center justify-center py-48 opacity-20">
+                                    <div className="w-1 h-32 bg-white animate-pulse" />
+                                    <span className="arch-label mt-8">SYNCING_LEDGER</span>
+                                </div>
                             ) : bookings.length === 0 ? (
-                                <div className="py-48 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/20">
-                                    <Anchor className="w-16 h-16 text-zinc-900 mb-8" />
-                                    <div className="text-zinc-800 font-black uppercase tracking-[0.5em] mb-12">No manifests detected in active sector.</div>
-                                    <Link href="/quote">
-                                        <Button className="h-16 px-16 border border-white/10 bg-transparent text-white font-black uppercase tracking-[0.4em] text-[10px] hover:bg-white hover:text-black transition-all">
-                                            INITIATE_FIRST_MANIFEST
-                                        </Button>
-                                    </Link>
+                                <div className="py-64 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/10 grayscale opacity-20">
+                                    <Anchor className="w-16 h-16 mb-8" />
+                                    <span className="arch-label">ZERO_MANIFESTS_DETECTED</span>
                                 </div>
                             ) : (
                                 bookings.map((b, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        className="group p-8 flex items-center justify-between bg-zinc-950/20 border border-white/5 hover:border-white/20 hover:bg-zinc-950/40 transition-all cursor-pointer"
-                                    >
-                                        <div className="flex items-center gap-12">
-                                            <div className="w-16 h-16 bg-zinc-900 flex items-center justify-center group-hover:bg-white group-hover:rotate-12 transition-all duration-500">
-                                                <Ship className="w-8 h-8 text-zinc-600 group-hover:text-black" />
-                                            </div>
+                                    <div key={i} className="arch-detail-line group flex items-center justify-between hover:bg-zinc-950/20 transition-all duration-700 py-12">
+                                        <div className="flex items-center gap-16">
+                                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all">0{i + 1}</span>
                                             <div>
-                                                <div className="text-2xl font-black italic uppercase tracking-tighter text-white group-hover:text-emerald-500 transition-colors mb-2">
-                                                    {b.booking_reference || "GEN_CARGO_01"}
-                                                </div>
-                                                <div className="flex items-center gap-4 text-[9px] font-black text-zinc-700 uppercase tracking-widest">
-                                                    <MapPin className="w-3 h-3 text-emerald-500" />
-                                                    {b.origin} <span className="text-zinc-900 mx-2">{">>"}</span> {b.destination}
+                                                <h3 className="text-4xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{b.booking_reference || "GEN_CARGO_01"}</h3>
+                                                <div className="flex items-center gap-8 mt-2">
+                                                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">{b.origin}</span>
+                                                    <ArrowRight className="w-3 h-3 text-zinc-800" />
+                                                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">{b.destination}</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-2">
-                                                STATUS_ACTIVE
-                                            </div>
-                                            <div className="text-[10px] font-black text-zinc-800 uppercase tracking-widest">
-                                                {new Date(b.created_at).toLocaleDateString()}
-                                            </div>
+                                            <div className="text-[10px] font-bold tracking-[1em] text-emerald-500 mb-2">ACTIVE</div>
+                                            <div className="text-xl font-bold text-zinc-800 tracking-tighter tabular-nums">{new Date(b.created_at).toLocaleDateString()}</div>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 ))
                             )}
                         </div>
                     </div>
 
-                    {/* Elite Intelligence Widgets */}
-                    <div className="lg:col-span-4 flex flex-col gap-12">
-                        <div className="p-8 bg-zinc-950/40 border border-white/5 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-8 opacity-5 italic font-black text-6xl text-white pointer-events-none">
-                                INTEL
-                            </div>
-                            <div className="relative z-10">
-                                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-emerald-500 mb-6">Market_Intelligence</h3>
+                    {/* Right Side: High-Security Intel */}
+                    <div className="space-y-32">
+                        <div className="arch-detail-line border-white">
+                            <span className="arch-label block mb-8">MARKET_INTEL</span>
+                            <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale saturate-50 hover:grayscale-0 transition-all duration-1000">
                                 <MarketTrendWidget />
                             </div>
                         </div>
 
-                        <div className="p-8 bg-zinc-950/40 border border-white/5">
-                            <h3 className="text-xs font-black uppercase tracking-[0.4em] text-zinc-700 mb-6 px-2">Global_Vessel_Tracking</h3>
-                            <VesselTrackerWidget />
+                        <div className="arch-detail-line border-zinc-800 hover:border-white transition-all duration-1000">
+                            <span className="arch-label block mb-8">GLOBAL_VESSELS</span>
+                            <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale">
+                                <VesselTrackerWidget />
+                            </div>
                         </div>
 
-                        <div className="p-8 bg-white text-black group hover:bg-emerald-500 transition-colors duration-700 cursor-pointer">
-                            <div className="flex justify-between items-start mb-8">
-                                <h3 className="text-xs font-black uppercase tracking-[0.4em] leading-none">Security_Protocol_Active</h3>
-                                <Zap className="w-5 h-5 fill-black" />
+                        <div className="bg-white p-12 text-black flex flex-col justify-between h-96 group hover:translate-x-4 transition-all duration-700">
+                            <div>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em]">SECURITY_PROTOCOL</span>
+                                <h4 className="text-5xl font-light italic leading-none mt-4 transition-all group-hover:pl-4 tracking-tighter">Encrypted <br />Node Link</h4>
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-widest leading-loose mb-12">
-                                Encrypted neural link established between all global logistics nodes. Deployment status: SECURE.
-                            </p>
-                            <ArrowUpRight className="w-8 h-8 transform group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform" />
+                            <div className="flex justify-between items-end">
+                                <Zap className="w-12 h-12 fill-black" />
+                                <ArrowUpRight className="w-12 h-12" />
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Sub-footer Section */}
+                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
+                    <span className="arch-label mb-12 block">COMMAND_HUB_OS</span>
+                    <h2 className="arch-heading italic mb-16">Monitor. Manage. Move.</h2>
                 </div>
             </div>
         </main>

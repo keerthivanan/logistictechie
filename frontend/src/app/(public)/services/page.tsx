@@ -1,165 +1,137 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { motion, Variants } from "framer-motion";
 import { Ship, Plane, Package, Truck, Globe, Shield, Clock, DollarSign, ArrowRight, Check, Zap } from "lucide-react";
 import Link from "next/link";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ServicesPage() {
-    const { t } = useLanguage();
-
-    const services = [
+    const mainServices = [
         {
-            icon: Ship,
-            title: "OCEAN_FREIGHT_V2",
-            description: "Full container (FCL) and segmented (LCL) high-velocity shipping protocols with direct carrier sync.",
-            features: ["CARRIER_DIRECT_API", "REAL_TIME_TELEMETRY", "QUANTUM_TRACKING"],
+            id: "01",
+            title: "OCEAN_STRATEGY",
+            desc: "Architecting global maritime corridors with zero-latency coordination and autonomous vessel integration.",
+            details: "Full Container Load (FCL), Less than Container Load (LCL), Specialized Equipment Deployment."
         },
         {
-            icon: Plane,
-            title: "AIR_INTELLIGENCE",
-            description: "Express orbital cargo services for time-critical manifests. Mission-critical deployment to all nodes.",
-            features: ["EXPRESS_ORBITAL", "CHARTER_PROTOCOL", "THERMAL_CONTROL"],
+            id: "02",
+            title: "AERIAL_LOGISTICS",
+            desc: "High-velocity atmospheric transit for time-critical mission assets and high-value payloads.",
+            details: "Express Cargo, Charter Operations, Temperature Controlled Atmospheric Transit."
         },
         {
-            icon: Truck,
-            title: "GROUND_LOGISTICS",
-            description: "Tactical land-based unit maneuvers for first/last-mile synchronization across continental grids.",
-            features: ["FTL_LTL_PRECISION", "CROSS_GRID_LOGIC", "MULTIMODAL_SYNC"],
+            id: "03",
+            title: "GROUND_DEVICES",
+            desc: "Precision terrestrial routing across continental networks using tactical fleet synchronization.",
+            details: "Last-mile autonomous delivery, Heavy-haul logistics, Multi-modal rail integration."
         },
         {
-            icon: Package,
-            title: "BASE_OPERATIONS",
-            description: "Strategic fulfillment nodes with neural inventory management and autonomous distribution logic.",
-            features: ["NEURAL_INVENTORY", "PICK_PACK_SYNC", "GLOBAL_HUB_SYNC"],
-        },
+            id: "04",
+            title: "WAREHOUSE_NODES",
+            desc: "Strategic asset positioning within climate-controlled, high-security regional storage frameworks.",
+            details: "Automated fulfillment nodes, Cold-chain integrity, Secure perimeter storage."
+        }
     ];
 
-    const benefits = [
-        {
-            icon: Globe,
-            title: "GLOBAL_NETWORK",
-            description: "Direct access to 200+ sovereign port nodes and terminal intelligence layers."
-        },
-        {
-            icon: Shield,
-            title: "ASSET_PROTECTION",
-            description: "End-to-end indemnity protocols securing every unit against maritime contingency."
-        },
-        {
-            icon: Clock,
-            title: "24/7_OPS_LINK",
-            description: "Constant operational surveillance and high-bandwidth support for every manifest."
-        },
-        {
-            icon: Zap,
-            title: "MAX_VELOCITY",
-            description: "Optimized trajectory calculations ensuring mission completion at peak efficiency."
-        },
-    ];
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.2, delayChildren: 0.3 }
+        }
+    };
+
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+    };
 
     return (
-        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium">
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-            <div className="container max-w-[1400px] mx-auto px-8 pt-48 pb-48 relative z-10">
-                {/* Cinematic Header */}
-                <div className="flex flex-col mb-32">
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-[1px] bg-emerald-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">CAPABILITIES_&_INFRASTRUCTURE</span>
-                        </div>
-                        <h1 className="titan-text mb-8">
-                            Global. <br />
-                            <span className="text-zinc-900 group">Deployment.</span>
-                        </h1>
-                        <p className="max-w-3xl text-zinc-600 text-sm md:text-xl font-black uppercase tracking-[0.4em] leading-relaxed">
-                            A unified operating system for global trade. From deep-sea freight intelligence <br />
-                            <span className="text-zinc-800">to autonomous last-mile maneuvers.</span>
-                        </p>
-                    </motion.div>
-                </div>
+                {/* Architectural Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="mb-48"
+                >
+                    <span className="arch-label mb-12 block">SERVICES</span>
+                    <h1 className="arch-heading">What We Do</h1>
+                </motion.div>
 
-                {/* Services Grid */}
-                <div className="grid md:grid-cols-2 gap-0 border-t border-white/5 mb-48">
-                    {services.map((service, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className="p-16 border-l border-b border-white/5 relative group hover:bg-zinc-950/40 transition-all duration-700 flex flex-col h-full"
-                        >
-                            <div className="h-20 w-20 bg-zinc-950 border border-white/5 flex items-center justify-center mb-16 transition-all duration-700 group-hover:bg-white group-hover:text-black group-hover:rotate-12">
-                                <service.icon className="h-8 w-8" />
-                            </div>
-
-                            <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-8 leading-tight transition-all duration-700 group-hover:translate-x-4">
-                                {service.title}
-                            </h2>
-                            <p className="text-zinc-700 text-[11px] font-black uppercase tracking-[0.4em] mb-12 leading-loose max-w-md group-hover:text-zinc-400 transition-colors">
-                                {service.description}
-                            </p>
-
-                            <ul className="space-y-6 mb-20 flex-1">
-                                {service.features.map((f, i) => (
-                                    <li key={i} className="flex items-center gap-6 group/item cursor-default">
-                                        <div className="h-1.5 w-1.5 bg-emerald-500 group-hover/item:scale-150 transition-transform" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.6em] text-zinc-800 group-hover/item:text-white transition-colors">{f}</span>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            <Link href="/quote" className="w-full">
-                                <Button className="w-full h-20 bg-zinc-950 border border-white/5 text-zinc-600 group-hover:bg-white group-hover:text-black group-hover:border-transparent transition-all duration-700 rounded-none font-black text-[11px] uppercase tracking-[0.6em] flex items-center justify-center gap-6">
-                                    INITIALIZE_PROTOCOL <ArrowRight className="h-5 w-5" />
-                                </Button>
-                            </Link>
-
-                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] italic font-black text-9xl text-white select-none pointer-events-none group-hover:opacity-[0.06] transition-opacity">
-                                0{idx + 1}
+                {/* Service Grid - Numbered Pattern */}
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid md:grid-cols-2 gap-x-32 gap-y-48 border-t border-white/5 pt-24"
+                >
+                    {mainServices.map((service) => (
+                        <motion.div key={service.id} variants={itemVariants} className="group cursor-default">
+                            <div className="flex items-start gap-8">
+                                <span className="arch-number">{service.id}</span>
+                                <div className="space-y-8">
+                                    <h2 className="text-4xl font-light text-white uppercase tracking-tight group-hover:pl-4 transition-all duration-700">
+                                        {service.title}
+                                    </h2>
+                                    <p className="text-xl leading-relaxed text-zinc-500 max-w-md group-hover:text-zinc-300 transition-colors duration-700">
+                                        {service.desc}
+                                    </p>
+                                    <div className="arch-detail-line">
+                                        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-700">
+                                            {service.details}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
-                </div>
+                </motion.div>
 
-                {/* Tactical Advantage Matrix */}
-                <div className="mb-24 pt-32 border-t border-white/5">
-                    <div className="flex items-end justify-between mb-24">
+                {/* Technical Advantage Section */}
+                <div className="mt-96">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 2 }}
+                        className="grid lg:grid-cols-2 gap-32 items-start"
+                    >
                         <div>
-                            <h2 className="text-5xl md:text-7xl font-black text-white uppercase italic tracking-tighter leading-none mb-6">
-                                The Edge.
-                            </h2>
-                            <div className="text-[11px] font-black text-zinc-800 uppercase tracking-[0.8em]">STRATEGIC_OPERATIONAL_DOMINANCE</div>
+                            <span className="arch-label mb-12 block">APPROACH</span>
+                            <h2 className="text-6xl font-light text-white mb-16 leading-tight">Tactical <br />Advantage</h2>
+                            <p className="text-xl text-zinc-500 max-w-lg mb-16 leading-relaxed">
+                                Our practice focus on creating logistic pipelines that are both functional and poetic, respecting the natural volatility of global trade while ensuring absolute delivery integrity.
+                            </p>
+                            <Link href="/quote">
+                                <button className="h-20 px-16 border border-white text-[11px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
+                                    INITIALIZE_MISSION
+                                </button>
+                            </Link>
                         </div>
-                        <div className="w-24 h-[1px] bg-white/5 mb-8" />
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-0 border border-white/5">
-                        {benefits.map((b, idx) => (
-                            <motion.div
-                                key={idx}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.8, delay: idx * 0.1 }}
-                                className="p-12 border-r border-white/5 last:border-r-0 group hover:bg-zinc-950/40 transition-all duration-700 cursor-default"
-                            >
-                                <div className="h-14 w-14 bg-zinc-950 border border-white/5 flex items-center justify-center mb-10 transition-all duration-700 group-hover:rotate-12 group-hover:border-emerald-500/50">
-                                    <b.icon className="h-6 w-6 text-zinc-800 group-hover:text-white transition-colors" />
+                        <div className="space-y-16 py-12">
+                            {[
+                                { title: "Research", desc: "Deep understanding of context, culture, and climate." },
+                                { title: "Collaboration", desc: "Close partnership with clients, engineers, and craftspeople." },
+                                { title: "Innovation", desc: "Sustainable materials and forward-thinking design solutions." }
+                            ].map((item, idx) => (
+                                <div key={idx} className="arch-detail-line">
+                                    <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
+                                    <p className="text-zinc-500 max-w-sm">{item.desc}</p>
                                 </div>
-                                <h4 className="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-6 group-hover:text-emerald-500 transition-colors">{b.title}</h4>
-                                <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest leading-loose group-hover:text-zinc-500 transition-colors">{b.description}</p>
-                            </motion.div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Minimal Sub-footer */}
+            <div className="border-t border-white/5 py-32">
+                <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-[0.8em] text-zinc-800 uppercase">
+                    <span>PHOENIX_OS_OPERATIONS</span>
+                    <span>V4.1.0_STABLE</span>
                 </div>
             </div>
         </main>

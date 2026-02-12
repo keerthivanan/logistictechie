@@ -72,4 +72,13 @@ class GlobalKnowledge:
             brief += f"- {alert['location']}: {alert['status']}. Insight: {alert['reason']}\n"
         return brief
 
+    @classmethod
+    async def initialize(cls):
+        """
+        Asynchronous startup routine to fetch the latest global intelligence.
+        """
+        print("[INFO] High-Intelligence Oracle: Refreshing Global Corridor Data...")
+        await cls.refresh_intelligence()
+        print("[INFO] Global Knowledge Synchronization Complete.")
+
 knowledge_oracle = GlobalKnowledge()

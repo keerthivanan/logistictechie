@@ -74,11 +74,11 @@ export function ServicesStep() {
                     <div
                         className={cn(
                             "p-10 border transition-all duration-700 cursor-pointer relative overflow-hidden group/tile",
-                            formData.portChargesCoveredBy === 'carrier'
+                            formData.portChargesCoveredBy === 'supplier'
                                 ? "bg-white text-black border-transparent"
                                 : "bg-zinc-950/40 border-white/5 text-zinc-500 hover:border-white/20"
                         )}
-                        onClick={() => updateForm({ portChargesCoveredBy: 'carrier' })}
+                        onClick={() => updateForm({ portChargesCoveredBy: 'supplier' })}
                     >
                         <div className="flex items-start justify-between relative z-10">
                             <div className="space-y-2">
@@ -87,9 +87,9 @@ export function ServicesStep() {
                             </div>
                             <div className={cn(
                                 "w-6 h-6 border flex items-center justify-center transition-all",
-                                formData.portChargesCoveredBy === 'carrier' ? "border-black bg-black text-white" : "border-zinc-800"
+                                formData.portChargesCoveredBy === 'supplier' ? "border-black bg-black text-white" : "border-zinc-800"
                             )}>
-                                {formData.portChargesCoveredBy === 'carrier' && <Check className="w-4 h-4" />}
+                                {formData.portChargesCoveredBy === 'supplier' && <Check className="w-4 h-4" />}
                             </div>
                         </div>
                     </div>
@@ -114,7 +114,7 @@ export function ServicesStep() {
                                 </div>
                                 <Switch
                                     checked={!!(formData as any)[service.id]}
-                                    onCheckedChange={(val) => updateForm({ [service.id]: val })}
+                                    onCheckedChange={(val) => updateForm({ [service.id]: val } as any)}
                                     className="data-[state=checked]:bg-emerald-500"
                                 />
                             </div>

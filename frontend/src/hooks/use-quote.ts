@@ -18,8 +18,9 @@ interface QuoteState {
         readyDate: string;
 
         // Recommended Services (Step 4)
-        needsInsurance: boolean;
-        needsCustomsBrokerage: boolean;
+        insurance: boolean;
+        customs: boolean;
+        warehousing: boolean;
         portChargesCoveredBy: 'agent' | 'supplier';
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,8 +46,9 @@ export const useQuoteStore = create<QuoteState>((set) => ({
         weight: 1000,
         volume: 1,
         readyDate: new Date().toISOString().split('T')[0],
-        needsInsurance: true,
-        needsCustomsBrokerage: true,
+        insurance: true,
+        customs: true,
+        warehousing: false,
         portChargesCoveredBy: 'agent'
     },
     selectedQuote: null,

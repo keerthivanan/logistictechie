@@ -2,184 +2,136 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Zap, Shield, Crown, ArrowUpRight } from "lucide-react";
+import { Check, Zap, Shield, Crown, ArrowUpRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function PricingPage() {
     const plans = [
         {
+            id: "01",
             name: "Nomad_Node",
             description: "BASIC_OPERATIONAL_ACCESS",
             price: "$0",
-            period: "",
-            icon: Zap,
+            period: "FREE",
             features: [
                 "5 Automated_Quotes / Week",
                 "Standard_Telemetry",
-                "Public_API_Access",
-                "Community_Intel"
-            ],
-            cta: "INITIATE_PROTOCOL",
-            highlight: false,
+                "Public_API_Access"
+            ]
         },
         {
+            id: "02",
             name: "Sovereign_OS",
             description: "PREMIUM_LOGISTICS_INFRA",
             price: "$299",
             period: "/MO",
-            icon: Shield,
             features: [
                 "Unlimited_Global_Quotes",
                 "Real-time_GPS_Tracking",
                 "Priority_AI_Routing",
-                "Direct_Carrier_APIs",
-                "Digital_Manifest_Sync",
-                "Private_VPC_Access"
-            ],
-            cta: "ASCEND_NOW",
-            highlight: true,
+                "Digital_Manifest_Sync"
+            ]
         },
         {
+            id: "03",
             name: "Titan_Ledger",
             description: "BESPOKE_GLOBAL_NETWORK",
             price: "CUSTOM",
-            period: "",
-            icon: Crown,
+            period: "POA",
             features: [
                 "Dedicated_Strategist",
                 "Custom_LLM_Training",
                 "99.99%_Uptime_SLA",
-                "Global_Ledger_Sync",
-                "Quantum_Security",
-                "Priority_Bandwidth"
-            ],
-            cta: "FORGE_ALLIANCE",
-            highlight: false,
+                "Quantum_Security"
+            ]
         },
     ];
 
     return (
-        <main className="min-h-screen bg-black text-white relative overflow-hidden bg-grid-premium">
-            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-            <div className="container max-w-[1400px] mx-auto px-8 pt-48 pb-48 relative z-10">
-                {/* Cinematic Header */}
-                <div className="flex flex-col mb-32">
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-[1px] bg-emerald-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">PRICING_HIERARCHY</span>
-                        </div>
-                        <h1 className="titan-text mb-8">
-                            Operational. <br />
-                            <span className="text-zinc-900 group">Transparency.</span>
-                        </h1>
-                        <p className="max-w-2xl text-zinc-600 text-sm md:text-xl font-black uppercase tracking-[0.4em] leading-relaxed">
-                            Direct carrier rates with zero latent fees. <br />
-                            <span className="text-zinc-800">Pure. Unfiltered. Velocity.</span>
+                {/* Architectural Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                >
+                    <div>
+                        <span className="arch-label mb-12 block">PRICING</span>
+                        <h1 className="arch-heading">Tiered <br />Hierarchy</h1>
+                    </div>
+                    <div className="flex flex-col justify-end">
+                        <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
+                            Direct carrier rates with <strong className="text-white">zero latent fees</strong>. Pure. Unfiltered. Velocity.
                         </p>
-                    </motion.div>
-                </div>
+                    </div>
+                </motion.div>
 
-                {/* Pricing Architecture */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-white/5">
+                {/* Structured Pricing Matrix */}
+                <div className="grid lg:grid-cols-3 gap-0 border-y border-white/5">
                     {plans.map((plan, idx) => (
                         <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 1, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className={`p-12 border-l border-b border-white/5 relative group transition-colors flex flex-col ${plan.highlight ? 'bg-zinc-950/40' : 'hover:bg-zinc-950/20'
-                                }`}
+                            key={plan.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, delay: idx * 0.1 }}
+                            className={`p-16 border-r last:border-r-0 border-white/5 group relative transition-all duration-700 hover:bg-zinc-950/20`}
                         >
-                            <div className="mb-16">
-                                <div className="flex justify-between items-start mb-12">
-                                    <div className={`w-16 h-16 flex items-center justify-center transition-all duration-700 group-hover:rotate-12 ${plan.highlight ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 group-hover:bg-white group-hover:text-black'
-                                        }`}>
-                                        <plan.icon className="w-8 h-8" />
+                            <div className="space-y-12">
+                                <div className="flex justify-between items-start">
+                                    <span className="arch-number text-zinc-900 group-hover:text-white transition-all">{plan.id}</span>
+                                    <span className="arch-label text-zinc-800">{plan.description}</span>
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="text-5xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{plan.name}</h3>
+                                    <div className="flex items-baseline gap-4 mt-8">
+                                        <div className="text-6xl font-light text-white tabular-nums tracking-tighter">{plan.price}</div>
+                                        <div className="arch-label text-zinc-600">{plan.period}</div>
                                     </div>
-                                    {plan.highlight && (
-                                        <div className="text-[10px] font-black bg-emerald-500 text-black px-4 py-1 uppercase tracking-widest">
-                                            RECOMMENDED
-                                        </div>
-                                    )}
                                 </div>
-                                <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-2 group-hover:text-emerald-500 transition-colors">
-                                    {plan.name}
-                                </h3>
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-700 group-hover:text-zinc-500 transition-colors">
-                                    {plan.description}
-                                </p>
-                            </div>
-
-                            <div className="mb-16">
-                                <span className="text-7xl font-black italic tracking-tighter">
-                                    {plan.price}
-                                </span>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-800 ml-4">
-                                    {plan.period}
-                                </span>
-                            </div>
-
-                            <div className="flex-1 mb-16">
-                                <div className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800 mb-8 border-l border-emerald-500 pl-4">
-                                    Capabilities:
-                                </div>
-                                <ul className="space-y-4">
+                                <div className="arch-detail-line space-y-4 py-8">
                                     {plan.features.map((f, i) => (
-                                        <li key={i} className="flex items-center gap-4 group/item">
-                                            <div className="w-1.5 h-1.5 bg-emerald-500/20 group-hover/item:bg-emerald-500 transition-colors" />
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover/item:text-white transition-colors">
-                                                {f}
-                                            </span>
-                                        </li>
+                                        <div key={i} className="flex items-center gap-4">
+                                            <div className="w-1.5 h-1.5 bg-zinc-900 group-hover:bg-white transition-colors" />
+                                            <span className="text-[10px] font-bold text-zinc-600 group-hover:text-white uppercase tracking-[0.4em]">{f}</span>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
+                                <Link href="/quote" className="block pt-8">
+                                    <button className="w-full h-20 border border-white/10 text-white text-[11px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
+                                        INITIALIZE_PROTOCOL
+                                    </button>
+                                </Link>
                             </div>
-
-                            <Link href="/quote">
-                                <Button className={`w-full h-16 rounded-none font-black text-[10px] uppercase tracking-[0.4em] transition-all duration-700 ${plan.highlight
-                                        ? 'bg-emerald-500 text-black hover:bg-white'
-                                        : 'bg-white text-black hover:bg-emerald-500'
-                                    }`}>
-                                    {plan.cta}
-                                </Button>
-                            </Link>
                         </motion.div>
                     ))}
                 </div>
 
-                {/* Sub-Interface CTA */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="mt-32 p-16 md:p-24 bg-zinc-950/40 border border-white/5 relative overflow-hidden group"
-                >
-                    <div className="absolute top-0 right-0 p-12 opacity-5 italic font-black text-9xl text-white select-none pointer-events-none uppercase">
-                        Enterprise
+                {/* Sub-Interface: Enterprise */}
+                <div className="mt-96 grid lg:grid-cols-[2fr,1fr] gap-32 border-t border-white/5 pt-32">
+                    <div className="space-y-12">
+                        <span className="arch-label mb-12 block">BESPOKE</span>
+                        <h2 className="text-5xl font-light text-white leading-tight">Complex <br />Deployment</h2>
+                        <p className="text-2xl text-zinc-500 leading-relaxed max-w-2xl">
+                            Connect with our <strong className="text-white text-3xl italic">Strategic Operations Group</strong> for specialized global deployment and custom neural link training.
+                        </p>
                     </div>
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-                        <div className="max-w-2xl text-center md:text-left">
-                            <h3 className="text-4xl md:text-6xl font-black text-white italic uppercase tracking-tighter leading-none mb-8">
-                                Bespoke. <span className="text-zinc-900 group-hover:text-white transition-colors duration-1000">Intelligence.</span>
-                            </h3>
-                            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] leading-loose">
-                                Connect with our Strategic Operations Group for specialized global deployment and custom neural link training.
-                            </p>
-                        </div>
-                        <Link href="/company">
-                            <Button className="h-20 px-16 rounded-none bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] hover:bg-emerald-500 hover:scale-105 transition-all flex items-center gap-4">
-                                INITIATE_CONTACT <ArrowUpRight className="w-5 h-5" />
-                            </Button>
+                    <div className="flex flex-col justify-end items-end pb-12">
+                        <Link href="/contact">
+                            <button className="h-24 px-16 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200 flex items-center gap-6">
+                                FORGE_ALLIANCE <ArrowRight className="w-5 h-5" />
+                            </button>
                         </Link>
                     </div>
-                </motion.div>
+                </div>
+
+                {/* Sub-footer Section */}
+                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
+                    <span className="arch-label mb-12 block">PRICING_HIERARCHY</span>
+                    <h2 className="arch-heading italic mb-16">Pure. Unfiltered.</h2>
+                </div>
             </div>
         </main>
     );

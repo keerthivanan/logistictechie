@@ -12,8 +12,7 @@ async def lifespan(app: FastAPI):
     # Sovereign Database Handshake
     # Schema harmonization is now handled via Alembic migrations.
     from app.services.knowledge import knowledge_oracle
-    import asyncio
-    asyncio.create_task(knowledge_oracle.refresh_intelligence())
+    await knowledge_oracle.initialize()
     
     print("[SYSTEM] Phoenix Logistics OS Backend Initialized.")
     yield

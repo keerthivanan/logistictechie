@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Lock, Loader2, Mail, ShieldCheck, User, Building2, Globe, Zap } from "lucide-react";
+import { Lock, Loader2, Mail, ShieldCheck, User, Building2, Globe, Zap, ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -55,159 +54,170 @@ export default function SignupPage() {
     };
 
     return (
-        <main className="min-h-screen w-full flex items-center justify-center bg-black px-8 py-24 selection:bg-emerald-500/30 overflow-hidden relative bg-grid-premium">
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black pointer-events-none" />
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-            <div className="w-full max-w-[580px] relative z-10">
-                {/* Branding Focus */}
-                <div className="flex flex-col items-center mb-16 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center gap-4 mb-8"
-                    >
-                        <div className="w-8 h-[1px] bg-emerald-500" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.8em] text-emerald-500">INITIATE_ENROLLMENT</span>
-                        <div className="w-8 h-[1px] bg-emerald-500" />
-                    </motion.div>
-                    <h1 className="text-5xl font-black tracking-tighter text-white uppercase italic leading-none mb-6">
-                        Join the<span className="text-zinc-900">Sovereign.</span>
-                    </h1>
-                    <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] max-w-sm leading-loose">
-                        Synchronizing global logistics nodes via encrypted neural link.
-                    </p>
-                </div>
+                {/* Architectural Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                >
+                    <div>
+                        <span className="arch-label mb-12 block">ENROLLMENT</span>
+                        <h1 className="arch-heading">Join. <br />Architecture.</h1>
+                    </div>
+                    <div className="flex flex-col justify-end">
+                        <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
+                            Synchronizing <strong className="text-white">global logistics nodes</strong> via encrypted neural link. Join the architectural elite.
+                        </p>
+                    </div>
+                </motion.div>
 
-                <div className="elite-card p-10 md:p-16 relative overflow-hidden group">
-                    <AnimatePresence mode="wait">
-                        {success ? (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="py-12 text-center"
-                            >
-                                <div className="h-24 w-24 bg-white flex items-center justify-center mx-auto mb-12 shadow-[0_0_80px_rgba(255,255,255,0.1)]">
-                                    <ShieldCheck className="h-12 w-12 text-black" />
+                <div className="grid lg:grid-cols-[1fr,1.5fr] gap-32 border-t border-white/5 pt-32">
+
+                    {/* Left: Enrollment Intelligence */}
+                    <div className="space-y-32">
+                        <div className="space-y-16">
+                            {[
+                                { id: "01", title: "Mission Critical", desc: "Gain access to high-fidelity global routing networks." },
+                                { id: "02", title: "Neural Integration", desc: "Sync your operations directly with our AI core." },
+                                { id: "03", title: "Global Sovereignty", desc: "Military-grade security for your terrestrial assets." }
+                            ].map((item) => (
+                                <div key={item.id} className="arch-detail-line">
+                                    <span className="arch-number block mb-4">{item.id}</span>
+                                    <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">{item.title}</h3>
+                                    <p className="text-zinc-500 max-w-xs">{item.desc}</p>
                                 </div>
-                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">DEPLOYMENT_SUCCESSFUL</h3>
-                                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.3em]">Redirecting to authentication node...</p>
-                            </motion.div>
-                        ) : (
-                            <>
-                                {error && (
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        className="mb-10 p-5 bg-white text-black text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-4"
-                                    >
-                                        <Zap className="w-4 h-4 fill-black" />
-                                        {error}
-                                    </motion.div>
-                                )}
+                            ))}
+                        </div>
 
-                                <form onSubmit={handleSignup} className="space-y-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-3 group">
-                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Commander_Name</label>
-                                            <div className="relative">
-                                                <User className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
-                                                <Input
-                                                    required
-                                                    placeholder="NAME"
+                        <div className="pt-24">
+                            <Link href="/login" className="group inline-flex items-center gap-6">
+                                <span className="arch-label text-zinc-800 group-hover:text-white transition-colors">ALREADY_ENROLLED?</span>
+                                <span className="text-xl font-light italic text-white flex items-center gap-4">
+                                    Sign In <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                                </span>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Right: Enrollment Form */}
+                    <div className="p-16 bg-zinc-950/20 border border-white/5 relative overflow-hidden">
+                        <AnimatePresence mode="wait">
+                            {success ? (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="py-24 text-center space-y-12"
+                                >
+                                    <div className="w-24 h-24 border border-white flex items-center justify-center mx-auto">
+                                        <ShieldCheck className="h-10 w-10 text-white" />
+                                    </div>
+                                    <h2 className="text-4xl font-light text-white uppercase italic tracking-tighter">Identity_Confirmed.</h2>
+                                    <p className="arch-label">REDIRECTING_TO_AUTH_NODE</p>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="space-y-16"
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-4xl font-light text-white uppercase tracking-tight">Access_Request</h2>
+                                        {isLoading && <Loader2 className="w-6 h-6 animate-spin text-white" />}
+                                    </div>
+
+                                    {error && (
+                                        <div className="p-8 border-l border-white bg-white/5 text-white text-[10px] font-bold uppercase tracking-[0.4em]">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleSignup} className="space-y-12">
+                                        <div className="grid md:grid-cols-2 gap-12">
+                                            <div className="space-y-4">
+                                                <label className="arch-label">NAME_IDENTIFIER</label>
+                                                <input
                                                     value={fullName}
                                                     onChange={(e) => setFullName(e.target.value)}
-                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                    required
+                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    placeholder="NAME"
                                                 />
                                             </div>
-                                        </div>
-                                        <div className="space-y-3 group">
-                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Entity_ID</label>
-                                            <div className="relative">
-                                                <Building2 className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
-                                                <Input
-                                                    placeholder="ENTITY"
+                                            <div className="space-y-4">
+                                                <label className="arch-label">ENTITY_ID</label>
+                                                <input
                                                     value={companyName}
                                                     onChange={(e) => setCompanyName(e.target.value)}
-                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    placeholder="ENTITY"
                                                 />
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="space-y-3 group">
-                                        <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Neural_Link</label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
-                                            <Input
+                                        <div className="space-y-4">
+                                            <label className="arch-label">COMM_PROTO_EMAIL</label>
+                                            <input
                                                 type="email"
-                                                required
-                                                placeholder="EMAIL_ADDR"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
-                                                className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                required
+                                                className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                placeholder="EMAIL_ADDR"
                                             />
                                         </div>
-                                    </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-3 group">
-                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Access_Key</label>
-                                            <div className="relative">
-                                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
-                                                <Input
+                                        <div className="grid md:grid-cols-2 gap-12">
+                                            <div className="space-y-4">
+                                                <label className="arch-label">ACCESS_KEY</label>
+                                                <input
                                                     type="password"
-                                                    required
-                                                    placeholder="••••••••"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
-                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                    required
+                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    placeholder="••••••••"
                                                 />
                                             </div>
-                                        </div>
-                                        <div className="space-y-3 group">
-                                            <label className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.4em] group-focus-within:text-emerald-500 transition-colors">Verify_Key</label>
-                                            <div className="relative">
-                                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-800" />
-                                                <Input
+                                            <div className="space-y-4">
+                                                <label className="arch-label">VERIFY_KEY</label>
+                                                <input
                                                     type="password"
-                                                    required
-                                                    placeholder="••••••••"
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                                    className="h-14 pl-16 bg-zinc-950/40 border-white/5 rounded-none text-[10px] font-black uppercase tracking-[0.4em] placeholder:text-zinc-900 focus:border-white/20 transition-all"
+                                                    required
+                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    placeholder="••••••••"
                                                 />
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <Button
-                                        type="submit"
-                                        disabled={isLoading}
-                                        className="w-full h-20 rounded-none bg-white text-black hover:bg-emerald-500 transition-all duration-700 font-black uppercase tracking-[0.6em] text-[11px] shadow-[0_20px_60px_rgba(255,255,255,0.05)] mt-8"
-                                    >
-                                        {isLoading ? (
-                                            <Loader2 className="h-5 w-5 animate-spin mx-auto text-black" />
-                                        ) : "EXECUTE_ENROLLMENT"}
-                                    </Button>
-                                </form>
-
-                                <div className="mt-16 pt-12 border-t border-white/5 text-center">
-                                    <Link href="/login" className="group flex items-center justify-center gap-6">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-zinc-400 transition-colors">Existing_Identity?</span>
-                                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white py-3 px-8 border border-white/10 group-hover:bg-emerald-500 group-hover:text-black transition-all">SIGN_IN</span>
-                                    </Link>
-                                </div>
-                            </>
-                        )}
-                    </AnimatePresence>
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading}
+                                            className="w-full h-24 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200"
+                                        >
+                                            {isLoading ? "ENUMERATING..." : "REQUEST_ACCESS"}
+                                        </button>
+                                    </form>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
-                <div className="flex justify-center mt-20 gap-12 text-[10px] font-black uppercase tracking-[0.4em] text-zinc-800">
-                    <button className="hover:text-white transition-colors">TERMS_CORE</button>
-                    <button className="hover:text-white transition-colors">PRIVACY_PROTOCOL</button>
-                    <button className="hover:text-white transition-colors flex items-center gap-4">
-                        <Globe className="w-4 h-4" /> SECURE_OS
-                    </button>
+                {/* Sub-footer Metric Context */}
+                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
+                    <span className="arch-label mb-12 block">GLOBAL_SYNC</span>
+                    <h2 className="arch-heading mb-16 italic">Join.</h2>
+                    <div className="flex justify-center gap-12 mt-24 opacity-20">
+                        <Lock className="w-8 h-8" />
+                        <ShieldCheck className="w-8 h-8" />
+                        <Zap className="w-8 h-8" />
+                    </div>
                 </div>
             </div>
         </main>

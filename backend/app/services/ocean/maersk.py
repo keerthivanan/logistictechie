@@ -8,45 +8,53 @@ from app.services.sovereign import sovereign_engine
 class MaerskClient(OceanCarrierProtocol):
     """
     REAL Maersk API Client.
-    Connects to https://api.maersk.com
-    Requires: MAERSK_CONSUMER_KEY, MAERSK_CONSUMER_SECRET
+    👑 HIGH-PERFORMANCE SINGLETON MODE
     """
     
     BASE_URL = "https://api.maersk.com"
-    
+    _client: httpx.AsyncClient = None
+    _circuit_broken: bool = False
+
+    @classmethod
+    def get_client(cls) -> httpx.AsyncClient:
+        if cls._client is None or cls._client.is_closed:
+            cls._client = httpx.AsyncClient(
+                timeout=httpx.Timeout(10.0, connect=5.0),
+                headers={"X-System-ID": "PHOENIX-OS-KSA-2026"}
+            )
+        return cls._client
+
     async def _get_access_token(self) -> str:
         """
         Exchanges Consumer Key/Secret for an OAuth Token.
         """
+        if self._circuit_broken:
+            raise Exception("Maersk Circuit Breaker Active")
+
         if not settings.MAERSK_CONSUMER_KEY or not settings.MAERSK_CONSUMER_SECRET:
             raise ValueError("Maersk API Credentials Missing in .env")
 
         url = f"{self.BASE_URL}/oauth2/access_token"
-        
-        # AUTH PARAMS
         params = {
             "grant_type": "client_credentials",
             "client_id": settings.MAERSK_CONSUMER_KEY,
             "client_secret": settings.MAERSK_CONSUMER_SECRET
         }
         
-        print(f"   [DEBUG] Sending Params: grant_type={params['grant_type']}, client_id={params['client_id'][:5]}..., client_secret={params['client_secret'][:5]}...")
-        
-        # INTEGRATION ID HEADER
         headers = {}
         if hasattr(settings, "MAERSK_INTEGRATION_ID") and settings.MAERSK_INTEGRATION_ID:
-            print(f"   [DEBUG] Using Integration-ID: {settings.MAERSK_INTEGRATION_ID}")
             headers["Integration-ID"] = settings.MAERSK_INTEGRATION_ID
             
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        client = self.get_client()
+        try:
             resp = await client.post(url, data=params, headers=headers)
-            print(f"   [DEBUG] Raw Response: {resp.status_code} | {resp.text}")
-            
             if resp.status_code != 200:
-                print(f"[WARN] Maersk Auth Warning: {resp.status_code} - {resp.text}")
+                self._circuit_broken = True
                 raise Exception(f"Maersk Auth Failed: {resp.text}")
-                
             return resp.json().get("access_token")
+        except Exception as e:
+            self._circuit_broken = True
+            raise e
 
     async def _get_auth_headers(self, strict_oauth=False, direct_key_support=False) -> Dict:
         """

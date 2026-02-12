@@ -1,58 +1,82 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { HelpCircle, MessageSquare, Phone, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
-import { HelpCircle, MessageSquare, Phone } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function HelpPage() {
-    const { t } = useLanguage();
+    const supportChannels = [
+        { id: "01", title: "Knowledge Base", desc: "Access the full technical specifications and operational manuals.", link: "READ_DOCS" },
+        { id: "02", title: "Tactical Chat", desc: "Direct link to our global operations command team.", link: "OPEN_LINK" },
+        { id: "03", title: "Voice Call", desc: "24/7 global emergency support line for critical issues.", link: "CALL_NOW" }
+    ];
+
+    const faqs = [0, 1, 2, 3];
 
     return (
-        <main className="min-h-screen bg-black pt-32 pb-48 px-6 text-white">
-            <div className="container max-w-7xl mx-auto space-y-32">
-                <div className="space-y-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.6em] text-emerald-500 block">Support Infrastructure</span>
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter uppercase italic leading-[0.9]">
-                        Operational. <br />
-                        <span className="text-zinc-800">Assistance.</span>
-                    </h1>
-                    <p className="text-zinc-500 text-lg font-bold uppercase tracking-tight max-w-xl">
-                        Comprehensive documentation and direct support channels for the Phoenix Logistics OS.
-                    </p>
-                </div>
+        <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+            <div className="container max-w-[1400px] mx-auto px-8 py-48">
 
-                <div className="grid md:grid-cols-3 gap-8">
-                    {[
-                        { icon: HelpCircle, title: "Knowledge Base", desc: "Access the full technical specifications.", btn: "READ DOCS" },
-                        { icon: MessageSquare, title: "Tactical Chat", desc: "Direct link to our operations team.", btn: "OPEN LINK" },
-                        { icon: Phone, title: "Voice Call", desc: "24/7 global emergency support line.", btn: "INITIATE" }
-                    ].map((card, i) => (
-                        <div key={i} className="bg-zinc-950 border border-white/5 p-12 hover:border-white/20 transition-all group flex flex-col items-center text-center">
-                            <div className="w-16 h-16 bg-white flex items-center justify-center mb-10 group-hover:-rotate-12 transition-transform duration-500">
-                                <card.icon className="w-8 h-8 text-black" />
+                {/* Architectural Header */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                >
+                    <div>
+                        <span className="arch-label mb-12 block">ASSISTANCE</span>
+                        <h1 className="arch-heading">Support <br />Infrastructure</h1>
+                    </div>
+                    <div className="flex flex-col justify-end">
+                        <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
+                            Comprehensive <strong className="text-white">documentation</strong> and direct support channels for the Phoenix Logistics OS.
+                        </p>
+                    </div>
+                </motion.div>
+
+                {/* Structured Support Channels */}
+                <div className="grid lg:grid-cols-3 gap-0 border-y border-white/5">
+                    {supportChannels.map((channel, idx) => (
+                        <div key={channel.id} className="p-16 border-r last:border-r-0 border-white/5 group hover:bg-zinc-950/20 transition-all duration-700">
+                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all block mb-12">{channel.id}</span>
+                            <div className="space-y-8">
+                                <h3 className="text-3xl font-light text-white uppercase italic tracking-tighter">{channel.title}</h3>
+                                <p className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase leading-loose">{channel.desc}</p>
+                                <div className="pt-8">
+                                    <button className="h-16 px-8 border border-white/10 text-white text-[10px] font-bold uppercase tracking-[0.4em] transition-all hover:bg-white hover:text-black">
+                                        {channel.link}
+                                    </button>
+                                </div>
                             </div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-6">{card.title}</h3>
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed mb-10 flex-1">{card.desc}</p>
-                            <Button className="w-full h-14 bg-white/5 border-none text-white hover:bg-emerald-500 hover:text-black rounded-none font-black text-[10px] uppercase tracking-[0.3em] transition-all">
-                                {card.btn}
-                            </Button>
                         </div>
                     ))}
                 </div>
 
-                <div className="space-y-16">
-                    <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">
-                        Frequent. <span className="text-zinc-800">Queries.</span>
-                    </h2>
-                    <div className="grid gap-2">
-                        {[0, 1, 2, 3].map((i) => (
-                            <div key={i} className="bg-zinc-950 border border-white/5 p-10 flex justify-between items-center group cursor-pointer hover:bg-zinc-900 transition-colors">
-                                <span className="font-black text-[10px] uppercase tracking-[0.2em] text-zinc-400 group-hover:text-white">{t(`support.help.qs.${i}`)}</span>
-                                <div className="h-2 w-2 bg-emerald-500 group-hover:scale-150 transition-transform" />
+                {/* FAQ Matrix */}
+                <div className="mt-96 grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
+                    <div>
+                        <span className="arch-label mb-12 block">QUERIES</span>
+                        <h2 className="text-5xl font-light text-white leading-tight">Frequent <br />Operations</h2>
+                        <div className="arch-detail-line h-48 opacity-20 hidden lg:block" />
+                    </div>
+                    <div className="space-y-4">
+                        {faqs.map((i) => (
+                            <div key={i} className="arch-detail-line group flex items-center justify-between cursor-pointer hover:pl-12 transition-all duration-700 py-8">
+                                <div className="space-y-2">
+                                    <span className="arch-label text-zinc-800">QUESTION_0{i + 1}</span>
+                                    <h4 className="text-2xl font-light text-white italic group-hover:text-white">Operational query regarding protocol implementation.</h4>
+                                </div>
+                                <ArrowRight className="w-6 h-6 text-zinc-900 group-hover:text-white transition-colors" />
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Sub-footer Section */}
+                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
+                    <span className="arch-label mb-12 block">GLOBAL_SUPPORT</span>
+                    <h2 className="arch-heading italic mb-16">Always. Integrated.</h2>
                 </div>
             </div>
         </main>
