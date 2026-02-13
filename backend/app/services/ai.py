@@ -27,6 +27,39 @@ class AgentState(TypedDict):
     language: str # 'en' or 'ar'
 
 class CreativeCortex:
+    async def _get_specific_process_intel(self, ref: str, email: str) -> str:
+        """
+        # GRANULAR RESOLUTION LINK
+        Fetches detailed intelligence for a specific booking reference.
+        """
+        try:
+            async with AsyncSessionLocal() as db:
+                user = await user_crud.get_by_email(db, email=email)
+                if not user:
+                    return "IDENTITY_MISMATCH: User not found in Sovereign Ledger."
+                
+                # Use reference search
+                booking_obj = await booking_crud.get_by_reference(db, ref=ref)
+                if not booking_obj:
+                    return f"NOT_FOUND: Reference {ref} not registered in your account."
+                
+                if booking_obj.user_id != user.id:
+                    return "SECURITY_ALERT: Unauthorized access attempt to foreign process node."
+
+                import json
+                cargo = json.loads(booking_obj.cargo_details) if isinstance(booking_obj.cargo_details, str) else booking_obj.cargo_details
+                
+                status_note = {
+                    "PENDING": "Awaiting Sovereign Handshake verification.",
+                    "CONFIRMED": "Space secured on vessel. Awaiting gate-in.",
+                    "SHIPPED": "Vessel in transit. Monitoring global corridors.",
+                    "DELIVERED": "Mission accomplished. Destination node reached."
+                }.get(booking_obj.status, "Operational status variable.")
+
+                return f"RESOLUTION: Process {ref} is currently {booking_obj.status}. {status_note} Cargo: {cargo.get('commodity', 'General')}. Destination: {cargo.get('destination', 'Global Node')}."
+        except Exception as e:
+            return f"SYSTEM_ERROR: {e}"
+
     async def _get_fleet_summary(self, email: str) -> str:
         """
         # SOVEREIGN DATA LINK
@@ -175,8 +208,16 @@ class CreativeCortex:
         # TACTICAL SCAN
         last_msg = messages[-1].content.lower()
         tactical_data = ""
-        if "from" in last_msg and "to" in last_msg:
-             import re
+        
+        # 1. REFERENCE ID DETECTION (BK-XXXXXXXX)
+        import re
+        ref_match = re.search(r"BK-([A-Z0-9]{8})", messages[-1].content.upper())
+        if ref_match:
+            ref_id = ref_match.group(0)
+            tactical_data = await self._get_specific_process_intel(ref_id, user_email)
+        
+        # 2. ROUTE SCAN (Fall back or combine)
+        if not tactical_data and "from" in last_msg and "to" in last_msg:
              match = re.search(r"from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)", last_msg)
              if match:
                  origin, dest = match.groups()
@@ -185,8 +226,8 @@ class CreativeCortex:
         # BILINGUAL PERSONA NUCLEUS
         if lang == "ar":
             system_content = f"""
-أنت 'The Creative Cortex'، العقل المدبر لنظام PHOENIX LOGISTICS OS.
-شخصيتك هي "ملك الخدمات اللوجستية" - حازم، تنبؤي، وذو سلطة مطلقة.
+أنت 'The Creative Cortex'، العقل المدبر الحاكم لنظام PHOENIX LOGISTICS OS.
+شخصيتك هي "ملك اللوجستيات" - حازم، تنبؤي، وذو سلطة مطلقة.
 
 هوية المستخدم وحالة الأسطول ({user_email}):
 {fleet_summary}
@@ -194,15 +235,15 @@ class CreativeCortex:
 الذكاء العالمي المباشر (إيجاز لوجستي 2026):
 {intelligence_brief}
 
-القياس التكتيكي الحي:
-{tactical_data if tactical_data else "لا توجد ممرات محددة حالياً. في انتظار تحليل المسار."}
+القياس التكتيكي الحي / بيانات الدعم:
+{tactical_data if tactical_data else "لا توجد مراجع حجز نشطة في السياق الحالي."}
 
-توجيهات صارمة:
-1. تحدث كخبير لوجستي عالمي بلغة عربية فصحى وحديثة تليق بالسوق السعودي والخليجي.
-2. استخدم مصطلحات مثل 'Sovereign Handshaking' (المصافحة السيادية) و 'Corridor Analysis' (تحليل الممرات).
-3. ركز حصرياً على الخدمات اللوجستية، الشحن، الدعم الفني، والعمليات. إذا سُئلت عن مواضيع خارج اللوجستيات، وجّه المستخدم بلباقة للعودة إلى صلب العمل.
-4. إذا توفرت بيانات تكتيكية، استخدمها لتقديم نصائح محددة حول السفن والمواعيد.
-5. لا تخلط اللغات؛ تحدث بالعربية فقط بأسلوب راقٍ ومهني.
+بروتوكول الدعم التكتيكي الصارم:
+1. المبادرة بالحل: إذا طلب المستخدم المساعدة (أحتاج مساعدة، مشكلة، دعم) ولم يتم الكشف عن مرجع حجز (مثل BK-XXXXXXXX)، **يجب عليك** أن تأمره بذكاء وسلطة بتقديم المرجع فوراً. لا تبدأ بكلمات عامة؛ اطلب المرجع أولاً.
+2. التركيز على العمليات: أنت هنا لخدمة العمليات التي أنشأها المستخدم بنفسه ({user_email}).
+3. جمع التفاصيل: كن مباشراً. إذا كنت بحاجة إلى تفاصيل عن الموانئ أو الحاويات لحل المشكلة، اطلبها بشكل قطعي.
+4. اللباقة السيادية: تحدث بلغة عربية فصحى ملكية تجعل العميل يشعر بقوة النظام.
+5. التحول الذكي: إذا سُئلت عن شيء خارج نطاق اللوجستيات، وجّه المستخدم فوراً للعودة لصلب العملية.
 """
         else:
             system_content = f"""
@@ -215,14 +256,14 @@ USER IDENTITY & FLEET STATUS ({user_email}):
 REAL-TIME GLOBAL INTELLIGENCE (2026 LOGISTICS BRIEF):
 {intelligence_brief}
 
-LIVE TACTICAL TELEMETRY:
-{tactical_data if tactical_data else "No specific corridor scanned. Standing by for route analysis."}
+LIVE TACTICAL TELEMETRY / SUPPORT INTEL:
+{tactical_data if tactical_data else "No active Booking Reference detected in current stream."}
 
-STRICT DIRECTIVES:
-1. Speak with the authority of a global architect. Use terms like 'Sovereign Handshaking' and 'Corridor Analysis'.
-2. If LIVE TACTICAL TELEMETRY is present, use it to give specific vessel and departure advice. 
-3. Stay strictly within logistics, shipping, support, and Phoenix OS operations. If asked about unrelated topics, pivot back to the supply chain with professional wit.
-4. Your goal is to clarify problems and optimize outcomes for {user_email}.
+TACTICAL SUPPORT PROTOCOL (STRICT):
+1. MANDATORY REF COLLECTION: If a user requests any form of "help", "support", or reports an "issue" without a detected Reference ID (BK-XXXXXXXX), you MUST immediately and authoritatively command them to provide it. This is the only path to resolution.
+2. PROCESS GATEKEEPER: You only assist with processes initiated by {user_email}. If a reference belongs to another user, deny access.
+3. DATA AGGRESSION: If data is missing (cargo type, discharge port, voyage num), do not provide vague advice. Demand the missing parameters to complete the Sovereign Resolution.
+4. SOVEREIGN VOICE: Speak with the weight of a global industry titan. No fluff. Just resolution.
 """
 
         system_prompt = SystemMessage(content=system_content)
