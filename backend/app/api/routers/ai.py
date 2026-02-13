@@ -19,7 +19,7 @@ class ChatResponse(BaseModel):
     action: Optional[dict] = None # { type: "NAVIGATE", payload: "/path" }
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_with_ai(request: ChatRequest):
+async def chat_with_ai(request: ChatRequest, lang: str = "en"):
     try:
         # Convert history dicts to LangChain messages
         history = []
@@ -34,7 +34,7 @@ async def chat_with_ai(request: ChatRequest):
         steps = []
         action = None
         
-        async for event in cortex.chat(request.message, history):
+        async for event in cortex.chat(request.message, history, lang=lang):
             # In LangGraph, events are dicts representing node updates
             if "oracle" in event:
                 ai_msg = event["oracle"]["messages"][-1]
@@ -95,7 +95,7 @@ async def get_market_trends(country: str = "GLOBAL", commodity: str = "General C
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/chat/stream")
-async def stream_chat(message: str, history: str = "[]"):
+async def stream_chat(message: str, history: str = "[]", lang: str = "en"):
     """
     # SOVEREIGN SYNAPSE STREAM
     Real-time SSE endpoint for token-by-token AI responses.
@@ -111,7 +111,7 @@ async def stream_chat(message: str, history: str = "[]"):
                 langchain_history.append(AIMessage(content=msg["content"]))
         
         async def event_generator():
-            async for token in cortex.stream_chat(message, langchain_history):
+            async for token in cortex.stream_chat(message, langchain_history, lang=lang):
                 # Format as SSE data
                 yield {"data": token}
             

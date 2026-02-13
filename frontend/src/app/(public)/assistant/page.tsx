@@ -68,10 +68,11 @@ export default function AssistantPage() {
         setMessages((prev) => [...prev, aiMsg]);
 
         try {
+            const { language } = useLanguage();
             const history = messages.map(m => ({ role: m.role, content: m.content }));
             history.push({ role: "user", content: userMsg.content });
             const apiUrl = BACKEND_URL.replace('/api', '');
-            await fetchEventSource(`${apiUrl}/api/ai/chat/stream?message=${encodeURIComponent(userMsg.content)}&history=${encodeURIComponent(JSON.stringify(history))}`, {
+            await fetchEventSource(`${apiUrl}/api/ai/chat/stream?message=${encodeURIComponent(userMsg.content)}&history=${encodeURIComponent(JSON.stringify(history))}&lang=${language}`, {
                 method: "GET",
                 headers: { "Accept": "text/event-stream" },
                 onmessage(ev) {

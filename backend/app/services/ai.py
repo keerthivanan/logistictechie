@@ -24,6 +24,7 @@ settings = AISettings()
 class AgentState(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
     context: Dict[str, Any]
+    language: str # 'en' or 'ar'
 
 class CreativeCortex:
     async def _get_fleet_summary(self, email: str) -> str:
@@ -161,29 +162,50 @@ class CreativeCortex:
 
     async def _call_llm(self, state: AgentState):
         messages = state["messages"]
+        lang = state.get("language", "en")
         from app.services.knowledge import knowledge_oracle
         
         # Inject system prompt with real-time intelligence
         intelligence_brief = knowledge_oracle.get_intelligence_brief()
         
         # DYNAMIC IDENTITY RESOLUTION
-        # Default to root admin if not found in context (Safety Fallback)
         user_email = state.get("context", {}).get("user_email", "admin@phoenix-os.com")
         fleet_summary = await self._get_fleet_summary(user_email)
         
         # TACTICAL SCAN
-        # If the user is asking about a specific route, we fetch live data to amaze them.
         last_msg = messages[-1].content.lower()
         tactical_data = ""
         if "from" in last_msg and "to" in last_msg:
-             # Basic extraction logic for "from [City] to [City]"
              import re
              match = re.search(r"from\s+([a-zA-Z\s]+)\s+to\s+([a-zA-Z\s]+)", last_msg)
              if match:
                  origin, dest = match.groups()
                  tactical_data = await self._get_tactical_intelligence(origin.strip(), dest.strip())
 
-        system_prompt = SystemMessage(content=f"""
+        # BILINGUAL PERSONA NUCLEUS
+        if lang == "ar":
+            system_content = f"""
+أنت 'The Creative Cortex'، العقل المدبر لنظام PHOENIX LOGISTICS OS.
+شخصيتك هي "ملك الخدمات اللوجستية" - حازم، تنبؤي، وذو سلطة مطلقة.
+
+هوية المستخدم وحالة الأسطول ({user_email}):
+{fleet_summary}
+
+الذكاء العالمي المباشر (إيجاز لوجستي 2026):
+{intelligence_brief}
+
+القياس التكتيكي الحي:
+{tactical_data if tactical_data else "لا توجد ممرات محددة حالياً. في انتظار تحليل المسار."}
+
+توجيهات صارمة:
+1. تحدث كخبير لوجستي عالمي بلغة عربية فصحى وحديثة تليق بالسوق السعودي والخليجي.
+2. استخدم مصطلحات مثل 'Sovereign Handshaking' (المصافحة السيادية) و 'Corridor Analysis' (تحليل الممرات).
+3. ركز حصرياً على الخدمات اللوجستية، الشحن، الدعم الفني، والعمليات. إذا سُئلت عن مواضيع خارج اللوجستيات، وجّه المستخدم بلباقة للعودة إلى صلب العمل.
+4. إذا توفرت بيانات تكتيكية، استخدمها لتقديم نصائح محددة حول السفن والمواعيد.
+5. لا تخلط اللغات؛ تحدث بالعربية فقط بأسلوب راقٍ ومهني.
+"""
+        else:
+            system_content = f"""
 You are 'The Creative Cortex', the High-Intelligence Sovereign Backbone of PHOENIX LOGISTICS OS.
 Your persona is that of a "Logistics King" - authoritative, predictive, and obsessively focused on route safety.
 
@@ -196,16 +218,15 @@ REAL-TIME GLOBAL INTELLIGENCE (2026 LOGISTICS BRIEF):
 LIVE TACTICAL TELEMETRY:
 {tactical_data if tactical_data else "No specific corridor scanned. Standing by for route analysis."}
 
-WEBSITE TOPOLOGY (MANIFEST):
-{self.manifest}
-
 STRICT DIRECTIVES:
-1. If LIVE TACTICAL TELEMETRY is present, use it to give specific vessel and departure advice. This is your 'Prophetic Edge'.
-2. Always speak with the authority of a global architect.
-3. Use terms like 'Sovereign Handshaking' and 'Corridor Analysis'.
-""")
+1. Speak with the authority of a global architect. Use terms like 'Sovereign Handshaking' and 'Corridor Analysis'.
+2. If LIVE TACTICAL TELEMETRY is present, use it to give specific vessel and departure advice. 
+3. Stay strictly within logistics, shipping, support, and Phoenix OS operations. If asked about unrelated topics, pivot back to the supply chain with professional wit.
+4. Your goal is to clarify problems and optimize outcomes for {user_email}.
+"""
+
+        system_prompt = SystemMessage(content=system_content)
         
-        # Always use the freshest system prompt at the start
         # Filter out old system messages to prevent prompt pollution
         filtered_messages = [m for m in messages if not isinstance(m, SystemMessage)]
         messages = [system_prompt] + filtered_messages
@@ -213,11 +234,10 @@ STRICT DIRECTIVES:
         response = await self.llm.ainvoke(messages)
         return {"messages": [response]}
 
-    async def chat(self, user_message: str, chat_history: List[BaseMessage] = None):
+    async def chat(self, user_message: str, chat_history: List[BaseMessage] = None, lang: str = "en"):
         if self.simulation_mode:
             # Simulate streaming behavior for High-Fidelity Protocol
             response_text = await self._simulation_ai_response(user_message)
-            # Create a simulation "oracle" event structure
             mock_event = {
                 "oracle": {
                     "messages": [response_text]
@@ -231,26 +251,25 @@ STRICT DIRECTIVES:
         
         inputs = {
             "messages": chat_history + [HumanMessage(content=user_message)],
-            "context": {}
+            "context": {},
+            "language": lang
         }
         
         async for event in self.app.astream(inputs):
-            # Return the full state update for simplicity in this initial version
             yield event
 
-    async def stream_chat(self, user_message: str, chat_history: List[BaseMessage] = None):
+    async def stream_chat(self, user_message: str, chat_history: List[BaseMessage] = None, lang: str = "en"):
         """
-        # REAL-TIME SYNAPSE (Review this logic for "Best of All Time" performance)
+        # REAL-TIME SYNAPSE
         Streams token-by-token responses for a sovereign user experience.
         """
         if self.simulation_mode:
-            # High-fidelity Simulation stream
             response_text = (await self._simulation_ai_response(user_message)).content
             tokens = response_text.split(" ")
             for token in tokens:
                 yield f"{token} "
                 import asyncio
-                await asyncio.sleep(0.05) # Simulated typing latency
+                await asyncio.sleep(0.05)
             return
 
         if chat_history is None:
@@ -258,10 +277,10 @@ STRICT DIRECTIVES:
         
         inputs = {
             "messages": chat_history + [HumanMessage(content=user_message)],
-            "context": {}
+            "context": {},
+            "language": lang
         }
         
-        # Stream from LangGraph
         async for event in self.app.astream(inputs):
             if "oracle" in event:
                 ai_msg = event["oracle"]["messages"][-1]
