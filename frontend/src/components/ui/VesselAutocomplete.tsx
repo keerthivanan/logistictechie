@@ -2,6 +2,7 @@ import * as React from "react";
 import { Check, ChevronsUpDown, Ship, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 import { Button } from "@/components/ui/button";
 import {
     Command,
@@ -42,7 +43,7 @@ export function VesselAutocomplete({ value, onChange, placeholder, className, mi
         const fetchVessels = async () => {
             setLoading(true);
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL.replace('/api', '');
                 const { data } = await axios.get(`${apiUrl}/api/vessels/active`);
                 if (data && data.vessels) {
                     setVessels(data.vessels);

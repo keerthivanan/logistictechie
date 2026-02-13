@@ -167,7 +167,7 @@ export function LogisticsSearchBar() {
                 {/* Search Button - High Contrast Apple CTA */}
                 <Button
                     onClick={handleSearch}
-                    className="h-16 lg:w-48 bg-emerald-500 hover:bg-emerald-400 text-black rounded-none transition-all flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.2em] shadow-[0_10px_30px_rgba(16,185,129,0.2)]"
+                    className="h-16 lg:w-48 bg-white text-black hover:bg-zinc-200 rounded-none transition-all flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.2em]"
                 >
                     <span>{t('components.search_bar.action.search') || "INITIATE"}</span>
                     <ArrowRight className="h-4 w-4 stroke-[3]" />
@@ -175,17 +175,17 @@ export function LogisticsSearchBar() {
             </div>
 
             {/* Recent Searches - Subtle Professional Style */}
-            <div className="flex items-center gap-6 text-xs text-zinc-500 px-4 py-3">
+            <div className="flex items-center gap-6 text-[9px] font-black uppercase tracking-widest text-zinc-700 px-4 py-3">
                 <span className="flex items-center gap-2">
                     <Clock className="h-3 w-3" />
                     {t('components.search_bar.labels.recent')}
                 </span>
                 <div className="flex gap-4">
                     <button className="hover:text-white transition-colors">
-                        Shanghai → Rotterdam
+                        SHANGHAI → ROTTERDAM
                     </button>
                     <button className="hover:text-white transition-colors">
-                        Singapore → Los Angeles
+                        SINGAPORE → LOS_ANGELES
                     </button>
                 </div>
             </div>

@@ -38,35 +38,35 @@ export function Footer() {
     ];
 
     return (
-        <footer className="bg-black text-white border-t border-white/5 pt-48 pb-24">
-            <div className="container max-w-[1400px] mx-auto px-8">
+        <footer className="bg-black text-white border-t border-white/5 pt-20 pb-12">
+            <div className="container max-w-[1400px] mx-auto px-6">
 
-                {/* Structural Foundation Grid */}
-                <div className="grid lg:grid-cols-4 gap-32 mb-48">
+                {/* Grid */}
+                <div className="grid lg:grid-cols-4 gap-16 mb-20">
 
-                    {/* Brand Node */}
-                    <div className="space-y-12">
-                        <div className="w-12 h-12 border border-white flex items-center justify-center">
-                            <Ship className="h-6 w-6" />
+                    {/* Brand */}
+                    <div className="space-y-6">
+                        <div className="w-10 h-10 border border-white/20 flex items-center justify-center">
+                            <Ship className="h-5 w-5" />
                         </div>
-                        <h2 className="text-xl font-bold tracking-[0.6em] text-white">PHOENIX</h2>
-                        <p className="text-[10px] font-bold tracking-[0.2em] text-zinc-800 leading-loose uppercase">
-                            NEOM_OPERATIONAL_HUB<br />
-                            SAUDI_ARABIA_UNIT_1<br />
-                            CORE_ARCHITECTURE_FIRM
+                        <h2 className="text-lg font-bold tracking-widest text-white">PHOENIX</h2>
+                        <p className="text-[12px] font-medium text-zinc-600 leading-relaxed uppercase tracking-wider">
+                            Strategic Operations Hub<br />
+                            Saudi Arabia, Riyadh<br />
+                            Enterprise Logistics Node
                         </p>
                     </div>
 
-                    {/* Links Matrix */}
+                    {/* Links */}
                     {sections.map((section, idx) => (
                         <div key={idx} className="arch-detail-line">
-                            <span className="arch-label mb-12 block">{section.title}</span>
-                            <div className="flex flex-col gap-6">
+                            <span className="text-[12px] font-bold uppercase tracking-widest text-zinc-500 mb-6 block">{section.title}</span>
+                            <div className="flex flex-col gap-4">
                                 {section.links.map((link, lIdx) => (
                                     <Link
                                         key={lIdx}
                                         href={link.href}
-                                        className="text-[10px] font-bold tracking-[0.4em] text-zinc-700 hover:text-white transition-colors uppercase"
+                                        className="text-[13px] font-medium text-zinc-400 hover:text-white transition-colors"
                                     >
                                         {link.label}
                                     </Link>
@@ -76,11 +76,11 @@ export function Footer() {
                     ))}
                 </div>
 
-                {/* Sub-terrain Footer */}
-                <div className="mt-48 pt-24 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-12 text-[9px] font-bold tracking-[0.8em] text-zinc-900 uppercase">
-                    <div className="flex items-center gap-6">
-                        <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
-                        <span>SYSTEM_ID: PHOENIX_OS_V4.1.0</span>
+                {/* Sub-footer */}
+                <div className="mt-20 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[11px] font-medium text-zinc-700 uppercase tracking-widest">
+                    <div className="flex items-center gap-4">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                        <span>System Active: v4.2.0</span>
                     </div>
                     <span>© 2026 {t('footer.rights')}</span>
                     <div className="flex gap-8">

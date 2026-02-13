@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import axios from "axios";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { BACKEND_URL } from "@/lib/logistics";
 import { MarketTrendWidget } from "@/components/widgets/MarketTrendWidget";
 import { VesselTrackerWidget } from "@/components/widgets/VesselTrackerWidget";
 import { BookingOfficeLocator } from "@/components/widgets/BookingOfficeLocator";
@@ -58,7 +59,7 @@ export default function DashboardPage() {
                 try {
                     const token = (session.user as any).accessToken;
                     const userId = (session.user as any).id;
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                    const apiUrl = BACKEND_URL.replace('/api', '');
 
                     const [bookRes, statsRes] = await Promise.all([
                         axios.get(`${apiUrl}/api/bookings/user/${userId}`, {
@@ -165,7 +166,7 @@ export default function DashboardPage() {
                                 bookings.map((b, i) => (
                                     <div key={i} className="arch-detail-line group flex items-center justify-between hover:bg-zinc-950/20 transition-all duration-700 py-12">
                                         <div className="flex items-center gap-16">
-                                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all">0{i + 1}</span>
+                                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all">{String(i + 1).padStart(2, '0')}</span>
                                             <div>
                                                 <h3 className="text-4xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{b.booking_reference || t('dashboard.manifest.genCargo')}</h3>
                                                 <div className="flex items-center gap-8 mt-2">

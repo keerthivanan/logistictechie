@@ -71,7 +71,7 @@ async def analyze_route(origin: str, destination: str):
 @router.post("/predict", response_model=Dict)
 async def predict_rates(request: Dict[str, Any]):
     """
-    🔮 PROPHETIC PRICING ENDPOINT
+    PROPHETIC PRICING ENDPOINT
     Input: origin, destination, current_price
     Output: AI Prediction (Buy/Wait)
     """
@@ -85,7 +85,7 @@ async def predict_rates(request: Dict[str, Any]):
 @router.get("/trend", response_model=Dict)
 async def get_market_trends(country: str = "GLOBAL", commodity: str = "General Cargo"):
     """
-    📈 DASHBOARD TREND ENDPOINT
+    DASHBOARD TREND ENDPOINT
     Returns 12-month rate history + forecast for a specific market.
     """
     try:
@@ -97,7 +97,7 @@ async def get_market_trends(country: str = "GLOBAL", commodity: str = "General C
 @router.get("/chat/stream")
 async def stream_chat(message: str, history: str = "[]"):
     """
-    🌊 SOVEREIGN SYNAPSE STREAM
+    # SOVEREIGN SYNAPSE STREAM
     Real-time SSE endpoint for token-by-token AI responses.
     """
     try:

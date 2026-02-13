@@ -13,7 +13,7 @@ async def search_ports(q: str):
     """
     client = MaerskClient()
     
-    # 🧠 SMART LOGIC: Map Countries to Major Logistics Hubs
+    # SMART LOGIC: Map Countries to Major Logistics Hubs
     SMART_COUNTRIES = {
         "saudi": ["Jeddah", "Dammam", "Riyadh", "King Abdullah Port", "Jubail"],
         "saudi arabia": ["Jeddah", "Dammam", "Riyadh", "King Abdullah Port", "Jubail"],
@@ -131,7 +131,7 @@ async def search_commodities(q: str):
 async def get_active_vessels():
     client = MaerskClient()
     
-    # 👑 SOVEREIGN FLEET PROTOCOL (Zero-Fakeness Fallback)
+    # SOVEREIGN FLEET PROTOCOL (Zero-Fakeness Fallback)
     SOVEREIGN_FLEET = [
         {"name": "MAERSK JEDDAH", "imo": "9842102", "flag": "KSA", "operator": "Maersk"},
         {"name": "MSC AMELIA", "imo": "9842061", "flag": "LBR", "operator": "MSC"},
@@ -243,7 +243,7 @@ async def get_shipment_deadlines(voyage: str = "216E", imo: str = "9456783", un_
 @router.get("/market/trends", response_model=Dict[str, Any])
 async def get_market_trend_data(country: str = "GLOBAL", commodity: str = "General Cargo"):
     """
-    👑 SOVEREIGN TREND ANALYZER (v2.2 Zero-Fake)
+    # SOVEREIGN TREND ANALYZER (v2.2 Zero-Fake)
     Returns deterministic, regional freight price trends.
     """
     try:
@@ -255,7 +255,7 @@ async def get_market_trend_data(country: str = "GLOBAL", commodity: str = "Gener
 @router.get("/market/indices", response_model=Dict[str, Any])
 async def get_market_indices():
     """
-    👑 SOVEREIGN MARKET PULSE (v2.2 Zero-Fake)
+    # SOVEREIGN MARKET PULSE (v2.2 Zero-Fake)
     Returns deterministic global freight indices based on daily maritime pulse.
     """
     from datetime import datetime
@@ -307,7 +307,7 @@ async def get_sailing_schedules(origin: str = "Shanghai", destination: str = "Je
     try:
         client = MaerskClient()
         
-        # 🧼 CLEAN NAMES: Extract 'Shanghai' from 'Shanghai (CNSHA)'
+        # CLEAN NAMES: Extract 'Shanghai' from 'Shanghai (CNSHA)'
         origin_clean = origin.split(' (')[0].strip()
         dest_clean = destination.split(' (')[0].strip()
         

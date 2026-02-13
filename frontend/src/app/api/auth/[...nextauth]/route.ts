@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { BACKEND_URL } from "@/lib/logistics";
 
 const handler = NextAuth({
     providers: [
@@ -18,7 +19,8 @@ const handler = NextAuth({
                 if (!credentials?.email || !credentials?.password) return null;
 
                 try {
-                    const res = await fetch("http://localhost:8000/api/auth/login", {
+                    const API_URL = BACKEND_URL.replace('/api', '');
+                    const res = await fetch(`${API_URL}/api/auth/login`, {
                         method: "POST",
                         body: JSON.stringify({
                             email: credentials.email,
@@ -39,7 +41,9 @@ const handler = NextAuth({
                     }
                     return null;
                 } catch (e) {
-                    console.error("Auth Error:", e);
+                    if (process.env.NODE_ENV === 'development') {
+                        console.error("Auth Error:", e);
+                    }
                     return null;
                 }
             }
@@ -57,9 +61,10 @@ const handler = NextAuth({
                     token.accessToken = (user as any).accessToken;
                     token.id = user.id;
                 } else if (account.provider === "google") {
-                    // 👑 SOCIAL SYNC HANDSHAKE
+                    // SOCIAL SYNC HANDSHAKE
                     try {
-                        const res = await fetch("http://localhost:8000/api/auth/social-sync", {
+                        const API_URL = BACKEND_URL.replace('/api', '');
+                        const res = await fetch(`${API_URL}/api/auth/social-sync`, {
                             method: "POST",
                             body: JSON.stringify({
                                 email: user.email,
@@ -75,7 +80,9 @@ const handler = NextAuth({
                             token.id = syncData.user_id;
                         }
                     } catch (e) {
-                        console.error("Social Sync Failed:", e);
+                        if (process.env.NODE_ENV === 'development') {
+                            console.error("Social Sync Failed:", e);
+                        }
                     }
                 }
             }

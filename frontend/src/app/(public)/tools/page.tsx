@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import FreightosWidget from "@/components/widgets/FreightosWidget";
 import { OfficeFinder } from "@/components/tools/OfficeFinder";
-import { Calculator, Zap, Ruler, Leaf, ArrowRight } from "lucide-react";
+import { Calculator, Zap, Ruler, Leaf } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ToolsPage() {
@@ -85,49 +84,11 @@ export default function ToolsPage() {
                                 </div>
                             </div>
 
-                            <div className="p-8 bg-zinc-950/20 border border-white/5 grayscale saturate-50 hover:grayscale-0 transition-all duration-1000">
-                                <FreightosWidget
-                                    title={tool.title}
-                                    widgetType={tool.type}
-                                    config={{
-                                        title: tool.title,
-                                        background: { color: '#000000' },
-                                        appId: ''
-                                    }}
-                                />
+                            <div className="p-12 bg-zinc-950/20 border border-white/5 min-h-[120px] flex items-center justify-center">
+                                <tool.icon className="w-12 h-12 text-zinc-900 group-hover:text-white transition-all duration-700" />
                             </div>
                         </motion.div>
                     ))}
-                </div>
-
-                {/* Secondary Feature: Rate Estimator */}
-                <div className="mt-96 grid lg:grid-cols-[1fr,2fr] gap-32 border-t border-white/5 pt-32">
-                    <div>
-                        <span className="arch-label mb-12 block">{t('toolsPage.intel')}</span>
-                        <h2 className="text-5xl font-light text-white leading-tight">{t('toolsPage.marketEstimator')}</h2>
-                        <div className="arch-detail-line h-48 opacity-20 hidden lg:block" />
-                    </div>
-                    <div className="bg-zinc-950/20 border border-white/5 p-8 grayscale">
-                        <FreightosWidget
-                            title="Freight Rate Estimator"
-                            widgetType="FreightEstimator"
-                            config={{
-                                enabledModes: ['OCEAN', 'AIR', 'EXPRESS'],
-                                enabledResults: ['TRANSIT_TIMES', 'PRICE'],
-                                calcType: 'FreightEstimator',
-                                title: 'Rate Estimator',
-                                forceFail: false,
-                                noResults: {
-                                    subtitle: 'No rates available for this route',
-                                    CTA: 'Try a different route'
-                                },
-                                calculatingScreen: {
-                                    title: 'Calculating rates...',
-                                    subtitle: 'Checking carrier availability'
-                                },
-                            }}
-                        />
-                    </div>
                 </div>
 
                 {/* Sub-footer Section */}

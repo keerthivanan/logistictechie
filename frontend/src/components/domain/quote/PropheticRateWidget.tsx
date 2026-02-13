@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Sparkles, TrendingUp, TrendingDown, AlertCircle, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { BACKEND_URL } from "@/lib/logistics";
 
 interface PropheticWidgetProps {
     origin: string;
@@ -29,7 +30,7 @@ export function PropheticRateWidget({ origin, destination, currentPrice }: Proph
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL;
 
                 // 1. Fetch Prediction
                 const predRes = await fetch(`${apiUrl}/api/ai/predict`, {

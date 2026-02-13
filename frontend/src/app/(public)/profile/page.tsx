@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Building, Calendar, ArrowLeft, Shield, Globe, Zap, Phone, Camera } from "lucide-react";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,7 @@ export default function ProfilePage() {
         setLoading(true);
         try {
             const token = (session.user as any).accessToken;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const apiUrl = BACKEND_URL.replace('/api', '');
             const res = await axios.get(`${apiUrl}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -54,7 +55,7 @@ export default function ProfilePage() {
         setSaving(true);
         try {
             const token = (session.user as any).accessToken;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const apiUrl = BACKEND_URL.replace('/api', '');
             await axios.put(`${apiUrl}/api/auth/update-profile`, editData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -89,7 +90,7 @@ export default function ProfilePage() {
                 >
                     <div>
                         <span className="arch-label mb-12 block">{t('nav.profile').toUpperCase()}</span>
-                        <h1 className="arch-heading">{t('audit.operatorDetails').split(' ')[0]} <br />{t('audit.operatorDetails').split(' ').slice(1).join(' ')}</h1>
+                        <h1 className="arch-heading italic">{session?.user?.name?.toUpperCase() || "COMMANDER"}</h1>
                     </div>
                     <div className="flex flex-col justify-end space-y-12">
                         <div className="arch-detail-line">

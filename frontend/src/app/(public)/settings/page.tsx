@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Shield, Lock, Bell, Globe, ArrowLeft, Check, Zap, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 
 export default function SettingsPage() {
     const { t } = useLanguage();
@@ -28,7 +29,7 @@ export default function SettingsPage() {
         setLoading(true);
         try {
             const token = (session?.user as any).accessToken;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const apiUrl = BACKEND_URL.replace('/api', '');
             await axios.put(`${apiUrl}/api/auth/change-password`, {
                 current_password: passwords.current,
                 new_password: passwords.new
@@ -146,8 +147,8 @@ export default function SettingsPage() {
                                     className="flex flex-col items-center justify-center h-[400px] text-center"
                                 >
                                     <Zap className="w-12 h-12 text-zinc-900 mb-8 animate-pulse" />
-                                    <p className="arch-label">MODAL_PARAMETER_LOCKED</p>
-                                    <p className="text-zinc-700 text-[10px] mt-4 uppercase tracking-[0.4em]">Awaiting high-level operational override.</p>
+                                    <p className="arch-label">{t('settingsPage.lockedLabel')}</p>
+                                    <p className="text-zinc-700 text-[10px] mt-4 uppercase tracking-[0.4em]">{t('settingsPage.overrideLabel')}</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>

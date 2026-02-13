@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
@@ -20,10 +20,11 @@ class User(Base):
     preferences = Column(String) # JSON stored as string for compatibility, or use JSON type
     role = Column(String, default="user") # user, admin
     is_active = Column(Boolean, default=True)
-    failed_login_attempts = Column(String, default="0") # Stored as string for simplicity in some DBs, or use Integer
+    failed_login_attempts = Column(Integer, default=0)
     is_locked = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # 🔗 Relationships
+    # Relationships
     bookings = relationship("Booking", back_populates="user")
+    activities = relationship("UserActivity", back_populates="user")
 

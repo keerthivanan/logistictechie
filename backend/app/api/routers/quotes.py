@@ -2,11 +2,17 @@ from fastapi import APIRouter
 from typing import List, Dict
 from app.schemas import RateRequest, OceanQuote
 from app.services.ocean.maersk import MaerskClient
-from app.services.ocean.cma_cgm import CmaClient
-from app.services.ocean.msc import MscClient
-from app.services.ocean.searates import SearatesClient
 from app.services.sovereign import sovereign_engine
 import asyncio
+import hashlib
+import json
+from datetime import datetime, timedelta
+
+def generate_quote_id(quote: dict) -> str:
+    """ DETERMINISTIC HASHING: Ensures persistent IDs for stateless quotes."""
+    # Hash critical fields to create a stable reference
+    seed = f"{quote.get('carrier_name','')}-{quote.get('origin_locode','')}-{quote.get('dest_locode','')}-{quote.get('price',0)}-{quote.get('departure_date','N/A')}"
+    return hashlib.md5(seed.encode()).hexdigest()[:12].upper()
 
 router = APIRouter()
 
@@ -16,11 +22,8 @@ async def get_real_ocean_quotes(request: RateRequest):
     Orchestrates REAL calls and enriches them with Sovereign Intelligence.
     """
     maersk = MaerskClient()
-    cma = CmaClient()
-    msc = MscClient()
-    searates = SearatesClient()
     
-    # 👑 SOVEREIGN INTELLIGENCE: Decrypt Port Codes (e.g. CNSHA -> Shanghai)
+    # SOVEREIGN INTELLIGENCE: Decrypt Port Codes (e.g. CNSHA -> Shanghai)
     request.origin = sovereign_engine.resolve_port_code(request.origin)
     request.destination = sovereign_engine.resolve_port_code(request.destination)
     
@@ -33,25 +36,14 @@ async def get_real_ocean_quotes(request: RateRequest):
             quotes.extend(maersk_quotes)
     except Exception as e:
         print(f"[WARN] Maersk Fetch Error: {e}")
-        
-    # 2. ADDITIONAL REAL CARRIERS (CMA/MSC/Searates)
-    # These will attempt real calls if keys are present.
-    other_clients = [cma, msc, searates]
-    for client in other_clients:
-        try:
-            client_quotes = await client.fetch_real_rates(request)
-            if client_quotes:
-                quotes.extend(client_quotes)
-        except Exception as e:
-            print(f"[WARN] {client.__class__.__name__} Fetch Error: {e}")
     
-    # 3. SOVEREIGN GLOBAL CARRIER MATRIX (G.O.A.T. Expansion)
+    # 2. SOVEREIGN GLOBAL CARRIER MATRIX (G.O.A.T. Expansion)
     # If real API data is insufficient, we trigger the All-World Sovereign Protocol.
     if len(quotes) < 5:
         print(f"[INFO] Expansion Triggered. Current count: {len(quotes)}. Engaging Global Carrier Matrix.")
         est = sovereign_engine.generate_market_rate(request.origin, request.destination, request.container)
         
-        # 👑 GLOBAL CARRIER DATABASE (Deterministic Personality Nodes)
+        # GLOBAL CARRIER DATABASE (Deterministic Personality Nodes)
         carriers = [
             {"id": "MSC", "name": "MSC (Sovereign Direct)", "offset": 1.05, "transit": -1, "vessels": ["MSC OSCAR", "MSC GULSUN", "MSC AMELIA"], "wisdom": "The world's largest fleet. Optimized for capacity and corridor dominance."},
             {"name": "Hapag-Lloyd (Premium)", "offset": 1.12, "transit": -3, "vessels": ["BERLIN EXPRESS", "HAMBURG EXPRESS"], "wisdom": "Premium German engineering. Fastest transit times for high-value cargo."},
@@ -59,8 +51,6 @@ async def get_real_ocean_quotes(request: RateRequest):
             {"name": "ONE (Magenta Excellence)", "offset": 1.08, "transit": -1, "vessels": ["ONE STORK", "ONE APUS"], "wisdom": "Japanese precision. Ultra-reliable schedules with 99.9% port-call accuracy."},
             {"name": "Evergreen (Global Reach)", "offset": 0.98, "transit": 1, "vessels": ["EVER GIVEN", "EVER GREET"], "wisdom": "Aggressive global network. Balanced pricing across all major trade lanes."}
         ]
-        
-        from datetime import datetime, timedelta
         
         for c in carriers:
             # Generate 2 unique schedules per carrier for "Reality Depth"
@@ -101,7 +91,7 @@ async def get_real_ocean_quotes(request: RateRequest):
                     "vessel_name": vessel
                 })
 
-        # 🔮 Option X: PROPHETIC VISION (AI Master Tier)
+        # Option X: PROPHETIC VISION (AI Master Tier)
         # Always place the Prophetic Tier at the top for maximum "WOW"
         pulse = est["breakdown"]["daily_pulse"]
         signal = "BUY_NOW" if pulse < 1.05 else "WAIT_72H"
@@ -114,7 +104,7 @@ async def get_real_ocean_quotes(request: RateRequest):
             "price": int(est["price"] * 0.92) if signal == "BUY_NOW" else int(est["price"] * 1.08),
             "currency": "USD",
             "transit_time_days": est["transit_time"] + 3, # Saver AI route
-            "expiration_date": "2026-05-15",
+            "expiration_date": (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"),
             "is_real_api_rate": False,
             "source_endpoint": "Predictive Pulse Engine v5.0",
             "wisdom": f"🔮 PROPHETIC SIGNAL: {signal}. Global Pulse calibrated to {pulse}. AI recommends tactical placement near {request.origin} hub.",
@@ -126,9 +116,18 @@ async def get_real_ocean_quotes(request: RateRequest):
             "port_congestion_index": sovereign_engine.get_port_congestion(request.destination),
             "customs_duty_estimate": int(est["price"] * 0.05),
             "contact_office": "AI_ORACLE_CENTRAL",
-            "is_featured": True
+            "is_featured": True,
+            "departure_date": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         }
         quotes.insert(0, prophetic_quote) # The Legend always starts the list
+    
+    # FINAL ID INJECTION
+    for q in quotes:
+        if isinstance(q, dict):
+            q["id"] = generate_quote_id(q)
+        else:
+            # Assuming it's an OceanQuote object
+            q.id = generate_quote_id(q.model_dump())
     
     return {
         "success": True,

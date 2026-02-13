@@ -7,8 +7,11 @@ import { Lock, Loader2, Mail, ShieldCheck, User, Building2, Globe, Zap, ArrowRig
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function SignupPage() {
+    const { t } = useLanguage();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,7 +34,7 @@ export default function SignupPage() {
         }
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const apiUrl = BACKEND_URL.replace('/api', '');
             const response = await axios.post(`${apiUrl}/api/auth/register`, {
                 email,
                 password,
@@ -66,11 +69,11 @@ export default function SignupPage() {
                 >
                     <div>
                         <span className="arch-label mb-12 block">ENROLLMENT</span>
-                        <h1 className="arch-heading">Join. <br />Architecture.</h1>
+                        <h1 className="arch-heading italic">{t('auth.signup.title').split('. ')[0]}. <br />{t('auth.signup.title').split('. ').slice(1).join(' ')}</h1>
                     </div>
                     <div className="flex flex-col justify-end">
                         <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
-                            Synchronizing <strong className="text-white">global logistics nodes</strong> via encrypted neural link. Join the architectural elite.
+                            {t('auth.signup.subtitle').split('global logistics nodes')[0]} <strong className="text-white">global logistics nodes</strong> {t('auth.signup.subtitle').split('global logistics nodes')[1]}
                         </p>
                     </div>
                 </motion.div>
@@ -81,9 +84,9 @@ export default function SignupPage() {
                     <div className="space-y-32">
                         <div className="space-y-16">
                             {[
-                                { id: "01", title: "Mission Critical", desc: "Gain access to high-fidelity global routing networks." },
-                                { id: "02", title: "Neural Integration", desc: "Sync your operations directly with our AI core." },
-                                { id: "03", title: "Global Sovereignty", desc: "Military-grade security for your terrestrial assets." }
+                                { id: "01", title: t('auth.signup.feature1_title'), desc: t('auth.signup.feature1_desc') },
+                                { id: "02", title: t('auth.signup.feature2_title'), desc: t('auth.signup.feature2_desc') },
+                                { id: "03", title: t('auth.signup.feature3_title'), desc: t('auth.signup.feature3_desc') }
                             ].map((item) => (
                                 <div key={item.id} className="arch-detail-line">
                                     <span className="arch-number block mb-4">{item.id}</span>
@@ -95,9 +98,9 @@ export default function SignupPage() {
 
                         <div className="pt-24">
                             <Link href="/login" className="group inline-flex items-center gap-6">
-                                <span className="arch-label text-zinc-800 group-hover:text-white transition-colors">ALREADY_ENROLLED?</span>
+                                <span className="arch-label text-zinc-800 group-hover:text-white transition-colors">{t('auth.signup.alreadyEnrolled')}</span>
                                 <span className="text-xl font-light italic text-white flex items-center gap-4">
-                                    Sign In <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                                    {t('auth.signup.signIn')} <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                                 </span>
                             </Link>
                         </div>
@@ -115,8 +118,8 @@ export default function SignupPage() {
                                     <div className="w-24 h-24 border border-white flex items-center justify-center mx-auto">
                                         <ShieldCheck className="h-10 w-10 text-white" />
                                     </div>
-                                    <h2 className="text-4xl font-light text-white uppercase italic tracking-tighter">Identity_Confirmed.</h2>
-                                    <p className="arch-label">REDIRECTING_TO_AUTH_NODE</p>
+                                    <h2 className="text-4xl font-light text-white uppercase italic tracking-tighter">{t('auth.signup.success.title')}</h2>
+                                    <p className="arch-label">{t('auth.signup.success.subtitle')}</p>
                                 </motion.div>
                             ) : (
                                 <motion.div
@@ -125,7 +128,7 @@ export default function SignupPage() {
                                     className="space-y-16"
                                 >
                                     <div className="flex justify-between items-center">
-                                        <h2 className="text-4xl font-light text-white uppercase tracking-tight">Access_Request</h2>
+                                        <h2 className="text-4xl font-light text-white uppercase tracking-tight italic">Access_Request</h2>
                                         {isLoading && <Loader2 className="w-6 h-6 animate-spin text-white" />}
                                     </div>
 

@@ -17,6 +17,7 @@ class OceanQuote(BaseModel):
     """
     Standardized Container Quote Model
     """
+    id: Optional[str] = None
     carrier_name: str
     origin_locode: str
     dest_locode: str
@@ -29,24 +30,24 @@ class OceanQuote(BaseModel):
     
     surcharges: List[Surcharge] = []
     
-    # 👑 Sovereign Intelligence Metrics
+    # Sovereign Intelligence Metrics
     risk_score: float = 0.0
     carbon_emissions: float = 0.0
     customs_duty_estimate: float = 0.0
     port_congestion_index: float = 0.0
     
-    # 🧠 The Wisdom Layer
+    # The Wisdom Layer
     wisdom: Optional[str] = None
     thc_fee: float = 0.0
     pss_fee: float = 0.0
     fuel_fee: float = 0.0
     
-    # 🚢 Multi-Schedule Intelligence
+    # Multi-Schedule Intelligence
     vessel_name: Optional[str] = None
     departure_date: Optional[str] = None
     is_featured: bool = False
     
-    # 🔒 Security Verification
+    # Security Verification
     is_real_api_rate: bool = True
     source_endpoint: str 
     contact_office: Optional[str] = None
@@ -81,8 +82,8 @@ class UserResponse(BaseModel):
     created_at: Optional[datetime] = None
 # --- Booking Models ---
 class BookingCreate(BaseModel):
-    quote_id: str
-    user_id: str
+    quote_id: Optional[str] = None
+    user_id: Optional[str] = None  # Deprecated: derived from JWT current_user.id
     cargo_details: Any # Accept string or dict for robustness
     price: float = 0.0
     quote_data: Optional[dict] = None # For implicit quote creation

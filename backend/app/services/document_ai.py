@@ -18,7 +18,7 @@ class DocumentAIService:
 
     async def process_logistics_document(self, file_content: bytes, filename: str = "document.pdf") -> Dict[str, Any]:
         """
-        👑 PHOENIX SOVEREIGN OCR (v2.0 True AI)
+        PHOENIX SOVEREIGN OCR (v2.0 True AI)
         Uses GPT-4o to analyze and extract structured data from logistics documents.
         """
         if not self.llm:
@@ -29,7 +29,7 @@ class DocumentAIService:
             }
 
         try:
-            # 📜 CONTEXTUAL EXTRACTION PROTOCOL (v2.1 Zero-Fake)
+            # CONTEXTUAL EXTRACTION PROTOCOL (v2.1 Zero-Fake)
             # We use the filename and file statistics to anchor the AI's "Vision".
             # In a full-blown deployment, we would use pdfplumber here.
             

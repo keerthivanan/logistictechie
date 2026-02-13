@@ -8,7 +8,6 @@ export interface QuoteRequest {
 }
 
 // OceanQuote from Backend
-// OceanQuote from Backend
 export interface QuoteResult {
     id: string; // Generated on frontend or mapped
     carrier: string;
@@ -21,26 +20,26 @@ export interface QuoteResult {
     tags?: string[];
     fee_breakdown?: { name: string; amount: number }[];
 
-    // 👑 Sovereign Intelligence
+    // Sovereign Intelligence
     riskScore: number;
     carbonEmissions: number;
     customsDuty: number;
     portCongestion: number;
 
-    // 🧠 The Wisdom Layer
+    // The Wisdom Layer
     wisdom?: string;
     thc_fee?: number;
     pss_fee?: number;
     fuel_fee?: number;
     contactOffice?: string;
 
-    // 🚢 Multi-Schedule Intelligence
+    // Multi-Schedule Intelligence
     vesselName?: string;
     departureDate?: string;
     isFeatured?: boolean;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:8000/api";
+export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:8000/api";
 
 export const logisticsClient = {
     /**
@@ -108,20 +107,20 @@ export const logisticsClient = {
                         tags: r.is_featured ? ["AI_PROPHETIC", "OPTIMAL_CORRIDOR"] : ["Direct", "Eco-Select"],
                         fee_breakdown: r.surcharges ? r.surcharges.map((s: any) => ({ name: s.name, amount: s.amount })) : [],
 
-                        // 👑 Sovereign Metrics Mapping
+                        // Sovereign Metrics Mapping
                         riskScore: r.risk_score || 0,
                         carbonEmissions: r.carbon_emissions || 0,
                         customsDuty: r.customs_duty_estimate || 0,
                         portCongestion: r.port_congestion_index || 0,
 
-                        // 🧠 Wisdom Layer
+                        // Wisdom Layer
                         wisdom: r.wisdom,
                         thc_fee: r.thc_fee,
                         pss_fee: r.pss_fee,
                         fuel_fee: r.fuel_fee,
                         contactOffice: r.contact_office,
 
-                        // 🚢 Schedule
+                        // Schedule
                         vesselName: r.vessel_name,
                         departureDate: r.departure_date,
                         isFeatured: r.is_featured
@@ -130,7 +129,9 @@ export const logisticsClient = {
             }
             return [];
         } catch (error) {
-            console.error("Logistics Engine Error:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Logistics Engine Error:", error);
+            }
             return [];
         }
     },
@@ -150,7 +151,9 @@ export const logisticsClient = {
             }
             return null;
         } catch (error) {
-            console.error("Tracking API Error:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Tracking API Error:", error);
+            }
             return null;
         }
     },
@@ -167,7 +170,9 @@ export const logisticsClient = {
             }
             return null;
         } catch (error) {
-            console.error("Booking API Error:", error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error("Booking API Error:", error);
+            }
             return null;
         }
     },

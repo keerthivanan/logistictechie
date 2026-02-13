@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuoteStore } from "@/hooks/use-quote";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CargoSelectionPopover } from "../CargoSelectionPopover";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Package, FileUp, Zap } from "lucide-react";
@@ -8,19 +9,20 @@ import { AIDocumentUpload } from "../AIDocumentUpload";
 
 export function CargoStep() {
     const { nextStep } = useQuoteStore();
+    const { t } = useLanguage();
 
     return (
         <div className="max-w-4xl mx-auto">
             <div className="mb-20">
                 <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-[1px] bg-emerald-500" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">PROTOCOL_STEP_01</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">{t('quote.wizard.cargo.protocolStep')}</span>
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-6 leading-none">
-                    Identify. <span className="text-zinc-900 group-hover:text-white transition-colors duration-1000">Cargo.</span>
+                    {t('quote.wizard.cargo.identifyCargo').split('.')[0]}. <span className="text-zinc-900 group-hover:text-white transition-colors duration-1000">{t('quote.wizard.cargo.identifyCargo').split('.')[1]}</span>
                 </h2>
                 <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed max-w-xl">
-                    Select your operational unit type or synchronize via encrypted document upload for automated intelligence extraction.
+                    {t('quote.wizard.cargo.cargoDesc')}
                 </p>
             </div>
 
@@ -32,8 +34,8 @@ export function CargoStep() {
                             <Package className="h-8 w-8" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">UNIT_SPECIFICATION</h3>
-                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">Select dimensional parameters</p>
+                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">{t('quote.wizard.cargo.unitSpec')}</h3>
+                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">{t('quote.wizard.cargo.dimParams')}</p>
                         </div>
                     </div>
                     <CargoSelectionPopover />
@@ -47,8 +49,8 @@ export function CargoStep() {
                             <FileUp className="h-8 w-8" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">NEURAL_EXTRACTION</h3>
-                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">Auto-sync shipping data</p>
+                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">{t('quote.wizard.cargo.neuralExtraction')}</h3>
+                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">{t('quote.wizard.cargo.autoSync')}</p>
                         </div>
                     </div>
                     <AIDocumentUpload />
@@ -61,7 +63,7 @@ export function CargoStep() {
                     onClick={nextStep}
                     className="h-20 px-16 bg-white text-black hover:bg-emerald-500 rounded-none font-black text-[11px] uppercase tracking-[0.6em] transition-all duration-700 shadow-[0_20px_60px_rgba(255,255,255,0.05)] flex items-center gap-6"
                 >
-                    INITIALIZE_ROUTE <ArrowRight className="h-5 w-5" />
+                    {t('quote.wizard.cargo.initRoute')} <ArrowRight className="h-5 w-5" />
                 </Button>
             </div>
         </div>

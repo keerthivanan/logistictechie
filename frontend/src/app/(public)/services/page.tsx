@@ -13,25 +13,25 @@ export default function ServicesPage() {
             id: "01",
             title: t('servicesPage.items.ocean'),
             desc: t('servicesPage.tacticalDesc'),
-            details: "Full Container Load (FCL), Less than Container Load (LCL), Specialized Equipment Deployment."
+            details: t('servicesPage.items.oceanDetails')
         },
         {
             id: "02",
             title: t('servicesPage.items.aerial'),
-            desc: "High-velocity atmospheric transit for time-critical mission assets and high-value payloads.",
-            details: "Express Cargo, Charter Operations, Temperature Controlled Atmospheric Transit."
+            desc: t('servicesPage.items.aerialDesc'),
+            details: t('servicesPage.items.aerialDetails')
         },
         {
             id: "03",
             title: t('servicesPage.items.ground'),
-            desc: "Precision terrestrial routing across continental networks using tactical fleet synchronization.",
-            details: "Last-mile autonomous delivery, Heavy-haul logistics, Multi-modal rail integration."
+            desc: t('servicesPage.items.groundDesc'),
+            details: t('servicesPage.items.groundDetails')
         },
         {
             id: "04",
             title: t('servicesPage.items.warehouse'),
-            desc: "Strategic asset positioning within climate-controlled, high-security regional storage frameworks.",
-            details: "Automated fulfillment nodes, Cold-chain integrity, Secure perimeter storage."
+            desc: t('servicesPage.items.warehouseDesc'),
+            details: t('servicesPage.items.warehouseDetails')
         }
     ];
 
@@ -50,16 +50,16 @@ export default function ServicesPage() {
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-            <div className="container max-w-[1400px] mx-auto px-8 py-48">
+            <div className="container max-w-[1400px] mx-auto px-8 py-24">
 
                 {/* Architectural Header */}
                 <motion.div
-                    initial={{ opacity: 0, y: 40 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="mb-48"
+                    className="mb-32"
                 >
-                    <span className="arch-label mb-12 block">{t('servicesPage.label')}</span>
+                    <span className="arch-label">{t('servicesPage.label')}</span>
                     <h1 className="arch-heading">{t('servicesPage.title')}</h1>
                 </motion.div>
 
@@ -68,21 +68,21 @@ export default function ServicesPage() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="grid md:grid-cols-2 gap-x-32 gap-y-48 border-t border-white/5 pt-24"
+                    className="grid md:grid-cols-2 gap-x-16 gap-y-24 border-t border-white/5 pt-16"
                 >
                     {mainServices.map((service) => (
                         <motion.div key={service.id} variants={itemVariants} className="group cursor-default">
-                            <div className="flex items-start gap-8">
+                            <div className="flex items-start gap-6">
                                 <span className="arch-number">{service.id}</span>
-                                <div className="space-y-8">
-                                    <h2 className="text-4xl font-light text-white uppercase tracking-tight group-hover:pl-4 transition-all duration-700">
+                                <div className="space-y-4">
+                                    <h2 className="text-3xl font-light text-white uppercase tracking-tight group-hover:pl-4 transition-all duration-700">
                                         {service.title}
                                     </h2>
-                                    <p className="text-xl leading-relaxed text-zinc-500 max-w-md group-hover:text-zinc-300 transition-colors duration-700">
+                                    <p className="text-lg leading-relaxed text-zinc-500 max-w-md group-hover:text-zinc-300 transition-colors duration-700">
                                         {service.desc}
                                     </p>
                                     <div className="arch-detail-line">
-                                        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-zinc-700">
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-700">
                                             {service.details}
                                         </p>
                                     </div>
@@ -93,36 +93,36 @@ export default function ServicesPage() {
                 </motion.div>
 
                 {/* Technical Advantage Section */}
-                <div className="mt-96">
+                <div className="mt-64">
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 2 }}
-                        className="grid lg:grid-cols-2 gap-32 items-start"
+                        className="grid lg:grid-cols-2 gap-16 items-start"
                     >
                         <div>
-                            <span className="arch-label mb-12 block">{t('servicesPage.approach')}</span>
-                            <h2 className="text-6xl font-light text-white mb-16 leading-tight">{t('servicesPage.tacticalAdvantage')}</h2>
-                            <p className="text-xl text-zinc-500 max-w-lg mb-16 leading-relaxed">
+                            <span className="arch-label">{t('servicesPage.approach')}</span>
+                            <h2 className="text-5xl font-light text-white mb-12 leading-tight">{t('servicesPage.tacticalAdvantage')}</h2>
+                            <p className="text-lg text-zinc-500 max-w-lg mb-12 leading-relaxed">
                                 {t('servicesPage.tacticalDesc')}
                             </p>
                             <Link href="/quote">
-                                <button className="h-20 px-16 border border-white text-[11px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
+                                <button className="h-20 px-12 border border-white text-[10px] font-bold uppercase tracking-[0.6em] transition-all hover:bg-white hover:text-black">
                                     {t('servicesPage.initMission')}
                                 </button>
                             </Link>
                         </div>
 
-                        <div className="space-y-16 py-12">
+                        <div className="space-y-12 py-8">
                             {[
                                 { title: "Research", desc: "Deep understanding of context, culture, and climate." },
                                 { title: "Collaboration", desc: "Close partnership with clients, engineers, and craftspeople." },
                                 { title: "Innovation", desc: "Sustainable materials and forward-thinking design solutions." }
                             ].map((item, idx) => (
                                 <div key={idx} className="arch-detail-line">
-                                    <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
-                                    <p className="text-zinc-500 max-w-sm">{item.desc}</p>
+                                    <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                                    <p className="text-zinc-500 text-sm max-w-sm">{item.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -131,12 +131,12 @@ export default function ServicesPage() {
             </div>
 
             {/* Minimal Sub-footer */}
-            <div className="border-t border-white/5 py-32">
-                <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[10px] font-bold tracking-[0.8em] text-zinc-800 uppercase">
+            <div className="border-t border-white/5 py-24">
+                <div className="container max-w-[1400px] mx-auto px-8 flex justify-between items-center text-[9px] font-bold tracking-[0.6em] text-zinc-800 uppercase">
                     <span>{t('servicesPage.operations')}</span>
                     <span>{t('servicesPage.stable')}</span>
                 </div>
             </div>
-        </main>
+        </main >
     );
 }

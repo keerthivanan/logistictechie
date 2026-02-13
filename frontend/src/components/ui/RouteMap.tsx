@@ -136,7 +136,7 @@ export default function RouteMap({ origin, destination, className = "" }: RouteM
         mapId: process.env.NEXT_PUBLIC_MAP_ID || "bf19cf086f6f9660",
     }), []);
 
-    // 👑 SOVEREIGN GEOCODING ENGINE (v2.0 Extreme)
+    // SOVEREIGN GEOCODING ENGINE (v2.0 Extreme)
     const PORT_CACHE: Record<string, { lat: number; lng: number }> = {
         // ... (existing ports preserved for brevity, adding missing key nodes)
         "shanghai": { lat: 31.2304, lng: 121.4737 },
@@ -171,7 +171,7 @@ export default function RouteMap({ origin, destination, className = "" }: RouteM
     const originPos = useMemo(() => getCoordinates(origin), [origin]);
     const destPos = useMemo(() => getCoordinates(destination), [destination]);
 
-    // 👑 DYNAMIC BOUNDS CALIBRATION
+    // DYNAMIC BOUNDS CALIBRATION
     useEffect(() => {
         if (map && originPos && destPos) {
             const bounds = new window.google.maps.LatLngBounds();

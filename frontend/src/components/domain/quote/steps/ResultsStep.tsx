@@ -13,10 +13,12 @@ import { PremiumSearchingState } from "../PremiumSearchingState";
 import RouteMap from "@/components/ui/RouteMap";
 import { QuoteResult } from "@/lib/logistics";
 import { PropheticRateWidget } from "../PropheticRateWidget";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type SortMode = 'best' | 'fastest' | 'cheapest' | 'greenest';
 
 export function ResultsStep() {
+    const { t } = useLanguage();
     const { formData } = useQuoteStore();
     const [quotes, setQuotes] = useState<QuoteResult[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,7 +36,9 @@ export function ResultsStep() {
                 });
                 setQuotes(data);
             } catch (e) {
-                console.error(e);
+                if (process.env.NODE_ENV === 'development') {
+                    console.error(e);
+                }
                 setQuotes([]);
             } finally {
                 setLoading(false);
@@ -78,26 +82,26 @@ export function ResultsStep() {
             {/* Tactical Telemetry Header */}
             <div className="grid grid-cols-1 md:grid-cols-4 border border-white/5 divide-x divide-white/5 bg-zinc-950/40">
                 <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">ORIGIN_NODE</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.originNode')}</span>
                     <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
                         {formData.origin.split(',')[0]}
                     </span>
                 </div>
                 <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">TARGET_DESTINATION</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.targetDestination')}</span>
                     <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
                         {formData.destination.split(',')[0]}
                     </span>
                 </div>
                 <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">SPEC_UNIT</span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.specUnit')}</span>
                     <span className="text-xl font-black text-white italic tracking-tighter uppercase">
-                        {formData.containerSize}' HC_PROTOCOL
+                        {formData.containerSize}' {t('quote.results.specUnit').includes('_') ? 'HC_PROTOCOL' : 'HC PROTOCOL'}
                     </span>
                 </div>
                 <div className="p-10 flex items-center justify-center">
                     <Button variant="outline" className="h-16 w-full rounded-none border-white/5 bg-zinc-900 text-zinc-600 font-black text-[10px] uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all">
-                        RECONFIG_CORE
+                        {t('quote.results.reconfigCore')}
                     </Button>
                 </div>
             </div>
@@ -119,7 +123,7 @@ export function ResultsStep() {
                 <div className="lg:col-span-3 space-y-12">
                     <div className="flex items-center justify-between border-b border-white/5 pb-8">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white flex items-center gap-4">
-                            <Globe className="w-3 h-3 text-emerald-500" /> TRAJECTORY_MAP
+                            <Globe className="w-3 h-3 text-emerald-500" /> {t('quote.results.trajectoryMap')}
                         </h3>
                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     </div>
@@ -132,19 +136,19 @@ export function ResultsStep() {
                         />
                         <div className="absolute inset-0 pointer-events-none border border-white/10" />
                         <div className="absolute top-4 right-4 flex flex-col gap-2">
-                            <div className="px-3 py-1 bg-black/80 border border-white/10 text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">SAT_LINK_ACTIVE</div>
-                            <div className="px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-widest whitespace-nowrap">SOVEREIGN_NODE_V2</div>
+                            <div className="px-3 py-1 bg-black/80 border border-white/10 text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">{t('quote.results.satLinkActive')}</div>
+                            <div className="px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-widest whitespace-nowrap">{t('quote.results.sovereignNodeV2')}</div>
                         </div>
                     </div>
 
                     {/* Live Support Badge */}
                     <div className="mt-20 p-8 border border-white/5 bg-zinc-950/40 group hover:border-white/20 transition-all">
-                        <span className="text-[9px] font-black text-zinc-800 block mb-4 tracking-[0.4em]">LIVE_INTELLIGENCE</span>
+                        <span className="text-[9px] font-black text-zinc-800 block mb-4 tracking-[0.4em]">{t('quote.results.liveIntelligence')}</span>
                         <p className="text-[10px] font-black uppercase text-zinc-600 leading-relaxed mb-6 group-hover:text-zinc-400 transition-colors">
-                            Need custom routing logic? Our strategic ops group is active.
+                            {t('quote.results.customRouting')}
                         </p>
                         <Button className="w-full h-12 bg-white text-black font-black text-[9px] uppercase tracking-[0.4em] rounded-none hover:bg-emerald-500 transition-colors">
-                            OPEN_COMMS
+                            {t('quote.results.openComms')}
                         </Button>
                     </div>
                 </div>
@@ -154,10 +158,10 @@ export function ResultsStep() {
                     {/* Sorting Matrix */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-white/5">
                         {([
-                            { id: 'best', label: 'OPTIMAL', sub: metrics ? `${metrics.best.days} DAYS • $${metrics.best.price.toLocaleString()}` : '--' },
-                            { id: 'fastest', label: 'VELOCITY', sub: metrics ? `${metrics.fastest.days} DAYS • $${metrics.fastest.price.toLocaleString()}` : '--' },
-                            { id: 'cheapest', label: 'EFFICIENCY', sub: metrics ? `${metrics.cheapest.days} DAYS • $${metrics.cheapest.price.toLocaleString()}` : '--' },
-                            { id: 'greenest', label: 'ECO_CORE', sub: metrics ? `${metrics.greenest.days} DAYS • $${metrics.greenest.price.toLocaleString()}` : '--' }
+                            { id: 'best', label: t('quote.results.optimal'), sub: metrics ? `${metrics.best.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.best.price.toLocaleString()}` : '--' },
+                            { id: 'fastest', label: t('quote.results.velocity'), sub: metrics ? `${metrics.fastest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.fastest.price.toLocaleString()}` : '--' },
+                            { id: 'cheapest', label: t('quote.results.efficiency'), sub: metrics ? `${metrics.cheapest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.cheapest.price.toLocaleString()}` : '--' },
+                            { id: 'greenest', label: t('quote.results.ecoCore'), sub: metrics ? `${metrics.greenest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.greenest.price.toLocaleString()}` : '--' }
                         ] as const).map((mode) => (
                             <button
                                 key={mode.id}
@@ -180,7 +184,7 @@ export function ResultsStep() {
 
                     <div className="flex items-center justify-between pb-8">
                         <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
-                            {sortedQuotes.length} <span className="text-zinc-800 not-italic ml-4">IDENTIFIED_RESULTS_SYNCED</span>
+                            {sortedQuotes.length} <span className="text-zinc-800 not-italic ml-4">{t('quote.results.resultsSynced')}</span>
                         </h2>
                     </div>
 
@@ -202,12 +206,12 @@ export function ResultsStep() {
                     ) : (
                         <div className="py-48 text-center border-t border-white/5 bg-zinc-950/10">
                             <Ship className="w-16 h-16 text-zinc-900 mx-auto mb-10 opacity-20" />
-                            <h3 className="text-3xl font-black text-zinc-800 uppercase italic tracking-tighter mb-6">NO_INSTANT_SYNC</h3>
+                            <h3 className="text-3xl font-black text-zinc-800 uppercase italic tracking-tighter mb-6">{t('quote.results.noInstantSync')}</h3>
                             <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.6em] max-w-sm mx-auto leading-loose mb-12">
-                                Real-time telemetry unavailable for this trajectory. Manual protocol suggested.
+                                {t('quote.results.manualProtocol')}
                             </p>
                             <Button className="h-20 px-16 bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] rounded-none hover:bg-emerald-500 transition-colors">
-                                REQUEST_CUSTOM_INITIATIVE
+                                {t('quote.results.requestCustom')}
                             </Button>
                         </div>
                     )}

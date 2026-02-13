@@ -10,23 +10,29 @@ class SovereignEngine:
     @staticmethod
     def calculate_risk_score(origin: str, destination: str) -> float:
         """
-        👑 SOVEREIGN RISK ANALYZER (v2.0 Zero-Fake)
-        Geopolitical & Operational Risk Analysis based on 2026 Corridor Safety.
+        # SOVEREIGN RISK ANALYZER (v3.0 G.O.A.T.)
+        Dynamically analyzes risk based on LIVE Global Knowledge.
         """
+        from app.services.knowledge import knowledge_oracle
         corridor = (origin + destination).upper()
         
         # 1. BASELINE SAFETY
-        risk = 12.0 # Standard Global Corridor
+        risk = 12.0
         
-        # 2. PROPHETIC RISK NODES
-        if "RED SEA" in corridor or "SUEZ" in corridor or "SAJED" in corridor:
-            risk += 45.0 # Geopolitical Tension (2026 High)
-        if "MALACCA" in corridor or "CNSHA" in corridor:
-            risk += 15.0 # Congestion & Choke Point Risk
-        if "PANAMA" in corridor:
-            risk += 28.0 # Water Level & Transit Drought Risk
+        # 2. PROPHETIC RISK NODES (Static Baseline)
+        if any(x in corridor for x in ["RED SEA", "SUEZ", "SAJED"]):
+            risk += 45.0
+        if any(x in corridor for x in ["MALACCA", "CNSHA", "SGSIN"]):
+            risk += 15.0
+            
+        # 3. LIVE KNOWLEDGE SYNC (The Research Pillar)
+        # This makes the 'Research' a true pillar of the logic
+        alerts = knowledge_oracle.HOT_SPOTS
+        for alert in alerts:
+            if alert["location"].upper() in corridor:
+                risk += 15.0 # Add weight for live reported congestion/maintenance
         
-        # 3. WEATHER VOLATILITY (Simulation based on daily seed)
+        # 4. WEATHER VOLATILITY
         seed = SovereignEngine.calculate_volatility_factor()
         risk *= seed
         
@@ -46,7 +52,7 @@ class SovereignEngine:
     def get_port_congestion(port_name: str) -> float:
         """
         Predictive Port Health Index (0-100).
-        👑 DYNAMIC SOVEREIGN SYNC
+        # DYNAMIC SOVEREIGN SYNC
         """
         port = port_name.upper()
         # Daily Volatility Seed
@@ -68,7 +74,7 @@ class SovereignEngine:
     @staticmethod
     def resolve_port_code(input_str: str) -> str:
         """
-        👑 SOVEREIGN INTELLIGENCE: Logistics Code Decryptor.
+        # SOVEREIGN INTELLIGENCE: Logistics Code Decryptor.
         Converts UN/LOCODE (e.g. 'CNSHA') into Real World Locations.
         """
         code = input_str.upper().strip().replace(" ", "")
@@ -106,7 +112,7 @@ class SovereignEngine:
     @staticmethod
     def calculate_volatility_factor() -> float:
         """
-        📈 GLOBAL VOLATILITY ENGINE
+        # GLOBAL VOLATILITY ENGINE
         Simulates 2026 market tension based on a daily sovereign seed.
         """
         from datetime import datetime
@@ -120,7 +126,7 @@ class SovereignEngine:
     @staticmethod
     def generate_market_rate(origin: str, destination: str, container: str) -> Dict[str, Any]:
         """
-        👑 GOD-TIER MATHEMATICS (Absolute Zero-Fakeness)
+        # GOD-TIER MATHEMATICS (Absolute Zero-Fakeness)
         Calculates pricing based on REAL physics: Distance, Fuel, THC, PSS, and Daily Pulse.
         """
         from datetime import datetime
@@ -129,29 +135,30 @@ class SovereignEngine:
         # 100% deterministic but varies daily to reflect global volatility
         pulse_index = SovereignEngine.calculate_volatility_factor()
         
-        # 1. PHYSICAL CONSTANTS (2026 Sovereign Standard)
-        FUEL_PRICE_TON = 650.0 
-        FUEL_CONS_KM = 0.015   
-        DOC_FEE = 75.0         
+        # 1. PHYSICAL CONSTANTS (2026 Sovereign Standard - Recalibrated)
+        FUEL_PRICE_TON = 680.0 # 2026 High-Sulfur / VLSFO blend
+        FUEL_CONS_KM = 0.22    # Standard Large Container Vessel (Tons per KM)
+        DOC_FEE = 95.0         
+        VESSEL_TEU_CAPACITY = 18000 # Ultra Large Container Vessel (ULCV)
         
         # 2. GLOBAL HUB THC (Terminal Handling Charges)
         # Deep Intelligence Map for every major logistics node
         thc_map = {
-            "CNSHA": 185.0, # Shanghai
-            "SGSIN": 210.0, # Singapore
-            "NLRTM": 245.0, # Rotterdam
-            "SAJED": 155.0, # Jeddah
-            "USLAX": 420.0, # Los Angeles
-            "AEDXB": 190.0, # Dubai
-            "AEJEA": 190.0, # Jebel Ali
-            "DEHAM": 225.0, # Hamburg
-            "JPTYO": 240.0, # Tokyo
-            "USSAV": 380.0, # Savannah
-            "GRPIR": 180.0, # Piraeus
-            "KRBUS": 195.0, # Busan
-            "SADMM": 160.0, # Dammam
-            "HKHKG": 185.0, # Hong Kong
-            "CNNGB": 180.0, # Ningbo
+            "CNSHA": 285.0, # Shanghai
+            "SGSIN": 310.0, # Singapore
+            "NLRTM": 345.0, # Rotterdam
+            "SAJED": 255.0, # Jeddah
+            "USLAX": 580.0, # Los Angeles
+            "AEDXB": 290.0, # Dubai
+            "AEJEA": 290.0, # Jebel Ali
+            "DEHAM": 325.0, # Hamburg
+            "JPTYO": 340.0, # Tokyo
+            "USSAV": 540.0, # Savannah
+            "GRPIR": 280.0, # Piraeus
+            "KRBUS": 295.0, # Busan
+            "SADMM": 260.0, # Dammam
+            "HKHKG": 285.0, # Hong Kong
+            "CNNGB": 280.0, # Ningbo
         }
         
         origin_code = origin.upper().strip()
@@ -160,7 +167,7 @@ class SovereignEngine:
         origin_thc = next((v for k, v in thc_map.items() if k in origin_code), 150.0)
         dest_thc = next((v for k, v in thc_map.items() if k in dest_code), 150.0)
         
-        CANAL_TRANSIT_FEE = 350000.0 / 20000 
+        CANAL_TRANSIT_FEE = 750.0 # $750 per TEU (Strategic Suez Node 2026)
         
         # 3. DISTANCE MAPPING (Direct Haul Physics)
         distance_km = 12000 
@@ -168,31 +175,47 @@ class SovereignEngine:
         if "JED" in origin_code and "RTM" in dest_code: distance_km = 6500  
         if "SHA" in origin_code and "LAX" in dest_code: distance_km = 10500 
         
-        # 4. CORE LOGISTICS FORMULA
-        fuel_cost = (distance_km * FUEL_CONS_KM * FUEL_PRICE_TON) / (2.0 if "20" in container else 1.0)
+        # 4. CORE LOGISTICS FORMULA (Slot Cost Model)
+        # Fuel cost shared across effective capacity (70% load factor)
+        vessel_fuel_cost = distance_km * FUEL_CONS_KM * FUEL_PRICE_TON
+        fuel_cost_per_teu = vessel_fuel_cost / (VESSEL_TEU_CAPACITY * 0.7)
         
+        if "20" in container:
+            fuel_share = fuel_cost_per_teu
+        else:
+            fuel_share = fuel_cost_per_teu * 1.85
+            
+        # BASE FREIGHT (2026 Market Baseline)
+        base_freight = 1500.0 
+        
+        if "20" in container:
+            slot_cost = base_freight
+        else:
+            slot_cost = base_freight * 1.85
+            
         # 5. SURCHARGES (BAF / LSS / PSS)
-        baf_surcharge = fuel_cost * 0.12 
-        lss_surcharge = 250.0           
+        baf_surcharge = fuel_share * 0.25 # Fuel recovery factor
+        lss_surcharge = 350.0            # Low sulfur surcharge
         
         current_month = datetime.now().month
-        pss_surcharge = 500.0 if current_month in [8, 9, 10, 11] else 0.0
+        pss_surcharge = 850.0 if current_month in [8, 9, 10, 11] else 250.0
         
         # 6. CANAL LOGIC (Prophetic Suez Context)
         canal_additive = 0.0
+        tension_multiplier = 1.0
         if any(p in (origin_code + dest_code) for p in ["JED", "SUEZ"]):
             canal_additive = CANAL_TRANSIT_FEE
+            tension_multiplier = 1.25 # Strategic node risk premium
             
         # 7. MARKET VOLATILITY & TENSION (Daily Pulse Node)
         congestion_dest = SovereignEngine.get_port_congestion(destination)
-        tension_factor = 1.0 + (congestion_dest / 200.0) 
+        congestion_factor = 1.0 + (congestion_dest / 200.0) 
         
-        # 8. FINAL ACCUMULATION
-        base_cost = fuel_cost + origin_thc + dest_thc + DOC_FEE + canal_additive + pss_surcharge
-        total_price = (base_cost + baf_surcharge + lss_surcharge) * pulse_index * tension_factor
+        # 8. FINAL ACCUMULATION (Sovereign 2026 Standard)
+        operating_cost = slot_cost + fuel_share + origin_thc + dest_thc + DOC_FEE + canal_additive
+        surcharges = baf_surcharge + lss_surcharge + pss_surcharge
         
-        if "40" in container:
-            total_price *= 1.85
+        total_price = (operating_cost + surcharges) * pulse_index * tension_multiplier * congestion_factor
         
         # Wisdom Layer (The "Best in World" differentiator)
         pulse_percent = int((pulse_index - 1) * 100)
@@ -206,12 +229,12 @@ class SovereignEngine:
             "transit_time": int(distance_km / 800) + 2, 
             "service_type": "Priority Sovereign Corridor",
             "is_real_api_rate": False,
-            "source": f"Sovereign Engine v4.3 (Pulse_Index: {pulse_index:.2f})",
+            "source": f"Sovereign Engine v4.5 (High Tension Mode)",
             "wisdom": wisdom_note,
             "breakdown": {
-                "fuel_component": int(fuel_cost),
+                "fuel_component": int(fuel_share),
                 "terminal_handling": int(origin_thc + dest_thc),
-                "surcharges": int(baf_surcharge + lss_surcharge + pss_surcharge),
+                "surcharges": int(surcharges),
                 "daily_pulse": round(pulse_index, 2),
                 "port_congestion": round(congestion_dest, 1)
             }
@@ -220,7 +243,7 @@ class SovereignEngine:
     @staticmethod
     async def get_market_trend(country: str = "GLOBAL", commodity: str = "General Cargo") -> Dict[str, Any]:
         """
-        📈 SOVEREIGN MARKET TREND ENGINE
+        # SOVEREIGN MARKET TREND ENGINE
         Generates a 12-month trend analysis (Historical + Predictive).
         Deterministic logic tied to specific regions for "Zero-Fakeness" legitimacy.
         """
@@ -263,7 +286,6 @@ class SovereignEngine:
         # 4. Generate 3 months of prediction (Deterministic AI Logic)
         forecast = []
         # AI Logic: Predicts stabilization or rise based on regional seed
-        # 👑 SOVEREIGN PREDICTION ENGINE (Deterministic)
         volatility_profile = {
             "SAUDI": 1.02, # Growth trajectory (Vision 2030)
             "CHINA": 0.98, # Stabilization after peak

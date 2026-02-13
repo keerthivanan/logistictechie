@@ -41,7 +41,7 @@ export default function TermsPage() {
                     {sections.map((section) => (
                         <div key={section.id} className="grid lg:grid-cols-[1fr,3fr] gap-32 border-t border-white/5 pt-32">
                             <div className="flex items-start gap-8">
-                                <span className="arch-number">0{section.id}</span>
+                                <span className="arch-number">{section.id}</span>
                                 <h3 className="arch-label mt-4">{section.title}</h3>
                             </div>
                             <p className="text-3xl font-light text-zinc-500 leading-relaxed max-w-4xl italic">

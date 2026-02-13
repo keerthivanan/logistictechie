@@ -9,7 +9,7 @@ router = APIRouter()
 @router.get("/{number}", response_model=Dict[str, Any])
 async def get_tracking_status(number: str):
     """
-    👑 SOVEREIGN TRACKING ENGINE
+    # SOVEREIGN TRACKING ENGINE
     Provides high-fidelity predictive tracking when real API keys are unavailable.
     """
     from app.services.sovereign import sovereign_engine

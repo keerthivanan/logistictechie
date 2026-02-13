@@ -92,9 +92,9 @@ export default function ContactPage() {
                     <h2 className="arch-heading mb-16 italic">{t('contact.globalBase')}</h2>
                     <div className="grid md:grid-cols-3 gap-16 text-left max-w-4xl mx-auto mt-24">
                         {[
-                            { id: "01", title: "London Hub", city: "United Kingdom" },
-                            { id: "02", title: "Dubai Node", city: "UAE" },
-                            { id: "03", title: "Singapore Unit", city: "Singapore" }
+                            { id: "01", title: "LONDON_HUB", city: "UNITED_KINGDOM" },
+                            { id: "02", title: "DUBAI_NODE", city: "UAE" },
+                            { id: "03", title: "SINGAPORE_UNIT", city: "SINGAPORE" }
                         ].map((hub) => (
                             <div key={hub.id} className="arch-detail-line">
                                 <span className="arch-number block mb-4">{hub.id}</span>

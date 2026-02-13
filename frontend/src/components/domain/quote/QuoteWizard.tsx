@@ -25,12 +25,12 @@ export function QuoteWizard() {
     const { t } = useLanguage();
 
     const steps = [
-        { num: 1, label: "CARGO" },
-        { num: 2, label: "ROUTE" },
-        { num: 3, label: "DETAILS" },
-        { num: 4, label: "SERVICES" },
-        { num: 5, label: "RESULTS" },
-        { num: 6, label: "BOOKING" }
+        { num: 1, label: t('quote.wizard.steps.cargo') },
+        { num: 2, label: t('quote.wizard.steps.route') },
+        { num: 3, label: t('quote.wizard.steps.details') },
+        { num: 4, label: t('quote.wizard.steps.services') },
+        { num: 5, label: t('quote.wizard.steps.results') },
+        { num: 6, label: t('quote.wizard.steps.booking') }
     ];
 
     return (
@@ -69,7 +69,7 @@ export function QuoteWizard() {
                 <div className="flex justify-between items-center mb-16 opacity-50">
                     <div className="flex items-center gap-4">
                         <div className="h-2 w-2 bg-white animate-pulse" />
-                        <span className="arch-label">PROTOCOL_SYNC: {step}/06</span>
+                        <span className="arch-label">{t('quote.wizard.protocolSync')}: {step}/06</span>
                     </div>
                     <Shield className="w-4 h-4 text-zinc-900" />
                 </div>

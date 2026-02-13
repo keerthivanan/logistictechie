@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 
 import { usePathname, useRouter } from "next/navigation";
 
@@ -27,7 +28,7 @@ export function CreativeCortex() {
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // 🧠 CONTEXT AWARE SUGGESTIONS
+    // CONTEXT AWARE SUGGESTIONS
     const getSuggestions = () => {
         if (pathname?.includes('/tracking')) return ["Where is container MSCU123?", "How accurate is the ETA?", "Show me the map"];
         if (pathname?.includes('/quote')) return ["Find rates from Shanghai to LA", "What are the hidden fees?", "Is this the best price?"];
@@ -55,7 +56,7 @@ export function CreativeCortex() {
         setIsLoading(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const apiUrl = BACKEND_URL.replace('/api', '');
             const response = await axios.post(`${apiUrl}/api/ai/chat`, {
                 message: userMsg,
                 history: messages.map(m => ({ role: m.role, content: m.content })),
@@ -67,7 +68,7 @@ export function CreativeCortex() {
 
             setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
 
-            // 🚀 AI ACTION HANDLER
+            // ACTION HANDLER
             if (response.data.action && response.data.action.type === 'NAVIGATE') {
                 const path = response.data.action.payload;
                 // Add a system log message
@@ -91,12 +92,12 @@ export function CreativeCortex() {
 
                 {!isOpen && (
                     <div className="relative group">
-                        {/* 🔔 Proactive Helper Hint */}
+                        {/* Proactive Helper Hint */}
                         <motion.div
                             initial={{ opacity: 0, x: 20, scale: 0.8 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             transition={{ delay: 2, duration: 0.5 }}
-                            className="absolute right-20 top-4 bg-white text-black px-4 py-2 rounded-xl rounded-tr-none shadow-2xl flex items-center gap-3 whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors"
+                            className="absolute right-20 top-4 bg-white text-black px-4 py-2 rounded-none shadow-2xl flex items-center gap-3 whitespace-nowrap cursor-pointer hover:bg-gray-100 transition-colors"
                             onClick={() => setIsOpen(true)}
                         >
                             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
@@ -128,12 +129,12 @@ export function CreativeCortex() {
                         initial={{ opacity: 0, y: 100, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 100, scale: 0.9 }}
-                        className={`ultra-card bg-black/90 backdrop-blur-2xl border border-white/10 rounded-[32px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-500 ${isMinimized ? 'h-20 w-80' : 'h-[600px] w-[90vw] sm:w-[400px]'}`}
+                        className={`ultra-card bg-black/90 backdrop-blur-2xl border border-white/10 rounded-none overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-500 ${isMinimized ? 'h-20 w-80' : 'h-[600px] w-[90vw] sm:w-[400px]'}`}
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                             <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
+                                <div className="h-10 w-10 rounded-none bg-white flex items-center justify-center shadow-2xl">
                                     <Sparkles className="h-6 w-6 text-black" />
                                 </div>
                                 <div>
@@ -145,13 +146,13 @@ export function CreativeCortex() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => router.push('/assistant')} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white" title="Open Full Screen">
+                                <button onClick={() => router.push('/assistant')} className="p-2 hover:bg-white/5 rounded-none transition-colors text-gray-500 hover:text-white" title="Open Full Screen">
                                     <Maximize2 className="h-4 w-4" />
                                 </button>
-                                <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
+                                <button onClick={() => setIsMinimized(!isMinimized)} className="p-2 hover:bg-white/5 rounded-none transition-colors text-gray-500 hover:text-white">
                                     {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
                                 </button>
-                                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-500 hover:text-white">
+                                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-none transition-colors text-gray-500 hover:text-white">
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
@@ -168,7 +169,7 @@ export function CreativeCortex() {
                                             key={idx}
                                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                         >
-                                            <div className={`max-w-[85%] p-4 rounded-2xl text-xs font-medium leading-relaxed uppercase tracking-widest ${msg.role === 'user'
+                                            <div className={`max-w-[85%] p-4 rounded-none text-xs font-medium leading-relaxed uppercase tracking-widest ${msg.role === 'user'
                                                 ? 'bg-white text-black font-bold'
                                                 : 'bg-white/5 border border-white/10 text-gray-300'}`}>
                                                 {msg.role === 'assistant' && (
@@ -183,10 +184,10 @@ export function CreativeCortex() {
                                     ))}
                                     {isLoading && (
                                         <div className="flex justify-start">
-                                            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl flex gap-1">
-                                                <div className="h-1.5 w-1.5 bg-white rounded-full animate-bounce" />
-                                                <div className="h-1.5 w-1.5 bg-white rounded-full animate-bounce delay-75" />
-                                                <div className="h-1.5 w-1.5 bg-white rounded-full animate-bounce delay-150" />
+                                            <div className="bg-white/5 border border-white/10 p-4 rounded-none flex gap-1">
+                                                <div className="h-1.5 w-1.5 bg-white rounded-none animate-bounce" />
+                                                <div className="h-1.5 w-1.5 bg-white rounded-none animate-bounce delay-75" />
+                                                <div className="h-1.5 w-1.5 bg-white rounded-none animate-bounce delay-150" />
                                             </div>
                                         </div>
                                     )}
@@ -194,7 +195,7 @@ export function CreativeCortex() {
 
                                 {/* Input */}
                                 <div className="p-6 border-t border-white/5 bg-white/[0.01]">
-                                    {/* 💡 Context Suggestions */}
+                                    {/* Context Suggestions */}
                                     <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide mb-2">
                                         {getSuggestions().map((s, i) => (
                                             <button
@@ -212,10 +213,10 @@ export function CreativeCortex() {
                                             onChange={(e) => setInput(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                                             placeholder="SYNC QUERY OR USE VOICE..."
-                                            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 font-bold uppercase tracking-widest text-xs rounded-xl focus-visible:ring-white/20"
+                                            className="h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-600 font-bold uppercase tracking-widest text-xs rounded-none focus-visible:ring-white/20"
                                         />
 
-                                        {/* 🎙️ 2026 VOICE COMMAND */}
+                                        {/* 2026 VOICE COMMAND */}
                                         <Button
                                             onClick={() => {
                                                 if ('webkitSpeechRecognition' in window) {
@@ -236,7 +237,7 @@ export function CreativeCortex() {
                                                     alert("Voice Command requires Chrome/Edge.");
                                                 }
                                             }}
-                                            className="h-12 w-12 bg-white/10 text-white hover:bg-white hover:text-black rounded-xl flex-shrink-0 border border-white/10 transition-all hover:scale-105"
+                                            className="h-12 w-12 bg-white/10 text-white hover:bg-white hover:text-black rounded-none flex-shrink-0 border border-white/10 transition-all hover:scale-105"
                                         >
                                             <div className="relative">
                                                 <div className="absolute inset-0 bg-green-500 rounded-full blur-md opacity-20 animate-pulse" />
@@ -247,7 +248,7 @@ export function CreativeCortex() {
                                         <Button
                                             onClick={() => handleSend()}
                                             disabled={isLoading}
-                                            className="h-12 w-12 bg-white text-black hover:bg-gray-100 rounded-xl flex-shrink-0 shadow-2xl"
+                                            className="h-12 w-12 bg-white text-black hover:bg-gray-100 rounded-none flex-shrink-0 shadow-2xl"
                                         >
                                             <Send className="h-5 w-5" />
                                         </Button>

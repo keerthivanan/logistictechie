@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { BACKEND_URL } from "@/lib/logistics";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
-import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 interface Message {
     role: "user" | "assistant";
@@ -69,7 +70,8 @@ export default function AssistantPage() {
         try {
             const history = messages.map(m => ({ role: m.role, content: m.content }));
             history.push({ role: "user", content: userMsg.content });
-            await fetchEventSource("http://localhost:8000/api/ai/chat/stream?message=" + encodeURIComponent(userMsg.content) + "&history=" + encodeURIComponent(JSON.stringify(history)), {
+            const apiUrl = BACKEND_URL.replace('/api', '');
+            await fetchEventSource(`${apiUrl}/api/ai/chat/stream?message=${encodeURIComponent(userMsg.content)}&history=${encodeURIComponent(JSON.stringify(history))}`, {
                 method: "GET",
                 headers: { "Accept": "text/event-stream" },
                 onmessage(ev) {

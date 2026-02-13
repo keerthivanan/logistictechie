@@ -64,7 +64,7 @@
     overflow-x: hidden;
   }
 
-  /* Structural Typography */
+  /* Structural Typography - Professional Human Scaling */
   h1,
   h2,
   h3,
@@ -72,7 +72,7 @@
   h5,
   h6 {
     font-family: var(--font-outfit), sans-serif;
-    @apply font-normal tracking-tight;
+    @apply font-semibold tracking-tight;
     font-variant-ligatures: none;
   }
 
@@ -83,8 +83,8 @@
   a,
   label {
     font-family: var(--font-inter), sans-serif;
-    @apply tracking-tight leading-relaxed;
-    color: theme('colors.zinc.400');
+    @apply tracking-normal leading-relaxed;
+    color: theme('colors.zinc.300');
   }
 
   strong,
@@ -92,13 +92,22 @@
     color: white;
   }
 
-  /* Architectural Heading Patterns */
+  /* Architectural Heading Patterns - Refined for High-Density Enterprise Look */
   .arch-heading {
-    @apply text-7xl md:text-8xl lg:text-[10rem] font-light leading-[0.9] tracking-[-0.04em] text-white;
+    @apply text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight text-white mb-4;
   }
 
   .arch-label {
-    @apply text-[10px] font-bold uppercase tracking-[0.6em] text-zinc-600;
+    @apply text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-2;
+  }
+
+  /* Compact Section Containers */
+  .arch-section {
+    @apply py-24 md:py-32 lg:py-40;
+  }
+
+  .arch-section-hero {
+    @apply pt-32 pb-40 md:pt-48 md:pb-56;
   }
 }
 
@@ -106,38 +115,38 @@
 
   /* Vertical Detail Line */
   .arch-detail-line {
-    @apply relative pl-8 border-l border-white/20;
+    @apply relative pl-6 border-l border-white/10;
   }
 
   .arch-detail-line::before {
     content: "";
-    @apply absolute left-[-1px] top-0 h-12 w-[1px] bg-white;
+    @apply absolute left-[-1px] top-0 h-8 w-[1px] bg-white/40;
   }
 
   /* Structured Numerical List */
   .arch-number {
-    @apply text-[11px] font-bold tracking-widest text-zinc-700 mr-4;
+    @apply text-[12px] font-bold tracking-widest text-zinc-600 mr-4;
   }
 
-  /* Ultra-Minimal Container */
+  /* Ultra-Minimal Container - High-Density Spacing */
   .arch-grid {
-    @apply grid gap-24 md:grid-cols-2 lg:gap-32;
+    @apply grid gap-6 md:grid-cols-2 lg:gap-12;
   }
 
-  /* 💎 HOLOGRAPHIC ACCENTS (Best of All Time Status) */
+  /* HOLOGRAPHIC ACCENTS (Subtle) */
   .holographic-glow {
     @apply relative overflow-hidden;
   }
 
   .holographic-glow::after {
     content: "";
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent;
-    animation: holographic-sweep 8s ease-in-out infinite;
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent;
+    animation: holographic-sweep 12s ease-in-out infinite;
     transform: skewX(-20deg) translateX(-100%);
   }
 
   .titan-label {
-    @apply text-[10px] font-black uppercase tracking-[0.4em] leading-none;
+    @apply text-[11px] font-bold uppercase tracking-[0.2em] leading-none;
   }
 
   @keyframes holographic-sweep {

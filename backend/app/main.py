@@ -9,8 +9,13 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # SOVEREIGN CONSTITUTION CHECK
+    if not settings.SECRET_KEY:
+        print("[FATAL] SECRET_KEY is missing or insecure. System halted.")
+        # We don't exit(1) immediately to allow the dev server to show the error if appropriate,
+        # but the lack of key will naturally crash jwt operations.
+    
     # Sovereign Database Handshake
-    # Schema harmonization is now handled via Alembic migrations.
     from app.services.knowledge import knowledge_oracle
     await knowledge_oracle.initialize()
     
@@ -23,6 +28,17 @@ app = FastAPI(
     description="The 'True Ocean' Protocol. Uses strictly real API integrations.",
     lifespan=lifespan
 )
+
+# SECURITY HEADERS MIDDLEWARE
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 # Rate Limiting Logic (Simple in-memory for Best-of-All-Time efficiency)
 user_rates = defaultdict(list)

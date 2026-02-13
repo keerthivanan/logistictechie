@@ -7,6 +7,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { QuoteResult } from "@/lib/logistics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CarrierCardProps {
     quote: QuoteResult;
@@ -16,6 +17,7 @@ interface CarrierCardProps {
 }
 
 export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardProps) {
+    const { t } = useLanguage();
     const [expanded, setExpanded] = useState(false);
     const isFeatured = quote.isFeatured;
 
@@ -58,11 +60,11 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                 ))
                             ) : null}
                             <span className={`titan-label border px-3 py-1 ${quote.riskScore > 50 ? 'border-red-911 text-red-500' : 'border-white/10 text-gray-500'}`}>
-                                <ShieldCheck className="w-2 h-2 mr-2" /> RISK: {quote.riskScore}%
+                                <ShieldCheck className="w-2 h-2 mr-2" /> {t('quote.card.risk')}: {quote.riskScore}%
                             </span>
                             {quote.isReal && (
                                 <span className="titan-label bg-white text-black border-transparent px-3 py-1">
-                                    CORE_VERIFIED
+                                    {t('quote.card.coreVerified')}
                                 </span>
                             )}
                         </div>
@@ -73,7 +75,7 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                     <div className="text-5xl font-bold text-white tracking-tight leading-none">
                         ${(quote.price + quote.customsDuty).toLocaleString()}
                     </div>
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block">INCL. ${quote.customsDuty.toLocaleString()} DUTY_CALC</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block">INCL. ${quote.customsDuty.toLocaleString()} {t('quote.card.dutyCalc')}</span>
                 </div>
             </div>
 
@@ -82,11 +84,11 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                 <div className="md:col-span-8">
                     <div className="flex justify-between items-center mb-8">
                         <div className="flex flex-col items-start w-[45%]">
-                            <span className="titan-label mb-2">RECEIPT_NODE</span>
+                            <span className="titan-label mb-2">{t('quote.card.receiptNode')}</span>
                             <span className="truncate w-full font-bold text-white uppercase tracking-tight text-xl">{origin.split(',')[0]}</span>
                         </div>
                         <div className="flex flex-col items-end w-[45%] text-right">
-                            <span className="titan-label mb-2">GATEWAY_POINT</span>
+                            <span className="titan-label mb-2">{t('quote.card.gatewayPoint')}</span>
                             <span className="truncate w-full font-bold text-white uppercase tracking-tight text-xl">{destination.split(',')[0]}</span>
                         </div>
                     </div>
@@ -111,15 +113,15 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
 
                     <div className="flex justify-between items-center mt-6">
                         <div className="flex items-center gap-6">
-                            <span className="titan-label text-gray-600">VELOCITY_METRIC: {quote.days} DAYS_E</span>
+                            <span className="titan-label text-gray-600">{t('quote.card.velocityMetric')}: {quote.days} {t('quote.booking.days').split(' ')[0]}</span>
                             {quote.departureDate && (
                                 <span className="titan-label text-emerald-500 border border-emerald-500/20 px-2 py-0.5">
-                                    DEPARTURE: {quote.departureDate}
+                                    {t('quote.card.departure')}: {quote.departureDate}
                                 </span>
                             )}
                             {quote.vesselName && (
                                 <span className="titan-label text-white/40 italic">
-                                    VESSEL: {quote.vesselName}
+                                    {t('quote.card.vessel')}: {quote.vesselName}
                                 </span>
                             )}
                         </div>
@@ -132,13 +134,13 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                         onClick={onBook}
                         className="w-full bg-white hover:bg-gray-200 text-black font-bold uppercase tracking-[0.2em] h-16 rounded-none shadow-none text-xs active:scale-95 transition-all"
                     >
-                        INITIALIZE_BOOKING
+                        {t('quote.card.initBooking')}
                     </Button>
                     <button
                         onClick={() => setExpanded(!expanded)}
                         className="titan-label hover:text-white flex items-center justify-center gap-3 transition-all p-3 border border-white/5 hover:border-white/10"
                     >
-                        {expanded ? "COLLAPSE_INTEL" : "EXPAND_ANALYTICS"}
+                        {expanded ? t('quote.card.collapseIntel') : t('quote.card.expandAnalytics')}
                         {expanded ? <ChevronUp className="w-3 h-3 text-white/30" /> : <ChevronDown className="w-3 h-3 text-white/30" />}
                     </button>
                 </div>
@@ -157,12 +159,12 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                             {/* Left: Detailed Line Items */}
                             <div className="space-y-10">
                                 <h4 className="titan-label flex items-center gap-3">
-                                    <Calculator className="w-3 h-3 text-emerald-500" /> RATE_CALIBRATION
+                                    <Calculator className="w-3 h-3 text-emerald-500" /> {t('quote.card.rateCalibration')}
                                 </h4>
                                 <div className="space-y-5">
                                     {quote.wisdom && (
                                         <div className="bg-emerald-500/5 border border-emerald-500/10 p-6 mb-8">
-                                            <span className="titan-label text-emerald-500 mb-2 block">INTELLIGENCE_WISDOM</span>
+                                            <span className="titan-label text-emerald-500 mb-2 block">{t('quote.card.intelWisdom')}</span>
                                             <p className="text-[11px] font-bold text-white uppercase leading-relaxed italic tracking-widest leading-loose">
                                                 "{quote.wisdom}"
                                             </p>
@@ -183,14 +185,14 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                             <div className="flex justify-between items-center group/fee">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-1 h-1 bg-white"></div>
-                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">BASE_FREIGHT_PROTOCOL</span>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">{t('quote.card.baseFreight')}</span>
                                                 </div>
                                                 <span className="font-mono text-xs font-bold text-white">${(quote.fuel_fee || quote.price * 0.6).toLocaleString()}</span>
                                             </div>
                                             <div className="flex justify-between items-center group/fee">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-1 h-1 bg-white/20"></div>
-                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">TERMINAL_HANDLING (THC)</span>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">{t('quote.card.terminalHandling')}</span>
                                                 </div>
                                                 <span className="font-mono text-xs font-bold text-white">${(quote.thc_fee || 350).toLocaleString()}</span>
                                             </div>
@@ -198,7 +200,7 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                                 <div className="flex justify-between items-center group/fee">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-1 h-1 bg-red-500"></div>
-                                                        <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">PEAK_SEASON (PSS)</span>
+                                                        <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">{t('quote.card.peakSeason')}</span>
                                                     </div>
                                                     <span className="font-mono text-xs font-bold text-white">${quote.pss_fee.toLocaleString()}</span>
                                                 </div>
@@ -206,7 +208,7 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                             <div className="flex justify-between items-center group/fee">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-1 h-1 bg-white/10"></div>
-                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">DYNAMIC_SURCHARGES</span>
+                                                    <span className="titan-label text-gray-500 group-hover/fee:text-white transition-colors">{t('quote.card.dynamicSurcharges')}</span>
                                                 </div>
                                                 <span className="font-mono text-xs font-bold text-white">${(quote.price - (quote.fuel_fee || 0) - (quote.thc_fee || 0) - (quote.pss_fee || 0)).toLocaleString()}</span>
                                             </div>
@@ -214,19 +216,19 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                     )}
                                 </div>
                                 <div className="flex justify-between items-center pt-8 border-t border-white/5">
-                                    <span className="titan-label text-white">AGGREGATED_TOTAL</span>
+                                    <span className="titan-label text-white">{t('quote.card.aggregatedTotal')}</span>
                                     <span className="font-bold text-2xl text-white tracking-tight">USD {quote.price.toLocaleString()}</span>
                                 </div>
 
-                                {/* 👑 5-API SYNC TELEMETRY */}
+                                {/* 5-API SYNC TELEMETRY */}
                                 <div className="pt-8 border-t border-white/5 space-y-4">
-                                    <h4 className="titan-label text-white/40 mb-4 tracking-[0.4em]">SOVEREIGN_HANDSHAKE</h4>
+                                    <h4 className="titan-label text-white/40 mb-4 tracking-[0.4em]">{t('quote.card.sovereignHandshake')}</h4>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">VESSEL_AUTH</span>
+                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">{t('quote.card.vesselAuth')}</span>
                                         <span className="text-[10px] font-black text-emerald-500 uppercase italic">{(quote as any).source_endpoint?.split('(')[1]?.replace(')', '') || "VERIFIED"}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">LOCAL_OFFICE</span>
+                                        <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest">{t('quote.card.localOffice')}</span>
                                         <span className="text-[10px] font-black text-white uppercase italic">{quote.contactOffice || "+1 (800) MAERSK"}</span>
                                     </div>
                                 </div>
@@ -235,7 +237,7 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                             {/* Right: Routing Details */}
                             <div className="bg-white/[0.01] p-10 border border-white/5 shadow-2xl relative overflow-hidden">
                                 <h4 className="titan-label mb-10 flex items-center gap-3">
-                                    <Truck className="w-3 h-3 text-emerald-500" /> NODE_TELEMETRY
+                                    <Truck className="w-3 h-3 text-emerald-500" /> {t('quote.card.nodeTelemetry')}
                                 </h4>
                                 <div className="space-y-8 relative z-10">
                                     <div className="flex gap-6">
@@ -244,7 +246,7 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                             <div className="w-[1px] h-full bg-white/10 my-2"></div>
                                         </div>
                                         <div>
-                                            <p className="titan-label text-white mb-2">RECEIPT_PROTOCOL</p>
+                                            <p className="titan-label text-white mb-2">{t('quote.card.receiptProtocol')}</p>
                                             <p className="text-xs font-bold uppercase text-gray-600 tracking-widest">{origin}</p>
                                         </div>
                                     </div>
@@ -254,8 +256,8 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                             <div className="w-[1px] h-full bg-white/10 my-2"></div>
                                         </div>
                                         <div>
-                                            <p className="titan-label text-white mb-2">LOAD_POINT_NODE</p>
-                                            <p className="text-xs font-bold uppercase text-gray-600 tracking-widest">{origin.split(',')[0]} PORT_GATEWAY</p>
+                                            <p className="titan-label text-white mb-2">{t('quote.card.loadPoint')}</p>
+                                            <p className="text-xs font-bold uppercase text-gray-600 tracking-widest">{origin.split(',')[0]} {t('quote.card.loadPoint').includes('_') ? 'PORT_GATEWAY' : 'PORT GATEWAY'}</p>
                                         </div>
                                     </div>
                                     <div className="flex gap-6">
@@ -263,13 +265,13 @@ export function CarrierCard({ quote, origin, destination, onBook }: CarrierCardP
                                             <div className="w-2 h-2 bg-white/5"></div>
                                         </div>
                                         <div>
-                                            <p className="titan-label text-white mb-2">DISCHARGE_UNIT_TARGET</p>
-                                            <p className="text-xs font-bold uppercase text-gray-600 tracking-widest mb-4">{destination.split(',')[0]} GATEWAY_INFRA</p>
+                                            <p className="titan-label text-white mb-2">{t('quote.card.dischargeUnit')}</p>
+                                            <p className="text-xs font-bold uppercase text-gray-600 tracking-widest mb-4">{destination.split(',')[0]} {t('quote.card.dischargeUnit').includes('_') ? 'GATEWAY_INFRA' : 'GATEWAY INFRA'}</p>
                                             <div className="flex items-center gap-4">
                                                 <div className="h-[2px] w-32 bg-white/5 overflow-hidden">
                                                     <div className={`h-full ${quote.portCongestion > 70 ? 'bg-red-500' : 'bg-white'}`} style={{ width: `${quote.portCongestion}%` }} />
                                                 </div>
-                                                <span className="text-xs font-bold uppercase text-gray-400 tracking-[0.3em]">HEALTH: {100 - Math.round(quote.portCongestion)}%</span>
+                                                <span className="text-xs font-bold uppercase text-gray-400 tracking-[0.3em]">{t('quote.card.health')}: {100 - Math.round(quote.portCongestion)}%</span>
                                             </div>
                                         </div>
                                     </div>

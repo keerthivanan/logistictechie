@@ -9,6 +9,7 @@ from datetime import timedelta
 from app.core.config import settings
 from typing import Optional
 from pydantic import BaseModel
+from app.services.activity import activity_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,10 +32,11 @@ class SocialSyncRequest(BaseModel):
 @router.post("/social-sync", response_model=Token)
 async def social_sync(
     request: SocialSyncRequest,
+    raw_request: Request,
     db: AsyncSession = Depends(deps.get_db)
 ):
     """
-    👑 SOCIAL SYNC PROTOCOL
+    SOCIAL SYNC PROTOCOL
     Harmonizes Google/Social Auth with Phoenix Native JWTs.
     Ensures social users are recognized as 'Elite Citizens' of the platform.
     """
@@ -42,21 +44,37 @@ async def social_sync(
     
     if not user:
         # Create a Shadow User for the Social Provider
+        # NOTE: We bypass crud.user.create() to avoid password-strength validation,
+        # since social users don't need a real password — they authenticate via OAuth.
         from app.models.user import User
         import uuid
         
-        # Generate a high-entropy random password for the shadow record
-        shadow_password = security.get_password_hash(str(uuid.uuid4()))
+        shadow_password = security.get_password_hash(str(uuid.uuid4()) + "Aa1!")
         
-        user = await crud.user.create(
-            db,
+        db_user = User(
             email=request.email,
-            password=str(uuid.uuid4()), # We use a random string and it gets hashed in crud.create
+            password_hash=shadow_password,
             full_name=request.name,
             company_name="Social_Identity_Link",
-            avatar_url=request.image
+            avatar_url=request.image,
+            role="user"
         )
+        db.add(db_user)
+        await db.commit()
+        await db.refresh(db_user)
+        user = db_user
         print(f"[SOCIAL_SYNC] New Citizen Enrolled: {request.email}")
+    
+    # AUDIT PILLAR: Log Social Sync
+    client_ip = raw_request.client.host if raw_request.client else None
+    await activity_service.log(
+        db, 
+        user_id=user.id, 
+        action="SOCIAL_LINK", 
+        entity_type="USER", 
+        entity_id=user.id,
+        ip_address=client_ip
+    )
 
     if not user.is_active:
         raise HTTPException(status_code=401, detail="Account Inactive")
@@ -81,6 +99,7 @@ async def social_sync(
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
     form_data: UserLogin,
+    raw_request: Request,
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Authenticate user and return JWT token."""
@@ -101,8 +120,8 @@ async def login_for_access_token(
 
     if not security.verify_password(form_data.password, user.password_hash):
         # Increment failed attempts
-        new_attempts = int(user.failed_login_attempts or "0") + 1
-        update_data = {"failed_login_attempts": str(new_attempts)}
+        new_attempts = (user.failed_login_attempts or 0) + 1
+        update_data = {"failed_login_attempts": new_attempts}
         if new_attempts >= 5:
             update_data["is_locked"] = True
         
@@ -115,8 +134,8 @@ async def login_for_access_token(
         )
     
     # Reset on success
-    if int(user.failed_login_attempts or "0") > 0:
-        await crud.user.update(db, user_id=str(user.id), obj_in={"failed_login_attempts": "0"})
+    if (user.failed_login_attempts or 0) > 0:
+        await crud.user.update(db, user_id=str(user.id), obj_in={"failed_login_attempts": 0})
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
@@ -126,6 +145,17 @@ async def login_for_access_token(
     refresh_token = security.create_refresh_token(
         data={"sub": user.email, "user_id": user.id}
     )
+    # AUDIT PILLAR: Log Login event
+    login_ip = raw_request.client.host if raw_request.client else None
+    await activity_service.log(
+        db, 
+        user_id=user.id, 
+        action="LOGIN", 
+        entity_type="USER", 
+        entity_id=user.id,
+        ip_address=login_ip
+    )
+
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token,

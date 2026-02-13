@@ -28,7 +28,7 @@ class AgentState(TypedDict):
 class CreativeCortex:
     async def _get_fleet_summary(self, email: str) -> str:
         """
-        👑 SOVEREIGN DATA LINK
+        # SOVEREIGN DATA LINK
         Fetches live fleet telemetry for the specific authenticated user.
         """
         try:
@@ -50,7 +50,7 @@ class CreativeCortex:
             return "SATELLITE DOWNLINK INTERRUPTED: Unable to access live fleet telemetry."
 
     async def _simulation_ai_response(self, user_message: str):
-        # 🎭 THEATRICAL ACTIVE LOGIC (Navigates the User via Manifest)
+        # THEATRICAL ACTIVE LOGIC (Navigates the User via Manifest)
         msg = user_message.lower()
         
         # Load Manifest mappings
@@ -63,7 +63,8 @@ class CreativeCortex:
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
             )
         elif "booking" in msg or "shipping" in msg or "my ship" in msg:
-            fleet_info = await self._get_fleet_summary()
+            # In simulation mode, we use a default admin identity for telemetry
+            fleet_info = await self._get_fleet_summary("admin@phoenix-os.com")
             return AIMessage(
                 content=f"SOVEREIGN DATA LINK ESTABLISHED. {fleet_info} I can help you manage these or book a new one."
             )
@@ -93,7 +94,7 @@ class CreativeCortex:
     def __init__(self):
         self.simulation_mode = False
         
-        # 📂 Load Sovereign Navigation Manifest
+        # Load Sovereign Navigation Manifest
         import json
         manifest_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "core", "navigation_manifest.json")
         try:
@@ -134,7 +135,7 @@ class CreativeCortex:
 
     async def _get_tactical_intelligence(self, origin: str, dest: str) -> str:
         """
-        ⚡ TACTICAL SYNC
+        # TACTICAL SYNC
         Fetches live Maersk schedules to inform the LLM's advice.
         """
         from app.services.ocean.maersk import maersk_client
@@ -165,12 +166,12 @@ class CreativeCortex:
         # Inject system prompt with real-time intelligence
         intelligence_brief = knowledge_oracle.get_intelligence_brief()
         
-        # 👑 DYNAMIC IDENTITY RESOLUTION
+        # DYNAMIC IDENTITY RESOLUTION
         # Default to root admin if not found in context (Safety Fallback)
         user_email = state.get("context", {}).get("user_email", "admin@phoenix-os.com")
         fleet_summary = await self._get_fleet_summary(user_email)
         
-        # 🕵️ TACTICAL SCAN
+        # TACTICAL SCAN
         # If the user is asking about a specific route, we fetch live data to amaze them.
         last_msg = messages[-1].content.lower()
         tactical_data = ""
@@ -184,7 +185,7 @@ class CreativeCortex:
 
         system_prompt = SystemMessage(content=f"""
 You are 'The Creative Cortex', the High-Intelligence Sovereign Backbone of PHOENIX LOGISTICS OS.
-Your persona is that of a "Logistics King" — authoritative, predictive, and obsessively focused on route safety.
+Your persona is that of a "Logistics King" - authoritative, predictive, and obsessively focused on route safety.
 
 USER IDENTITY & FLEET STATUS ({user_email}):
 {fleet_summary}
@@ -239,7 +240,7 @@ STRICT DIRECTIVES:
 
     async def stream_chat(self, user_message: str, chat_history: List[BaseMessage] = None):
         """
-        🌊 REAL-TIME SYNAPSE (Review this logic for "Best of All Time" performance)
+        # REAL-TIME SYNAPSE (Review this logic for "Best of All Time" performance)
         Streams token-by-token responses for a sovereign user experience.
         """
         if self.simulation_mode:
@@ -268,13 +269,19 @@ STRICT DIRECTIVES:
 
     async def predict_market_rates(self, origin: str, dest: str, current_price: float) -> Dict[str, Any]:
         """
-        🔮 PROPHETIC PRICING (Sovereign Intelligence)
+        # PROPHETIC PRICING (Sovereign Intelligence)
         Uses true GPT-4o logic to analyze trends and provide high-intelligence advice.
         """
         from app.services.sovereign import sovereign_engine
         
+        # RESOLUTION PILLAR: Ensure we have valid city names/codes
+        origin_resolved = sovereign_engine.resolve_port_code(origin)
+        dest_resolved = sovereign_engine.resolve_port_code(dest)
+        
         # 1. Fetch High-Fidelity Trend Data
-        trend_data = await sovereign_engine.get_market_trend(dest[:2]) # Use country code
+        # Extract 2-letter country code or use resolved name for trend analysis
+        country_query = dest_resolved.split(",")[-1].strip() if "," in dest_resolved else dest_resolved
+        trend_data = await sovereign_engine.get_market_trend(country_query)
         
         # 2. Engage the Oracle for Deep Analysis
         if self.simulation_mode:
@@ -340,7 +347,7 @@ STRICT DIRECTIVES:
 
     async def get_market_trend(self, country: str, commodity: str) -> Dict[str, Any]:
         """
-        📈 MARKET TREND (Sovereign Sync)
+        # MARKET TREND (Sovereign Sync)
         """
         from app.services.sovereign import sovereign_engine
         return await sovereign_engine.get_market_trend(country, commodity)

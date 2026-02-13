@@ -18,16 +18,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 
-// Helper to convert country code to flag emoji
-const getFlagEmoji = (countryCode: string) => {
-    if (!countryCode) return "🌐";
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
-}
+// Flag logic removed for architectural purity
 
 interface Port {
     code: string;
@@ -59,7 +52,7 @@ export function PortAutocomplete({ value, onChange, placeholder, className, mini
             setLoading(true);
             try {
                 // Call our Python Backend
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL.replace('/api', '');
                 const { data } = await axios.get(`${apiUrl}/api/ports/search`, {
                     params: { q: query }
                 });
@@ -141,9 +134,9 @@ export function PortAutocomplete({ value, onChange, placeholder, className, mini
 
                                             <div className="flex items-center justify-between w-full">
                                                 <div className="flex items-center gap-5">
-                                                    <span className="text-2xl leading-none grayscale brightness-125 contrast-125 group-hover:grayscale-0 transition-all duration-500">
-                                                        {getFlagEmoji(port.country_code)}
-                                                    </span>
+                                                    <div className="h-10 w-10 border border-white/10 flex items-center justify-center bg-white/5 grayscale group-hover:grayscale-0 transition-all duration-500">
+                                                        <Anchor className="h-5 w-5 text-zinc-500" />
+                                                    </div>
                                                     <div className="flex flex-col gap-1">
                                                         <span className={cn(
                                                             "font-bold text-base uppercase tracking-tight transition-colors",

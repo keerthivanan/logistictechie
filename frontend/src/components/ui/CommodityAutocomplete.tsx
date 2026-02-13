@@ -2,6 +2,7 @@ import * as React from "react";
 import { Check, ChevronsUpDown, Package, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 import { Button } from "@/components/ui/button";
 import {
     Command,
@@ -41,7 +42,7 @@ export function CommodityAutocomplete({ value, onChange, placeholder, className,
             if (query.length < 2) return;
             setLoading(true);
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL.replace('/api', '');
                 const { data } = await axios.get(`${apiUrl}/api/commodities/search`, {
                     params: { q: query }
                 });

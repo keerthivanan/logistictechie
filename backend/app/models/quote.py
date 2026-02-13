@@ -21,7 +21,7 @@ class Quote(Base):
     transit_days = Column(Integer)
     valid_until = Column(String)
     
-    # 👑 Sovereign Metrics (2026 King Protocol)
+    # Sovereign Metrics (2026 King Protocol)
     risk_score = Column(Float, default=0.0)
     carbon_emissions = Column(Float, default=0.0) # in kg CO2
     customs_duty_estimate = Column(Float, default=0.0)

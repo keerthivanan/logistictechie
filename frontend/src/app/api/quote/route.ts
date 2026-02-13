@@ -6,7 +6,9 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { origin, destination, container } = body;
 
-        console.log(`📡 API: Calculating Quote for ${origin} -> ${destination}`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`[API]: Calculating Quote for ${origin} -> ${destination}`);
+        }
 
         // 1. Get Raw Rates from Logistics Engine (Real Data)
         const rawQuotes = await logisticsClient.getRates({
@@ -22,7 +24,9 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error("API Error:", error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error("API Error:", error);
+        }
         return NextResponse.json(
             { success: false, error: "Failed to calculate rates" },
             { status: 500 }

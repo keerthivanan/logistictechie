@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Ship, Anchor, Flag } from "lucide-react";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 
 interface Vessel {
     name: string;
@@ -18,7 +19,7 @@ export function VesselTrackerWidget() {
     useEffect(() => {
         async function fetchVessels() {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL.replace('/api', '');
                 const res = await axios.get(`${apiUrl}/api/vessels/active`);
                 setVessels(res.data.vessels || []);
             } catch (error) {
@@ -32,51 +33,50 @@ export function VesselTrackerWidget() {
 
     if (loading) {
         return (
-            <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6">
+            <div className="bg-zinc-950/20 border border-white/5 p-6">
                 <div className="animate-pulse flex items-center gap-3">
-                    <Ship className="w-6 h-6 text-cyan-400" />
-                    <span className="text-gray-400">Loading Active Fleet...</span>
+                    <Ship className="w-5 h-5 text-zinc-700" />
+                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-700 uppercase">SYNCING_FLEET_DATA</span>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6">
+        <div className="bg-zinc-950/20 border border-white/5 p-6">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <Ship className="w-6 h-6 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white uppercase tracking-wider">Active Fleet</h3>
+                    <Ship className="w-5 h-5 text-white" />
+                    <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">ACTIVE_FLEET</h3>
                 </div>
-                <span className="text-xs bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full font-bold">
-                    {vessels.length} Vessels
+                <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-500">
+                    {vessels.length} VESSELS
                 </span>
             </div>
 
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            <div className="space-y-0 max-h-[300px] overflow-y-auto">
                 {vessels.map((vessel, idx) => (
                     <div
                         key={idx}
-                        className="flex items-center justify-between bg-black/40 p-4 rounded-xl border border-white/5 hover:border-cyan-500/30 transition-all"
+                        className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0 group hover:bg-white/[0.02] transition-all duration-500"
                     >
                         <div className="flex items-center gap-4">
-                            <Anchor className="w-5 h-5 text-cyan-500/70" />
+                            <span className="text-[10px] font-bold text-zinc-800 tracking-[0.4em]">{String(idx + 1).padStart(2, '0')}</span>
                             <div>
-                                <p className="text-white font-semibold">{vessel.name}</p>
-                                <p className="text-xs text-gray-500">IMO: {vessel.imo}</p>
+                                <p className="text-sm font-bold text-white uppercase tracking-wider">{vessel.name}</p>
+                                <p className="text-[10px] text-zinc-600 tracking-widest">IMO: {vessel.imo}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-400">
-                            <Flag className="w-4 h-4" />
-                            <span className="text-xs uppercase">{vessel.flag || "INT"}</span>
+                        <div className="flex items-center gap-2 text-zinc-600">
+                            <Flag className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.4em]">{vessel.flag || "INT"}</span>
                         </div>
                     </div>
                 ))}
                 {vessels.length === 0 && (
-                    <p className="text-gray-500 text-center py-4">No vessels found</p>
+                    <p className="text-zinc-700 text-center py-4 text-[10px] font-bold tracking-[0.4em] uppercase">NO_VESSELS_DETECTED</p>
                 )}
             </div>
         </div>
     );
 }
-

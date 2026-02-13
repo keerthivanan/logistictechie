@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
 import axios from "axios";
+import { BACKEND_URL } from "@/lib/logistics";
 
 interface Deadline {
     type: string;
@@ -27,7 +28,7 @@ export function CutoffTimeAlert({ voyage, imo }: CutoffAlertProps) {
             setLoading(true);
             setError(null);
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                const apiUrl = BACKEND_URL.replace('/api', '');
                 const res = await axios.get(`${apiUrl}/api/deadlines?voyage=${voyage}&imo=${imo}`);
                 if (res.data.success) {
                     setDeadlines(res.data.deadlines || []);
@@ -45,10 +46,10 @@ export function CutoffTimeAlert({ voyage, imo }: CutoffAlertProps) {
 
     if (!voyage || !imo) {
         return (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+            <div className="bg-zinc-950/20 border-l border-white/10 p-6">
                 <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-amber-400" />
-                    <p className="text-amber-300 text-sm">Select a voyage to view cutoff times</p>
+                    <Clock className="w-4 h-4 text-zinc-700" />
+                    <p className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">SELECT_VOYAGE_TO_VIEW_CUTOFFS</p>
                 </div>
             </div>
         );
@@ -56,10 +57,10 @@ export function CutoffTimeAlert({ voyage, imo }: CutoffAlertProps) {
 
     if (loading) {
         return (
-            <div className="bg-white/[0.02] border border-white/10 rounded-xl p-4">
+            <div className="bg-zinc-950/20 border border-white/5 p-6">
                 <div className="animate-pulse flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-400">Loading deadlines...</span>
+                    <Clock className="w-4 h-4 text-zinc-700" />
+                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-700 uppercase">SYNCING_DEADLINES</span>
                 </div>
             </div>
         );
@@ -67,40 +68,39 @@ export function CutoffTimeAlert({ voyage, imo }: CutoffAlertProps) {
 
     if (error) {
         return (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+            <div className="bg-zinc-950/20 border-l border-white/20 p-6">
                 <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                    <p className="text-red-300 text-sm">{error}</p>
+                    <AlertTriangle className="w-4 h-4 text-white" />
+                    <p className="text-[10px] font-bold tracking-[0.4em] text-zinc-400 uppercase">{error}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white/[0.02] border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3 mb-4">
-                <Clock className="w-5 h-5 text-cyan-400" />
-                <h4 className="text-white font-bold uppercase text-sm tracking-wider">Cutoff Times</h4>
+        <div className="bg-zinc-950/20 border border-white/5 p-6">
+            <div className="flex items-center gap-3 mb-6">
+                <Clock className="w-4 h-4 text-white" />
+                <h4 className="text-[10px] font-bold text-white uppercase tracking-[0.4em]">CUTOFF_TIMES</h4>
             </div>
 
             {deadlines.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-0">
                     {deadlines.map((deadline, idx) => (
-                        <div key={idx} className="flex items-center justify-between bg-black/40 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-emerald-400" />
-                                <span className="text-white text-sm">{deadline.type}</span>
+                        <div key={idx} className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                <span className="text-sm font-bold text-white uppercase tracking-wider">{deadline.type}</span>
                             </div>
-                            <span className="text-cyan-400 text-xs font-mono">
+                            <span className="text-[10px] font-bold text-zinc-500 tracking-[0.2em] tabular-nums">
                                 {new Date(deadline.cutoffDate).toLocaleString()}
                             </span>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-500 text-sm">No deadline information available</p>
+                <p className="text-zinc-700 text-[10px] font-bold tracking-[0.4em] uppercase">NO_DEADLINE_DATA</p>
             )}
         </div>
     );
 }
-
