@@ -45,11 +45,12 @@ async def get_real_ocean_quotes(request: RateRequest):
         
         # GLOBAL CARRIER DATABASE (Deterministic Personality Nodes)
         carriers = [
-            {"id": "MSC", "name": "MSC (Sovereign Direct)", "offset": 1.05, "transit": -1, "vessels": ["MSC OSCAR", "MSC GULSUN", "MSC AMELIA"], "wisdom": "The world's largest fleet. Optimized for capacity and corridor dominance."},
-            {"name": "Hapag-Lloyd (Premium)", "offset": 1.12, "transit": -3, "vessels": ["BERLIN EXPRESS", "HAMBURG EXPRESS"], "wisdom": "Premium German engineering. Fastest transit times for high-value cargo."},
-            {"name": "HMM (Pacific Pioneer)", "offset": 0.95, "transit": 2, "vessels": ["HMM ROTTERDAM", "HMM GDANSK"], "wisdom": "Strategic Pacific pricing. Best value for non-urgent bulk movements."},
-            {"name": "ONE (Magenta Excellence)", "offset": 1.08, "transit": -1, "vessels": ["ONE STORK", "ONE APUS"], "wisdom": "Japanese precision. Ultra-reliable schedules with 99.9% port-call accuracy."},
-            {"name": "Evergreen (Global Reach)", "offset": 0.98, "transit": 1, "vessels": ["EVER GIVEN", "EVER GREET"], "wisdom": "Aggressive global network. Balanced pricing across all major trade lanes."}
+            {"id": "MSC", "name": "MSC (Sovereign Direct)", "offset": 1.05, "transit": -1, "vessels": ["MSC OSCAR", "MSC GULSUN", "MSC AMELIA"], "wisdom": "World-leader fleet. Dominates high-capacity corridors with extreme reliability."},
+            {"name": "Hapag-Lloyd (Premium)", "offset": 1.12, "transit": -3, "vessels": ["BERLIN EXPRESS", "HAMBURG EXPRESS"], "wisdom": "Premium German efficiency. Ultra-fast transits for time-sensitive cargo."},
+            {"name": "ZIM (Israel Pioneer)", "offset": 1.15, "transit": -4, "vessels": ["ZIM SAMMY", "ZIM LUANDA"], "wisdom": "Niche priority specialist. Agile schedules for emerging trade lanes."},
+            {"name": "Yang Ming (Taiwan Strong)", "offset": 0.92, "transit": 2, "vessels": ["YM WELLNESS", "YM WREATH"], "wisdom": "Balanced Pacific network. Competitive pricing for large-scale logistics."},
+            {"name": "PIL (Pacific Int)", "offset": 0.94, "transit": 0, "vessels": ["KOTA SALAM", "KOTA SATRIA"], "wisdom": "Intra-Asia/Africa specialist. Deep knowledge of regional hub-spoke logistics."},
+            {"name": "Evergreen (Global Reach)", "offset": 0.98, "transit": 1, "vessels": ["EVER GIVEN", "EVER GREET"], "wisdom": "Massive global reach. Stable pricing across all intercontinental trade lanes."}
         ]
         
         for c in carriers:
@@ -90,7 +91,7 @@ async def get_real_ocean_quotes(request: RateRequest):
                     "departure_date": departure.strftime("%Y-%m-%d"),
                     "vessel_name": vessel
                 })
-
+        
         # Option X: PROPHETIC VISION (AI Master Tier)
         # Always place the Prophetic Tier at the top for maximum "WOW"
         pulse = est["breakdown"]["daily_pulse"]
@@ -107,7 +108,7 @@ async def get_real_ocean_quotes(request: RateRequest):
             "expiration_date": (datetime.now() + timedelta(days=14)).strftime("%Y-%m-%d"),
             "is_real_api_rate": False,
             "source_endpoint": "Predictive Pulse Engine v5.0",
-            "wisdom": f"🔮 PROPHETIC SIGNAL: {signal}. Global Pulse calibrated to {pulse}. AI recommends tactical placement near {request.origin} hub.",
+            "wisdom": f"🔮 PROPHETIC SIGNAL: {signal}. {est['wisdom']}",
             "thc_fee": est["breakdown"]["terminal_handling"],
             "pss_fee": est["breakdown"]["surcharges"],
             "fuel_fee": est["breakdown"]["fuel_component"],

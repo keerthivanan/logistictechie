@@ -3,69 +3,70 @@
 import { useQuoteStore } from "@/hooks/use-quote";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CargoSelectionPopover } from "../CargoSelectionPopover";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Package, FileUp, Zap } from "lucide-react";
+import { ArrowRight, Package, FileUp } from "lucide-react";
 import { AIDocumentUpload } from "../AIDocumentUpload";
 
 export function CargoStep() {
-    const { nextStep } = useQuoteStore();
+    const { formData, updateForm, nextStep } = useQuoteStore();
     const { t } = useLanguage();
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="mb-20">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-[1px] bg-emerald-500" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-500">{t('quote.wizard.cargo.protocolStep')}</span>
+        <div className="max-w-[1400px] mx-auto">
+            <div className="mb-24">
+                <div className="flex items-center gap-6 mb-8">
+                    <div className="w-16 h-[1px] bg-white/40" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.6em] text-white/40">{t('quote.wizard.cargo.protocolStep')}</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-6 leading-none">
-                    {t('quote.wizard.cargo.identifyCargo').split('.')[0]}. <span className="text-zinc-900 group-hover:text-white transition-colors duration-1000">{t('quote.wizard.cargo.identifyCargo').split('.')[1]}</span>
+                <h2 className="text-7xl md:text-[120px] font-black text-white uppercase tracking-tighter mb-8 leading-[0.8] italic">
+                    {t('quote.wizard.cargo.identifyCargo').split('.')[0]}. <br />
+                    <span className="text-white/20 select-none">{t('quote.wizard.cargo.identifyCargo').split('.')[1]}</span>
                 </h2>
-                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed max-w-xl">
+                <p className="text-white text-3xl font-black uppercase tracking-tighter leading-[0.9] max-w-3xl italic">
                     {t('quote.wizard.cargo.cargoDesc')}
                 </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-10 mb-20">
+            <div className="grid md:grid-cols-2 gap-12 mb-32">
                 {/* Cargo Selection */}
-                <div className="bg-zinc-950/40 border border-white/5 p-12 relative group hover:bg-zinc-950/60 transition-all duration-700">
-                    <div className="flex items-center gap-6 mb-10">
-                        <div className="h-16 w-16 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-white group-hover:text-black group-hover:rotate-12">
-                            <Package className="h-8 w-8" />
+                <div className="bg-zinc-950/40 rounded-[48px] border border-white/10 p-16 relative overflow-hidden backdrop-blur-3xl">
+                    <div className="flex items-center gap-8 mb-12">
+                        <div className="h-24 w-24 rounded-[32px] bg-white text-black flex items-center justify-center shadow-2xl">
+                            <Package className="h-10 w-10" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">{t('quote.wizard.cargo.unitSpec')}</h3>
-                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">{t('quote.wizard.cargo.dimParams')}</p>
+                            <h3 className="text-4xl font-black uppercase tracking-[0.02em] text-white italic">{t('quote.wizard.cargo.unitSpec')}</h3>
+                            <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em] mt-2">{t('quote.wizard.cargo.dimParams')}</p>
                         </div>
                     </div>
-                    <CargoSelectionPopover />
-                    <div className="absolute bottom-0 left-0 h-[1px] bg-emerald-500 w-0 group-hover:w-full transition-all duration-1000" />
+                    <CargoSelectionPopover
+                        containerSize={formData.containerSize || "40"}
+                        onChange={(size) => updateForm({ containerSize: size as any })}
+                    />
                 </div>
 
                 {/* Document Sync */}
-                <div className="bg-zinc-950/40 border border-white/5 p-12 relative group hover:bg-zinc-950/60 transition-all duration-700">
-                    <div className="flex items-center gap-6 mb-10">
-                        <div className="h-16 w-16 bg-zinc-900 flex items-center justify-center transition-all duration-700 group-hover:bg-emerald-500 group-hover:text-black group-hover:-rotate-12">
-                            <FileUp className="h-8 w-8" />
+                <div className="bg-zinc-950/40 rounded-[48px] border border-white/10 p-16 relative overflow-hidden backdrop-blur-3xl">
+                    <div className="flex items-center gap-8 mb-12">
+                        <div className="h-24 w-24 rounded-[32px] bg-white text-black flex items-center justify-center shadow-2xl">
+                            <FileUp className="h-10 w-10" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase italic tracking-tighter text-white">{t('quote.wizard.cargo.neuralExtraction')}</h3>
-                            <p className="text-zinc-700 text-[9px] font-black uppercase tracking-[0.2em] mt-1 group-hover:text-zinc-500 transition-colors">{t('quote.wizard.cargo.autoSync')}</p>
+                            <h3 className="text-4xl font-black uppercase tracking-[0.02em] text-white italic">{t('quote.wizard.cargo.neuralExtraction')}</h3>
+                            <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em] mt-2">{t('quote.wizard.cargo.autoSync')}</p>
                         </div>
                     </div>
                     <AIDocumentUpload />
-                    <div className="absolute bottom-0 left-0 h-[1px] bg-white w-0 group-hover:w-full transition-all duration-1000" />
                 </div>
             </div>
 
-            <div className="flex justify-end border-t border-white/5 pt-12">
-                <Button
+            <div className="flex justify-end border-t border-white/10 pt-16">
+                <button
                     onClick={nextStep}
-                    className="h-20 px-16 bg-white text-black hover:bg-emerald-500 rounded-none font-black text-[11px] uppercase tracking-[0.6em] transition-all duration-700 shadow-[0_20px_60px_rgba(255,255,255,0.05)] flex items-center gap-6"
+                    className="h-32 px-24 bg-white text-black font-black text-[14px] uppercase tracking-[1em] transition-all hover:bg-zinc-200 rounded-full shadow-2xl active:scale-95 flex items-center gap-8"
                 >
-                    {t('quote.wizard.cargo.initRoute')} <ArrowRight className="h-5 w-5" />
-                </Button>
+                    {t('quote.wizard.cargo.initRoute')} <ArrowRight className="h-8 w-8" />
+                </button>
             </div>
-        </div>
+        </div >
     );
 }

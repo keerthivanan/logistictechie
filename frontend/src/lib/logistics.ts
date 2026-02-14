@@ -37,6 +37,8 @@ export interface QuoteResult {
     vesselName?: string;
     departureDate?: string;
     isFeatured?: boolean;
+    container_type?: string;
+    containerSize?: string;
 }
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api` : "http://localhost:8000/api";
@@ -123,7 +125,9 @@ export const logisticsClient = {
                         // Schedule
                         vesselName: r.vessel_name,
                         departureDate: r.departure_date,
-                        isFeatured: r.is_featured
+                        isFeatured: r.is_featured,
+                        container_type: r.type || "40' ST",
+                        containerSize: r.type ? r.type.split("'")[0] : "40"
                     };
                 });
             }

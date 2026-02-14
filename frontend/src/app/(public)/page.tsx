@@ -4,150 +4,86 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArrowRight, Ship, Globe, Zap, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PartnersSection } from "@/components/domain/home/Partners";
-import { BentoServices } from "@/components/domain/home/BentoServices";
 import { LogisticsSearchBar } from "@/components/domain/home/LogisticsSearchBar";
+import { ActiveShipments } from "@/components/domain/home/ActiveShipments";
+import { DashboardPreview } from "@/components/domain/home/DashboardPreview";
+import { ServicesList } from "@/components/domain/home/ServicesList";
+import { BenefitsSection } from "@/components/domain/home/BenefitsSection";
+import { NewsSection } from "@/components/domain/home/NewsSection";
 
 export default function HomePage() {
   const { t } = useLanguage();
 
   return (
-    <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-      {/* Architectural Hero */}
-      <section className="container max-w-[1400px] mx-auto px-8 arch-section-hero">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="arch-label">{t('home.hero.label')}</span>
-          <h1 className="arch-heading max-w-5xl">
-            {t('audit.home.architecting')} <br />
-            <span className="italic">{t('audit.home.globalVelocity')}</span>
-          </h1>
-
-          <div className="grid lg:grid-cols-2 gap-16 border-t border-white/5 pt-16">
-            <div className="space-y-8">
-              <p className="text-2xl font-light text-zinc-400 leading-tight max-w-lg">
-                {t('home.hero.description_part1')} <strong className="text-white">{t('audit.home.transitEcosystems')}</strong> {t('home.hero.description_part2')}
-              </p>
-
-              {/* LIVE CARRIER HEALTH NODE */}
-              <div className="flex gap-8 pt-6 border-t border-white/[0.02]">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8px] font-black text-zinc-700 tracking-[0.4em] uppercase">{t('home.hero.maerskNode')}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-[9px] font-black text-white uppercase italic tracking-widest">{t('home.hero.authenticated')}</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8px] font-black text-zinc-700 tracking-[0.4em] uppercase">{t('home.hero.globalFleet')}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-[9px] font-black text-white uppercase italic tracking-widest">{t('home.hero.vesselsLive')}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Functional Node - Search */}
-              <div className="pt-16 border-t border-white/5">
-                <LogisticsSearchBar />
-              </div>
-            </div>
-
-            <div className="space-y-12">
-              {[
-                { id: "01", title: t('home.features.precision_title'), desc: t('home.features.precision_desc') },
-                { id: "02", title: t('home.features.ai_title'), desc: t('home.features.ai_desc') }
-              ].map((feature) => (
-                <div key={feature.id} className="flex gap-6">
-                  <span className="arch-number">{feature.id}</span>
-                  <div className="arch-detail-line">
-                    <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-zinc-500 text-sm max-w-xs">{feature.desc}</p>
-                  </div>
-                </div>
+    <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black overflow-hidden font-sans">
+      {/* Absolute Black Hero Section */}
+      <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 bg-black border-b border-white/5">
+        <div className="container max-w-[1400px] mx-auto px-6 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col items-center text-center"
+          >
+            <h1 className="text-5xl md:text-8xl font-black text-white mb-16 tracking-tighter uppercase leading-[0.9]">
+              {t('home.hero.title').split(' ').map((word: string, i: number) => (
+                <span key={i} className={i % 2 === 0 ? "block" : "text-white/20 italic"}>
+                  {word}
+                </span>
               ))}
+            </h1>
+
+            {/* Logistics Explorer Hub - Dark High Density */}
+            <div className="w-full max-w-6xl mt-8">
+              <LogisticsSearchBar />
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Tactical Background Elements */}
+        <div className="absolute top-0 right-0 w-1/2 h-full opacity-5 pointer-events-none translate-x-1/4">
+          <Globe className="w-full h-full text-white" />
+        </div>
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </section>
 
-      {/* Partners - Minimalist Loop */}
-      <section className="border-y border-white/5 py-12">
-        <div className="container max-w-[1400px] mx-auto px-8">
-          <span className="arch-label mb-8 block text-center">{t('home.partners.label')}</span>
+      {/* Partners - Tactical Dark Loop */}
+      <section className="border-b border-white/5 bg-black py-12">
+        <div className="container max-w-[1400px] mx-auto px-6">
           <PartnersSection />
         </div>
       </section>
 
-      {/* Infrastructure Node - Bento Grid */}
-      <section className="border-t border-white/5 py-24">
-        <div className="container max-w-[1400px] mx-auto px-8">
-          <BentoServices />
-        </div>
-      </section>
-      <section className="container max-w-[1400px] mx-auto px-8 arch-section">
-        <div className="grid lg:grid-cols-[1fr,2fr] gap-16 border-b border-white/5 pb-24">
-          <div>
-            <span className="arch-label">{t('audit.home.approach')}</span>
-            <h2 className="text-5xl font-light text-white mb-12 leading-tight">{t('audit.home.designPhilosophy').split(' ')[0]} <br />{t('audit.home.designPhilosophy').split(' ').slice(1).join(' ')}</h2>
-            <div className="arch-detail-line h-32 opacity-20 hidden lg:block" />
-          </div>
-          <div className="grid md:grid-cols-2 gap-12">
-            {[
-              { title: t('company.approach.research'), desc: t('company.approach.researchDesc') },
-              { title: t('company.approach.collab'), desc: t('company.approach.collabDesc') },
-              { title: t('company.approach.innovation'), desc: t('company.approach.innovationDesc') },
-              { title: t('company.approach.poetic'), desc: t('company.approach.poeticDesc') }
-            ].map((item, idx) => (
-              <div key={idx} className="arch-detail-line">
-                <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-zinc-500 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* High-Density Body Content Sections */}
+      <div className="space-y-0 relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_0%,transparent_100%)] pointer-events-none" />
 
-      {/* Secondary CTA */}
-      <section className="py-48 bg-zinc-950/20">
-        <div className="container max-w-[1400px] mx-auto px-8 text-center">
-          <span className="arch-label">{t('home.cta.label')}</span>
-          <h2 className="arch-heading italic mb-16">{t('audit.home.transformSupply').split('. ')[0]}. {t('audit.home.transformSupply').split('. ').slice(1, 2)}. <br /><span className="text-white">{t('audit.home.transformSupply').split('. ').slice(2).join(' ')}</span></h2>
+        <DashboardPreview />
+        <ActiveShipments />
+        <ServicesList />
+        <BenefitsSection />
+        <NewsSection />
+      </div>
+
+      {/* Global Expansion CTA */}
+      <section className="py-48 bg-black overflow-hidden relative border-t border-white/5">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5">
+          <Globe className="w-full h-full scale-150 text-white" />
+        </div>
+        <div className="container max-w-[1400px] mx-auto px-6 text-center relative z-10">
+          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[1em] mb-12 block">GLOBAL_SYNC</span>
+          <h2 className="text-5xl md:text-9xl font-black text-white mb-24 leading-[0.8] tracking-tighter uppercase">
+            Initialize <br /> <span className="text-white/20 italic">Global</span> <br /> Expansion
+          </h2>
           <Link href="/quote">
-            <button className="h-20 px-16 border border-white text-[10px] font-bold uppercase tracking-[0.8em] transition-all hover:bg-white hover:text-black">
-              {t('pricingPage.initProtocol')}
+            <button className="h-24 px-20 bg-white text-black text-[12px] font-black uppercase tracking-[0.8em] rounded-full transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+              INITIALIZE_PROTOCOL
             </button>
           </Link>
         </div>
       </section>
-
-      {/* Technical Sub-footer */}
-      <div className="border-t border-white/5 py-24 bg-black">
-        <div className="container max-w-[1400px] mx-auto px-8 grid md:grid-cols-3 gap-12">
-          <div>
-            <span className="arch-label mb-4 block">{t('home.status.label')}</span>
-            <div className="flex items-center gap-4">
-              <div className="w-1.5 h-1.5 bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-bold tracking-[0.4em] text-emerald-500 uppercase">{t('home.status.operational')}</span>
-            </div>
-          </div>
-          <div>
-            <span className="arch-label mb-4 block">{t('home.info.label')}</span>
-            <p className="text-[9px] font-bold tracking-[0.2em] text-zinc-800 uppercase leading-loose">
-              {t('home.info.practice')}<br />
-              {t('home.info.hub')}<br />
-              {t('home.info.location')}
-            </p>
-          </div>
-          <div>
-            <span className="arch-label mb-4 block">VERSION</span>
-            <span className="text-[9px] font-bold tracking-[0.4em] text-zinc-900 uppercase">V4.1.0_LATEST</span>
-          </div>
-        </div>
-      </div>
-    </main >
+    </main>
   );
 }

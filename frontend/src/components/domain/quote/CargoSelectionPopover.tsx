@@ -1,169 +1,105 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Box, Container, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import * as React from "react";
+import { Package, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQuoteStore } from "@/hooks/use-quote";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-export function CargoSelectionPopover() {
-    const { formData, updateForm } = useQuoteStore();
-    const [open, setOpen] = useState(false);
+interface CargoSelectionProps {
+    containerSize: string;
+    onChange: (size: string) => void;
+    className?: string;
+}
 
-    const handleConfirm = () => {
-        setOpen(false);
-    };
+export function CargoSelectionPopover({ containerSize, onChange, className }: CargoSelectionProps) {
+    const [open, setOpen] = React.useState(false);
+    const { t } = useLanguage();
 
-    const containerTypes = ["20'", "40'", "40'HC", "45'HC"];
+    const SIZES = [
+        { id: "20", label: "20' ST", desc: "Standard Container" },
+        { id: "40", label: "40' ST", desc: "Standard Container" },
+        { id: "40HC", label: "40' HC", desc: "High Cube Container" },
+        { id: "45HC", label: "45' HC", desc: "Extra High Cube" },
+    ];
+
+    const TYPES = [
+        { id: "FCL", label: "FCL" },
+        { id: "LCL", label: "LCL" },
+    ];
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <div className="w-full cursor-pointer group">
-                    <div className="flex items-center justify-between h-20 w-full rounded-none border border-white/10 bg-white/[0.01] px-8 py-4 ring-offset-background group-hover:border-white/30 transition-all hover:bg-white/[0.03] shadow-none relative overflow-hidden">
-                        {/* Status Indicator */}
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
-
-                        <div className="flex items-center gap-5">
-                            {formData.cargoType === 'lcl' ? (
-                                <Box className="w-5 h-5 text-emerald-500" />
-                            ) : (
-                                <Container className="w-5 h-5 text-emerald-500" />
-                            )}
-                            <div className="flex flex-col text-left">
-                                <span className="font-bold text-white tracking-widest uppercase text-xs">
-                                    {formData.cargoType === 'lcl' ? "LOOSE_CARGO (LCL)" : "FULL_CONTAINER (FCL)"}
-                                </span>
-                                <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-0.5">
-                                    {formData.cargoType === 'lcl'
-                                        ? `${formData.weight}KG • ${formData.volume}CBM_VOL`
-                                        : `${formData.quantity} UNIT${formData.quantity > 1 ? 'S' : ''} • ${formData.containerSize} FT_UNIT`
-                                    }
-                                </span>
-                            </div>
+                <button
+                    className={cn(
+                        "h-24 px-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-left flex items-center gap-6 group w-full outline-none",
+                        className
+                    )}
+                >
+                    <Package className="h-6 w-6 text-white/40 group-hover:text-white transition-colors" />
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">{t('quote.wizard.cargo.unitType') || "CARGO_CONFIGURATION"}</span>
+                        <span className="text-lg font-black text-white uppercase tracking-tighter italic">
+                            FCL, {containerSize}&apos; {containerSize.includes('HC') ? 'HC' : 'ST'}
+                        </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 ml-auto text-white/20" />
+                </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 p-0 border-white/10 rounded-[48px] bg-black shadow-2xl backdrop-blur-3xl" align="start">
+                <div className="p-10 space-y-10">
+                    <div className="space-y-6">
+                        <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">LOAD_OPTIMIZATION</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            {TYPES.map((type) => (
+                                <button
+                                    key={type.id}
+                                    className={cn(
+                                        "py-4 rounded-full border text-[11px] font-black tracking-widest transition-all",
+                                        type.id === "FCL" ? "bg-white text-black border-white" : "border-white/5 text-white/40 hover:border-white/20"
+                                    )}
+                                >
+                                    {type.label}
+                                </button>
+                            ))}
                         </div>
-                        <ChevronDown className="h-4 w-4 text-zinc-500 group-hover:text-white transition-colors" />
+                    </div>
+
+                    <div className="space-y-6">
+                        <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">CONTAINER_DIMENSIONS</h4>
+                        <div className="grid gap-4">
+                            {SIZES.map((s) => {
+                                const isSelected = containerSize === s.id || (containerSize === "40" && s.id === "40");
+                                return (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => {
+                                            onChange(s.id);
+                                            setOpen(false);
+                                        }}
+                                        className={cn(
+                                            "flex items-center justify-between p-6 rounded-[32px] border transition-all",
+                                            isSelected ? "border-white bg-white/5" : "border-white/5 hover:border-white/20 bg-white/[0.02]"
+                                        )}
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span className={cn("text-[12px] font-black uppercase tracking-widest", isSelected ? "text-white" : "text-white/40")}>
+                                                {s.label}
+                                            </span>
+                                            <span className="text-[10px] font-black text-white/10 uppercase tracking-widest mt-1">{s.desc}</span>
+                                        </div>
+                                        {isSelected && <Check className="h-4 w-4 text-white" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-            </PopoverTrigger>
-
-            <PopoverContent className="w-[calc(100vw-2rem)] md:w-[480px] p-0 bg-black border border-white/10 rounded-none shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden" align="start">
-                <Tabs defaultValue={formData.cargoType === 'lcl' ? 'loose' : 'containers'} className="w-full" onValueChange={(val) => updateForm({ cargoType: val === 'loose' ? 'lcl' : 'fcl' })}>
-                    <div className="border-b border-white/5 p-4 bg-white/[0.01]">
-                        <TabsList className="grid w-full grid-cols-2 bg-zinc-900/50 p-1 h-14 rounded-none">
-                            <TabsTrigger
-                                value="loose"
-                                className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 uppercase font-bold tracking-widest rounded-none transition-all h-full text-[10px]"
-                            >
-                                <Box className="w-3.5 h-3.5 mr-2.5" /> LOOSE_CARGO
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="containers"
-                                className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 uppercase font-bold tracking-widest rounded-none transition-all h-full text-[10px]"
-                            >
-                                <Container className="w-3.5 h-3.5 mr-2.5" /> FCL_UNIT_S
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
-
-                    <TabsContent value="loose" className="p-10 space-y-10 mt-0 focus-visible:outline-none">
-                        <div className="text-center border-b border-white/5 pb-8">
-                            <span className="text-emerald-500 text-[10px] font-black tracking-[0.4em] uppercase block mb-3">CALIBRATION_MATRIX</span>
-                            <h4 className="text-xl font-bold text-white uppercase tracking-tight">MANUAL LOAD (LCL)</h4>
-                        </div>
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="space-y-4 group">
-                                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase group-focus-within:text-white transition-colors">GROSS_MASS (KG)</label>
-                                <Input
-                                    type="number"
-                                    value={formData.weight}
-                                    onChange={(e) => updateForm({ weight: Number(e.target.value) })}
-                                    className="bg-zinc-900 border-white/10 h-16 text-white font-bold uppercase text-base tracking-widest focus:border-white transition-all rounded-none ring-0 placeholder:text-zinc-800"
-                                />
-                            </div>
-                            <div className="space-y-4 group">
-                                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase group-focus-within:text-white transition-colors">VOLUMETRIC (CBM)</label>
-                                <Input
-                                    type="number"
-                                    value={formData.volume}
-                                    onChange={(e) => updateForm({ volume: Number(e.target.value) })}
-                                    className="bg-zinc-900 border-white/10 h-16 text-white font-bold uppercase text-base tracking-widest focus:border-white transition-all rounded-none ring-0 placeholder:text-zinc-800"
-                                />
-                            </div>
-                        </div>
-                        <Button
-                            className="w-full bg-emerald-500 text-black hover:bg-emerald-400 h-16 font-bold uppercase tracking-[0.3em] text-xs rounded-none transition-all shadow-[0_20px_40px_-15px_rgba(16,185,129,0.3)]"
-                            onClick={handleConfirm}
-                        >
-                            CONFIRM_PARAMETERS
-                        </Button>
-                    </TabsContent>
-
-                    <TabsContent value="containers" className="p-10 space-y-12 mt-0 focus-visible:outline-none">
-                        <div className="grid grid-cols-4 gap-8 items-end">
-                            <div className="col-span-1 space-y-4 group">
-                                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase group-focus-within:text-white transition-colors text-center block">QTY</label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    value={formData.quantity}
-                                    onChange={(e) => updateForm({ quantity: Math.max(1, Number(e.target.value)) })}
-                                    className="bg-zinc-900 border-white/10 h-16 text-white font-bold text-center text-xl focus:border-white transition-all rounded-none uppercase ring-0"
-                                />
-                            </div>
-                            <div className="col-span-3 space-y-4">
-                                <label className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase text-center block">ISO_CONTAINER_TYPE</label>
-                                <div className="flex bg-zinc-900 p-1 border border-white/5 rounded-none" role="group">
-                                    {containerTypes.map((type) => {
-                                        const cleanType = type.replace("'", "").replace(" ", "") as any;
-                                        const isSelected = formData.containerSize === cleanType;
-
-                                        return (
-                                            <button
-                                                key={type}
-                                                type="button"
-                                                onClick={() => updateForm({ containerSize: cleanType })}
-                                                className={cn(
-                                                    "px-3 py-4 text-[10px] font-black uppercase tracking-widest transition-all flex-1 rounded-none relative outline-none",
-                                                    isSelected ? "bg-white text-black" : "text-zinc-600 hover:text-white hover:bg-white/5"
-                                                )}
-                                            >
-                                                <span className="relative z-10">{type}</span>
-                                                {isSelected && (
-                                                    <motion.div
-                                                        layoutId="container-active"
-                                                        className="absolute inset-0 bg-white"
-                                                        style={{ zIndex: 0 }}
-                                                    />
-                                                )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center space-x-4 px-2 bg-white/[0.02] py-4 border-l-2 border-emerald-500">
-                            <div className="h-6 w-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                            </div>
-                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">VERIFIED_FCL_SPECIFICATION (SOLAS)</span>
-                        </div>
-
-                        <div className="pt-2">
-                            <Button
-                                className="w-full bg-white text-black hover:bg-zinc-200 h-20 font-bold uppercase tracking-[0.4em] text-xs rounded-none shadow-[0_20px_50px_-15px_rgba(255,255,255,0.1)] transition-all"
-                                onClick={handleConfirm}
-                            >
-                                ACTIVATE_UNIT_PROFILE
-                            </Button>
-                        </div>
-                    </TabsContent>
-                </Tabs>
             </PopoverContent>
         </Popover>
     );

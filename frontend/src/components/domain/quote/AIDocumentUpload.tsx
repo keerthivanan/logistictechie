@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
 import { FileUp, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useQuoteStore } from '@/hooks/use-quote';
+import { cn } from '@/lib/utils';
 
 export function AIDocumentUpload() {
     const [isUploading, setIsUploading] = useState(false);
@@ -64,76 +63,47 @@ export function AIDocumentUpload() {
                 accept=".pdf,.png,.jpg,.jpeg"
             />
 
-            <Button
+            <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className={`
-                    w-full h-32 rounded-none border-2 border-dashed transition-all duration-700 flex flex-col items-center justify-center gap-3 group
-                    ${status === 'success'
+                className={cn(
+                    "w-full h-32 rounded-[32px] border-2 border-dashed transition-all flex flex-col items-center justify-center gap-3 backdrop-blur-3xl",
+                    status === 'success'
                         ? 'border-white bg-white/10'
                         : status === 'error'
-                            ? 'border-red-911 bg-red-500/5'
-                            : 'border-white/5 hover:border-white/20 bg-white/[0.01]'
-                    }
-                `}
+                            ? 'border-red-500 bg-red-500/5'
+                            : 'border-white/10 hover:border-white/20 bg-white/[0.01]'
+                )}
             >
-                <AnimatePresence mode="wait">
-                    {isUploading ? (
-                        <motion.div
-                            key="loading"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex flex-col items-center"
-                        >
-                            <Loader2 className="w-8 h-8 text-white animate-spin mb-3" />
-                            <span className="titan-label text-white">Extracting Intelligence.</span>
-                        </motion.div>
-                    ) : status === 'success' ? (
-                        <motion.div
-                            key="success"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex flex-col items-center"
-                        >
-                            <CheckCircle2 className="w-8 h-8 text-white mb-3" />
-                            <span className="titan-label text-white">Handshake Complete</span>
-                        </motion.div>
-                    ) : status === 'error' ? (
-                        <motion.div
-                            key="error"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex flex-col items-center"
-                        >
-                            <AlertCircle className="w-8 h-8 text-red-500 mb-3" />
-                            <span className="titan-label text-red-500">Signal Interrupted</span>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="idle"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex flex-col items-center"
-                        >
-                            <div className="w-12 h-12 rounded-none bg-white/5 flex items-center justify-center mb-3 group-hover:bg-white group-hover:text-black transition-all">
-                                <FileUp className="w-5 h-5" />
-                            </div>
-                            <span className="titan-label group-hover:text-white transition-colors">
-                                AI SCANN_SYS
-                            </span>
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">
-                                UPLOAD_BL_INVOICE
-                            </span>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </Button>
-
-            {isUploading && (
-                <div className="absolute inset-0 -z-10 bg-white/5 blur-[60px] rounded-none animate-pulse" />
-            )}
+                {isUploading ? (
+                    <div className="flex flex-col items-center">
+                        <Loader2 className="w-8 h-8 text-white animate-spin mb-4" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Extracting_Intelligence</span>
+                    </div>
+                ) : status === 'success' ? (
+                    <div className="flex flex-col items-center">
+                        <CheckCircle2 className="w-8 h-8 text-white mb-4" />
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Handshake_Complete</span>
+                    </div>
+                ) : status === 'error' ? (
+                    <div className="flex flex-col items-center">
+                        <AlertCircle className="w-8 h-8 text-red-500 mb-4" />
+                        <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em]">Signal_Interrupted</span>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center">
+                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+                            <FileUp className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">
+                            AI_SCANN_SYS
+                        </span>
+                        <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mt-2 italic">
+                            UPLOAD_BL_INVOICE
+                        </span>
+                    </div>
+                )}
+            </button>
         </div>
     );
 }
-

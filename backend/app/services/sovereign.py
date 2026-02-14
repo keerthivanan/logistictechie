@@ -164,15 +164,15 @@ class SovereignEngine:
         origin_code = origin.upper().strip()
         dest_code = destination.upper().strip()
         
-        origin_thc = next((v for k, v in thc_map.items() if k in origin_code), 150.0)
-        dest_thc = next((v for k, v in thc_map.items() if k in dest_code), 150.0)
+        origin_thc = next((v for k, v in thc_map.items() if k in origin_code or k in origin_code.replace(" ","")), 150.0)
+        dest_thc = next((v for k, v in thc_map.items() if k in dest_code or k in dest_code.replace(" ","")), 150.0)
         
         CANAL_TRANSIT_FEE = 750.0 # $750 per TEU (Strategic Suez Node 2026)
         
         # 3. DISTANCE MAPPING (Direct Haul Physics)
         distance_km = 12000 
         if "SHA" in origin_code and "JED" in dest_code: distance_km = 14500 
-        if "JED" in origin_code and "RTM" in dest_code: distance_km = 6500  
+        if ("JED" in origin_code or "SA" in origin_code) and "RTM" in dest_code: distance_km = 6500  
         if "SHA" in origin_code and "LAX" in dest_code: distance_km = 10500 
         
         # 4. CORE LOGISTICS FORMULA (Slot Cost Model)
@@ -203,7 +203,7 @@ class SovereignEngine:
         # 6. CANAL LOGIC (Prophetic Suez Context)
         canal_additive = 0.0
         tension_multiplier = 1.0
-        if any(p in (origin_code + dest_code) for p in ["JED", "SUEZ"]):
+        if any(p in (origin_code + dest_code) for p in ["JED", "SUEZ", "SAUDI"]):
             canal_additive = CANAL_TRANSIT_FEE
             tension_multiplier = 1.25 # Strategic node risk premium
             
@@ -211,15 +211,35 @@ class SovereignEngine:
         congestion_dest = SovereignEngine.get_port_congestion(destination)
         congestion_factor = 1.0 + (congestion_dest / 200.0) 
         
-        # 8. FINAL ACCUMULATION (Sovereign 2026 Standard)
+        # 8. GLOBAL TAX & COMPLIANCE (Hardened Region Detection v2.1 G.O.A.T.)
+        # Professional regional tax matrix for absolute mathematical parity
+        tax_matrix = {
+            "SAUDI": 0.15, "JEDDAH": 0.15, "RIYADH": 0.15, "DAMMAM": 0.15, "KSA": 0.15,
+            "UAE": 0.05, "DUBAI": 0.05, "JEBEL ALI": 0.05, "ABU DHABI": 0.05,
+            "CHINA": 0.09, "SHANGHAI": 0.09, "NINGBO": 0.09, "SHENZHEN": 0.09, "GUANGZHOU": 0.09,
+            "INDIA": 0.18, "MUMBAI": 0.18, "NHAVA": 0.18, "CHENNAI": 0.18, "DELHI": 0.18,
+            "UK": 0.20, "LONDON": 0.20, "FELIXSTOWE": 0.20, "SOUTHAMPTON": 0.20,
+            "NETHERLANDS": 0.21, "ROTTERDAM": 0.21, "GERMANY": 0.21, "HAMBURG": 0.21, 
+            "BELGIUM": 0.21, "ANTWERP": 0.21, "FRANCE": 0.21, "ITALY": 0.21, "SPAIN": 0.21,
+            "USA": 0.00, "AMERICA": 0.00, "LAX": 0.00, "LOS ANGELES": 0.00, "NEW YORK": 0.00, "NYC": 0.00, "SAVANNAH": 0.00, "HOUSTON": 0.00
+        }
+        
+        tax_rate = 0.05 # Default global service fee node
+        for key, rate in tax_matrix.items():
+            if key in dest_code:
+                tax_rate = rate
+                break
+        
         operating_cost = slot_cost + fuel_share + origin_thc + dest_thc + DOC_FEE + canal_additive
         surcharges = baf_surcharge + lss_surcharge + pss_surcharge
         
-        total_price = (operating_cost + surcharges) * pulse_index * tension_multiplier * congestion_factor
+        base_total = (operating_cost + surcharges) * pulse_index * tension_multiplier * congestion_factor
+        tax_collectable = base_total * tax_rate
+        total_price = base_total + tax_collectable
         
         # Wisdom Layer (The "Best in World" differentiator)
         pulse_percent = int((pulse_index - 1) * 100)
-        wisdom_note = f"Logistics Pulse: {pulse_percent:+}%. Optimized for {origin} -> {destination}. Includes ${pss_surcharge} PSS (Seasonality) and ${origin_thc+dest_thc} Total THC."
+        wisdom_note = f"Logistics Pulse: {pulse_percent:+}%. Optimized for {origin} -> {destination}. Includes ${pss_surcharge} PSS and ${int(tax_collectable)} Regional tax node ({int(tax_rate*100)}%)."
         if canal_additive > 0:
             wisdom_note += " Suez Corridor surcharge applied (Strategic Node)."
 
@@ -251,7 +271,6 @@ class SovereignEngine:
         import hashlib
         
         # 1. Deterministic Regional Seed
-        # Use hash of country name to create a stable "personality" for each market
         seed_hex = hashlib.md5(country.upper().encode()).hexdigest()
         seed_int = int(seed_hex[:8], 16)
         
@@ -265,6 +284,7 @@ class SovereignEngine:
         
         # 3. Generate 9 months of history (Deterministic Wave)
         history = []
+        forecast = [] # Corrected: initialize forecast
         today = datetime.now()
         
         for i in range(9, 0, -1):
@@ -284,12 +304,13 @@ class SovereignEngine:
             })
             
         # 4. Generate 3 months of prediction (Deterministic AI Logic)
-        forecast = []
-        # AI Logic: Predicts stabilization or rise based on regional seed
         volatility_profile = {
             "SAUDI": 1.02, # Growth trajectory (Vision 2030)
             "CHINA": 0.98, # Stabilization after peak
-            "USA": 1.04    # Supply pressure rise
+            "USA": 1.04,   # Supply pressure rise
+            "EU": 0.97,    # Stagnant/Stabilized
+            "INDIA": 1.05, # Emerging node surge
+            "UAE": 1.01,   # Hub-efficiency stabilization
         }
         
         market_key = next((k for k in volatility_profile if k in country.upper()), "GLOBAL")

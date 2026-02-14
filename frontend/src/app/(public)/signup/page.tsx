@@ -58,27 +58,28 @@ export default function SignupPage() {
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-            <div className="container max-w-[1400px] mx-auto px-8 py-48">
+            <div className="container max-w-[1400px] mx-auto px-8 py-32 md:py-48">
 
-                {/* Architectural Header */}
+                {/* Tactical Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                    className="grid lg:grid-cols-2 gap-16 md:gap-32 mb-32 md:mb-64 group"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">ENROLLMENT</span>
-                        <h1 className="arch-heading italic">{t('auth.signup.title').split('. ')[0]}. <br />{t('auth.signup.title').split('. ').slice(1).join(' ')}</h1>
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[1em] mb-8 block">NEW_OPERATIVE_ENROLLMENT_PROTOCOL</span>
+                        <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase group-hover:italic transition-all duration-700 leading-none">{t('auth.signup.title').split('. ')[0]}. <br /><span className="text-white/20 italic">{t('auth.signup.title').split('. ').slice(1).join(' ')}.</span></h1>
                     </div>
                     <div className="flex flex-col justify-end">
-                        <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl">
+                        <p className="text-2xl md:text-3xl font-bold text-white/40 leading-tight max-w-xl md:text-right md:ml-auto uppercase tracking-tighter opacity-80">
                             {t('auth.signup.subtitle').split('global logistics nodes')[0]} <strong className="text-white">global logistics nodes</strong> {t('auth.signup.subtitle').split('global logistics nodes')[1]}
                         </p>
                     </div>
                 </motion.div>
 
-                <div className="grid lg:grid-cols-[1fr,1.5fr] gap-32 border-t border-white/5 pt-32">
+                <div className="grid lg:grid-cols-[1fr,1.5fr] gap-16 md:gap-32 border-t border-white/5 pt-32 relative group">
+                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/[0.01] blur-[150px] rounded-full pointer-events-none" />
 
                     {/* Left: Enrollment Intelligence */}
                     <div className="space-y-32">
@@ -88,111 +89,128 @@ export default function SignupPage() {
                                 { id: "02", title: t('auth.signup.feature2_title'), desc: t('auth.signup.feature2_desc') },
                                 { id: "03", title: t('auth.signup.feature3_title'), desc: t('auth.signup.feature3_desc') }
                             ].map((item) => (
-                                <div key={item.id} className="arch-detail-line">
-                                    <span className="arch-number block mb-4">{item.id}</span>
-                                    <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-tighter">{item.title}</h3>
-                                    <p className="text-zinc-500 max-w-xs">{item.desc}</p>
+                                <div key={item.id} className="group border-b border-white/5 pb-16 last:border-0 hover:border-white/20 transition-all duration-700">
+                                    <span className="text-6xl font-black text-white/[0.03] group-hover:text-white/10 transition-all tracking-tighter tabular-nums leading-none block mb-6">0{item.id.replace('0', '')}</span>
+                                    <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter group-hover:pl-4 group-hover:italic transition-all duration-700 leading-none">{item.title}</h3>
+                                    <p className="text-white/30 text-[13px] font-bold uppercase tracking-widest leading-loose max-w-sm group-hover:text-white/60 transition-colors">{item.desc}</p>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="pt-24">
-                            <Link href="/login" className="group inline-flex items-center gap-6">
-                                <span className="arch-label text-zinc-800 group-hover:text-white transition-colors">{t('auth.signup.alreadyEnrolled')}</span>
-                                <span className="text-xl font-light italic text-white flex items-center gap-4">
-                                    {t('auth.signup.signIn')} <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                        <div className="pt-12">
+                            <Link href="/login" className="group block">
+                                <span className="text-[10px] font-black text-white/30 uppercase tracking-[1em] mb-8 block">{t('auth.signup.alreadyEnrolled')}</span>
+                                <span className="text-4xl font-black text-white flex items-center gap-8 uppercase tracking-tighter group-hover:pl-8 group-hover:italic transition-all duration-700 leading-none">
+                                    {t('auth.signup.signIn')} <ArrowRight className="w-12 h-12 group-hover:translate-x-6 transition-transform text-white/40" />
                                 </span>
                             </Link>
                         </div>
                     </div>
 
                     {/* Right: Enrollment Form */}
-                    <div className="p-16 bg-zinc-950/20 border border-white/5 relative overflow-hidden">
+                    <div className="p-10 md:p-16 bg-zinc-950/40 rounded-[64px] border border-white/5 shadow-2xl backdrop-blur-3xl relative overflow-hidden group hover:border-white/10 transition-all duration-1000">
                         <AnimatePresence mode="wait">
                             {success ? (
                                 <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="py-24 text-center space-y-12"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="py-32 text-center space-y-16"
                                 >
-                                    <div className="w-24 h-24 border border-white flex items-center justify-center mx-auto">
-                                        <ShieldCheck className="h-10 w-10 text-white" />
+                                    <div className="w-40 h-40 bg-white/5 rounded-full flex items-center justify-center mx-auto border border-white/10 group-hover:border-white/30 transition-all shadow-2xl">
+                                        <ShieldCheck className="h-20 w-20 text-emerald-500" />
                                     </div>
-                                    <h2 className="text-4xl font-light text-white uppercase italic tracking-tighter">{t('auth.signup.success.title')}</h2>
-                                    <p className="arch-label">{t('auth.signup.success.subtitle')}</p>
+                                    <div className="space-y-6">
+                                        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter group-hover:italic transition-all leading-none">{t('auth.signup.success.title')}</h2>
+                                        <p className="text-[14px] font-black text-white/20 uppercase tracking-[1em]">{t('auth.signup.success.subtitle')}</p>
+                                    </div>
+                                    <div className="w-full max-w-sm mx-auto bg-white/5 h-[4px] rounded-full overflow-hidden relative">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: "100%" }}
+                                            transition={{ duration: 3, ease: "linear" }}
+                                            className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+                                        />
+                                    </div>
                                 </motion.div>
                             ) : (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="space-y-16"
+                                    className="space-y-24"
                                 >
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-4xl font-light text-white uppercase tracking-tight italic">Access_Request</h2>
-                                        {isLoading && <Loader2 className="w-6 h-6 animate-spin text-white" />}
+                                    <div className="flex justify-between items-center pb-8 border-b border-white/5">
+                                        <h2 className="text-4xl font-black text-white uppercase tracking-tighter group-hover:pl-6 group-hover:italic transition-all duration-700 leading-none">Access_Request_Portal</h2>
+                                        <div className="px-6 py-3 bg-white/5 rounded-full flex items-center gap-4 border border-white/10 group-hover:border-white/30 transition-all">
+                                            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                            <span className="text-[10px] font-black text-emerald-500 tracking-[0.6em] uppercase">SECURE_SSL_PROTOCOL</span>
+                                        </div>
                                     </div>
 
                                     {error && (
-                                        <div className="p-8 border-l border-white bg-white/5 text-white text-[10px] font-bold uppercase tracking-[0.4em]">
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="p-8 border-l-4 border-red-500 bg-red-500/5 text-red-500 text-[11px] font-black uppercase tracking-widest rounded-r-2xl backdrop-blur-3xl"
+                                        >
                                             {error}
-                                        </div>
+                                        </motion.div>
                                     )}
 
                                     <form onSubmit={handleSignup} className="space-y-12">
-                                        <div className="grid md:grid-cols-2 gap-12">
+                                        <div className="grid md:grid-cols-2 gap-8">
                                             <div className="space-y-4">
-                                                <label className="arch-label">NAME_IDENTIFIER</label>
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] ml-4">NAME_IDENTIFIER</label>
                                                 <input
                                                     value={fullName}
                                                     onChange={(e) => setFullName(e.target.value)}
                                                     required
-                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
-                                                    placeholder="NAME"
+                                                    className="bg-black/40 border border-white/5 w-full py-6 px-8 text-xl font-black text-white outline-none focus:border-white transition-all rounded-[32px] uppercase tracking-tighter placeholder:text-white/5 backdrop-blur-3xl"
+                                                    placeholder="NAME_NODE"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="arch-label">ENTITY_ID</label>
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] ml-4">ENTITY_ID</label>
                                                 <input
                                                     value={companyName}
                                                     onChange={(e) => setCompanyName(e.target.value)}
-                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
-                                                    placeholder="ENTITY"
+                                                    className="bg-black/40 border border-white/5 w-full py-6 px-8 text-xl font-black text-white outline-none focus:border-white transition-all rounded-[32px] uppercase tracking-tighter placeholder:text-white/5 backdrop-blur-3xl"
+                                                    placeholder="CORP_ENTITY"
                                                 />
                                             </div>
                                         </div>
 
                                         <div className="space-y-4">
-                                            <label className="arch-label">COMM_PROTO_EMAIL</label>
+                                            <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] ml-4">COMM_PROTOCOL_EMAIL</label>
                                             <input
                                                 type="email"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
-                                                className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
-                                                placeholder="EMAIL_ADDR"
+                                                className="bg-black/40 border border-white/5 w-full py-6 px-8 text-xl font-black text-white outline-none focus:border-white transition-all rounded-[32px] uppercase tracking-tighter placeholder:text-white/5 backdrop-blur-3xl"
+                                                placeholder="EMAIL_COMM_LINK"
                                             />
                                         </div>
 
-                                        <div className="grid md:grid-cols-2 gap-12">
+                                        <div className="grid md:grid-cols-2 gap-8">
                                             <div className="space-y-4">
-                                                <label className="arch-label">ACCESS_KEY</label>
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] ml-4">ACCESS_SECURE_KEY</label>
                                                 <input
                                                     type="password"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     required
-                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    className="bg-black/40 border border-white/5 w-full py-6 px-8 text-xl font-black text-white outline-none focus:border-white transition-all rounded-[32px] tracking-widest placeholder:text-white/5 backdrop-blur-3xl"
                                                     placeholder="••••••••"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="arch-label">VERIFY_KEY</label>
+                                                <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] ml-4">VERIFY_KEY_SYNC</label>
                                                 <input
                                                     type="password"
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     required
-                                                    className="bg-transparent border-b border-white/10 w-full py-4 text-2xl font-light text-white italic outline-none focus:border-white transition-all"
+                                                    className="bg-black/40 border border-white/5 w-full py-6 px-8 text-xl font-black text-white outline-none focus:border-white transition-all rounded-[32px] tracking-widest placeholder:text-white/5 backdrop-blur-3xl"
                                                     placeholder="••••••••"
                                                 />
                                             </div>
@@ -201,9 +219,9 @@ export default function SignupPage() {
                                         <button
                                             type="submit"
                                             disabled={isLoading}
-                                            className="w-full h-24 bg-white text-black font-bold uppercase tracking-[1em] text-[12px] transition-all hover:bg-zinc-200"
+                                            className="w-full h-28 bg-white text-black font-black uppercase tracking-[1em] text-[12px] rounded-full transition-all hover:bg-zinc-200 active:scale-95 disabled:opacity-50 mt-12 shadow-2xl"
                                         >
-                                            {isLoading ? "ENUMERATING..." : "REQUEST_ACCESS"}
+                                            {isLoading ? <Loader2 className="w-8 h-8 animate-spin mx-auto text-black" /> : "REQUEST_ACCESS_LINK"}
                                         </button>
                                     </form>
                                 </motion.div>
@@ -212,15 +230,11 @@ export default function SignupPage() {
                     </div>
                 </div>
 
-                {/* Sub-footer Metric Context */}
-                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">GLOBAL_SYNC</span>
-                    <h2 className="arch-heading mb-16 italic">Join.</h2>
-                    <div className="flex justify-center gap-12 mt-24 opacity-20">
-                        <Lock className="w-8 h-8" />
-                        <ShieldCheck className="w-8 h-8" />
-                        <Zap className="w-8 h-8" />
-                    </div>
+                {/* Industrial Status Marker */}
+                <div className="mt-64 text-center border-t border-white/5 pt-48 pb-32 group relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] mb-12 block">GLOBAL_NETWORK_EXPANSION</span>
+                    <h2 className="text-4xl md:text-8xl font-black text-white mb-16 uppercase tracking-tighter group-hover:text-white/40 transition-all duration-700 leading-none">Initialize.</h2>
                 </div>
             </div>
         </main>

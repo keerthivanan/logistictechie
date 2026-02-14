@@ -1,37 +1,27 @@
 export const en = {
     nav: {
-        tools: "Tools",
+        work: "Work",
         services: "Services",
-        pricing: "Pricing",
-        company: "Company",
+        about: "About",
+        intel: "Intel",
+        contact: "Contact",
         signIn: "Sign In",
-        quote: "Get Your Quote",
         getQuote: "Get Your Quote",
         profile: "Profile",
-        settings: "Settings",
-        dashboard: "Dashboard",
-        vesselTracker: "Vessel Tracker",
-        cutoffAlert: "Cutoff Alert",
-        officeLocator: "Office Locator"
+        dashboard: "Dashboard"
     },
     home: {
         hero: {
-            label: "Global Logistics",
-            description_part1: "Streamlined logistics",
-            description_part2: "for the next generation of global trade.",
-            maerskNode: "Maersk Network",
-            authenticated: "Verified Connection",
-            globalFleet: "Global fleet count",
-            vesselsLive: "5,142 Vessels Tracking",
-            badge: "Global Logistics Excellence",
-            title_start: "Modern Shipping,",
-            title_end: "Simplified.",
-            subtitle: "Connect to the PHOENIX network for direct carrier access. Instant quotes, global tracking, and transparent pricing. No hidden fees. Just efficient cargo movement.",
-            start: "Get a Quote",
-            demo: "Explore Solutions",
-            verified: "Trusted Partners",
-            instant: "Direct Rates",
-            global: "Global Coverage"
+            label: "LOGISTICS EXPLORER",
+            title: "Find the best Freight Quote",
+            description: "Direct access to real-time rates and global carrier schedules.",
+            maerskNode: "Network Health",
+            authenticated: "Connected",
+            globalFleet: "Tracked Vessels",
+            vesselsLive: "6,240+ Live",
+            start: "Get Started",
+            instant: "Live Rates",
+            global: "Global Network"
         },
         features: {
             precision_title: "Precise Operations",
@@ -74,6 +64,65 @@ export const en = {
             practice: "Phoenix Global Logistics",
             hub: "Global Operations Hub",
             location: "Riyadh, Saudi Arabia"
+        },
+        dashboard_preview: {
+            title: "Personal dashboard",
+            description: "See and manage all your processes in one dashboard on the desktop or in the mobile app! Control your bookings, contracts, finance, and all other features needed for managing logistics in your trading business. Get the full seamless experience of the log-tech!",
+            cta: "Show more"
+        },
+        active_shipments: {
+            title: "Active shipments",
+            subtitle: "These shipment requests are currently under review by the Phoenix logistics department for routing and pricing.",
+            cta: "Request a quote",
+            lcl: "Less container load",
+            fcl: "Full container load",
+            special: "Special equipment"
+        },
+        services_grid: {
+            title: "Services",
+            shipping: {
+                title: "Shipping & logistics",
+                desc: "Open up new opportunities for the growth of your business, enter new markets, discover new continents. We are with you door-to-door."
+            },
+            track: {
+                title: "Book & track online",
+                desc: "Find diverse solutions for transportation needs of all kinds. Quick and nimble solutions to handle all your supply chain needs."
+            },
+            marketplace: {
+                title: "Freight marketplace",
+                desc: "We support your goals for growth with cargo insurance, online payments and paperless workflow. Take the business to the next step."
+            },
+            tech: {
+                title: "Digital Technologies",
+                desc: "Our priority is to offer a mix of tools and insights for business, no matter the size of your operation, the volume of your sales or the age of your company."
+            },
+            support: {
+                title: "24/7 Support",
+                desc: "Feel the supportive hand of our staff every moment. The acumen of our numerous experts throughout the world is at your fingertips."
+            }
+        },
+        benefits_grid: {
+            title: "Your benefits with Phoenix",
+            all_in_one: {
+                title: "All in One Shipping",
+                desc: "Would you like to ship cargo by ship? FCL or LCL? Bulk or Break Bulk? There is everything you need for shipping on Phoenix. We have gathered the shipping services and put them all in one place to facilitate your search. Instantly compare ocean and trucking freight quotes from the most popular logistics providers. Book everything on one site!"
+            },
+            loyalty: {
+                title: "Save with Loyalty",
+                desc: "We value our frequent customers and provide shipping rates with discounts for those who qualify. We provide special promotions in the form of promotional codes depending on your orders & routes. To get a promo code, fill out the quotation request form."
+            },
+            easy_booking: {
+                title: "Easy Freight Booking",
+                desc: "Affordable pricing of shipping services is what we constantly strive for. At Phoenix you will find cheap rates to any country, from the world's top freight forwarders, saving you time and money. Why spend a lot of resource and energy on negotiations to get the best shipping rate? Find and book them online at Phoenix."
+            },
+            support: {
+                title: "End-to-End Support",
+                desc: "24 hours a day, 7 days a week, 365 days a year! We understand how important it is to support our customers while arranging their cargo movement, delivery and customs clearance. Our Customer Care Service is always available to support on all issues relating to freight, weight, routing, rates, inland haulage and documentation."
+            }
+        },
+        news: {
+            title: "News",
+            cta: "View all articles"
         }
     },
     auth: {
@@ -620,13 +669,13 @@ export const en = {
                 schedules: "Sailing Schedules"
             },
             placeholders: {
-                origin: "Origin port",
-                destination: "Destination port",
-                cargo: "Cargo type",
-                tracking_input: "Enter container or B/L number",
-                vessel: "Or search by vessel",
-                from: "From port",
-                to: "To port"
+                origin: "City, terminal, ZIP code etc.",
+                destination: "City, terminal, ZIP code etc.",
+                cargo: "FCL, 20' ST",
+                tracking_input: "Container, B/L or Booking number",
+                vessel: "Search by vessel",
+                from: "Origin city or port",
+                to: "Destination city or port"
             },
             labels: {
                 ready: "Ready to ship",
@@ -708,10 +757,10 @@ export const en = {
         }
     },
     market: {
-        forecast: "SOVEREIGN_FORECAST",
-        historical: "HISTORICAL_CORE",
-        projection: "SOVEREIGN_PROJECTION",
-        stable: "SYSTEM_STABLE_V4.2"
+        forecast: "MARKET_FORECAST",
+        historical: "HISTORICAL_BENCHMARK",
+        projection: "MARKET_PROJECTION",
+        stable: "SYSTEM_OPTIMIZED_V4.2"
     },
 
     widgets: {
@@ -772,22 +821,22 @@ export const en = {
     marketPage: {
         intelligence: "Market Insights",
         title: "Global Supply Trends",
-        globalCorridors: "Global Corridors",
-        maritimeIntel: "Maritime Insights",
-        intelDesc: "Real-time tracking of major freight corridors with advanced demand forecasting.",
-        techNote: "TECHNICAL NOTE",
-        techDesc: "Data aggregated from global maritime networks and refreshed via automated API synchronization.",
-        economicLoad: "SUPPLY CHAIN METRICS",
-        vesselCapacity: "Fleet Capacity",
-        capacityDesc: "Analyzing total global tonnage to identify space availability and optimize booking windows.",
-        dataReliability: "DATA INTEGRITY",
-        reliabilityDesc: "Verified logistics data sourced directly from port authorities and international carriers.",
-        sensorsActive: "Live Updates Active",
+        globalCorridors: "Trade Corridors",
+        maritimeIntel: "Carrier Intelligence",
+        intelDesc: "Real-time tracking of major trade lanes with advanced logistics forecasting.",
+        techNote: "TECHNICAL SPECIFICATION",
+        techDesc: "Aggregated global maritime data synchronized via validated API protocols.",
+        economicLoad: "SUPPLY CHAIN TELEMETRY",
+        vesselCapacity: "Global Tonnage",
+        capacityDesc: "Analyzing total global carrier capacity to optimize freight booking windows.",
+        dataReliability: "DATA VALIDATION",
+        reliabilityDesc: "Verified logistics metrics sourced directly from port authorities and tier-1 carriers.",
+        sensorsActive: "Live Telemetry Active",
         globalPulse: "Global Logistics Pulse",
-        liveFeed: "Real-time Market Feed",
-        structuralIntegrity: "System Status: Verified",
-        seaFreightIndexTitle: "Global Freight Index",
-        vesselCapacityIndexTitle: "Global Capacity Index"
+        liveFeed: "Real-time Intelligence Feed",
+        structuralIntegrity: "System Status: Validated",
+        seaFreightIndexTitle: "Freight Cost Index",
+        vesselCapacityIndexTitle: "Carrier Capacity Index"
     },
     servicesPage: {
         label: "SERVICES",

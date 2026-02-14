@@ -96,24 +96,26 @@ export default function DashboardPage() {
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-            <div className="container max-w-[1400px] mx-auto px-8 py-48">
+            <div className="container max-w-[1400px] mx-auto px-8 py-32 md:py-48">
 
-                {/* Architectural Header */}
+                {/* Tactical Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="grid lg:grid-cols-2 gap-32 mb-64"
+                    className="grid lg:grid-cols-2 gap-16 md:gap-32 mb-32 md:mb-64 group"
                 >
                     <div>
-                        <span className="arch-label mb-12 block">{t('dashboard.commandHub')}</span>
-                        <h1 className="arch-heading">{t('dashboard.welcome')} <br /><span className="italic">{userName}</span>.</h1>
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[1em] mb-8 block">{t('dashboard.commandHub')}</span>
+                        <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase group-hover:italic transition-all duration-700 leading-none">
+                            {t('dashboard.welcome')} <br /><span className="text-white/20 italic">{userName}.</span>
+                        </h1>
                     </div>
-                    <div className="flex flex-col justify-end items-end">
-                        <div className="arch-detail-line h-32 border-white flex flex-col justify-center px-12">
-                            <span className="arch-label mb-2">{t('dashboard.osStatus')}</span>
-                            <div className="text-4xl font-light text-white italic tracking-widest flex items-center gap-6">
-                                <div className="w-3 h-3 bg-emerald-500 animate-pulse" />
+                    <div className="flex flex-col justify-end">
+                        <div className="bg-zinc-950/40 border border-white/5 rounded-[48px] p-10 md:p-12 backdrop-blur-3xl group-hover:border-white/10 transition-all duration-700 flex flex-col justify-center">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] mb-4">{t('dashboard.osStatus')}</span>
+                            <div className="text-3xl md:text-5xl font-black text-white italic tracking-tighter flex items-center gap-8">
+                                <div className="w-3.5 h-3.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
                                 {t('dashboard.coreOnline')}
                             </div>
                         </div>
@@ -121,31 +123,31 @@ export default function DashboardPage() {
                 </motion.div>
 
                 {/* Structured Stats Matrix */}
-                <div className="grid lg:grid-cols-3 gap-0 border-y border-white/5 mb-64">
+                <div className="grid lg:grid-cols-3 gap-0 border-y border-white/5 bg-zinc-950/20 backdrop-blur-3xl mb-64">
                     {stats.map((stat) => (
-                        <div key={stat.id} className="p-16 border-r last:border-r-0 border-white/5 group hover:bg-zinc-950/20 transition-all duration-700">
-                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all block mb-12">{stat.id}</span>
-                            <div className="space-y-4">
-                                <span className="arch-label text-zinc-600 block mb-8">{stat.label}</span>
-                                <div className="text-8xl font-light text-white tracking-tighter tabular-nums transition-all group-hover:pl-4">{stat.value}</div>
-                                <div className="text-[10px] font-bold text-emerald-500 tracking-[0.6em] mt-8 uppercase">{stat.trend}</div>
+                        <div key={stat.id} className="p-10 md:p-20 border-r last:border-r-0 border-white/5 group hover:bg-white/5 transition-all duration-700">
+                            <span className="text-6xl font-black text-white/5 group-hover:text-white/10 transition-all block mb-12 tabular-nums">0{stat.id}</span>
+                            <div className="space-y-6">
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.6em] block group-hover:text-white transition-colors">{stat.label}</span>
+                                <div className="text-7xl md:text-9xl font-black text-white tracking-tighter tabular-nums transition-all group-hover:pl-4 group-hover:italic leading-none">{stat.value}</div>
+                                <div className="text-[10px] font-black text-emerald-400 tracking-[0.8em] mt-12 uppercase">{stat.trend}</div>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Primary Operational Grid */}
-                <div className="grid lg:grid-cols-[2fr,1fr] gap-32 border-t border-white/5 pt-32">
+                <div className="grid lg:grid-cols-[2fr,1fr] gap-16 md:gap-32 border-t border-white/5 pt-32">
 
                     {/* Left Side: Manifest Log */}
                     <div className="space-y-32">
-                        <div className="flex justify-between items-end mb-16 px-4">
+                        <div className="flex justify-between items-end mb-16 px-6">
                             <div>
-                                <span className="arch-label mb-4 block">{t('dashboard.manifest.activeOps')}</span>
-                                <h2 className="text-5xl font-light text-white italic tracking-tighter">{t('dashboard.manifest.title')}</h2>
+                                <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] mb-4 block">{t('dashboard.manifest.activeOps')}</span>
+                                <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter group hover:italic transition-all duration-700">{t('dashboard.manifest.title')}</h2>
                             </div>
                             <Link href="/quote">
-                                <button className="h-16 px-12 bg-white text-black font-bold uppercase tracking-[0.6em] text-[10px] transition-all hover:bg-zinc-200">
+                                <button className="h-20 px-16 bg-white text-black font-black uppercase tracking-[0.8em] text-[10px] transition-all hover:bg-zinc-200 rounded-full active:scale-95 shadow-2xl">
                                     {t('dashboard.manifest.newDeployment')}
                                 </button>
                             </Link>
@@ -154,31 +156,31 @@ export default function DashboardPage() {
                         <div className="space-y-8">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-48 opacity-20">
-                                    <div className="w-1 h-32 bg-white animate-pulse" />
-                                    <span className="arch-label mt-8">{t('dashboard.manifest.syncingLedger')}</span>
+                                    <div className="w-[1px] h-32 bg-white animate-pulse" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[1em] mt-12">{t('dashboard.manifest.syncingLedger')}</span>
                                 </div>
                             ) : bookings.length === 0 ? (
-                                <div className="py-64 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/10 grayscale opacity-20">
-                                    <Anchor className="w-16 h-16 mb-8" />
-                                    <span className="arch-label">{t('dashboard.manifest.zeroManifests')}</span>
+                                <div className="py-64 flex flex-col items-center justify-center border border-white/5 bg-zinc-950/10 rounded-[64px] shadow-inner opacity-20 group">
+                                    <Anchor className="w-24 h-24 mb-12 text-white/10 group-hover:text-white transition-all" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-[1em]">{t('dashboard.manifest.zeroManifests')}</span>
                                 </div>
                             ) : (
                                 bookings.map((b, i) => (
-                                    <div key={i} className="arch-detail-line group flex items-center justify-between hover:bg-zinc-950/20 transition-all duration-700 py-12">
+                                    <div key={i} className="bg-zinc-950/20 rounded-[48px] border border-white/5 group flex items-center justify-between hover:bg-white/5 hover:border-white/20 transition-all duration-700 p-10 backdrop-blur-xl">
                                         <div className="flex items-center gap-16">
-                                            <span className="arch-number text-zinc-900 group-hover:text-white transition-all">{String(i + 1).padStart(2, '0')}</span>
+                                            <span className="text-5xl font-black text-white/5 group-hover:text-white/10 transition-all tabular-nums leading-none">0{i + 1}</span>
                                             <div>
-                                                <h3 className="text-4xl font-light text-white uppercase italic tracking-tighter transition-all group-hover:pl-4">{b.booking_reference || t('dashboard.manifest.genCargo')}</h3>
-                                                <div className="flex items-center gap-8 mt-2">
-                                                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">{b.origin}</span>
-                                                    <ArrowRight className="w-3 h-3 text-zinc-800" />
-                                                    <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-600 uppercase">{b.destination}</span>
+                                                <h3 className="text-3xl font-black text-white uppercase tracking-tighter transition-all group-hover:pl-6 group-hover:italic leading-none">{b.booking_reference || t('dashboard.manifest.genCargo')}</h3>
+                                                <div className="flex items-center gap-8 mt-4">
+                                                    <span className="text-[10px] font-black tracking-[0.6em] text-white/20 uppercase group-hover:text-white/40">{b.origin}</span>
+                                                    <ArrowRight className="w-4 h-4 text-white/10" />
+                                                    <span className="text-[10px] font-black tracking-[0.6em] text-white/20 uppercase group-hover:text-white/40">{b.destination}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-[10px] font-bold tracking-[1em] text-emerald-500 mb-2">{t('dashboard.manifest.active')}</div>
-                                            <div className="text-xl font-bold text-zinc-800 tracking-tighter tabular-nums">{new Date(b.created_at).toLocaleDateString()}</div>
+                                        <div className="text-right pr-4">
+                                            <div className="text-[9px] font-black tracking-[1.2em] text-emerald-400 mb-2 uppercase">{t('dashboard.manifest.active')}</div>
+                                            <div className="text-2xl font-black text-white/20 group-hover:text-white transition-all tabular-nums italic tracking-tighter">{new Date(b.created_at).toLocaleDateString()}</div>
                                         </div>
                                     </div>
                                 ))
@@ -188,37 +190,41 @@ export default function DashboardPage() {
 
                     {/* Right Side: High-Security Intel */}
                     <div className="space-y-32">
-                        <div className="arch-detail-line border-white">
-                            <span className="arch-label block mb-8">{t('dashboard.intel.marketIntel')}</span>
-                            <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale saturate-50 hover:grayscale-0 transition-all duration-1000">
+                        <div className="bg-zinc-950/40 rounded-[64px] border border-white/5 p-8 backdrop-blur-3xl group hover:border-white/10 transition-all duration-700">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] block mb-12 ml-4">{t('dashboard.intel.marketIntel')}</span>
+                            <div className="grayscale saturate-50 hover:grayscale-0 transition-all duration-1000 p-4">
                                 <MarketTrendWidget />
                             </div>
                         </div>
 
-                        <div className="arch-detail-line border-zinc-800 hover:border-white transition-all duration-1000">
-                            <span className="arch-label block mb-8">{t('dashboard.intel.globalVessels')}</span>
-                            <div className="bg-zinc-950/20 p-8 border border-white/5 grayscale">
+                        <div className="bg-zinc-950/40 rounded-[64px] border border-white/5 p-8 backdrop-blur-3xl group hover:border-white/10 transition-all duration-700">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] block mb-12 ml-4">{t('dashboard.intel.globalVessels')}</span>
+                            <div className="grayscale hover:grayscale-0 transition-all duration-1000 p-4">
                                 <VesselTrackerWidget />
                             </div>
                         </div>
 
-                        <div className="bg-white p-12 text-black flex flex-col justify-between h-96 group hover:translate-x-4 transition-all duration-700">
+                        <div className="bg-white p-16 text-black rounded-[48px] flex flex-col justify-between h-[450px] group hover:scale-[1.02] transition-all duration-700 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-16 opacity-5 pointer-events-none italic text-8xl font-black tracking-tighter">SECURE</div>
                             <div>
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em]">{t('dashboard.intel.securityProtocol')}</span>
-                                <h4 className="text-5xl font-light italic leading-none mt-4 transition-all group-hover:pl-4 tracking-tighter">{t('dashboard.intel.encryptedLink')}</h4>
+                                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-black/40">{t('dashboard.intel.securityProtocol')}</span>
+                                <h4 className="text-6xl font-black italic leading-none mt-8 transition-all group-hover:pl-6 tracking-tighter uppercase">{t('dashboard.intel.encryptedLink')}</h4>
                             </div>
                             <div className="flex justify-between items-end">
-                                <Zap className="w-12 h-12 fill-black" />
-                                <ArrowUpRight className="w-12 h-12" />
+                                <Zap className="w-16 h-16 fill-black" />
+                                <div className="w-24 h-24 bg-black rounded-full flex items-center justify-center text-white group-hover:translate-x-4 transition-transform">
+                                    <ArrowUpRight className="w-10 h-10" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Sub-footer Section */}
-                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">COMMAND_HUB_OS</span>
-                    <h2 className="arch-heading italic mb-16">Monitor. Manage. Move.</h2>
+                {/* Industrial Status Marker */}
+                <div className="mt-64 text-center border-t border-white/5 pt-48 pb-32 group relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[1em] mb-12 block">COMMAND_HUB_OS</span>
+                    <h2 className="text-4xl md:text-8xl font-black text-white mb-12 uppercase tracking-tighter group-hover:italic transition-all duration-700 leading-none">Monitor. Manage. Move.</h2>
                 </div>
             </div>
         </main>

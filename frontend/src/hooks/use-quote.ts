@@ -7,7 +7,7 @@ interface QuoteState {
         origin: string;
         destination: string;
         cargoType: 'fcl' | 'lcl' | 'air';
-        containerSize: '20' | '40' | '40HC';
+        containerSize: '20' | '40' | '40HC' | '45HC';
         quantity: number;
 
         // Detailed Logistics Data

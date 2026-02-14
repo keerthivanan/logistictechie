@@ -2,17 +2,14 @@
 
 import { useQuoteStore } from "@/hooks/use-quote";
 import { CarrierCard } from "../CarrierCard";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState, useMemo } from "react";
 import { logisticsClient } from "@/lib/logistics";
-import { Anchor, Filter, Zap, Globe, Shield, Ship, ArrowRight, X } from "lucide-react";
+import { Ship, ArrowRight, X, MapPin, ChevronDown, Calendar } from "lucide-react";
 import { PremiumSearchingState } from "../PremiumSearchingState";
-import RouteMap from "@/components/ui/RouteMap";
 import { QuoteResult } from "@/lib/logistics";
-import { PropheticRateWidget } from "../PropheticRateWidget";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type SortMode = 'best' | 'fastest' | 'cheapest' | 'greenest';
@@ -22,12 +19,11 @@ export function ResultsStep() {
     const { formData } = useQuoteStore();
     const [quotes, setQuotes] = useState<QuoteResult[]>([]);
     const [loading, setLoading] = useState(true);
-    const [sortMode, setSortMode] = useState<SortMode>('best');
+    const [sortMode] = useState<SortMode>('best');
 
     useEffect(() => {
         const fetch = async () => {
             try {
-                // Tactical artificial delay for search feel
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 const data = await logisticsClient.getRates({
                     origin: formData.origin,
@@ -47,7 +43,6 @@ export function ResultsStep() {
         fetch();
     }, [formData]);
 
-    // Sorting Logic
     const sortedQuotes = useMemo(() => {
         const sorted = [...quotes];
         if (sortMode === 'cheapest') {
@@ -60,162 +55,138 @@ export function ResultsStep() {
         return sorted;
     }, [quotes, sortMode]);
 
-    const metrics = useMemo(() => {
-        if (quotes.length === 0) return null;
-        const sortedByPrice = [...quotes].sort((a, b) => a.price - b.price);
-        const sortedByDays = [...quotes].sort((a, b) => a.days - b.days);
-        const sortedByBest = [...quotes].sort((a, b) => (a.price * a.days) - (b.price * b.days));
-        return {
-            cheapest: sortedByPrice[0],
-            fastest: sortedByDays[0],
-            best: sortedByBest[0],
-            greenest: sortedByDays[0]
-        };
-    }, [quotes]);
-
-    const bestPrice = metrics?.cheapest?.price || 0;
-
     if (loading) return <PremiumSearchingState />;
 
     return (
-        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            {/* Tactical Telemetry Header */}
-            <div className="grid grid-cols-1 md:grid-cols-4 border border-white/5 divide-x divide-white/5 bg-zinc-950/40">
-                <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.originNode')}</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
-                        {formData.origin.split(',')[0]}
-                    </span>
+        <div className="max-w-[1400px] mx-auto space-y-16">
+            {/* --- Top Search Summary Bar - Monumental & High Contrast --- */}
+            <div className="flex flex-wrap items-center gap-6 py-12 border-b border-white/10">
+                <div className="flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/10 rounded-full">
+                    <MapPin className="h-5 w-5 text-white" />
+                    <span className="text-[12px] font-black text-white uppercase tracking-[0.4em]">{formData.origin}</span>
+                    <X className="h-5 w-5 text-white/20 cursor-pointer hover:text-white transition-colors" />
                 </div>
-                <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.targetDestination')}</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter uppercase truncate">
-                        {formData.destination.split(',')[0]}
-                    </span>
+                <div className="h-10 w-10 flex items-center justify-center">
+                    <ArrowRight className="h-6 w-6 text-white/40" />
                 </div>
-                <div className="p-10 flex flex-col group">
-                    <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700 mb-4 group-hover:text-emerald-500 transition-colors">{t('quote.results.specUnit')}</span>
-                    <span className="text-xl font-black text-white italic tracking-tighter uppercase">
-                        {formData.containerSize}' {t('quote.results.specUnit').includes('_') ? 'HC_PROTOCOL' : 'HC PROTOCOL'}
-                    </span>
+                <div className="flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/10 rounded-full">
+                    <MapPin className="h-5 w-5 text-white" />
+                    <span className="text-[12px] font-black text-white uppercase tracking-[0.4em]">{formData.destination}</span>
+                    <X className="h-5 w-5 text-white/20 cursor-pointer hover:text-white transition-colors" />
                 </div>
-                <div className="p-10 flex items-center justify-center">
-                    <Button variant="outline" className="h-16 w-full rounded-none border-white/5 bg-zinc-900 text-zinc-600 font-black text-[10px] uppercase tracking-[0.4em] hover:bg-white hover:text-black transition-all">
-                        {t('quote.results.reconfigCore')}
-                    </Button>
+                <div className="flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/10 rounded-full">
+                    <Calendar className="h-5 w-5 text-white" />
+                    <span className="text-[12px] font-black text-white uppercase tracking-[0.4em]">14 Feb, 2026</span>
+                    <X className="h-5 w-5 text-white/20 cursor-pointer hover:text-white transition-colors" />
+                </div>
+                <div className="flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/10 rounded-full">
+                    <Ship className="h-5 w-5 text-white" />
+                    <span className="text-[12px] font-black text-white uppercase tracking-[0.4em]">FCL, {formData.containerSize}&apos; ST</span>
+                    <X className="h-5 w-5 text-white/20 cursor-pointer hover:text-white transition-colors" />
                 </div>
             </div>
 
-            {/* AI Analysis Interface */}
-            {bestPrice > 0 && (
-                <div className="border border-emerald-500/10 bg-emerald-500/[0.02] p-[1px]">
-                    <PropheticRateWidget
-                        origin={formData.origin}
-                        destination={formData.destination}
-                        currentPrice={bestPrice}
-                    />
-                </div>
-            )}
+            <div className="grid lg:grid-cols-12 gap-16 items-start">
 
-            {/* Visualization Grid */}
-            <div className="grid lg:grid-cols-12 gap-16">
-                {/* Side Control Deck */}
-                <div className="lg:col-span-3 space-y-12">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-8">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.6em] text-white flex items-center gap-4">
-                            <Globe className="w-3 h-3 text-emerald-500" /> {t('quote.results.trajectoryMap')}
-                        </h3>
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                {/* --- Left: Filter Sidebar - Monumental Scales --- */}
+                <aside className="lg:col-span-3 space-y-12 h-fit lg:sticky lg:top-32">
+                    <div className="p-12 rounded-[64px] border border-white/10 bg-zinc-950/40 backdrop-blur-3xl space-y-12 shadow-2xl">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-[12px] font-black text-white/40 uppercase tracking-[0.6em]">{t('quote.results.filter') || "Filter"}</h3>
+                            <button className="text-[10px] font-black text-white uppercase tracking-widest hover:underline decoration-white/20 underline-offset-4">RESET</button>
+                        </div>
+
+                        {/* Included Services Section */}
+                        <div className="space-y-10">
+                            <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.8em]">Integrated_Modules</h4>
+                            <div className="space-y-8">
+                                {[
+                                    { label: 'Place of loading', checked: true },
+                                    { label: 'Port of origin', checked: true },
+                                    { label: 'Ocean freight', checked: true },
+                                    { label: 'Port of destination', checked: false },
+                                    { label: 'Place of discharge', checked: false },
+                                ].map((service, i) => (
+                                    <div key={i} className="flex items-center gap-6 cursor-pointer group/filter">
+                                        <Checkbox
+                                            id={`service-${i}`}
+                                            checked={service.checked}
+                                            className="h-6 w-6 rounded-full border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black transition-all"
+                                        />
+                                        <Label
+                                            htmlFor={`service-${i}`}
+                                            className="text-[12px] font-black text-white uppercase tracking-[0.2em] cursor-pointer group-hover/filter:translate-x-1 transition-transform"
+                                        >
+                                            {service.label}
+                                        </Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Price Range Section */}
+                        <div className="space-y-10">
+                            <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.8em]">Cost_Spectrum</h4>
+                            <div className="flex items-center gap-6">
+                                <div className="flex-1 p-5 rounded-full border border-white/10 bg-black text-[12px] font-black text-white text-center tabular-nums italic">1757_USD</div>
+                                <div className="flex-1 p-5 rounded-full border border-white/10 bg-black text-[12px] font-black text-white text-center tabular-nums italic">3690_USD</div>
+                            </div>
+                            <Slider defaultValue={[40]} max={100} step={1} className="[&_[role=slider]]:bg-white [&_[role=slider]]:border-white h-10" />
+                        </div>
+
+                        {/* Transit Time Section */}
+                        <div className="space-y-10">
+                            <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.8em]">Transit_Velocity</h4>
+                            <Slider defaultValue={[20]} max={60} step={1} className="[&_[role=slider]]:bg-white [&_[role=slider]]:border-white h-10" />
+                        </div>
                     </div>
+                </aside>
 
-                    <div className="h-96 border border-white/5 bg-zinc-950/40 relative overflow-hidden group">
-                        <RouteMap
-                            origin={formData.origin}
-                            destination={formData.destination}
-                            className="w-full h-full grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000"
-                        />
-                        <div className="absolute inset-0 pointer-events-none border border-white/10" />
-                        <div className="absolute top-4 right-4 flex flex-col gap-2">
-                            <div className="px-3 py-1 bg-black/80 border border-white/10 text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">{t('quote.results.satLinkActive')}</div>
-                            <div className="px-3 py-1 bg-white text-black text-[8px] font-black uppercase tracking-widest whitespace-nowrap">{t('quote.results.sovereignNodeV2')}</div>
+                {/* --- Right: Results Architecture --- */}
+                <main className="lg:col-span-9 space-y-16">
+                    {/* Secondary Sorting/Status Bar */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 pb-12 border-b border-white/10">
+                        <div className="flex gap-8">
+                            <button className="flex items-center gap-6 px-12 py-5 bg-white text-black text-[12px] font-black uppercase tracking-[1em] rounded-full active:scale-95 transition-all shadow-2xl">
+                                SUBSCRIBE_INDEX
+                            </button>
+                            <button className="flex items-center gap-6 px-12 py-5 border border-white/10 text-white text-[12px] font-black uppercase tracking-[0.8em] rounded-full hover:bg-white/5 active:scale-95 transition-all">
+                                PROTOCOL_DISCLAIMER
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-8">
+                            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.6em]">SORT_BY</span>
+                            <div className="flex items-center gap-4 border-b-2 border-white/10 pb-2 cursor-pointer group/sort">
+                                <span className="text-[12px] font-black text-white uppercase tracking-[0.4em] group-hover:text-white transition-colors italic">RECOMMENDED</span>
+                                <ChevronDown className="h-5 w-5 text-white/40 group-hover:text-white transition-all group-hover:translate-y-0.5" />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Live Support Badge */}
-                    <div className="mt-20 p-8 border border-white/5 bg-zinc-950/40 group hover:border-white/20 transition-all">
-                        <span className="text-[9px] font-black text-zinc-800 block mb-4 tracking-[0.4em]">{t('quote.results.liveIntelligence')}</span>
-                        <p className="text-[10px] font-black uppercase text-zinc-600 leading-relaxed mb-6 group-hover:text-zinc-400 transition-colors">
-                            {t('quote.results.customRouting')}
-                        </p>
-                        <Button className="w-full h-12 bg-white text-black font-black text-[9px] uppercase tracking-[0.4em] rounded-none hover:bg-emerald-500 transition-colors">
-                            {t('quote.results.openComms')}
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Primary Intelligence Feed */}
-                <div className="lg:col-span-9 space-y-12">
-                    {/* Sorting Matrix */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-0 border border-white/5">
-                        {([
-                            { id: 'best', label: t('quote.results.optimal'), sub: metrics ? `${metrics.best.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.best.price.toLocaleString()}` : '--' },
-                            { id: 'fastest', label: t('quote.results.velocity'), sub: metrics ? `${metrics.fastest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.fastest.price.toLocaleString()}` : '--' },
-                            { id: 'cheapest', label: t('quote.results.efficiency'), sub: metrics ? `${metrics.cheapest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.cheapest.price.toLocaleString()}` : '--' },
-                            { id: 'greenest', label: t('quote.results.ecoCore'), sub: metrics ? `${metrics.greenest.days} ${t('quote.booking.days').split(' ')[0]} • $${metrics.greenest.price.toLocaleString()}` : '--' }
-                        ] as const).map((mode) => (
-                            <button
-                                key={mode.id}
-                                onClick={() => setSortMode(mode.id)}
-                                className={`p-10 flex flex-col items-center justify-center transition-all duration-700 relative overflow-hidden group ${sortMode === mode.id ? 'bg-white' : 'hover:bg-zinc-950/40'
-                                    }`}
-                            >
-                                <span className={`text-2xl font-black italic uppercase tracking-tighter mb-2 transition-all duration-700 ${sortMode === mode.id ? 'text-black' : 'text-zinc-600 group-hover:text-white'
-                                    }`}>
-                                    {mode.label}
-                                </span>
-                                <span className={`text-[10px] font-black uppercase tracking-widest transition-all duration-700 ${sortMode === mode.id ? 'text-zinc-500' : 'text-zinc-800'
-                                    }`}>
-                                    {mode.sub}
-                                </span>
-                                {sortMode === mode.id && <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-500" />}
-                            </button>
+                    {/* Results Feed - Static */}
+                    <div className="space-y-12">
+                        {sortedQuotes.map((q, i) => (
+                            <CarrierCard
+                                key={i}
+                                quote={q}
+                                origin={formData.origin.split(',')[0]}
+                                destination={formData.destination.split(',')[0]}
+                                onBook={() => {
+                                    useQuoteStore.getState().selectQuote(q);
+                                    useQuoteStore.getState().nextStep();
+                                }}
+                            />
                         ))}
                     </div>
 
-                    <div className="flex items-center justify-between pb-8">
-                        <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
-                            {sortedQuotes.length} <span className="text-zinc-800 not-italic ml-4">{t('quote.results.resultsSynced')}</span>
-                        </h2>
-                    </div>
-
-                    {quotes.length > 0 ? (
-                        <div className="grid gap-8">
-                            {sortedQuotes.map((q, i) => (
-                                <CarrierCard
-                                    key={i}
-                                    quote={q}
-                                    origin={formData.origin}
-                                    destination={formData.destination}
-                                    onBook={() => {
-                                        useQuoteStore.getState().selectQuote(q);
-                                        useQuoteStore.getState().nextStep();
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="py-48 text-center border-t border-white/5 bg-zinc-950/10">
-                            <Ship className="w-16 h-16 text-zinc-900 mx-auto mb-10 opacity-20" />
-                            <h3 className="text-3xl font-black text-zinc-800 uppercase italic tracking-tighter mb-6">{t('quote.results.noInstantSync')}</h3>
-                            <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.6em] max-w-sm mx-auto leading-loose mb-12">
-                                {t('quote.results.manualProtocol')}
-                            </p>
-                            <Button className="h-20 px-16 bg-white text-black font-black uppercase tracking-[0.4em] text-[11px] rounded-none hover:bg-emerald-500 transition-colors">
-                                {t('quote.results.requestCustom')}
-                            </Button>
+                    {quotes.length === 0 && (
+                        <div className="py-48 text-center bg-zinc-950/40 rounded-[64px] border border-white/10 shadow-2xl">
+                            <Ship className="h-24 w-24 text-white/5 mx-auto mb-10" />
+                            <h3 className="text-4xl font-black text-white/20 uppercase tracking-tighter italic">ZERO_FORENSIC_MATCHES</h3>
                         </div>
                     )}
-                </div>
+                </main>
             </div>
         </div>
     );

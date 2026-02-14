@@ -25,6 +25,8 @@ async def search_ports(q: str):
         "usa": ["Los Angeles", "Long Beach", "New York", "Savannah"],
         "us": ["Los Angeles", "Long Beach", "New York"],
         "uk": ["Felixstowe", "Southampton", "London Gateway"],
+        "chennai": ["Chennai", "Kattupalli", "Ennore", "Tondiarpet"],
+        "madras": ["Chennai", "Kattupalli", "Ennore"],
     }
     
     query_lower = q.lower().strip()
@@ -49,12 +51,17 @@ async def search_ports(q: str):
                         
                         if code and name:
                             if not any(r['code'] == code for r in formatted_results):
+                                loc_category = "port"
+                                if "TERMINAL" in loc_type: loc_category = "port"
+                                elif "STATION" in loc_type: loc_category = "station"
+                                elif "CITY" in loc_type: loc_category = "city"
+                                
                                 formatted_results.append({
                                     "code": code,
                                     "name": name.title(),
                                     "country": country.title() if country else "Global Node",
                                     "country_code": country_code or "GL",
-                                    "type": "port" if loc_type in ["PORT", "TERMINAL"] else "city",
+                                    "type": loc_category,
                                     "geoId": geo_id
                                 })
                         break
@@ -86,12 +93,17 @@ async def search_ports(q: str):
             if code and name:
                 # DE-DUPLICATION: Only unique UN/LOCODEs
                 if not any(r['code'] == code for r in formatted_results):
+                    loc_category = "port"
+                    if "PORT" in loc_type or "TERMINAL" in loc_type: loc_category = "port"
+                    elif "STATION" in loc_type or "RAIL" in loc_type: loc_category = "station"
+                    else: loc_category = "city"
+                    
                     formatted_results.append({
                         "code": code,
                         "name": name.title(),
                         "country": country.title() if country else "Global Node",
                         "country_code": country_code or "GL",
-                        "type": "port" if loc_type in ["PORT", "TERMINAL"] else "city",
+                        "type": loc_category,
                         "geoId": geo_id
                     })
             

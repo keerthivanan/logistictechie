@@ -2,51 +2,40 @@
 
 import { useState } from "react";
 import { PortAutocomplete } from "@/components/ui/PortAutocomplete";
-import { CommodityAutocomplete } from "@/components/ui/CommodityAutocomplete";
 import { VesselAutocomplete } from "@/components/ui/VesselAutocomplete";
 import { Button } from "@/components/ui/button";
-import { Calendar, Search, Ship, Clock, ArrowRight } from "lucide-react";
+import { Calendar, Search, Ship, Clock, ArrowLeftRight, MapPin, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuoteStore } from "@/hooks/use-quote";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { CargoSelectionPopover } from "../quote/CargoSelectionPopover";
+import { cn } from "@/lib/utils";
 
 export function LogisticsSearchBar() {
     const [activeTab, setActiveTab] = useState<'rates' | 'tracking' | 'schedules'>('rates');
     const [origin, setOrigin] = useState("");
     const [destination, setDestination] = useState("");
-    const [commodity, setCommodity] = useState("");
-    const [trackingInput, setTrackingInput] = useState("");
     const router = useRouter();
-    const { updateForm } = useQuoteStore();
+    const { updateForm, formData } = useQuoteStore();
     const { t } = useLanguage();
 
     const handleSearch = () => {
         if (activeTab === 'rates') {
-            updateForm({
-                origin,
-                destination,
-                commodity: commodity || "General Cargo"
-            });
+            if (!origin || !destination) return;
+            updateForm({ origin, destination });
             router.push('/quote');
         } else if (activeTab === 'tracking') {
-            if (trackingInput) {
-                router.push(`/tracking?id=${encodeURIComponent(trackingInput)}`);
-            } else {
-                router.push('/tracking');
-            }
+            router.push(`/tracking`);
         } else if (activeTab === 'schedules') {
-            const params = new URLSearchParams();
-            if (origin) params.set('origin', origin);
-            if (destination) params.set('dest', destination);
-            router.push(`/schedules?${params.toString()}`);
+            router.push(`/schedules`);
         }
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto">
-            {/* Navigation Tabs - Apple Glass Style */}
-            <div className="flex border-b border-white/5">
+        <div className="w-full">
+            {/* Dark Tactical Tabs */}
+            <div className="flex items-center gap-2 mb-0 px-2">
                 {[
                     { id: 'rates', icon: Ship, label: t('components.search_bar.tabs.rates') },
                     { id: 'tracking', icon: Search, label: t('components.search_bar.tabs.tracking') },
@@ -55,138 +44,102 @@ export function LogisticsSearchBar() {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center gap-3 px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === tab.id
-                            ? 'text-white'
-                            : 'text-zinc-600 hover:text-zinc-400'
-                            }`}
-                    >
-                        <tab.icon className="h-3 w-3" />
-                        <span>{tab.label}</span>
-                        {activeTab === tab.id && (
-                            <motion.div
-                                layoutId="activeTabIndicator"
-                                className="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-500"
-                            />
+                        className={cn(
+                            "flex items-center gap-3 px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-t-2xl transition-all",
+                            activeTab === tab.id
+                                ? "bg-zinc-900 text-white border-x border-t border-white/10"
+                                : "bg-transparent text-white/30 hover:text-white"
                         )}
+                    >
+                        <tab.icon className={cn("h-4 w-4", activeTab === tab.id ? "text-white" : "text-white/20")} />
+                        {tab.label}
                     </button>
                 ))}
+
+                {/* Tactical Request Link */}
+                <button className="ml-auto flex items-center gap-3 px-8 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-t-2xl transition-all">
+                    <Zap className="h-4 w-4 text-white" />
+                    {t('nav.getQuote')} ↗
+                </button>
             </div>
 
-            {/* Search Form - Premium Minimalist Design */}
-            <div className="bg-transparent p-4 flex flex-col lg:flex-row items-stretch gap-4">
+            {/* High-Density Search Command Container */}
+            <div className="bg-zinc-950 rounded-[32px] md:rounded-full shadow-[0_0_100px_rgba(0,0,0,1)] p-3 border border-white/10 flex flex-col md:flex-row items-center gap-2 backdrop-blur-3xl">
 
-                {/* --- RATES TAB CONTENT --- */}
                 {activeTab === 'rates' && (
-                    <div className="flex-1 grid md:grid-cols-4 gap-4">
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
+                    <>
+                        <div className="flex-[1.2] flex items-center w-full md:w-auto px-8 h-16 bg-white/5 md:bg-transparent rounded-full md:rounded-none group hover:bg-white/5 transition-all">
+                            <MapPin className="h-5 w-5 text-white/20 mr-4 group-hover:text-white transition-colors" />
                             <PortAutocomplete
                                 value={origin}
                                 onChange={setOrigin}
                                 placeholder={t('components.search_bar.placeholders.origin')}
                                 minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
+                                className="w-full text-sm font-bold text-white placeholder:text-white/20 bg-transparent border-none outline-none"
                             />
                         </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
+
+                        <div className="hidden md:block w-px h-10 bg-white/10" />
+                        <ArrowLeftRight className="h-4 w-4 text-white/10 mx-4 hidden md:block" />
+                        <div className="hidden md:block w-px h-10 bg-white/10" />
+
+                        <div className="flex-[1.2] flex items-center w-full md:w-auto px-8 h-16 bg-white/5 md:bg-transparent rounded-full md:rounded-none group hover:bg-white/5 transition-all">
+                            <MapPin className="h-5 w-5 text-white/20 mr-4 group-hover:text-white transition-colors" />
                             <PortAutocomplete
                                 value={destination}
                                 onChange={setDestination}
                                 placeholder={t('components.search_bar.placeholders.destination')}
                                 minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
+                                className="w-full text-sm font-bold text-white placeholder:text-white/20 bg-transparent border-none outline-none"
                             />
                         </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-                            <Calendar className="h-4 w-4 text-zinc-600" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{t('components.search_bar.labels.ready')}</span>
+
+                        <div className="hidden md:block w-px h-10 bg-white/10" />
+
+                        <div className="flex-1 flex items-center w-full md:w-auto px-8 h-16 bg-white/5 md:bg-transparent rounded-full md:rounded-none group hover:bg-white/5 transition-all cursor-pointer">
+                            <Calendar className="h-5 w-5 text-white/20 mr-4 group-hover:text-white transition-colors" />
+                            <span className="text-sm font-bold text-white whitespace-nowrap uppercase tracking-tighter">
+                                14 Feb, 2026
+                            </span>
                         </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
-                            <CommodityAutocomplete
-                                value={commodity}
-                                onChange={setCommodity}
-                                placeholder={t('components.search_bar.placeholders.cargo')}
-                                minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
+
+                        <div className="hidden md:block w-px h-10 bg-white/10" />
+
+                        <div className="flex-1 flex items-center w-full md:w-auto px-6 md:px-8 h-16 bg-white/5 md:bg-transparent rounded-full md:rounded-none group hover:bg-white/5 transition-all">
+                            <Ship className="h-5 w-5 text-white/20 mr-4 group-hover:text-white transition-colors" />
+                            <CargoSelectionPopover
+                                containerSize={formData.containerSize || "40"}
+                                onChange={(size) => updateForm({ containerSize: size as any })}
+                                className="w-full"
                             />
                         </div>
+                    </>
+                )}
+
+                {/* Tracking & Schedules fallbacks */}
+                {(activeTab === 'tracking' || activeTab === 'schedules') && (
+                    <div className="flex-1 flex items-center w-full px-8 h-16">
+                        <input
+                            className="w-full h-full bg-transparent text-sm font-bold text-white placeholder:text-white/20 outline-none uppercase tracking-widest"
+                            placeholder={t(`components.search_bar.placeholders.${activeTab === 'tracking' ? 'tracking_input' : 'from'}`)}
+                        />
                     </div>
                 )}
 
-                {/* --- TRACKING TAB CONTENT --- */}
-                {activeTab === 'tracking' && (
-                    <div className="flex-1 grid md:grid-cols-3 gap-4">
-                        <div className="md:col-span-2 bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
-                            <Search className="h-4 w-4 text-zinc-600 mr-3" />
-                            <input
-                                className="w-full h-full bg-transparent border-none focus:ring-0 focus:outline-none text-[10px] font-black uppercase tracking-widest text-white placeholder:text-zinc-700"
-                                placeholder={t('components.search_bar.placeholders.tracking_input')}
-                                value={trackingInput}
-                                onChange={(e) => setTrackingInput(e.target.value)}
-                            />
-                        </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
-                            <VesselAutocomplete
-                                value=""
-                                onChange={(v) => setTrackingInput(v)}
-                                placeholder={t('components.search_bar.placeholders.vessel')}
-                                minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {/* --- SCHEDULES TAB CONTENT --- */}
-                {activeTab === 'schedules' && (
-                    <div className="flex-1 grid md:grid-cols-3 gap-4">
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
-                            <PortAutocomplete
-                                value={origin}
-                                onChange={setOrigin}
-                                placeholder={t('components.search_bar.placeholders.from')}
-                                minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
-                            />
-                        </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 hover:bg-white/10 transition-colors">
-                            <PortAutocomplete
-                                value={destination}
-                                onChange={setDestination}
-                                placeholder={t('components.search_bar.placeholders.to')}
-                                minimal={true}
-                                className="h-full text-[10px] font-black uppercase tracking-widest text-white bg-transparent border-none focus:ring-0 placeholder:text-zinc-700"
-                            />
-                        </div>
-                        <div className="bg-white/5 border border-white/5 rounded-none flex items-center px-4 h-16 gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-                            <Calendar className="h-4 w-4 text-zinc-600" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{t('components.search_bar.labels.departure_date')}</span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Search Button - High Contrast Apple CTA */}
-                <Button
+                <button
                     onClick={handleSearch}
-                    className="h-16 lg:w-48 bg-white text-black hover:bg-zinc-200 rounded-none transition-all flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-[0.2em]"
+                    className="h-16 w-full md:w-24 bg-white hover:bg-zinc-200 text-black rounded-full transition-all flex items-center justify-center group active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.1)]"
                 >
-                    <span>{t('components.search_bar.action.search') || "INITIATE"}</span>
-                    <ArrowRight className="h-4 w-4 stroke-[3]" />
-                </Button>
+                    <Search className="h-6 w-6 stroke-[3] group-hover:scale-110 transition-transform" />
+                </button>
             </div>
 
-            {/* Recent Searches - Subtle Professional Style */}
-            <div className="flex items-center gap-6 text-[9px] font-black uppercase tracking-widest text-zinc-700 px-4 py-3">
-                <span className="flex items-center gap-2">
-                    <Clock className="h-3 w-3" />
-                    {t('components.search_bar.labels.recent')}
-                </span>
-                <div className="flex gap-4">
-                    <button className="hover:text-white transition-colors">
-                        SHANGHAI → ROTTERDAM
-                    </button>
-                    <button className="hover:text-white transition-colors">
-                        SINGAPORE → LOS_ANGELES
-                    </button>
+            {/* Tactical Recent Searches */}
+            <div className="mt-8 flex items-center gap-6 text-[10px] font-black text-white/20 px-10">
+                <span className="uppercase tracking-[0.4em]">RECENT_EXTRACTIONS</span>
+                <div className="flex items-center gap-4 px-6 py-2 bg-white/5 border border-white/5 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all cursor-pointer group">
+                    <Clock className="w-3.5 h-3.5 group-hover:rotate-45 transition-transform" />
+                    Chennai, IN <ArrowRight className="w-3 h-3" /> Dammam, SA
                 </div>
             </div>
         </div>

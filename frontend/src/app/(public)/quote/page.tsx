@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { QuoteWizard } from "@/components/domain/quote/QuoteWizard";
-import { Zap, Shield, Globe } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function QuotePage() {
@@ -10,63 +8,39 @@ export default function QuotePage() {
 
     return (
         <main className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-            <div className="container max-w-[1400px] mx-auto px-8 py-48">
+            <div className="container max-w-[1400px] mx-auto px-8 py-32 md:py-48">
 
-                {/* Architectural Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="grid lg:grid-cols-2 gap-32 mb-64"
-                >
+                {/* Tactical Header - Monumental static typography */}
+                <div className="grid lg:grid-cols-2 gap-16 md:gap-32 mb-16 md:mb-32 group">
                     <div>
-                        <span className="arch-label mb-12 block">{t('quotePage.initialization')}</span>
-                        <h1 className="arch-heading">{t('quotePage.title')}</h1>
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[1em] mb-8 block">QUOTE_INITIALIZATION_PROTOCOL</span>
+                        <h1 className="text-7xl md:text-[180px] font-black text-white tracking-tighter uppercase leading-[0.8] italic">
+                            {t('quotePage.title')} <br />
+                            <span className="text-white/20 select-none">{t('quotePage.engine') || "Engine."}</span>
+                        </h1>
                     </div>
                     <div className="flex flex-col justify-end">
-                        <p className="text-3xl font-light text-zinc-400 leading-tight max-w-xl text-right ml-auto">
+                        <p className="text-3xl md:text-5xl font-black text-white leading-[0.9] max-w-xl md:text-right md:ml-auto uppercase tracking-tighter italic">
                             {t('quotePage.configure')}
                         </p>
                     </div>
-                </motion.div>
-
-                {/* Structured Protocol Interface */}
-                <div className="grid lg:grid-cols-[1fr,2.5fr] gap-32 border-t border-white/5 pt-32">
-
-                    {/* Left: Tactical Sensors */}
-                    <div className="space-y-32 hidden lg:block">
-                        <div className="space-y-16">
-                            {[
-                                { id: "01", label: "GLOBAL_NODES", status: "ONLINE", icon: Globe },
-                                { id: "02", label: "ENCRYPTION", status: "ACTIVE", icon: Shield },
-                                { id: "03", label: "ROUTING", status: "OPTIMIZED", icon: Zap }
-                            ].map((item) => (
-                                <div key={item.id} className="arch-detail-line group">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="arch-number text-zinc-900 group-hover:text-white transition-all">{item.id}</span>
-                                        <item.icon className="w-4 h-4 text-zinc-800 group-hover:text-white transition-colors" />
-                                    </div>
-                                    <p className="text-[10px] font-bold tracking-[0.4em] text-white uppercase">{item.label}</p>
-                                    <p className="text-emerald-500 text-[9px] uppercase tracking-widest mt-1 font-bold">{item.status}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right: Quote Wizard Protocol */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.3 }}
-                    >
-                        <QuoteWizard />
-                    </motion.div>
                 </div>
 
-                {/* Sub-footer Section */}
-                <div className="mt-96 text-center border-t border-white/5 pt-48 pb-24">
-                    <span className="arch-label mb-12 block">{t('quotePage.protocolReady')}</span>
-                    <h2 className="arch-heading italic mb-16">{t('quotePage.forgeLinkMove')}</h2>
+                {/* Full-Page Protocol Interface - Static */}
+                <div className="border-t border-white/10 pt-16 relative">
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
+
+                    {/* Quote Wizard Protocol - Static Node */}
+                    <div className="bg-zinc-950/40 rounded-[64px] border border-white/10 p-8 md:p-24 shadow-2xl backdrop-blur-3xl relative overflow-hidden">
+                        <QuoteWizard />
+                    </div>
+                </div>
+
+                {/* Sub-footer Section - Monumental Static */}
+                <div className="mt-32 text-center border-t border-white/10 pt-32 pb-32 group relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-white/20" />
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-[1em] mb-12 block">{t('quotePage.protocolReady')}</span>
+                    <h2 className="text-6xl md:text-[180px] font-black text-white/10 mb-12 uppercase tracking-tighter leading-[0.8]">{t('quotePage.forgeLinkMove')}</h2>
                 </div>
             </div>
         </main>
