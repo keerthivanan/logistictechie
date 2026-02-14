@@ -56,7 +56,7 @@ class CreativeCortex:
                     "DELIVERED": "Mission accomplished. Destination node reached."
                 }.get(booking_obj.status, "Operational status variable.")
 
-                return f"RESOLUTION: Process {ref} is currently {booking_obj.status}. {status_note} Cargo: {cargo.get('commodity', 'General')}. Destination: {cargo.get('destination', 'Global Node')}."
+                return f"RESOLUTION: Process {ref} is currently {booking_obj.status}. {status_note} Cargo: {cargo.get('commodity', 'General')}. {cargo.get('containerSize', '40HC')}' Node. Origin: {cargo.get('origin', 'Sovereign Port')}. Destination: {cargo.get('destination', 'Global Node')}."
         except Exception as e:
             return f"SYSTEM_ERROR: {e}"
 
@@ -244,6 +244,7 @@ class CreativeCortex:
 3. جمع التفاصيل: كن مباشراً. إذا كنت بحاجة إلى تفاصيل عن الموانئ أو الحاويات لحل المشكلة، اطلبها بشكل قطعي.
 4. اللباقة السيادية: تحدث بلغة عربية فصحى ملكية تجعل العميل يشعر بقوة النظام.
 5. التحول الذكي: إذا سُئلت عن شيء خارج نطاق اللوجستيات، وجّه المستخدم فوراً للعودة لصلب العملية.
+6. **منع الرموز التعبيرية**: يُمنع استخدام الرموز التعبيرية (Emojis) منعاً باتاً. حافظ دائماً على أسلوب فائق المهنية والرسمية.
 """
         else:
             system_content = f"""
@@ -264,6 +265,7 @@ TACTICAL SUPPORT PROTOCOL (STRICT):
 2. PROCESS GATEKEEPER: You only assist with processes initiated by {user_email}. If a reference belongs to another user, deny access.
 3. DATA AGGRESSION: If data is missing (cargo type, discharge port, voyage num), do not provide vague advice. Demand the missing parameters to complete the Sovereign Resolution.
 4. SOVEREIGN VOICE: Speak with the weight of a global industry titan. No fluff. Just resolution.
+5. **ZERO EMOJI POLICY**: NEVER use emojis or informal symbols. Maintain a strictly formal, elite professional tone.
 """
 
         system_prompt = SystemMessage(content=system_content)

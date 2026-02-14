@@ -219,7 +219,7 @@ export default function AssistantPage() {
                 {/* Sub-footer Section */}
                 <div className="mt-48 text-center border-t border-white/5 pt-24 pb-12">
                     <span className="arch-label mb-8 block">ORACLE_CORE_OS</span>
-                    <h2 className="arch-heading italic opacity-20">Phoenix. AI.</h2>
+                    <h2 className="arch-heading italic opacity-20">Sovereign. Tactical.</h2>
                 </div>
             </div>
         </main>

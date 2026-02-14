@@ -69,7 +69,7 @@ app.add_middleware(
 
 # Mount the 'Honest' Routers
 # Mount references first to avoid greedy matching if any
-app.include_router(references.router, prefix="/api", tags=["Reference Data"])
+app.include_router(references.router, prefix="/api/references", tags=["Reference Data"])
 app.include_router(quotes.router, prefix="/api/quotes", tags=["Ocean Quotes"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
