@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Calculator, Package, RefreshCw, ShieldCheck, MapPin, Loader2 } from 'lucide-react'
+import { Calculator, ArrowRight, Info, Zap, Shield, BarChart3, Loader2, ShieldCheck, MapPin, RefreshCw, Package } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 export default function CalculatorPage() {
     const [origin, setOrigin] = useState('CNSHA')
@@ -18,7 +19,7 @@ export default function CalculatorPage() {
         e.preventDefault()
         setCalculating(true)
         try {
-            const res = await fetch('http://localhost:8000/api/quotes/calculate', {
+            const res = await fetch(`${API_URL}/api/quotes/calculate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

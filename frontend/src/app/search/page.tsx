@@ -100,7 +100,7 @@ export default function SearchPage() {
   // --- Popups ---
 
   const LocationPopup = ({ title, data, setData }: { title: string, data: Location, setData: (d: Location) => void }) => (
-    <div className="absolute top-full left-0 mt-2 w-[500px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-6 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="absolute top-full left-0 mt-2 w-full max-w-[500px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-6 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-bold text-xl tracking-tight text-gray-900">{title}</h3>
         <button onClick={() => setActivePopup(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors group">
@@ -282,7 +282,7 @@ export default function SearchPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.98 }}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-full left-0 mt-2 w-[650px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                      className="absolute top-full left-0 mt-2 w-full max-w-[650px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                     >
                       {/* Header */}
                       <div className="flex justify-between items-center p-6 border-b border-gray-100">
@@ -430,7 +430,7 @@ export default function SearchPage() {
                       <motion.div
                         initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.98 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute top-full right-0 mt-2 w-[480px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                        className="absolute top-full right-0 mt-2 w-full max-w-[480px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                       >
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                           <h3 className="font-bold text-lg text-gray-900">Goods Details</h3>

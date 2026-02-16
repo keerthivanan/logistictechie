@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Search, Book, Database, Layers, Hash, Code, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, Loader2, Sparkles, AlertCircle, CheckCircle2, Info, ArrowRight, Hash, Layers, Book, Database, Code } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 export default function HSCodesPage() {
     const [query, setQuery] = useState('')
@@ -15,7 +16,7 @@ export default function HSCodesPage() {
         if (!query) return
         setSearching(true)
         try {
-            const res = await fetch('http://localhost:8000/api/ai/hs-discovery', {
+            const res = await fetch(`${API_URL}/api/ai/hs-discovery`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query })

@@ -1,0 +1,54 @@
+﻿
+============================================================
+python : Traceback (most recent call 
+last):
+At line:1 char:26
++ ... s\activate; python 
+ultimate_verifier.py > 
+verifier_results.txt 2>&1;  ...
++                 ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+NotSpecified    : (Traceback (most 
+recent call last)::    String) [], 
+RemoteException
+    + FullyQualifiedErrorId : 
+NativeComman    dError
+ 
+  File "C:\Users\91709\OneDrive\Docume
+nts\logistics\backend\ultimate_verifie
+r.py", line 143, in <module>
+    
+asyncio.run(UltimateVerifier().run())
+  File "C:\Users\91709\anaconda3\Lib\a
+syncio\runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\91709\anaconda3\Lib\a
+syncio\runners.py", line 118, in run
+    return 
+self._loop.run_until_complete(task)
+           
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\91709\anaconda3\Lib\a
+syncio\base_events.py", line 687, in 
+run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\91709\OneDrive\Docume
+nts\logistics\backend\ultimate_verifie
+r.py", line 22, in run
+    print("\U0001f680 STARTING 
+ULTIMATE G.O.A.T. SYSTEM 
+VERIFICATION")
+  File "C:\Users\91709\anaconda3\Lib\e
+ncodings\cp1252.py", line 19, in 
+encode
+    return codecs.charmap_encode(input
+,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec 
+can't encode character '\U0001f680' 
+in position 0: character maps to 
+<undefined>

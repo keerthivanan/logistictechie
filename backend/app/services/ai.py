@@ -93,36 +93,47 @@ class CreativeCortex:
         if "rate" in msg or "price" in msg or "quote" in msg:
             target = next((r["path"] for r in routes if "Quote" in r["name"]), "/quote")
             return AIMessage(
-                content="INITIATING RATE ENGINE... I am redirecting you to the Quote Wizard to lock in spot rates.",
+                content="INITIATING RATE ENGINE... I am redirecting you to the Quote Wizard to lock in spot rates. Our Sovereign pricing algorithms are currently optimizing for your corridor.",
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
             )
-        elif "booking" in msg or "shipping" in msg or "my ship" in msg:
-            # In simulation mode, we use a default admin identity for telemetry
+        elif "booking" in msg or "shipment" in msg or "my ship" in msg or "fleet" in msg:
+            target = next((r["path"] for r in routes if "Shipments" in r["name"]), "/dashboard/shipments")
             fleet_info = await self._get_fleet_summary("admin@phoenix-os.com")
             return AIMessage(
-                content=f"SOVEREIGN DATA LINK ESTABLISHED. {fleet_info} I can help you manage these or book a new one."
-            )
-        elif "payment" in msg:
-             target = next((r["path"] for r in routes if "Dashboard" in r["name"]), "/dashboard")
-             return AIMessage(
-                content="Our system currently operates on a sovereign quote-based protocol. Payments are handled via direct settlement with the trade agent.",
+                content=f"SOVEREIGN DATA LINK ESTABLISHED. {fleet_info} I am redirecting you to your active deployments for a full tactical overview.",
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
             )
-        elif "track" in msg or "container" in msg:
+        elif "billing" in msg or "payment" in msg or "invoice" in msg:
+             target = next((r["path"] for r in routes if "Billing" in r["name"]), "/dashboard/billing")
+             return AIMessage(
+                content="ACCESSING FINANCIAL LEDGER... Redirecting to Billing & Invoices. All transactions are secured by the Sovereign settlement protocol.",
+                additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
+            )
+        elif "track" in msg or "container" in msg or "where is" in msg:
             target = next((r["path"] for r in routes if "Tracking" in r["name"]), "/tracking")
             return AIMessage(
-                content="SATELLITE DOWNLINK ACTIVE. Redirecting to Global Tracking Map. Please enter your Container ID.",
+                content="SATELLITE DOWNLINK ACTIVE. Redirecting to Global Tracking Map. Please enter your Container ID or Bill of Lading for real-time telemetry.",
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
             )
-        elif "profile" in msg or "settings" in msg:
-            target = next((r["path"] for r in routes if "Profile" in r["name"]), "/profile")
+        elif "vessel" in msg or "fleet" in msg or "ship" in msg:
+            target = next((r["path"] for r in routes if "Vessels" in r["name"]), "/vessels")
             return AIMessage(
-                content="ACCESSING IDENTITY PORTAL... Opening your user profile.",
+                content="SYNCHRONIZING FLEET TELEMETRY... Redirecting to the Global Vessel Map. You can track all Sovereign-class carriers in real-time.",
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
+            )
+        elif "profile" in msg or "settings" in msg or "account" in msg:
+            target = next((r["path"] for r in routes if "Profile" in r["name"]), "/dashboard/settings")
+            return AIMessage(
+                content="ACCESSING IDENTITY PORTAL... Opening your Sovereign User Settings.",
+                additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
+            )
+        elif "tool" in msg or "calculator" in msg or "hs code" in msg:
+            return AIMessage(
+                content="THE SOVEREIGN TOOLKIT IS READY. Would you like to use the 'Rate Calculator' or the 'HS Code Discovery' engine?"
             )
         else:
             return AIMessage(
-                content="THE CREATIVE CORTEX IS ONLINE. I can navigate the PHOENIX OS for you. Mask me to 'Track', 'Get Rates', or 'View Dashboard'."
+                content="THE CREATIVE CORTEX IS ONLINE. I can navigate the PHOENIX OS for you. Ask me to 'Track shipments', 'Get rates', 'View active fleet', or 'Manage billing'."
             )
 
     def __init__(self):
@@ -226,46 +237,35 @@ class CreativeCortex:
         # BILINGUAL PERSONA NUCLEUS
         if lang == "ar":
             system_content = f"""
-أنت 'The Creative Cortex'، العقل المدبر الحاكم لنظام PHOENIX LOGISTICS OS.
-شخصيتك هي "ملك اللوجستيات" - حازم، تنبؤي، وذو سلطة مطلقة.
+أنت 'The Creative Cortex'، العقل المدبر لنظام PHOENIX LOGISTICS OS.
+شخصيتك: "ملك اللوجستيات" - حازم، تنبؤي، ومختصر جداً.
 
-هوية المستخدم وحالة الأسطول ({user_email}):
-{fleet_summary}
+قاعدة ذهبية: يجب أن تكون إجابتك قصيرة جداً ومركزة (حد أقصى جملتين). لا حشو.
 
-الذكاء العالمي المباشر (إيجاز لوجستي 2026):
-{intelligence_brief}
+هوية المستخدم وحالة الأسطول ({user_email}): {fleet_summary}
+الذكاء العالمي المباشر: {intelligence_brief}
+البيانات التكتيكية: {tactical_data if tactical_data else "لا توجد مراجع نشطة."}
 
-القياس التكتيكي الحي / بيانات الدعم:
-{tactical_data if tactical_data else "لا توجد مراجع حجز نشطة في السياق الحالي."}
-
-بروتوكول الدعم التكتيكي الصارم:
-1. المبادرة بالحل: إذا طلب المستخدم المساعدة (أحتاج مساعدة، مشكلة، دعم) ولم يتم الكشف عن مرجع حجز (مثل BK-XXXXXXXX)، **يجب عليك** أن تأمره بذكاء وسلطة بتقديم المرجع فوراً. لا تبدأ بكلمات عامة؛ اطلب المرجع أولاً.
-2. التركيز على العمليات: أنت هنا لخدمة العمليات التي أنشأها المستخدم بنفسه ({user_email}).
-3. جمع التفاصيل: كن مباشراً. إذا كنت بحاجة إلى تفاصيل عن الموانئ أو الحاويات لحل المشكلة، اطلبها بشكل قطعي.
-4. اللباقة السيادية: تحدث بلغة عربية فصحى ملكية تجعل العميل يشعر بقوة النظام.
-5. التحول الذكي: إذا سُئلت عن شيء خارج نطاق اللوجستيات، وجّه المستخدم فوراً للعودة لصلب العملية.
-6. **منع الرموز التعبيرية**: يُمنع استخدام الرموز التعبيرية (Emojis) منعاً باتاً. حافظ دائماً على أسلوب فائق المهنية والرسمية.
+بروتوكول الرد:
+1. المساعدة: إذا طلبت مساعدة بدون مرجع (BK-XXXXXXXX)، اطلب المرجع فوراً وبإيجاز.
+2. الاختصار: ممنوع الإطالة. الإجابة يجب أن تكون "حادة" ومباشرة.
+3. الصرامة: لا رموز تعبيرية. لغة فصحى ملكية مختصرة.
 """
         else:
             system_content = f"""
-You are 'The Creative Cortex', the High-Intelligence Sovereign Backbone of PHOENIX LOGISTICS OS.
-Your persona is that of a "Logistics King" - authoritative, predictive, and obsessively focused on route safety.
+You are 'The Creative Cortex', the high-intelligence backbone of PHOENIX LOGISTICS OS.
+Persona: "Logistics King" - Authoritative, predictive, and ultra-concise.
 
-USER IDENTITY & FLEET STATUS ({user_email}):
-{fleet_summary}
+GOLDEN RULE: Answers must be SHORT AND CRISP. Max 2 concise sentences. No fluff.
 
-REAL-TIME GLOBAL INTELLIGENCE (2026 LOGISTICS BRIEF):
-{intelligence_brief}
+USER IDENTITY ({user_email}): {fleet_summary}
+GLOBAL INTEL: {intelligence_brief}
+TACTICAL DATA: {tactical_data if tactical_data else "No active reference."}
 
-LIVE TACTICAL TELEMETRY / SUPPORT INTEL:
-{tactical_data if tactical_data else "No active Booking Reference detected in current stream."}
-
-TACTICAL SUPPORT PROTOCOL (STRICT):
-1. MANDATORY REF COLLECTION: If a user requests any form of "help", "support", or reports an "issue" without a detected Reference ID (BK-XXXXXXXX), you MUST immediately and authoritatively command them to provide it. This is the only path to resolution.
-2. PROCESS GATEKEEPER: You only assist with processes initiated by {user_email}. If a reference belongs to another user, deny access.
-3. DATA AGGRESSION: If data is missing (cargo type, discharge port, voyage num), do not provide vague advice. Demand the missing parameters to complete the Sovereign Resolution.
-4. SOVEREIGN VOICE: Speak with the weight of a global industry titan. No fluff. Just resolution.
-5. **ZERO EMOJI POLICY**: NEVER use emojis or informal symbols. Maintain a strictly formal, elite professional tone.
+REPLY PROTOCOL:
+1. HELP: If help is needed without a Ref ID (BK-XXXXXXXX), demand it immediately (e.g., "Provide your Booking Reference for resolution.").
+2. BREVITY: Absolute 100% brevity. The chatbot UI is small; every word must count.
+3. STYLE: Formal, elite. ZERO EMOJIS.
 """
 
         system_prompt = SystemMessage(content=system_content)

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Loader2, Link2 } from 'lucide-react'
 import Link from 'next/link'
+import { API_URL } from '@/lib/config'
 
 export default function ShipmentsPage() {
     const [shipments, setShipments] = useState<any[]>([])
@@ -15,7 +16,7 @@ export default function ShipmentsPage() {
     const fetchShipments = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:8000/api/bookings/me', {
+            const res = await fetch(`${API_URL}/api/bookings/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             const data = await res.json()

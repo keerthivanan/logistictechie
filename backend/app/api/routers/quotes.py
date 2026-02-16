@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 from typing import List, Dict
 from app.schemas import RateRequest, OceanQuote
 from app.services.ocean.maersk import MaerskClient
@@ -14,6 +14,8 @@ def generate_quote_id(quote: dict) -> str:
     # Hash critical fields to create a stable reference
     seed = f"{quote.get('carrier_name','')}-{quote.get('origin_locode','')}-{quote.get('dest_locode','')}-{quote.get('price',0)}-{quote.get('departure_date','N/A')}"
     return hashlib.md5(seed.encode()).hexdigest()[:12].upper()
+
+router = APIRouter()
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -184,7 +186,10 @@ async def get_real_ocean_quotes(
             # Assuming it's an OceanQuote object
             q.id = generate_quote_id(q.model_dump())
     
-    return quotes
+    return {
+        "quotes": quotes,
+        "carrier_count": len(quotes)
+    }
 @router.post("/calculate", response_model=Dict)
 async def calculate_landed_cost(request: RateRequest):
     """

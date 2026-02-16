@@ -1,15 +1,14 @@
-'use client';
+'use client'
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Renderer, Triangle, Program, Mesh } from 'ogl';
 
-
-interface PrismProps {
+type PrismProps = {
     height?: number;
     baseWidth?: number;
     animationType?: 'rotate' | 'hover' | '3drotate';
     glow?: number;
-    offset?: { x: number; y: number };
+    offset?: { x?: number; y?: number };
     noise?: number;
     transparent?: boolean;
     scale?: number;
@@ -20,15 +19,15 @@ interface PrismProps {
     bloom?: number;
     suspendWhenOffscreen?: boolean;
     timeScale?: number;
-}
+};
 
-const Prism = ({
+const Prism: React.FC<PrismProps> = ({
     height = 3.5,
     baseWidth = 5.5,
     animationType = 'rotate',
     glow = 1,
     offset = { x: 0, y: 0 },
-    noise = 0.5,
+    noise = 0, // DEFAULT TO ZERO FOR CLEANEST LOOK
     transparent = true,
     scale = 3.6,
     hueShift = 0,
@@ -38,8 +37,8 @@ const Prism = ({
     bloom = 1,
     suspendWhenOffscreen = false,
     timeScale = 0.5
-}: PrismProps) => {
-    const containerRef = useRef<HTMLDivElement>(null);
+}) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -81,7 +80,7 @@ const Prism = ({
             width: '100%',
             height: '100%',
             display: 'block'
-        });
+        } as Partial<CSSStyleDeclaration>);
         container.appendChild(gl.canvas);
 
         const vertex = /* glsl */ `
@@ -193,8 +192,10 @@ const Prism = ({
         o = tanh4(o * o * (uGlow * uBloom) / 1e5);
 
         vec3 col = o.rgb;
-        float n = rand(gl_FragCoord.xy + vec2(iTime));
-        col += (n - 0.5) * uNoise;
+        if (uNoise > 0.0) {
+            float n = rand(gl_FragCoord.xy + vec2(iTime));
+            col += (n - 0.5) * uNoise;
+        }
         col = clamp(col, 0.0, 1.0);
 
         float L = dot(col, vec3(0.2126, 0.7152, 0.0722));
@@ -316,7 +317,7 @@ const Prism = ({
         const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
         const pointer = { x: 0, y: 0, inside: true };
-        const onMove = (e: MouseEvent) => {
+        const onMove = (e: PointerEvent) => {
             const ww = Math.max(1, window.innerWidth);
             const wh = Math.max(1, window.innerHeight);
             const cx = ww * 0.5;
@@ -334,13 +335,13 @@ const Prism = ({
             pointer.inside = false;
         };
 
-        let onPointerMove: ((e: MouseEvent) => void) | null = null;
+        let onPointerMove: ((e: PointerEvent) => void) | null = null;
         if (animationType === 'hover') {
-            onPointerMove = (e: MouseEvent) => {
+            onPointerMove = (e: PointerEvent) => {
                 onMove(e);
                 startRAF();
             };
-            window.addEventListener('mousemove', onPointerMove as any, { passive: true });
+            window.addEventListener('pointermove', onPointerMove, { passive: true });
             window.addEventListener('mouseleave', onLeave);
             window.addEventListener('blur', onBlur);
             program.uniforms.uUseBaseWobble.value = 0;
@@ -403,6 +404,10 @@ const Prism = ({
             }
         };
 
+        interface PrismContainer extends HTMLElement {
+            __prismIO?: IntersectionObserver;
+        }
+
         if (suspendWhenOffscreen) {
             const io = new IntersectionObserver(entries => {
                 const vis = entries.some(e => e.isIntersecting);
@@ -411,7 +416,7 @@ const Prism = ({
             });
             io.observe(container);
             startRAF();
-            (container as any).__prismIO = io;
+            (container as PrismContainer).__prismIO = io;
         } else {
             startRAF();
         }
@@ -420,14 +425,14 @@ const Prism = ({
             stopRAF();
             ro.disconnect();
             if (animationType === 'hover') {
-                if (onPointerMove) window.removeEventListener('mousemove', onPointerMove as any);
+                if (onPointerMove) window.removeEventListener('pointermove', onPointerMove as EventListener);
                 window.removeEventListener('mouseleave', onLeave);
                 window.removeEventListener('blur', onBlur);
             }
             if (suspendWhenOffscreen) {
-                const io = (container as any).__prismIO;
+                const io = (container as PrismContainer).__prismIO as IntersectionObserver | undefined;
                 if (io) io.disconnect();
-                delete (container as any).__prismIO;
+                delete (container as PrismContainer).__prismIO;
             }
             if (gl.canvas.parentElement === container) container.removeChild(gl.canvas);
         };
@@ -450,7 +455,7 @@ const Prism = ({
         suspendWhenOffscreen
     ]);
 
-    return <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '100%' }} />;
+    return <div className="w-full h-full relative" ref={containerRef} />;
 };
 
 export default Prism;

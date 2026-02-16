@@ -1,5 +1,5 @@
 from typing import Generator, Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from pydantic import ValidationError
@@ -43,3 +43,26 @@ def get_current_active_user(
     if not crud.user.is_active(current_user):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+async def get_current_user_optional(
+    db: AsyncSession = Depends(get_db),
+    request: Request = None
+) -> Optional[User]:
+    """Optional token authentication. Doesn't raise if token is missing/invalid."""
+    from fastapi import Request
+    if not request:
+        return None
+    
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]
+    try:
+        payload = security.decode_token(token)
+        email = payload.get("sub")
+        if not email:
+            return None
+        return await crud.user.get_by_email(db, email=email)
+    except:
+        return None

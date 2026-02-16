@@ -4,6 +4,7 @@ import React, { Suspense } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { CheckCircle, Printer, ArrowRight } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -17,7 +18,7 @@ function ConfirmationContent() {
         if (!refId) return
 
         const token = localStorage.getItem('token')
-        fetch(`http://localhost:8000/api/bookings/${refId}`, {
+        fetch(`${API_URL}/api/bookings/${refId}`, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         })
             .then(res => res.json())

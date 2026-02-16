@@ -16,6 +16,7 @@ import TrustedIndustries from '@/components/visuals/TrustedIndustries'
 import AiChatVisual from '@/components/visuals/AiChatVisual'
 import ComparisonChart from '@/components/visuals/ComparisonChart'
 import { motion, AnimatePresence } from 'framer-motion'
+import { API_URL } from '@/lib/config'
 
 export default function Home() {
   const [trackingId, setTrackingId] = useState('')
@@ -27,7 +28,7 @@ export default function Home() {
     if (!trackingId) return
     setIsLoading(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/tracking/${trackingId}`)
+      const res = await fetch(`${API_URL}/api/tracking/${trackingId}`)
       const data = await res.json()
       setTrackingResult(data)
       setShowModal(true)
@@ -45,7 +46,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
-        {/* Background Image - Unsplash Container Terminal */}
         {/* Global Network Prism Visual - Main Background */}
         <div className="absolute inset-0 z-0 opacity-100 mix-blend-screen pointer-events-none">
           <Prism />

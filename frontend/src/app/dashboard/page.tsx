@@ -4,6 +4,9 @@ import { ArrowUpRight, Package, Truck, AlertCircle, History, ExternalLink, Arrow
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+import { API_URL } from '@/lib/config'
 
 interface Activity {
     id: string
@@ -38,27 +41,28 @@ export default function DashboardPage() {
 
         if (userName) setUser(userName)
 
-        fetch('http://localhost:8000/api/dashboard/stats/me', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => {
-                if (res.status === 401) {
+        const fetchDashboardData = async () => {
+            try {
+                const statsRes = await fetch(`${API_URL}/api/bookings/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+
+                if (statsRes.status === 401) {
                     localStorage.removeItem('token')
                     router.push('/login')
-                    throw new Error('Unauthorized')
+                    return
                 }
-                return res.json()
-            })
-            .then(data => {
-                setStats(data)
+
+                const statsData = await statsRes.json()
+                setStats(statsData)
+            } catch (err) {
+                console.error('Dashboard telemetry failure:', err)
+            } finally {
                 setLoading(false)
-            })
-            .catch(err => {
-                console.error(err)
-                setLoading(false)
-            })
+            }
+        }
+
+        fetchDashboardData()
     }, [router])
 
     if (loading) {

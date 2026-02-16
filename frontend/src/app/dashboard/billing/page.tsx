@@ -1,6 +1,7 @@
 'use client'
 
-import { Download, Loader2 } from 'lucide-react'
+import { CreditCard, History, Download, ExternalLink, Shield, Plus, ArrowRight, Loader2 } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 import { useEffect, useState } from 'react'
 
 interface Invoice {
@@ -27,7 +28,7 @@ export default function BillingPage() {
 
     useEffect(() => {
         const token = localStorage.getItem('token')
-        fetch('http://localhost:8000/api/billing/me', {
+        fetch(`${API_URL}/api/billing/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -55,13 +56,13 @@ export default function BillingPage() {
                     <button
                         onClick={async () => {
                             const token = localStorage.getItem('token')
-                            const res = await fetch('http://localhost:8000/api/billing/pay/all', {
+                            const res = await fetch(`${API_URL}/api/billing/pay/all`, {
                                 method: 'POST',
                                 headers: { 'Authorization': `Bearer ${token}` }
                             })
                             if (res.ok) {
                                 // Refresh data
-                                const res2 = await fetch('http://localhost:8000/api/billing/me', {
+                                const res2 = await fetch(`${API_URL}/api/billing/me`, {
                                     headers: { 'Authorization': `Bearer ${token}` }
                                 })
                                 const data2 = await res2.json()

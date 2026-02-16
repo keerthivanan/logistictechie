@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { User, Shield, Bell, Layout, CreditCard, Save, Loader2 } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 export default function SettingsPage() {
     const [user, setUser] = useState<any>(null)
@@ -17,7 +19,7 @@ export default function SettingsPage() {
         try {
             const token = localStorage.getItem('token')
             if (!token) return
-            const res = await fetch('http://localhost:8000/api/auth/me', {
+            const res = await fetch(`${API_URL}/api/auth/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             const data = await res.json()
@@ -42,7 +44,7 @@ export default function SettingsPage() {
         setMessage('')
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:8000/api/auth/update-profile', {
+            const res = await fetch(`${API_URL}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

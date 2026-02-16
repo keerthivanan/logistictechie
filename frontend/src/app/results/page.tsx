@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle } from 'lucide-react'
@@ -25,7 +27,7 @@ function ResultsContent() {
     async function fetchQuotes() {
       try {
         setLoading(true)
-        const res = await fetch('http://localhost:8000/api/quotes/', {
+        const res = await fetch(`${API_URL}/api/quotes/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -40,8 +42,9 @@ function ResultsContent() {
 
         if (!res.ok) throw new Error("Failed to fetch rates")
         const data = await res.json()
-        setQuotes(data)
-        setFilteredQuotes(data)
+        const quoteList = data.quotes || []
+        setQuotes(quoteList)
+        setFilteredQuotes(quoteList)
       } catch (err) {
         console.error(err)
         setError("Unable to connect to Global Carrier Matrix.")

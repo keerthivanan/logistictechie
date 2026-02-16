@@ -120,7 +120,8 @@ async def login_for_access_token(
 
     if not security.verify_password(form_data.password, user.password_hash):
         # Increment failed attempts
-        new_attempts = (user.failed_login_attempts or 0) + 1
+        current_attempts = int(user.failed_login_attempts or 0)
+        new_attempts = current_attempts + 1
         update_data = {"failed_login_attempts": new_attempts}
         if new_attempts >= 5:
             update_data["is_locked"] = True
@@ -134,7 +135,7 @@ async def login_for_access_token(
         )
     
     # Reset on success
-    if (user.failed_login_attempts or 0) > 0:
+    if int(user.failed_login_attempts or 0) > 0:
         await crud.user.update(db, user_id=str(user.id), obj_in={"failed_login_attempts": 0})
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { TrendingUp, TrendingDown, AlertTriangle, Activity } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertTriangle, Activity, Ship, Globe, Zap } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 import { useEffect, useState } from 'react'
 
 interface TickerItem {
@@ -16,9 +17,9 @@ export default function MarketTicker() {
     const [tickerItems, setTickerItems] = useState<TickerItem[]>([])
 
     useEffect(() => {
-        const fetchPulse = async () => {
+        const fetchTicker = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/status/pulse')
+                const res = await fetch(`${API_URL}/api/status/pulse`)
                 const data = await res.json()
                 if (data.feed) {
                     setTickerItems(data.feed)
@@ -27,8 +28,8 @@ export default function MarketTicker() {
                 console.error(err)
             }
         }
-        fetchPulse()
-        const interval = setInterval(fetchPulse, 30000)
+        fetchTicker()
+        const interval = setInterval(fetchTicker, 30000)
         return () => clearInterval(interval)
     }, [])
 

@@ -4,6 +4,7 @@ import React, { Suspense } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { CreditCard, Lock, ShieldCheck } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -54,7 +55,7 @@ function PaymentContent() {
                 }
             }
 
-            const res = await fetch('http://localhost:8000/api/bookings/', {
+            const res = await fetch(`${API_URL}/api/bookings/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

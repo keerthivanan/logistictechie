@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Ship, MapPin, Clock, Anchor, ShieldCheck, AlertTriangle, Loader2 } from 'lucide-react'
+import { Ship, MapPin, Package, Clock, Shield, Search, Globe, ChevronRight, Loader2, Anchor, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 function TrackingContent() {
     const searchParams = useSearchParams()
@@ -21,7 +22,7 @@ function TrackingContent() {
     const fetchTracking = async () => {
         try {
             setLoading(true)
-            const res = await fetch(`http://localhost:8000/api/tracking/${id}`)
+            const res = await fetch(`${API_URL}/api/tracking/${id}`)
             const data = await res.json()
             setTracking(data)
         } catch (e) {

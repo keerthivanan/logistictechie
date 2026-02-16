@@ -3,6 +3,7 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { Play } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 export default function DemoPage() {
     return (
@@ -42,7 +43,7 @@ export default function DemoPage() {
                                     interest: 'Live Demo'
                                 };
                                 try {
-                                    const res = await fetch('http://localhost:8000/api/dashboard/leads', {
+                                    const res = await fetch(`${API_URL}/api/dashboard/leads`, {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify(data)

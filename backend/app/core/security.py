@@ -42,7 +42,6 @@ def validate_password_strength(password: str) -> bool:
     """
     Validate password strength:
     - At least 8 characters
-    - At least one uppercase letter
     - At least one lowercase letter
     - At least one number
     """
@@ -50,8 +49,7 @@ def validate_password_strength(password: str) -> bool:
         return False
     if not re.search(r"[a-z]", password):
         return False
-    if not re.search(r"[A-Z]", password):
-        return False
+    # Uppercase made optional for enterprise flexibility
     if not re.search(r"[0-9]", password):
         return False
     return True

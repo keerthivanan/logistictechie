@@ -3,25 +3,29 @@
 import { useState, useEffect } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Ship, Globe, Shield, Activity, Anchor } from 'lucide-react'
+import { Ship, Anchor, Globe, Search, RefreshCw, Layers, Shield, Activity } from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 export default function VesselsPage() {
     const [vessels, setVessels] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
+    const fetchVessels = async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/vessels/active`)
+            const data = await res.json()
+            if (data.success) {
+                setVessels(data.vessels)
+            }
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
-        fetch('http://localhost:8000/api/vessels/active')
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    setVessels(data.vessels)
-                }
-                setLoading(false)
-            })
-            .catch(err => {
-                console.error(err)
-                setLoading(false)
-            })
+        fetchVessels()
     }, [])
 
     return (
