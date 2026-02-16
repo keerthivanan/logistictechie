@@ -252,8 +252,28 @@ class MaerskClient(OceanCarrierProtocol):
                 
                 vessel_status = "ACTIVE_FLEET" if vessel_code in active_vessel_codes else "SOVEREIGN_PARTNER"
                 
-                deadlines = await self.get_deadlines(origin_un, vessel_code, voyage)
-                doc_cutoff = deadlines.get("docCutoff", "TBD")
+                deadlines_resp = await self.get_deadlines(origin_un, vessel_code, voyage)
+                
+                # SCHEMA FIX: Parse nested "deadlines-api.json" structure
+                doc_cutoff = "TBD"
+                if deadlines_resp and isinstance(deadlines_resp, list) and len(deadlines_resp) > 0:
+                    try:
+                        # Extract 'deadlines' array from the first shipment deadline object
+                        # Structure: [{ "shipmentDeadlines": { "deadlines": [ ... ] } }]
+                        dl_list = deadlines_resp[0].get("shipmentDeadlines", {}).get("deadlines", [])
+                        
+                        for dl in dl_list:
+                            # Look for documentation-related deadlines
+                            name = dl.get("deadlineName", "").lower()
+                            if "documentation" in name or "instruction" in name:
+                                doc_cutoff = dl.get("deadlineLocal", "TBD")
+                                break
+                    except Exception as e:
+                        print(f"[WARN] Deadline Schema Parse Error: {e}")
+                
+                # Fallback if specific deadline not found
+                if doc_cutoff == "TBD":
+                     doc_cutoff = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
                 
                 market_rate = sovereign_engine.generate_market_rate(request.origin, request.destination, request.container)
                 

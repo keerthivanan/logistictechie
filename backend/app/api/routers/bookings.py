@@ -72,6 +72,19 @@ async def create_booking(
         raise HTTPException(status_code=500, detail=f"Booking creation failed: {str(e)}")
 
 
+@router.get("/me", response_model=Dict)
+async def get_my_bookings(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all bookings for the authenticated user."""
+    res = await crud.booking.get_by_user(db, user_id=current_user.id)
+    return {
+        "success": True,
+        "data": [booking_to_dict(b) for b in res]
+    }
+
+
 @router.get("/user/{user_id}", response_model=Dict)
 async def get_user_bookings(user_id: str, db: AsyncSession = Depends(get_db)):
     """Get all bookings for a user."""
@@ -80,8 +93,6 @@ async def get_user_bookings(user_id: str, db: AsyncSession = Depends(get_db)):
         "success": True,
         "data": [booking_to_dict(b) for b in res]
     }
-
-
 @router.get("/{ref}", response_model=Dict)
 async def get_booking_by_ref(ref: str, db: AsyncSession = Depends(get_db)):
     """Get a specific booking by reference number."""

@@ -1,172 +1,156 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
-import Image from "next/image";
-import { Menu, X, Globe, LogOut, User, Ship, ChevronRight, Zap, Shield } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { cn } from "@/lib/utils";
+import { useState } from 'react'
+import Link from 'next/link'
+import { Menu, X, ChevronDown } from 'lucide-react'
 
-export function Navbar() {
-    const pathname = usePathname();
-    const { data: session, status } = useSession();
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { language, setLanguage, t } = useLanguage();
+export default function Navbar() {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
 
-    const isLoggedIn = status === "authenticated";
+    const toggleDropdown = (label: string) => {
+        if (activeDropdown === label) {
+            setActiveDropdown(null)
+        } else {
+            setActiveDropdown(label)
+        }
+    }
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    const navLinks = [
-        { href: '/quote', label: 'WORK' },
-        { href: '/services', label: 'SERVICES' },
-        { href: '/company', label: 'ABOUT' },
-        { href: '/market', label: 'INTEL' },
-        { href: '/contact', label: 'CONTACT' },
-    ];
+    const navItems = [
+        {
+            label: "Marketplace",
+            children: [
+                { label: "Importers & Exporters", href: "/importers-exporters" },
+                { label: "Forwarders", href: "/forwarders" },
+                { label: "Carriers", href: "/carriers" }
+            ]
+        },
+        {
+            label: "Company",
+            children: [
+                { label: "About Us", href: "/about" },
+                { label: "Careers", href: "/careers" },
+                { label: "Blog", href: "/blog" },
+                { label: "Contact", href: "/contact" }
+            ]
+        },
+        {
+            label: "Tools",
+            children: [
+                { label: "Freight Calculator", href: "/tools/calculator" },
+                { label: "HS Codes", href: "/tools/hs-codes" }
+            ]
+        }
+    ]
 
     return (
-        <nav className={cn(
-            "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
-            isScrolled
-                ? "bg-black/95 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl shadow-black"
-                : "bg-transparent py-8"
-        )}>
-            <div className="container max-w-[1400px] mx-auto px-6">
-                <div className="flex items-center justify-between">
-
-                    {/* Branding - High Contrast */}
-                    <Link href="/" className="flex items-center gap-4 group">
-                        <div className="relative">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center transition-all group-hover:scale-110">
-                                <Ship className="h-5 w-5 text-black" />
+        <nav className="fixed top-10 left-0 right-0 bg-black/80 backdrop-blur-md z-40 border-b border-white/5">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-between h-20">
+                    {/* Logo */}
+                    <div className="flex items-center">
+                        <Link href="/" className="flex items-center space-x-2 group">
+                            <div className="flex items-center space-x-1">
+                                <div className="w-2 h-4 bg-white rounded-sm group-hover:h-6 transition-all duration-300"></div>
+                                <div className="w-2 h-4 bg-white/70 rounded-sm group-hover:h-5 transition-all duration-300"></div>
+                                <div className="w-2 h-4 bg-white/40 rounded-sm group-hover:h-4 transition-all duration-300"></div>
                             </div>
-                            <div className="absolute -inset-1 bg-white/20 blur-md rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <h1 className="text-xl font-black text-white uppercase tracking-tighter leading-none">
-                            PHOENIX <br /><span className="text-white/20 italic font-medium text-sm tracking-[0.2em]">LOGISTICS</span>
-                        </h1>
-                    </Link>
+                            <span className="text-2xl font-bold tracking-tight text-white">OMEGO</span>
+                        </Link>
+                    </div>
 
-                    {/* Tactical Navigation */}
-                    <div className="hidden xl:flex items-center gap-12">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={cn(
-                                    "text-[10px] font-black uppercase tracking-[0.4em] transition-all duration-300 py-2 relative group",
-                                    pathname === link.href ? "text-white" : "text-white/40 hover:text-white"
-                                )}
-                            >
-                                {t(`nav.${link.label.toLowerCase()}`)}
-                                <span className={cn(
-                                    "absolute bottom-0 left-0 w-full h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left",
-                                    pathname === link.href && "scale-x-100"
-                                )} />
-                            </Link>
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center justify-center space-x-8">
+                        {navItems.map((item) => (
+                            <div key={item.label} className="relative group">
+                                <button className="flex items-center space-x-1 text-sm font-medium text-gray-300 hover:text-white transition-colors py-2">
+                                    <span>{item.label}</span>
+                                    <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
+                                </button>
+
+                                {/* Dropdown */}
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                    <div className="bg-zinc-950 border border-white/10 rounded-xl shadow-2xl p-2 w-56 ring-1 ring-white/5">
+                                        {item.children.map((child) => (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className="block px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                                            >
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
 
-                    {/* Actions - Command Tier */}
-                    <div className="hidden lg:flex items-center gap-10">
-                        <button
-                            onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                            className="text-[10px] font-black text-white/30 hover:text-white transition-colors uppercase tracking-[0.4em]"
+                    {/* Right Side Actions */}
+                    <div className="hidden md:flex items-center space-x-6">
+                        <Link href="/login" className="text-sm font-medium text-white hover:text-gray-300 transition-colors">Log In</Link>
+                        <Link
+                            href="/search"
+                            className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-200 transition-all transform hover:scale-105"
                         >
-                            {language === 'en' ? 'AR' : 'EN'}
-                        </button>
-
-                        <div className="w-[1px] h-4 bg-white/10" />
-
-                        {isLoggedIn ? (
-                            <div className="flex items-center gap-6">
-                                <Link href="/profile" className="flex items-center gap-4 group">
-                                    <div className="text-right">
-                                        <p className="text-[10px] font-black text-white uppercase tracking-wider leading-none">
-                                            {session.user?.name?.split(' ')[0]}
-                                        </p>
-                                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] mt-1">
-                                            COMMANDER
-                                        </p>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white/5 group-hover:border-white transition-all">
-                                        {session.user?.image ? (
-                                            <Image src={session.user.image} alt="Avatar" width={40} height={40} />
-                                        ) : (
-                                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-white/40">
-                                                <User className="w-5 h-5" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </Link>
-                                <button onClick={() => signOut({ callbackUrl: '/' })} className="text-white/20 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-xl">
-                                    <LogOut className="w-5 h-5" />
-                                </button>
-                            </div>
-                        ) : (
-                            <Link href="/login">
-                                <button className="h-12 px-10 bg-white text-black hover:bg-zinc-200 text-[10px] font-black uppercase tracking-[0.4em] transition-all rounded-full shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-95">
-                                    {t('nav.signIn')}
-                                </button>
-                            </Link>
-                        )}
+                            Compare Rates
+                        </Link>
                     </div>
 
-                    {/* Mobile Toggle */}
-                    <div className="xl:hidden">
+                    {/* Mobile menu button */}
+                    <div className="md:hidden">
                         <button
-                            className="text-white p-3 hover:bg-white/10 rounded-2xl transition-colors"
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="text-white p-2"
                         >
-                            {isMobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Architectural Mobile Menu */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black z-[101] flex flex-col p-12"
-                    >
-                        <div className="flex justify-between items-center mb-48">
-                            <span className="text-xl font-bold tracking-[0.6em] text-white">PHOENIX</span>
-                            <button onClick={() => setIsMobileMenuOpen(false)}>
-                                <X className="w-10 h-10 text-white" />
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col gap-12 mt-24">
-                            {navLinks.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className="text-6xl font-light text-zinc-800 hover:text-white transition-all tracking-tighter"
-                                    onClick={() => setIsMobileMenuOpen(false)}
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+                <div className="md:hidden bg-zinc-950 border-t border-white/10 absolute w-full left-0 z-50 h-screen overflow-y-auto">
+                    <div className="px-4 pt-4 pb-20 space-y-6">
+                        {navItems.map((item) => (
+                            <div key={item.label}>
+                                <button
+                                    onClick={() => toggleDropdown(item.label)}
+                                    className="flex items-center justify-between w-full text-left text-lg font-bold text-white mb-2"
                                 >
-                                    {link.label}
-                                </Link>
-                            ))}
+                                    {item.label}
+                                    <ChevronDown className={`w-5 h-5 transition-transform ${activeDropdown === item.label ? 'rotate-180' : ''}`} />
+                                </button>
+                                {activeDropdown === item.label && (
+                                    <div className="pl-4 space-y-3 border-l-2 border-white/10 ml-2">
+                                        {item.children.map((child) => (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className="block text-gray-400 hover:text-white py-1"
+                                                onClick={() => setMobileMenuOpen(false)}
+                                            >
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                        <div className="pt-8 border-t border-white/10 space-y-4">
+                            <Link href="/login" className="block text-center w-full py-4 text-white font-bold border border-white/10 rounded-xl">Log In</Link>
+                            <Link
+                                href="/search"
+                                className="block bg-white text-black px-6 py-4 rounded-xl font-bold text-center w-full"
+                            >
+                                Compare Rates
+                            </Link>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
+                </div>
+            )}
         </nav>
-    );
+    )
 }

@@ -414,4 +414,44 @@ TACTICAL SUPPORT PROTOCOL (STRICT):
         from app.services.sovereign import sovereign_engine
         return await sovereign_engine.get_market_trend(country, commodity)
 
+    async def discover_hs_codes(self, query: str) -> List[Dict[str, Any]]:
+        """
+        # HS CODE DISCOVERY (Sovereign Intelligence)
+        """
+        if self.simulation_mode:
+            # Deterministic Simulation based on query
+            import hashlib
+            seed = int(hashlib.md5(query.lower().encode()).hexdigest()[:8], 16)
+            
+            # Simulated categories
+            categories = [
+                {"code": "8507.60", "title": "Lithium-ion Accumulators", "desc": "Electrical machinery and equipment and parts thereof; sound recorders and reproducers...", "prob": "98%"},
+                {"code": "8703.80", "title": "Electric Vehicles", "desc": "Motor vehicles for the transport of persons, with only electric motor for propulsion.", "prob": "95%"},
+                {"code": "8471.30", "title": "Portable Data Processing Machines", "desc": "Automatic data processing machines, weighing not more than 10 kg...", "prob": "92%"},
+                {"code": "4011.10", "title": "New Pneumatic Tyres", "desc": "New pneumatic tyres, of rubber, of a kind used on motor cars.", "prob": "88%"}
+            ]
+            
+            # Return 2-3 results based on seed
+            return categories[seed % 2 : seed % 2 + 3]
+            
+        else:
+            try:
+                system_prompt = "You are the Sovereign HS Taxonomy expert. Classify goods with absolute precision."
+                user_prompt = f"Identify the most likely HS codes for: {query}. Return ONLY a JSON list of objects: [{{code, title, desc, prob}}]."
+                
+                response = await self.llm.ainvoke([
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(content=user_prompt)
+                ])
+                
+                import json
+                import re
+                json_match = re.search(r'\[.*\]', response.content, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group())
+                return []
+            except Exception as e:
+                print(f"[ERROR] HS Discovery Failure: {e}")
+                return []
+
 cortex = CreativeCortex()

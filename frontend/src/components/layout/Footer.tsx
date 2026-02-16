@@ -1,114 +1,87 @@
-"use client";
+import Link from 'next/link'
 
-import Link from "next/link";
-import { Ship, Linkedin, Twitter, Github } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-
-export function Footer() {
-    const { t } = useLanguage();
-
-    const footerLinks = [
-        {
-            title: t('footer.strategic'),
-            links: [
-                { label: t('footer.labels.quoteEngine'), href: '/quote' },
-                { label: t('footer.labels.marketIntel'), href: '/market' },
-                { label: t('footer.labels.capabilities'), href: '/services' },
-            ]
-        },
-        {
-            title: t('footer.operational'),
-            links: [
-                { label: t('footer.labels.globalNodes'), href: '/company' },
-                { label: t('footer.labels.trackMission'), href: '/tracking' },
-                { label: t('footer.labels.documentation'), href: '/help' },
-            ]
-        },
-        {
-            title: t('footer.architecture'),
-            links: [
-                { label: t('footer.labels.systemStatus'), href: '/health' },
-                { label: t('footer.labels.supportLink'), href: '/contact' },
-                { label: t('footer.labels.designPhilosophy'), href: '/company' },
-            ]
-        },
-        {
-            title: "Legal",
-            links: [
-                { label: t('footer.labels.coreLegal'), href: '/terms' },
-                { label: t('footer.labels.dataPrivacy'), href: '/privacy' },
-                { label: t('footer.labels.securityProto'), href: '/security' },
-            ]
-        }
-    ];
-
+export default function Footer() {
     return (
-        <footer className="bg-black border-t border-white/5 pt-32 pb-16 relative overflow-hidden">
-            {/* Tactical Detail Line */}
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-            <div className="container max-w-[1400px] mx-auto px-8 relative z-10">
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-16 md:gap-8 mb-32">
-                    {/* Branding & Extraction */}
-                    <div className="col-span-2 space-y-12">
-                        <Link href="/" className="flex items-center gap-4 group">
-                            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center transition-all group-hover:bg-zinc-200">
-                                <Ship className="h-6 w-6 text-black" />
-                            </div>
-                            <h1 className="text-2xl font-black text-white uppercase tracking-tighter leading-none">
-                                PHOENIX <br /><span className="text-white/20 italic font-medium text-sm tracking-[0.2em]">LOGISTICS</span>
-                            </h1>
-                        </Link>
-                        <p className="text-sm font-bold text-white/40 max-w-xs leading-relaxed uppercase tracking-tighter">
-                            {t('footer.missionDesc') || "Global supply chain synchronization through high-density intelligence and professional logistics telemetry."}
-                        </p>
-                        <div className="flex items-center gap-8">
-                            <a href="#" className="text-white/20 hover:text-white transition-colors">
-                                <Linkedin className="h-6 w-6" />
-                            </a>
-                            <a href="#" className="text-white/20 hover:text-white transition-colors">
-                                <Twitter className="h-6 w-6" />
-                            </a>
-                        </div>
+        <footer className="bg-black border-t border-white/10 py-20 pb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="mb-16">
+                    <div className="flex items-center space-x-2 mb-6">
+                        <div className="w-3 h-6 bg-white rounded-sm"></div>
+                        <div className="w-3 h-6 bg-white/70 rounded-sm"></div>
+                        <div className="w-3 h-6 bg-white/40 rounded-sm"></div>
+                        <span className="text-2xl font-bold tracking-tight text-white ml-2">OMEGO</span>
                     </div>
-
-                    {/* Navigation Columns - High Density */}
-                    {footerLinks.map((group, idx) => (
-                        <div key={idx} className="space-y-10">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.6em] text-white underline decoration-white/20 underline-offset-8 decoration-2">{group.title}</h4>
-                            <ul className="space-y-6">
-                                {group.links.map((link, lIdx) => (
-                                    <li key={lIdx}>
-                                        <Link
-                                            href={link.href}
-                                            className="text-[11px] font-bold text-white/40 hover:text-white transition-colors uppercase tracking-[0.2em] block"
-                                        >
-                                            → {link.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                    <p className="text-gray-500 max-w-xl">
+                        The evolved Supply Chain & AI performance tracker for the fastest-growing teams. Scale without limits and dominate global trade.
+                    </p>
                 </div>
 
-                {/* Sub-footer Certification */}
-                <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="flex items-center gap-8">
-                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.6em]">© 2026 PHOENIX_GLOBAL</span>
-                        <div className="w-px h-4 bg-white/10 hidden md:block" />
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{t('footer.rights')}</span>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-20">
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/importers-exporters" className="hover:text-white transition-colors">Rate Tracker</Link></li>
+                            <li><Link href="/forwarders" className="hover:text-white transition-colors">AI Quoting</Link></li>
+                            <li><Link href="/carriers" className="hover:text-white transition-colors">Yield Agent</Link></li>
+                            <li><Link href="/enterprise" className="hover:text-white transition-colors">Enterprise</Link></li>
+                            <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                        </ul>
                     </div>
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Features</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/search" className="hover:text-white transition-colors">Search Rates</Link></li>
+                            <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
+                            <li><Link href="/tools/calculator" className="hover:text-white transition-colors">Calculator</Link></li>
+                            <li><Link href="/tools/hs-codes" className="hover:text-white transition-colors">HS Codes</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Company</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                            <li><Link href="/customers" className="hover:text-white transition-colors">Customers</Link></li>
+                            <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+                            <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Resources</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                            <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+                            <li><Link href="/api" className="hover:text-white transition-colors">API Docs</Link></li>
+                            <li><Link href="/changelog" className="hover:text-white transition-colors">Changelog</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Compare</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/compare/freightos" className="hover:text-white transition-colors">Freightos</Link></li>
+                            <li><Link href="/compare/flexport" className="hover:text-white transition-colors">Flexport</Link></li>
+                            <li><Link href="/compare/xeneta" className="hover:text-white transition-colors">Xeneta</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Legal</h3>
+                        <ul className="space-y-4 text-sm text-gray-500">
+                            <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+                            <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                            <li><Link href="/legal/security" className="hover:text-white transition-colors">Security</Link></li>
+                        </ul>
+                    </div>
+                </div>
 
-                    <div className="flex items-center gap-12">
-                        <div className="flex items-center gap-4">
-                            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                            <span className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em]">{t('footer.systemStatus') || "SECURE_SYNC_ACTIVE"}</span>
-                        </div>
-                        <span className="text-[9px] font-black text-white/10 uppercase tracking-[0.8em]">NODE_X712_G.O.A.T.</span>
+                <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10">
+                    <p className="text-gray-600 text-sm">© 2011-2026 Omego Ltd. All rights reserved.</p>
+                    <div className="flex space-x-6 mt-4 md:mt-0">
+                        {/* Socials placeholder */}
+                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
+                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
+                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
                     </div>
                 </div>
             </div>
         </footer>
-    );
+    )
 }

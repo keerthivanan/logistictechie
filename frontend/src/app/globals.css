@@ -2,182 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   ARCHITECTURAL MINIMALIST SYSTEM (V3: ARCH)
-   Absolute Black • Structural Discipline • Pure Light
-   ============================================ */
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
 
-@layer base {
-  :root {
-    --background: 0 0% 0%;
-    --foreground: 210 40% 98%;
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  /* 80px for fixed navbar */
+}
 
-    --card: 0 0% 2%;
-    --card-foreground: 210 40% 98%;
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
 
-    --popover: 0 0% 2%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 0 0% 10%;
-    --input: 0 0% 10%;
-    --ring: 221 83% 53%;
-
-    --radius: 0.5rem;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    cursor: default;
-  }
-
-  a,
-  button {
-    cursor: pointer;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    background-color: black;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: var(--font-inter), sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
-
-  /* Structural Typography - Professional Human Scaling */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-outfit), sans-serif;
-    @apply font-semibold tracking-tight;
-    font-variant-ligatures: none;
-  }
-
-  p,
-  span,
-  div,
-  li,
-  a,
-  label {
-    font-family: var(--font-inter), sans-serif;
-    @apply tracking-normal leading-relaxed;
-    color: theme('colors.zinc.300');
-  }
-
-  strong,
-  .text-white {
-    color: white;
-  }
-
-  /* Architectural Heading Patterns - Refined for High-Density Enterprise Look */
-  .arch-heading {
-    @apply text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-tight text-white mb-4;
-  }
-
-  .arch-label {
-    @apply text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500 mb-2;
-  }
-
-  /* Compact Section Containers */
-  .arch-section {
-    @apply py-24 md:py-32 lg:py-40;
-  }
-
-  .arch-section-hero {
-    @apply pt-32 pb-40 md:pt-48 md:pb-56;
-  }
+li.active-nav-item {
+  color: black !important;
+  text-shadow: none !important;
 }
 
-@layer components {
-
-  /* Vertical Detail Line */
-  .arch-detail-line {
-    @apply relative pl-6 border-l border-white/10;
-  }
-
-  .arch-detail-line::before {
-    content: "";
-    @apply absolute left-[-1px] top-0 h-8 w-[1px] bg-white/40;
-  }
-
-  /* Structured Numerical List */
-  .arch-number {
-    @apply text-[12px] font-bold tracking-widest text-zinc-600 mr-4;
-  }
-
-  /* Ultra-Minimal Container - High-Density Spacing */
-  .arch-grid {
-    @apply grid gap-6 md:grid-cols-2 lg:gap-12;
-  }
-
-  /* HOLOGRAPHIC ACCENTS (Subtle) */
-  .holographic-glow {
-    @apply relative overflow-hidden;
-  }
-
-  .holographic-glow::after {
-    content: "";
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent;
-    animation: holographic-sweep 12s ease-in-out infinite;
-    transform: skewX(-20deg) translateX(-100%);
-  }
-
-  .titan-label {
-    @apply text-[11px] font-bold uppercase tracking-[0.2em] leading-none;
-  }
-
-  @keyframes holographic-sweep {
-    0% {
-      transform: skewX(-20deg) translateX(-150%);
-    }
-
-    50% {
-      transform: skewX(-20deg) translateX(150%);
-    }
-
-    100% {
-      transform: skewX(-20deg) translateX(150%);
-    }
-  }
+li.active-nav-item::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
-/* Scrollbar Refinement */
-::-webkit-scrollbar {
-  width: 2px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-::selection {
+li.nav-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  /* Pill shape */
   background: white;
-  color: black;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+@keyframes infinite-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 20s linear infinite;
 }

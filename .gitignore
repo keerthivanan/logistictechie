@@ -47,7 +47,8 @@ Thumbs.db
 *.env*
 
 # --- Backend Specific ---
-backend/alembic/versions/__pycache__/
+backend/alembic/
+backend/data/
 backend/app/__pycache__/
 backend/venv/
 venv/

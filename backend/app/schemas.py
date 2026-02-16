@@ -56,7 +56,9 @@ class RateRequest(BaseModel):
     origin: str  # e.g., "Shanghai" or "CNSHA"
     destination: str # e.g., "Jeddah" or "SAJED"
     container: str = "40FT" # Default
+    commodity: str = "General Cargo" # Added for Sovereign Logic
     ready_date: Optional[str] = None
+    goods_value: Optional[float] = None # Added for Best of All Time Accuracy
 
 # --- Auth Models ---
 class UserLogin(BaseModel):

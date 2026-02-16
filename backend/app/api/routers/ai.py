@@ -123,3 +123,22 @@ async def stream_chat(message: str, history: str = "[]", lang: str = "en"):
     except Exception as e:
         print(f"Stream Error: {e}")
         return EventSourceResponse(iter([]))
+@router.post("/hs-discovery")
+async def discover_hs_codes(request: Dict[str, Any]):
+    """
+    Sovereign HS Discovery Protocol.
+    Input: query (string)
+    Output: List of potential HS codes with metadata.
+    """
+    query = request.get("query", "")
+    if not query:
+        raise HTTPException(status_code=400, detail="Query is required")
+    
+    # Use Cortex to simulate/search HS codes
+    # For now, we use a sophisticated simulation if OpenAI is missing, 
+    # or the LLM if available.
+    try:
+        results = await cortex.discover_hs_codes(query)
+        return {"success": True, "results": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
