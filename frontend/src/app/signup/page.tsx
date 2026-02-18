@@ -14,46 +14,6 @@ export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
-    async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setIsLoading(true)
-        setError('')
-
-        const formData = new FormData(e.currentTarget)
-        const password = formData.get('password') as string
-        const firstName = formData.get('firstName') as string
-        const lastName = formData.get('lastName') as string
-        const full_name = `${firstName} ${lastName}`
-
-        const data = {
-            full_name: full_name,
-            email: formData.get('email'),
-            password: password,
-            confirm_password: password, // Auto-confirming for simplicity
-            company_name: formData.get('company') || 'New User Organization'
-        }
-
-        try {
-            const res = await fetch(`${API_URL}/api/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-
-            const result = await res.json()
-
-            if (!res.ok) {
-                throw new Error(result.detail || 'Signup failed')
-            }
-
-            // Success -> Go to Login
-            router.push('/login?registered=true')
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     return (
         <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center relative overflow-hidden">

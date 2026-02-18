@@ -14,39 +14,6 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
-    async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setIsLoading(true)
-        setError('')
-
-        const formData = new FormData(e.currentTarget)
-        const email = formData.get('email')
-        const password = formData.get('password')
-
-        try {
-            const res = await fetch(`${API_URL}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            })
-
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(data.detail || 'Login failed')
-            }
-
-            // Store Token via Unified Context (G.O.A.T. Standard)
-            login(data.access_token, data.user_name)
-
-            // Redirect to Dashboard
-            router.push('/dashboard')
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     return (
         <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center relative overflow-hidden">
