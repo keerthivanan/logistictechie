@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
 from app.schemas import Token, UserLogin, UserResponse
@@ -50,9 +51,16 @@ async def social_sync(
         google_data = resp.json()
         
     # 2. AUDIT CHECK (Ensure token is for OUR app)
-    # Support multiple client IDs (Web, Android, iOS) if needed
-    # if google_data["aud"] not in [settings.GOOGLE_CLIENT_ID]:
-    #     raise HTTPException(status_code=401, detail="Token Audience Mismatch")
+    # This prevents 'Token Injection' attacks from other rogue applications.
+    if google_data.get("aud") != settings.GOOGLE_CLIENT_ID:
+        # Fallback for debug: If you changed CLIENT_ID in frontend but not backend, this will catch it.
+        logger.warning(f"Audience Mismatch: Expected {settings.GOOGLE_CLIENT_ID}, got {google_data.get('aud')}")
+        # raise HTTPException(status_code=401, detail="Token Audience Mismatch (Security Breach Prevented)")
+        # For now, let's keep it lenient during the transition unless they are different
+        if settings.GOOGLE_CLIENT_ID:
+             # If we have a key, we MUST match it.
+             if google_data.get("aud") != settings.GOOGLE_CLIENT_ID:
+                  raise HTTPException(status_code=401, detail="Token Audience Mismatch")
 
     email = google_data.get("email")
     name = google_data.get("name")
@@ -63,26 +71,43 @@ async def social_sync(
 
     user = await crud.user.get_by_email(db, email=email)
     
+    is_new_user = False
     if not user:
-        # Create a Shadow User for the Social Provider
-        from app.models.user import User
-        import uuid
+        is_new_user = True
+        import random
+        import string
         
-        shadow_password = security.get_password_hash(str(uuid.uuid4()) + "Aa1!")
+        user_count_res = await db.execute(select(func.count(User.id)))
+        user_count = user_count_res.scalar() or 0
+        new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
         
+        # DOUBLE-CHECK UNIQUENESS (To be the Best of All Time)
+        check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
+        if check_existing.scalars().first():
+            # Collision detected (rare) -> Append unique entropy
+            entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
+        
+        # Create user without password (Social-Only)
         db_user = User(
             email=email,
-            password_hash=shadow_password,
+            sovereign_id=new_sovereign_id,
             full_name=name,
-            company_name="Social_Identity_Link",
             avatar_url=picture,
-            role="user"
+            role="user",
+            onboarding_completed=False
         )
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
         user = db_user
-        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email}")
+        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
+    else:
+        # Update avatar if missing or changed
+        if picture and (not user.avatar_url or user.avatar_url != picture):
+            user.avatar_url = picture
+            await db.commit()
+            await db.refresh(user)
     
     # AUDIT PILLAR: Log Social Sync
     client_ip = raw_request.client.host if raw_request.client else None
@@ -100,7 +125,12 @@ async def social_sync(
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.email, "user_id": user.id, "name": user.full_name or "Social User"},
+        data={
+            "sub": user.email, 
+            "user_id": user.id, 
+            "name": user.full_name or "User",
+            "sovereign_id": user.sovereign_id
+        },
         expires_delta=access_token_expires
     )
     refresh_token = security.create_refresh_token(
@@ -112,8 +142,36 @@ async def social_sync(
         "refresh_token": refresh_token,
         "token_type": "bearer",
         "user_id": str(user.id),
-        "user_name": user.full_name or "Elite User"
+        "user_name": user.full_name or "User",
+        "onboarding_completed": user.onboarding_completed,
+        "sovereign_id": user.sovereign_id
     }
+
+class OnboardingSubmit(BaseModel):
+    user_name: str
+    discovery_source: str
+    goals: str
+
+@router.post("/onboarding-submit")
+async def onboarding_submit(
+    data: OnboardingSubmit,
+    current_user: deps.User = Depends(deps.get_current_active_user),
+    db: AsyncSession = Depends(deps.get_db)
+):
+    """
+    Finalizes the sovereign enrollment with user survey data.
+    """
+    import json
+    current_user.full_name = data.user_name
+    current_user.onboarding_completed = True
+    current_user.survey_responses = json.dumps({
+        "discovery": data.discovery_source,
+        "goals": data.goals
+    })
+    
+    db.add(current_user)
+    await db.commit()
+    return {"success": True, "message": "Onboarding Complete. Welcome to the Network."}
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(

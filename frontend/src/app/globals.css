@@ -10,7 +10,6 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
-  /* 80px for fixed navbar */
 }
 
 body {
@@ -45,7 +44,6 @@ li.nav-item::after {
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  /* Pill shape */
   background: white;
   opacity: 0;
   transform: scale(0);
@@ -61,6 +59,63 @@ li.nav-item::after {
   to {
     transform: translateX(-50%);
   }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scan {
+  animation: scan 3s linear infinite;
+}
+
+.animate-shake {
+  animation: shake 0.2s ease-in-out;
+  animation-iteration-count: 2;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 
 .animate-infinite-scroll {

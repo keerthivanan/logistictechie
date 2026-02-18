@@ -2,19 +2,23 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_URL } from '@/lib/config';
 
 interface User {
     id: string;
+    sovereign_id: string;
     name: string;
     email: string;
     avatar_url?: string;
+    onboarding_completed: boolean;
 }
 
 interface AuthContextType {
     user: User | null;
-    login: (token: string, name: string) => void;
+    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string) => void;
     logout: () => void;
     loading: boolean;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -50,16 +54,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const fetchProfile = async (token: string) => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+            const res = await fetch(`${API_URL}/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
                 const data = await res.json();
                 setUser({
                     id: data.id,
+                    sovereign_id: data.sovereign_id,
                     name: data.full_name || data.email,
                     email: data.email,
-                    avatar_url: data.avatar_url
+                    avatar_url: data.avatar_url,
+                    onboarding_completed: data.onboarding_completed
                 });
             } else {
                 logout(); // Invalid token
@@ -71,25 +77,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const login = (token: string, name: string) => {
+    const refreshProfile = async () => {
+        const token = localStorage.getItem('token');
+        if (token) await fetchProfile(token);
+    };
+
+    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user_name', name);
-        // Set Secure Cookie for Middleware (World Best Practice)
         document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
-        // We need to fetch the full profile to get the ID immediately
+
+        setUser({
+            id: '', // Temporary until fetchProfile updates it
+            sovereign_id,
+            name,
+            email: '',
+            onboarding_completed
+        });
+
         fetchProfile(token);
     };
 
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user_name');
-        document.cookie = "token=; path=/; max-age=0"; // Clear Cookie
+        document.cookie = "token=; path=/; max-age=0";
         setUser(null);
         router.push('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );

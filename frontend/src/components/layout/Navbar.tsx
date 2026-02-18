@@ -177,8 +177,8 @@ export default function Navbar() {
                                     <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-black rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
                                 </Link>
                                 <div className="hidden lg:flex flex-col">
-                                    <span className="text-[10px] uppercase tracking-tighter text-gray-500 font-bold leading-none mb-1">Authenticated</span>
-                                    <span className="text-sm font-bold text-white leading-none">{user.name.split(' ')[0]}</span>
+                                    <span className="text-[9px] uppercase tracking-tighter text-zinc-500 font-black leading-none mb-1">Authenticated</span>
+                                    <span className="text-[10px] font-black text-white tracking-widest">{user.sovereign_id}</span>
                                 </div>
                                 <button
                                     onClick={logout}
@@ -197,7 +197,7 @@ export default function Navbar() {
                                     href="/signup"
                                     className="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-transform hover:scale-105"
                                 >
-                                    Start Free
+                                    Sign Up
                                 </Link>
                             </div>
                         )}

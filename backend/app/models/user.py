@@ -11,14 +11,20 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True, default=generate_uuid)
+    sovereign_id = Column(String, unique=True, index=True) # OMEGO-001
     email = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
+    password_hash = Column(String, nullable=True) # Optional for Social-Only nodes
     full_name = Column(String)
     company_name = Column(String)
     phone_number = Column(String)
-    avatar_url = Column(String) # For hosted avatars or Gravatar links
-    preferences = Column(String) # JSON stored as string for compatibility, or use JSON type
-    role = Column(String, default="user") # user, admin
+    avatar_url = Column(String) 
+    preferences = Column(String) 
+    role = Column(String, default="user") 
+    
+    # Onboarding Logic
+    onboarding_completed = Column(Boolean, default=False)
+    survey_responses = Column(String) # JSON of quiz/onboarding data
+    
     is_active = Column(Boolean, default=True)
     failed_login_attempts = Column(Integer, default=0)
     is_locked = Column(Boolean, default=False)

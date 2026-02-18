@@ -41,7 +41,7 @@ export default function DashboardPage() {
         const fetchDashboardData = async () => {
             try {
                 const token = localStorage.getItem('token')
-                const statsRes = await fetch(`${API_URL}/api/bookings/stats`, {
+                const statsRes = await fetch(`${API_URL}/api/dashboard/stats/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
 
@@ -72,12 +72,20 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-8 animate-fade-in-up">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                    Welcome back, {user?.name || 'User'}
-                </h1>
-                <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-xs font-mono animate-pulse">
-                    SYSTEM OPERATIONAL
+            <div className="flex justify-between items-end">
+                <div>
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-black tracking-widest text-zinc-500 uppercase">Sovereign Node</span>
+                        <span className="text-[10px] font-black text-white tracking-widest">{user?.sovereign_id}</span>
+                    </div>
+                    <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500 italic">
+                        Welcome back, {user?.name?.split(' ')[0] || 'User'}
+                    </h1>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                    <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-[10px] font-black tracking-widest animate-pulse">
+                        SATELLITE LINK ACTIVE
+                    </div>
                 </div>
             </div>
 

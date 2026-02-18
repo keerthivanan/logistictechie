@@ -59,42 +59,39 @@ async def submit_request(
         db.add(shipment)
         await db.flush() # Get ID
         
-        # 3. STRICT MODE: Fire n8n Webhook
+        # 3. STRICT MODE: Fire n8n Webhook (Optional Fallback for Demo)
         webhook_url = os.getenv('N8N_WEBHOOK_URL')
         if not webhook_url:
-            raise HTTPException(status_code=500, detail="System Error: Automation Bridge Missing (N8N_WEBHOOK_URL).")
-
-        try:
-            async with httpx.AsyncClient() as client:
-                n8n_res = await client.post(
-                    webhook_url,
-                    json={
-                        'type': 'NEW_SHIPMENT',
-                        'shipmentId': str(shipment.id),
-                        'uniqueId': unique_id,
-                        'userId': str(data.get('user_id')),
-                        'originCity': data.get('origin_city'),
-                        'originCountry': data.get('origin_country'),
-                        'destCity': data.get('dest_city'),
-                        'destCountry': data.get('dest_country'),
-                        'cargoType': data.get('cargo_type'),
-                        'weightKg': data.get('weight_kg'),
-                        'volumeCbm': data.get('volume_cbm'),
-                        'cargoValue': data.get('cargo_value'),
-                        'incoterms': data.get('incoterms'),
-                        'notes': data.get('notes'),
-                        'rawInput': data.get('raw_input')
-                    },
-                    timeout=8.0
-                )
-                
-                if n8n_res.status_code != 200:
-                    raise Exception(f"Automation Server rejected request (Status {n8n_res.status_code})")
+            print("[INFO] n8n Webhook URL missing. Skipping automation bridge and committing locally.")
+        else:
+            try:
+                async with httpx.AsyncClient() as client:
+                    n8n_res = await client.post(
+                        webhook_url,
+                        json={
+                            'type': 'NEW_SHIPMENT',
+                            'shipmentId': str(shipment.id),
+                            'uniqueId': unique_id,
+                            'userId': str(data.get('user_id')),
+                            'originCity': data.get('origin_city'),
+                            'originCountry': data.get('origin_country'),
+                            'destCity': data.get('dest_city'),
+                            'destCountry': data.get('dest_country'),
+                            'cargoType': data.get('cargo_type'),
+                            'weightKg': data.get('weight_kg'),
+                            'volumeCbm': data.get('volume_cbm'),
+                            'cargoValue': data.get('cargo_value'),
+                            'incoterms': data.get('incoterms'),
+                            'notes': data.get('notes'),
+                            'rawInput': data.get('raw_input')
+                        },
+                        timeout=8.0
+                    )
                     
-        except Exception as e:
-            # Rollback happens automatically on exception
-            print(f"[ERROR] Strict N8N Handshake Failed: {e}")
-            raise HTTPException(status_code=503, detail=f"Shipment Rejected: Automation System Unreachable. {str(e)}")
+                    if n8n_res.status_code != 200:
+                        print(f"[WARN] Automation Server rejected request (Status {n8n_res.status_code})")
+            except Exception as e:
+                print(f"[WARN] n8n Handshake Failed: {e}. Proceeding with local commit.")
         
         # 4. Success -> Commit
         await db.commit()

@@ -33,8 +33,10 @@ class CRUDUser:
         result = await db.execute(select(User).filter(User.id == user_id))
         db_user = result.scalars().first()
         if db_user:
+            # IMMUTABLE CORE PROTECTION (World Class Security)
+            protected_fields = ["id", "sovereign_id", "email"]
             for field, value in obj_in.items():
-                if hasattr(db_user, field):
+                if field not in protected_fields and hasattr(db_user, field):
                     setattr(db_user, field, value)
             await db.commit()
             await db.refresh(db_user)

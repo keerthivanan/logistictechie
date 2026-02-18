@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     
     # GOOGLE ENTERPRISE
     GOOGLE_CLOUD_PROJECT: str = "OMEGO-logistics-2026"
+    GOOGLE_CLIENT_ID: str = "852578606600-um6nsb17r0qm2hs5m7jmfhohtdcb9o27.apps.googleusercontent.com" # OMEGO Production Client
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_API_KEY: str = ""
 

@@ -70,97 +70,77 @@ export default function LoginPage() {
                     <p className="text-gray-400">Enter your credentials to access your dashboard.</p>
                 </div>
 
-                <div className="bg-zinc-900 border border-white/10 p-8 rounded-2xl shadow-2xl">
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                <div className="bg-zinc-900 border border-white/10 p-10 rounded-2xl shadow-2xl backdrop-blur-xl">
+                    <div className="space-y-8">
                         {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm text-center">
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm text-center animate-shake">
                                 {error}
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-bold mb-2 text-gray-300">Email Address</label>
-                            <input
-                                name="email"
-                                type="email"
-                                required
-                                className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors"
-                                placeholder="name@company.com"
-                            />
-                        </div>
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <label className="text-sm font-bold text-gray-300">Password</label>
-                                <Link href="#" className="text-sm text-gray-500 hover:text-white">Forgot password?</Link>
-                            </div>
-                            <input
-                                name="password"
-                                type="password"
-                                required
-                                className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors"
-                                placeholder="••••••••"
-                            />
+                        <div className="text-center space-y-4">
+                            <h2 className="text-xl font-black uppercase tracking-[0.2em] text-white">Sovereign Access</h2>
+                            <p className="text-xs text-zinc-500 uppercase tracking-widest leading-relaxed">Identity verification required to access the OMEGO logistics network.</p>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="block w-full bg-white text-black py-3 rounded-lg font-bold hover:bg-gray-200 transition-all text-center disabled:opacity-50"
-                        >
-                            {isLoading ? 'Signing In...' : 'Sign In'}
-                        </button>
+                        <div className="flex flex-col items-center space-y-6">
+                            <div className="w-full flex justify-center py-4 bg-white/5 rounded-xl border border-white/10 group hover:border-white/20 transition-all">
+                                <GoogleLogin
+                                    onSuccess={async (credentialResponse) => {
+                                        setIsLoading(true);
+                                        try {
+                                            if (!credentialResponse.credential) throw new Error("No Google Token received");
 
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/10"></span>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-zinc-900 px-2 text-gray-500 font-bold tracking-tighter">Enter the Sovereign Network</span>
-                            </div>
-                        </div>
+                                            const res = await fetch(`${API_URL}/api/auth/social-sync`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    id_token: credentialResponse.credential,
+                                                    provider: "google"
+                                                })
+                                            });
+                                            const data = await res.json();
+                                            if (res.ok) {
+                                                login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id);
 
-                        <div className="flex justify-center">
-                            <GoogleLogin
-                                onSuccess={async (credentialResponse) => {
-                                    setIsLoading(true);
-                                    try {
-                                        if (!credentialResponse.credential) throw new Error("No Google Token received");
-
-                                        const res = await fetch(`${API_URL}/api/auth/social-sync`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                id_token: credentialResponse.credential,
-                                                provider: "google"
-                                            })
-                                        });
-                                        const data = await res.json();
-                                        if (res.ok) {
-                                            login(data.access_token, data.user_name);
-                                            router.push('/dashboard');
-                                        } else {
-                                            throw new Error(data.detail || "Google Sign-In failed");
+                                                if (!data.onboarding_completed) {
+                                                    router.push('/onboarding');
+                                                } else {
+                                                    router.push('/dashboard');
+                                                }
+                                            } else {
+                                                throw new Error(data.detail || "Google Sign-In failed");
+                                            }
+                                        } catch (e: any) {
+                                            setError(e.message);
+                                        } finally {
+                                            setIsLoading(false);
                                         }
-                                    } catch (e: any) {
-                                        setError(e.message);
-                                    } finally {
-                                        setIsLoading(false);
-                                    }
-                                }}
-                                onError={() => {
-                                    setError('Google Sign-In Failed');
-                                }}
-                                theme="filled_black"
-                                shape="rectangular"
-                                width="350px"
-                                use_fedcm_for_prompt={true}
-                            />
-                        </div>
-                    </form>
+                                    }}
+                                    onError={() => {
+                                        setError('Google Sign-In Failed');
+                                    }}
+                                    theme="filled_black"
+                                    shape="rectangular"
+                                    width="320px"
+                                    use_fedcm_for_prompt={true}
+                                />
+                            </div>
 
-                    <div className="mt-6 pt-6 border-t border-white/10 text-center">
-                        <p className="text-gray-400 text-sm">
-                            Don't have an account? <Link href="/signup" className="text-white font-bold hover:underline">Sign up</Link>
+                            <div className="flex flex-col items-center gap-2">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]"></div>
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Encrypted Identity Vault Active</span>
+                                </div>
+                                <span className="text-[9px] text-zinc-600 font-medium">OMEGO OS v4.2 Deployment (Social Only)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-white/5 text-center">
+                        <p className="text-zinc-500 text-[11px] leading-tight font-medium">
+                            By accessing the network, you agree to the <br />
+                            <Link href="#" className="text-zinc-300 hover:text-white transition-colors underline decoration-white/10">Sovereign Data Protocols</Link>
                         </p>
                     </div>
                 </div >

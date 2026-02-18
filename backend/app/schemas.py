@@ -71,16 +71,20 @@ class Token(BaseModel):
     token_type: str
     user_id: str
     user_name: str
+    onboarding_completed: bool = False
+    sovereign_id: str
 
 class UserResponse(BaseModel):
     id: str
     email: str
+    sovereign_id: Optional[str] = None
     full_name: Optional[str] = None
     company_name: Optional[str] = None
     phone_number: Optional[str] = None
     avatar_url: Optional[str] = None
     preferences: Optional[str] = None
     role: str
+    onboarding_completed: bool = False
     created_at: Optional[datetime] = None
 # --- Booking Models ---
 class BookingCreate(BaseModel):

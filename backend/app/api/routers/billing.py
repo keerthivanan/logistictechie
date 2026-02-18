@@ -52,15 +52,7 @@ async def get_my_invoices(
                 "amount_raw": price
             })
             
-        # Add a mock subscription invoice just for "Realness"
-        invoices.append({
-            "id": "INV-SUB-2026",
-            "date": datetime.now().strftime("%b 01, %Y"),
-            "desc": "Sovereign AI Subscription (Feb)",
-            "amount": "$499.00",
-            "status": "Paid",
-            "amount_raw": 499.00
-        })
+        # Removed mock subscription invoice for 'Best of All Time' accuracy
 
         return {
             "success": True,
@@ -69,8 +61,8 @@ async def get_my_invoices(
                 "stats": {
                     "outstanding": f"${outstanding:,.2f}",
                     "last_payment": f"${last_payment:,.2f}",
-                    "credit_limit": "$100,000",
-                    "usage_percent": int((outstanding / 100000) * 100) if outstanding > 0 else 0
+                    "credit_limit": "$5,000",
+                    "usage_percent": int((outstanding / 5000) * 100) if outstanding > 0 else 0
                 }
             }
         }

@@ -77,101 +77,64 @@ export default function SignupPage() {
                     <p className="text-gray-400">Join the Sovereign Logistics Network.</p>
                 </div>
 
-                <div className="bg-zinc-900 border border-white/10 p-8 rounded-2xl shadow-2xl">
-                    <form className="space-y-6" onSubmit={handleSignup}>
-                        {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded-lg text-sm text-center">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-bold mb-2 text-gray-300">First Name</label>
-                                <input name="firstName" type="text" required className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold mb-2 text-gray-300">Last Name</label>
-                                <input name="lastName" type="text" required className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors" />
-                            </div>
+                <div className="bg-zinc-900 border border-white/10 p-10 rounded-2xl shadow-2xl backdrop-blur-xl">
+                    <div className="space-y-8 text-center">
+                        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
+                            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Enrollment Open</span>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-bold mb-2 text-gray-300">Work Email</label>
-                            <input name="email" type="email" required className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors" />
-                        </div>
+                        <h2 className="text-2xl font-black italic">Sovereign Identity.</h2>
+                        <p className="text-sm text-zinc-500 leading-relaxed">Join the most advanced logistics ecosystem in the world. Verify your identity with Google to begin.</p>
 
-                        <div>
-                            <label className="block text-sm font-bold mb-2 text-gray-300">Company Name</label>
-                            <input name="company" type="text" className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors" />
-                        </div>
+                        <div className="flex flex-col items-center space-y-6">
+                            <div className="w-full flex justify-center py-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+                                <GoogleLogin
+                                    onSuccess={async (credentialResponse) => {
+                                        setIsLoading(true);
+                                        try {
+                                            if (!credentialResponse.credential) throw new Error("No Google Token received");
 
-                        <div>
-                            <label className="block text-sm font-bold mb-2 text-gray-300">Password</label>
-                            <input name="password" type="password" required className="w-full bg-black border border-white/10 p-3 rounded-lg text-white focus:outline-none focus:border-white transition-colors" />
-                        </div>
+                                            const res = await fetch(`${API_URL}/api/auth/social-sync`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    id_token: credentialResponse.credential,
+                                                    provider: "google"
+                                                })
+                                            });
+                                            const data = await res.json();
+                                            if (res.ok) {
+                                                login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id);
 
-                        <div className="flex items-center">
-                            <input type="checkbox" required className="w-4 h-4 rounded border-gray-300 text-black focus:ring-white" />
-                            <span className="ml-2 text-sm text-gray-400">I agree to the <Link href="/legal/terms" className="text-white hover:underline">Terms</Link> and <Link href="/legal/privacy" className="text-white hover:underline">Privacy Policy</Link></span>
-                        </div>
-
-                        <button type="submit" disabled={isLoading} className="block w-full bg-white text-black py-3 rounded-lg font-bold hover:bg-gray-200 transition-all text-center disabled:opacity-50">
-                            {isLoading ? 'Creating Account...' : 'Create Account'}
-                        </button>
-
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/10"></span>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-zinc-900 px-2 text-gray-500 font-bold tracking-tighter">Enter the Sovereign Network</span>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-center">
-                            <GoogleLogin
-                                onSuccess={async (credentialResponse) => {
-                                    setIsLoading(true);
-                                    try {
-                                        if (!credentialResponse.credential) throw new Error("No Google Token received");
-
-                                        const res = await fetch(`${API_URL}/api/auth/social-sync`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                id_token: credentialResponse.credential,
-                                                provider: "google"
-                                            })
-                                        });
-                                        const data = await res.json();
-                                        if (res.ok) {
-                                            login(data.access_token, data.user_name);
-                                            router.push('/dashboard');
-                                        } else {
-                                            throw new Error(data.detail || "Google Sign-Up failed");
+                                                if (!data.onboarding_completed) {
+                                                    router.push('/onboarding');
+                                                } else {
+                                                    router.push('/dashboard');
+                                                }
+                                            } else {
+                                                throw new Error(data.detail || "Google Sign-In failed");
+                                            }
+                                        } catch (e: any) {
+                                            setError(e.message);
+                                        } finally {
+                                            setIsLoading(false);
                                         }
-                                    } catch (e: any) {
-                                        setError(e.message);
-                                    } finally {
-                                        setIsLoading(false);
-                                    }
-                                }}
-                                onError={() => {
-                                    setError('Google Sign-Up Failed');
-                                }}
-                                theme="filled_black"
-                                shape="rectangular"
-                                width="350px"
-                                use_fedcm_for_prompt={true}
-                            />
+                                    }}
+                                    onError={() => {
+                                        setError('Google Sign-In Failed');
+                                    }}
+                                    theme="filled_black"
+                                    shape="rectangular"
+                                    width="320px"
+                                />
+                            </div>
                         </div>
-                    </form>
 
-                    <div className="mt-6 pt-6 border-t border-white/10 text-center">
-                        <p className="text-gray-400 text-sm">
-                            Already have an account? <Link href="/login" className="text-white font-bold hover:underline">Sign in</Link>
-                        </p>
+                        <div className="pt-4 flex items-center justify-center space-x-2">
+                            <span className="text-zinc-600 text-[11px] font-bold uppercase tracking-tighter">Already a citizen?</span>
+                            <Link href="/login" className="text-white text-[11px] font-black uppercase tracking-tighter hover:underline">Sign In</Link>
+                        </div>
                     </div>
                 </div >
             </div >

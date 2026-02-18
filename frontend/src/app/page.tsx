@@ -63,14 +63,14 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
-            Built for data-obsessed teams. OMEGO is the only platform that unifies traditional freight forwarding with the new wave of Generative AI intelligence.
+            Built for data-obsessed shippers. OMEGO is the only platform that unifies traditional freight forwarding with the new wave of Sovereign AI intelligence.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up delay-300">
             <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
               Launch Operations <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/demo" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center">
+            <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center">
               View Live Demo
             </Link>
           </div>
@@ -311,14 +311,14 @@ export default function Home() {
             Ready to dominate the <br /> new logistics landscape?
           </h2>
           <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-            Join 10,000+ scaling teams tracking their true performance across search engines and AI platforms today.
+            Join 2,000+ forward-thinking teams orchestrating their global trade across the OMEGO Sovereign Network today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup" className="px-10 py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-gray-200 transition-all">
               Start Free Trial
             </Link>
             <Link href="/contact" className="px-10 py-5 bg-transparent border border-white/30 text-white text-xl font-bold rounded-full hover:bg-white/10 transition-all">
-              Talk to Sales
+              Talk to Specialist
             </Link>
           </div>
         </div>

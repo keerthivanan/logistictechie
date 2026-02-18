@@ -173,7 +173,13 @@ export default function SettingsPage() {
                                         className="w-full bg-black border border-white/5 p-4 rounded-xl text-white focus:border-white transition-all outline-none font-medium"
                                     />
                                 </div>
-                                <div className="col-span-2">
+                                <div className="col-span-2 md:col-span-1">
+                                    <label className="block text-[10px] font-bold mb-2 text-zinc-500 uppercase tracking-widest">Sovereign ID (Immutable)</label>
+                                    <div className="w-full bg-zinc-950 border border-white/5 p-4 rounded-xl text-blue-500 font-black tracking-widest italic">
+                                        {user?.sovereign_id}
+                                    </div>
+                                </div>
+                                <div className="col-span-2 md:col-span-1">
                                     <label className="block text-[10px] font-bold mb-2 text-zinc-500 uppercase tracking-widest">Email (Immutable)</label>
                                     <div className="w-full bg-zinc-950 border border-white/5 p-4 rounded-xl text-zinc-600 font-medium">
                                         {user?.email}
@@ -291,14 +297,28 @@ export default function SettingsPage() {
                         <div className="space-y-4">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-zinc-400">Security Score</span>
-                                <span className="font-bold text-green-500">98%</span>
+                                <span className="font-bold text-green-500">
+                                    {(60 + (user?.phone_number ? 20 : 0) + (user?.avatar_url ? 18 : 0))}%
+                                </span>
                             </div>
                             <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-green-500 h-full w-[98%] text-white"></div>
+                                <div
+                                    className="bg-green-500 h-full transition-all duration-1000"
+                                    style={{ width: `${60 + (user?.phone_number ? 20 : 0) + (user?.avatar_url ? 18 : 0)}%` }}
+                                ></div>
+                            </div>
+                            <div className="flex justify-between items-center text-sm pt-4 border-t border-white/5 group">
+                                <div className="flex flex-col">
+                                    <span className="text-zinc-400">Sovereign ID</span>
+                                    <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter">Permanent Network Identity</span>
+                                </div>
+                                <span className="font-mono text-sm text-white font-black tracking-widest bg-white/5 px-3 py-1 rounded-lg border border-white/10 group-hover:border-white/20 transition-all">
+                                    {user?.sovereign_id}
+                                </span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-zinc-400">Identity Guard</span>
-                                <span className="font-bold text-blue-500">Sovereign</span>
+                                <span className="font-bold text-blue-500">Sovereign Link</span>
                             </div>
                         </div>
                     </div>
