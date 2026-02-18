@@ -239,7 +239,9 @@ async def login_for_access_token(
         "refresh_token": refresh_token,
         "token_type": "bearer",
         "user_id": str(user.id),
-        "user_name": user.full_name or "User"
+        "user_name": user.full_name or "User",
+        "sovereign_id": user.sovereign_id,
+        "onboarding_completed": user.onboarding_completed or False
     }
 
 @router.post("/refresh", response_model=Token)
@@ -270,7 +272,9 @@ async def refresh_access_token(
             "refresh_token": new_refresh_token,
             "token_type": "bearer",
             "user_id": str(user.id),
-            "user_name": user.full_name or "User"
+            "user_name": user.full_name or "User",
+            "sovereign_id": user.sovereign_id,
+            "onboarding_completed": user.onboarding_completed or False
         }
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
