@@ -2,7 +2,7 @@
 **Status:** WIRED & ACTIVE
 **Inspector:** ANTIGRAVITY
 
-You asked: *"Check each and every button. Does it work like Freightos?"*
+You asked: *"Check each and every button. Does it work like OMEGO?"*
 I have mapped the **Frontend Buttons** to the **Backend Brain**.
 
 ---
@@ -44,5 +44,5 @@ I have mapped the **Frontend Buttons** to the **Backend Brain**.
 When you click, the system *thinks*.
 It is not just a picture. It is a **Machine.**
 
-**It works exactly like Freightos.**
+**It works exactly like OMEGO.**
 **But faster.** 🔱

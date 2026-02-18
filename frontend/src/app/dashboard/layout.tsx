@@ -29,7 +29,7 @@ export default function DashboardLayout({
                             <div className="w-2 h-4 bg-white/70 rounded-sm"></div>
                             <div className="w-2 h-4 bg-white/40 rounded-sm"></div>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">FREIGHTOS</span>
+                        <span className="text-xl font-bold tracking-tight text-white">OMEGO</span>
                     </Link>
                 </div>
 
@@ -41,8 +41,8 @@ export default function DashboardLayout({
                                 key={item.name}
                                 href={item.href}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive
-                                        ? 'bg-white text-black font-bold'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                    ? 'bg-white text-black font-bold'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/10'
                                     }`}
                             >
                                 <item.icon className="w-5 h-5" />

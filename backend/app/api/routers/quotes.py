@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from typing import List, Dict
 from app.schemas import RateRequest, OceanQuote
+from app.models.quote import Quote
 from app.services.ocean.maersk import MaerskClient
 from app.services.sovereign import sovereign_engine
 from app.services.sentinel import sentinel
@@ -178,18 +179,84 @@ async def get_real_ocean_quotes(
         prophetic_quote["metadata"] = {"quantum_signature": sentinel.quantum_sign_quote("AI-PROPHECY", prophetic_price)}
         quotes.insert(0, prophetic_quote) # The Legend always starts the list
     
-    # FINAL ID INJECTION
+    # FINAL ID INJECTION & PERSISTENCE
+    db_quotes = []
+    import json
+    
     for q in quotes:
         if isinstance(q, dict):
-            q["id"] = generate_quote_id(q)
+            # Ensure ID exists
+            if "id" not in q:
+                q["id"] = generate_quote_id(q)
+            
+            # Map to DB Model
+            db_quote = Quote(
+                id=q["id"],
+                origin=q["origin_locode"],
+                destination=q["dest_locode"],
+                container_type=q["container_type"],
+                carrier_name=q["carrier_name"],
+                price=float(q["price"]),
+                currency=q["currency"],
+                transit_days=q["transit_time_days"],
+                valid_until=q["expiration_date"],
+                risk_score=q.get("risk_score", 0.0),
+                carbon_emissions=q.get("carbon_emissions", 0.0),
+                customs_duty_estimate=q.get("customs_duty_estimate", 0.0),
+                port_congestion_index=q.get("port_congestion_index", 0.0),
+                is_real=q.get("is_real_api_rate", False),
+                source_endpoint=q.get("source_endpoint", "Sovereign Engine"),
+                request_data=q,  # Store full JSON for reconstruction
+                user_id=str(current_user.id) if current_user else None
+            )
+            db_quotes.append(db_quote)
+            
+            # Also update the q dict to verify ID is present for frontend
+            q["id"] = db_quote.id
         else:
-            # Assuming it's an OceanQuote object
-            q.id = generate_quote_id(q.model_dump())
-    
+            # Assuming it's an OceanQuote object (Maersk)
+            q_dict = q.model_dump()
+            q_id = generate_quote_id(q_dict)
+            q.id = q_id
+            
+            db_quote = Quote(
+                id=q_id,
+                origin=q_dict["origin_locode"],
+                destination=q_dict["dest_locode"],
+                container_type=q_dict["container_type"],
+                carrier_name=q_dict["carrier_name"],
+                price=float(q_dict["price"]),
+                currency=q_dict["currency"],
+                transit_days=q_dict["transit_time_days"],
+                valid_until=q_dict["expiration_date"],
+                is_real=True,
+                source_endpoint="Maersk Spot API",
+                request_data=q_dict,
+                user_id=str(current_user.id) if current_user else None
+            )
+            db_quotes.append(db_quote)
+
+    # PERSIST TO LEDGER
+    try:
+        print(f"[DEBUG] Attempting to persist {len(db_quotes)} quotes to DB...")
+        # Merge/Upsert to avoid ID conflicts if same quote generated twice
+        for dbq in db_quotes:
+            print(f"[DEBUG] Merging Quote ID: {dbq.id}")
+            await db.merge(dbq)
+        await db.commit()
+        print("[DEBUG] Persistence Successful COMMIT complete.")
+    except Exception as e:
+        print(f"[CRITICAL ERROR] Quote Persistence Failed: {e}")
+        # Print stack trace to stderr
+        import traceback
+        traceback.print_exc()
+        await db.rollback()
+
     return {
         "quotes": quotes,
         "carrier_count": len(quotes)
     }
+
 @router.post("/calculate", response_model=Dict)
 async def calculate_landed_cost(request: RateRequest):
     """

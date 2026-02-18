@@ -30,22 +30,24 @@ export default function ContactPage() {
                             <div className="flex items-start space-x-4">
                                 <MapPin className="w-6 h-6 text-white mt-1" />
                                 <div>
-                                    <h3 className="font-bold text-xl mb-2">Headquarters</h3>
-                                    <p className="text-gray-400">123 Logistics Way<br />New York, NY 10001<br />USA</p>
+                                    <h3 className="font-bold text-xl mb-2">Global Headquarters</h3>
+                                    <p className="text-gray-400">King Abdullah Financial District<br />Riyadh, Saudi Arabia 13519</p>
+                                    <p className="text-gray-500 text-xs mt-2">Innovation Hub: San Francisco, CA</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
                                 <Phone className="w-6 h-6 text-white mt-1" />
                                 <div>
-                                    <h3 className="font-bold text-xl mb-2">Phone</h3>
-                                    <p className="text-gray-400">+1 (888) 555-0123</p>
+                                    <h3 className="font-bold text-xl mb-2">24/7 Support Line</h3>
+                                    <p className="text-gray-400 font-mono">+966 11 460 0000</p>
+                                    <p className="text-gray-500 text-sm font-mono">+1 (415) 999-0101 (US)</p>
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">
                                 <Mail className="w-6 h-6 text-white mt-1" />
                                 <div>
-                                    <h3 className="font-bold text-xl mb-2">Email</h3>
-                                    <p className="text-gray-400">support@freightos.com</p>
+                                    <h3 className="font-bold text-xl mb-2">Secure Channel</h3>
+                                    <p className="text-gray-400 font-mono">mission@omego.ai</p>
                                 </div>
                             </div>
                         </div>

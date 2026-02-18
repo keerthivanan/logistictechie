@@ -2,25 +2,26 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from collections import defaultdict
-from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references, dashboard, vessels, status, billing
+from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references, dashboard, vessels, billing, marketplace, forwarders
 from app.core.config import settings
-from app.db.session import engine, Base
 from contextlib import asynccontextmanager
+
+import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # SOVEREIGN CONSTITUTION CHECK
-    if not settings.SECRET_KEY:
-        print("[FATAL] SECRET_KEY is missing or insecure. System halted.")
-        # We don't exit(1) immediately to allow the dev server to show the error if appropriate,
-        # but the lack of key will naturally crash jwt operations.
-    
     # Sovereign Database Handshake
-    from app.services.knowledge import knowledge_oracle
-    await knowledge_oracle.initialize()
-    
-    print("[SYSTEM] Phoenix Logistics OS Backend Initialized.")
-    yield
+    try:
+        from app.services.knowledge import knowledge_oracle
+        await knowledge_oracle.initialize()
+        
+        print(f"[SYSTEM] OMEGO LOGISTICS OS Backend Initialized.")
+        print(f"[SYSTEM] CORS WHITELIST: {settings.ALLOWED_ORIGINS}")
+        yield
+    except asyncio.CancelledError:
+        print(f"[SYSTEM] OMEGO LOGISTICS OS: Shutdown Signal Received.")
+    finally:
+        print(f"[SYSTEM] OMEGO LOGISTICS OS: Securely Offline.")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,48 +30,51 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# SECURITY HEADERS MIDDLEWARE
-@app.middleware("http")
-async def add_security_headers(request: Request, call_next):
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    return response
-
-# Rate Limiting Logic (Simple in-memory for Best-of-All-Time efficiency)
+# Rate Limiting Logic (World-Class Efficiency)
 user_rates = defaultdict(list)
 
+from fastapi.responses import JSONResponse
+
+# SECURITY HEADERS MIDDLEWARE (Standard implementation to avoid BaseHTTPMiddleware overhead)
 @app.middleware("http")
-async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host
-    current_time = time.time()
+async def security_and_rate_limit(request: Request, call_next):
+    client_ip = request.client.host if request.client else "127.0.0.1"
     
-    # G.O.A.T. BYPASS: Allow exhaustive local audit/verification
-    if client_ip in ["127.0.0.1", "::1"]:
+    # 1. Rate Limit Check (Bypass for Localhost)
+    if client_ip not in ["127.0.0.1", "::1"]:
+        current_time = time.time()
+        # Clean old marks
+        user_rates[client_ip] = [t for t in user_rates[client_ip] if current_time - t < 60]
+        if len(user_rates[client_ip]) >= settings.RATE_LIMIT_PER_MINUTE:
+            return JSONResponse(
+                status_code=429, 
+                content={"detail": "Sovereign Threshold Exceeded."}
+            )
+
+        user_rates[client_ip].append(current_time)
+
+    # 2. Process Request
+    try:
         response = await call_next(request)
+        
+        # 3. Add Security Headers (Skip for non-responses)
+        if hasattr(response, "headers"):
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
         return response
-
-    if len(user_rates[client_ip]) >= settings.RATE_LIMIT_PER_MINUTE:
-        raise HTTPException(status_code=429, detail="Too many requests. Oracle threshold reached.")
-    
-    user_rates[client_ip].append(current_time)
-    response = await call_next(request)
-    return response
-
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    except asyncio.CancelledError:
+        # Expected on Sovereign Shutdown
+        raise
+    except Exception as e:
+        # LOG AND RERISE (Let FastAPI exception handlers handle it)
+        print(f"[MIDDLEWARE_CRITICAL] Exception caught: {e}")
+        raise e
 
 # Mount the 'Honest' Routers
-# Mount references first to avoid greedy matching if any
 app.include_router(references.router, prefix="/api/references", tags=["Reference Data"])
 app.include_router(quotes.router, prefix="/api/quotes", tags=["Ocean Quotes"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
@@ -80,8 +84,9 @@ app.include_router(ai.router, prefix="/api/ai", tags=["Creative Cortex AI"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Document AI"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(vessels.router, prefix="/api/vessels", tags=["Maritime Assets"])
-app.include_router(status.router, prefix="/api/status", tags=["Sovereign Status"])
 app.include_router(billing.router, prefix="/api/billing", tags=["Sovereign Billing"])
+app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace"])
+app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarders"])
 
 @app.get("/health")
 @app.get("/")
@@ -91,3 +96,14 @@ def health_check():
         "mode": "TRUE_OCEAN_PROTOCOL",
         "note": "This system connects to Real APIs only. Authentication required."
     }
+
+# CORS CONFIGURATION (G.O.A.T. Security - OUTERMOST)
+# Must be added AFTER all @app.middleware to be the OUTERMOST for requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)

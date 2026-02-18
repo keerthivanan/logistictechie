@@ -20,7 +20,7 @@ To achieve **"Supreme Command"** status (Connectivity Score: 100/100), you must 
 **Required for:** 3D Global Tracking, Address Autocomplete, Document AI (OCR).
 
 1.  **Go to:** [Google Cloud Console](https://console.cloud.google.com/)
-2.  **Create Project:** Name it `phoenix-logistics-2026`.
+2.  **Create Project:** Name it `OMEGO-logistics-2026`.
 3.  **Enable APIs:** Search for and enable:
     *   Maps JavaScript API
     *   Places API (New)

@@ -41,19 +41,11 @@ export default function GlobalNetworkMap() {
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
 
-            {/* World Map SVG (Simplified) */}
-            <svg viewBox="0 0 100 50" className="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-                <path
-                    d="M18,12 C15,15 10,18 8,22 C10,25 15,28 15,35 C15,40 20,45 25,42 C28,40 32,35 30,25 C35,22 40,15 35,10 C30,8 20,10 18,12 Z
-                       M45,10 C42,12 40,18 42,22 C45,25 50,25 55,20 C60,18 55,10 50,8 C48,8 46,9 45,10 Z
-                       M65,15 C62,18 60,25 62,30 C65,35 70,35 75,30 C80,25 78,15 70,12 C68,12 66,13 65,15 Z
-                       M85,35 C82,38 80,45 82,48 C85,50 90,48 92,45 C94,40 90,32 85,35 Z"
-                    fill="currentColor"
-                    className="text-white"
-                />
-                {/* Abstract Continents approximation for style */}
-                <path d="M10,10 Q20,5 30,15 T50,15 T70,15 T90,20 V40 H10 Z" fill="none" stroke="none" />
-            </svg>
+            {/* Unsplash Background - "Connected World" */}
+            <div
+                className="absolute inset-0 bg-cover bg-center opacity-40 pointer-events-none mix-blend-screen grayscale contrast-125"
+                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop")' }}
+            ></div>
 
             {/* Connection Lines */}
             <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full preserve-3d">

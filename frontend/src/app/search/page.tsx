@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, MapPin, ArrowRight, Package, Calendar, DollarSign, Truck, Box, X, Info, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { API_URL } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
+import Footer from '@/components/layout/Footer'
 
 // --- Types ---
 type Location = {
@@ -35,7 +37,7 @@ export default function SearchPage() {
   const router = useRouter()
 
   // --- State ---
-  const [activePopup, setActivePopup] = useState<'origin' | 'destination' | 'load' | 'goods' | null>(null)
+  const [activePopup, setActivePopup] = useState<'origin' | 'destination' | 'load' | 'goods' | 'vessels' | 'locations' | 'commodities' | null>(null)
 
   const [origin, setOrigin] = useState<Location>({
     type: 'Factory/Warehouse',
@@ -99,8 +101,165 @@ export default function SearchPage() {
 
   // --- Popups ---
 
+  // --- Maersk Components ---
+  const MaerskToolCard = ({ title, desc, icon, onClick }: any) => (
+    <div onClick={onClick} className="bg-black border border-white/10 rounded-xl p-6 cursor-pointer hover:border-blue-500/50 hover:bg-zinc-900 transition-all group">
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2 bg-white/5 rounded-lg group-hover:bg-blue-500/10 transition-colors">
+          {icon}
+        </div>
+        <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-blue-400 transition-colors" />
+      </div>
+      <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+      <p className="text-sm text-gray-400">{desc}</p>
+    </div>
+  )
+
+  const ToolModal = ({ title, onClose, children }: any) => (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-zinc-900 border border-white/10 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
+      >
+        <div className="flex justify-between items-center p-6 border-b border-white/10">
+          <h3 className="text-xl font-bold text-white">{title}</h3>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <X className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  )
+
+  const VesselList = () => {
+    const [vessels, setVessels] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+      fetch(`${API_URL}/api/vessels/active`)
+        .then(res => res.json())
+        .then(data => {
+          setVessels(data.vessels || [])
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }, [])
+
+    if (loading) return <div className="text-center py-10 text-gray-400">Syncing with Global AIS Network...</div>
+
+    return (
+      <div className="space-y-3">
+        {vessels.map((v, i) => (
+          <div key={i} className="flex justify-between items-center bg-black/50 p-4 rounded-lg border border-white/5">
+            <div className="flex items-center space-x-3">
+              <Truck className="w-5 h-5 text-blue-500" />
+              <div>
+                <div className="font-bold text-white">{v.name}</div>
+                <div className="text-xs text-gray-500">IMO: {v.imo} | Flag: {v.flag}</div>
+              </div>
+            </div>
+            <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">ACTIVE</div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const LocationSearch = () => {
+    const [query, setQuery] = useState('')
+    const [results, setResults] = useState<any[]>([])
+    const [searching, setSearching] = useState(false)
+
+    const handleSearch = async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(`${API_URL}/api/references/ports/search?q=${query}`)
+        const data = await res.json()
+        setResults(data.results || [])
+      } catch (e) { }
+      setSearching(false)
+    }
+
+    return (
+      <div>
+        <div className="flex space-x-2 mb-6">
+          <input
+            className="flex-1 bg-black border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+            placeholder="Enter city or port code..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+          />
+          <button onClick={handleSearch} className="bg-blue-600 text-white px-6 rounded-lg font-bold">Search</button>
+        </div>
+        <div className="space-y-2">
+          {searching ? (
+            <div className="text-center text-gray-500">Scanning Logistics Network...</div>
+          ) : results.length > 0 ? (
+            results.map((r, i) => (
+              <div key={i} className="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-white/5">
+                <div>
+                  <div className="font-bold text-white">{r.name}</div>
+                  <div className="text-xs text-gray-500">{r.country} | {r.code}</div>
+                </div>
+                <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300 uppercase">{r.type}</span>
+              </div>
+            ))
+          ) : <div className="text-center text-gray-500 text-sm">Enter a location to search</div>}
+        </div>
+      </div>
+    )
+  }
+
+  const CommoditySearch = () => {
+    const [query, setQuery] = useState('')
+    const [results, setResults] = useState<any[]>([])
+    const [searching, setSearching] = useState(false)
+
+    const handleSearch = async () => {
+      setSearching(true)
+      try {
+        const res = await fetch(`${API_URL}/api/references/commodities/search?q=${query}`)
+        const data = await res.json()
+        setResults(data.results || [])
+      } catch (e) { }
+      setSearching(false)
+    }
+
+    return (
+      <div>
+        <div className="flex space-x-2 mb-6">
+          <input
+            className="flex-1 bg-black border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none"
+            placeholder="Enter commodity (e.g. Copper)"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+          />
+          <button onClick={handleSearch} className="bg-blue-600 text-white px-6 rounded-lg font-bold">Check</button>
+        </div>
+        <div className="space-y-2">
+          {searching ? (
+            <div className="text-center text-gray-500">Classifying...</div>
+          ) : results.length > 0 ? (
+            results.map((r, i) => (
+              <div key={i} className="flex justify-between items-center bg-black/30 p-3 rounded-lg border border-white/5">
+                <div>
+                  <div className="font-bold text-white">{r.commodityName}</div>
+                  <div className="text-xs text-gray-500">Code: {r.commodityCode}</div>
+                </div>
+              </div>
+            ))
+          ) : <div className="text-center text-gray-500 text-sm">Search for HS Codes</div>}
+        </div>
+      </div>
+    )
+  }
+
   const LocationPopup = ({ title, data, setData }: { title: string, data: Location, setData: (d: Location) => void }) => (
-    <div className="absolute top-full left-0 mt-2 w-full max-w-[500px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-6 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div className="absolute top-full left-0 mt-2 w-[450px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-6 animate-in fade-in slide-in-from-top-2 duration-200">
       <div className="flex justify-between items-center mb-6">
         <h3 className="font-bold text-xl tracking-tight text-gray-900">{title}</h3>
         <button onClick={() => setActivePopup(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors group">
@@ -110,7 +269,7 @@ export default function SearchPage() {
 
       <div className="grid grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Type</label>
+          <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Type</label>
           <div className="relative group">
             <select
               value={data.type}
@@ -126,7 +285,7 @@ export default function SearchPage() {
           </div>
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Country</label>
+          <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Country</label>
           <div className="relative group">
             <select
               value={data.country}
@@ -148,7 +307,7 @@ export default function SearchPage() {
       </div>
 
       <div className="mb-6">
-        <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Address / City</label>
+        <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Address / City</label>
         <div className="relative">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -194,6 +353,11 @@ export default function SearchPage() {
           </h1>
           <p className="text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto">
             Start searching to compare, book and manage your freight.
+            <br />
+            <span className="text-sm mt-4 block text-gray-500">
+              Once you make your first booking, we make it easy to manage your shipment.
+              <Link href="/demo" className="text-blue-500 hover:text-blue-400 ml-1 font-medium hover:underline">Learn more</Link>
+            </span>
           </p>
 
           {/* Search Form Container */}
@@ -282,7 +446,7 @@ export default function SearchPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.98 }}
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-full left-0 mt-2 w-full max-w-[650px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                      className="absolute top-full left-0 mt-2 w-[600px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                     >
                       {/* Header */}
                       <div className="flex justify-between items-center p-6 border-b border-gray-100">
@@ -333,7 +497,7 @@ export default function SearchPage() {
 
                             <div className="flex space-x-6">
                               <div className="w-24">
-                                <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider"># of units</label>
+                                <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider"># of units</label>
                                 <input
                                   type="number"
                                   value={load.units}
@@ -342,7 +506,7 @@ export default function SearchPage() {
                                 />
                               </div>
                               <div className="flex-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Container Type</label>
+                                <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Container Type</label>
                                 <div className="flex rounded-lg border border-gray-200 p-1 bg-gray-50">
                                   {['20FT', '40FT', '40HC', '45HC'].map((type) => (
                                     <button
@@ -368,20 +532,20 @@ export default function SearchPage() {
                           <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-6">
                               <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Package Type</label>
+                                <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Package Type</label>
                                 <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-medium focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all cursor-pointer bg-white">
                                   <option>Pallets</option>
                                   <option>Boxes/Crates</option>
                                 </select>
                               </div>
                               <div>
-                                <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Units</label>
+                                <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Units</label>
                                 <input type="number" defaultValue="1" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-medium focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                               </div>
                             </div>
                             <div className="flex gap-4 items-end">
                               <div className="flex-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Dimensions (L x W x H)</label>
+                                <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Dimensions (L x W x H)</label>
                                 <div className="flex border border-gray-200 rounded-lg overflow-hidden focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                                   <input type="text" placeholder="L" className="w-full p-2.5 text-sm border-r outline-none font-medium" />
                                   <input type="text" placeholder="W" className="w-full p-2.5 text-sm border-r outline-none font-medium" />
@@ -430,7 +594,7 @@ export default function SearchPage() {
                       <motion.div
                         initial={{ opacity: 0, y: 10, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.98 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="absolute top-full right-0 mt-2 w-full max-w-[480px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                        className="absolute top-full right-0 mt-2 w-[400px] bg-white text-black rounded-xl shadow-2xl border border-gray-200 z-50 p-0 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
                       >
                         <div className="flex justify-between items-center p-6 border-b border-gray-100">
                           <h3 className="font-bold text-lg text-gray-900">Goods Details</h3>
@@ -441,7 +605,7 @@ export default function SearchPage() {
 
                         <div className="p-6">
                           <div className="mb-6">
-                            <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Total Value</label>
+                            <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Total Value</label>
                             <div className="flex border border-gray-200 rounded-lg overflow-hidden items-center px-4 py-1 focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
                               <span className="text-gray-400 font-bold mr-3 text-sm">USD</span>
                               <input
@@ -477,7 +641,7 @@ export default function SearchPage() {
                           </div>
 
                           <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wider">Ready Date</label>
+                            <label className="text-sm font-bold text-gray-500 uppercase block mb-2 tracking-wider">Ready Date</label>
                             <div className="relative">
                               <input type="date" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm font-medium focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all uppercase text-gray-600" />
                               <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -511,6 +675,61 @@ export default function SearchPage() {
           </div>
         </div>
       </section>
+
+      {/* Maersk Power Tools Section */}
+      <section className="py-12 bg-zinc-900/50 border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Maersk Intelligence Network</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* 1. VESSEL TRACKER */}
+            <MaerskToolCard
+              title="Active Fleet"
+              desc="Real-time position of 17,990+ Vessels."
+              icon={<Truck className="w-6 h-6 text-blue-400" />}
+              onClick={() => setActivePopup('vessels')}
+            />
+
+            {/* 2. LOCATION FINDER */}
+            <MaerskToolCard
+              title="Port Lookup"
+              desc="Search 50,000+ Global Logistics Nodes."
+              icon={<MapPin className="w-6 h-6 text-green-400" />}
+              onClick={() => setActivePopup('locations')}
+            />
+
+            {/* 3. COMMODITY CHECKER */}
+            <MaerskToolCard
+              title="Commodity Class"
+              desc="Verify HS Codes & Restricted Goods."
+              icon={<Box className="w-6 h-6 text-purple-400" />}
+              onClick={() => setActivePopup('commodities')}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* MODALS FOR TOOLS */}
+      <AnimatePresence>
+        {activePopup === 'vessels' && (
+          <ToolModal title="Global Active Fleet" onClose={() => setActivePopup(null)}>
+            <VesselList />
+          </ToolModal>
+        )}
+        {activePopup === 'locations' && (
+          <ToolModal title="Global Port Search" onClose={() => setActivePopup(null)}>
+            <LocationSearch />
+          </ToolModal>
+        )}
+        {activePopup === 'commodities' && (
+          <ToolModal title="Commodity Classifier" onClose={() => setActivePopup(null)}>
+            <CommoditySearch />
+          </ToolModal>
+        )}
+      </AnimatePresence>
 
       {/* Features Grid */}
       <section className="py-20 bg-zinc-950 border-t border-white/5">
@@ -566,7 +785,7 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* Freightos Credit */}
+            {/* Omego Credit */}
             <div className="bg-black border border-white/10 rounded-2xl p-8 hover:border-white/30 transition-all">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Credit Line</h3>
@@ -586,11 +805,7 @@ export default function SearchPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black border-t border-white/10 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-gray-500 text-sm">© 2011-2026 Freightos Ltd</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

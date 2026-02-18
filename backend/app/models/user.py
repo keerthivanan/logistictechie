@@ -27,4 +27,11 @@ class User(Base):
     # Relationships
     bookings = relationship("Booking", back_populates="user")
     activities = relationship("UserActivity", back_populates="user")
+    # quotes = relationship("Quote", back_populates="user") # Optional: Add back_populates in Quote if needed
+
+    
+    # Marketplace Relationships
+    # Use string references to allow late-binding and avoid circular imports
+    forwarder_profile = relationship("Forwarder", uselist=False, back_populates="user")
+    shipment_requests = relationship("ShipmentRequest", back_populates="user")
 

@@ -6,7 +6,7 @@ You asked: *"I don't know Linux. Why not use AWS? Is that perfect?"*
 **The Answer:** YES. AWS is the "Perfect Choice" for Kings.
 But you must choose the **"Managed Services"** (where AWS handles the Linux for you).
 
-Here is the **No-Linux AWS Stack** for PHOENIX OS:
+Here is the **No-Linux AWS Stack** for OMEGO OS:
 
 ---
 

@@ -4,14 +4,22 @@ import { useState, useEffect } from 'react'
 import { Search, Filter, Loader2, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import { API_URL } from '@/lib/config'
+import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 
 export default function ShipmentsPage() {
+    const { user, logout, loading: authLoading } = useAuth()
+    const router = useRouter()
     const [shipments, setShipments] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetchShipments()
-    }, [])
+        if (!authLoading && !user) {
+            router.push('/login')
+            return
+        }
+        if (user) fetchShipments()
+    }, [user, authLoading])
 
     const fetchShipments = async () => {
         try {
@@ -19,6 +27,10 @@ export default function ShipmentsPage() {
             const res = await fetch(`${API_URL}/api/bookings/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
+            if (res.status === 401) {
+                logout()
+                return
+            }
             const data = await res.json()
             if (data.success) {
                 setShipments(data.data)

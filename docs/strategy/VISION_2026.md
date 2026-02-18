@@ -25,7 +25,7 @@ Here is the difference. The Winners of 2026 will do these 3 things:
 *   User types "Container tracking" into a search bar.
 
 **The 2026 Choice (Voice Command):**
-*   User speaks to the phone: *"Phoenix, where is my shipment?"*
+*   User speaks to the phone: *"OMEGO, where is my shipment?"*
 *   **The System:** Answers back: *"It is in the Red Sea, delayed by 2 days due to congestion."*
 *   **Tech:** OpenAI Realtime API (Voice Mode).
 

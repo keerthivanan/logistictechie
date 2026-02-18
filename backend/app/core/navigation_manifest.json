@@ -3,7 +3,7 @@
         {
             "path": "/",
             "name": "Landing Page",
-            "description": "Home of Phoenix Logistics OS"
+            "description": "Home of OMEGO LOGISTICS OS"
         },
         {
             "path": "/quote",
@@ -42,7 +42,7 @@
         },
         {
             "path": "/signup",
-            "name": "Join Phoenix",
+            "name": "Join OMEGO",
             "description": "Create a new logistics account"
         }
     ],

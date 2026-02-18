@@ -4,9 +4,9 @@ import { ArrowUpRight, Package, Truck, AlertCircle, History, ExternalLink, Arrow
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
 import { API_URL } from '@/lib/config'
+import { useAuth } from '@/context/AuthContext'
+import { Loader2 } from 'lucide-react'
 
 interface Activity {
     id: string
@@ -25,31 +25,28 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
+    const { user, login, logout, loading: authLoading } = useAuth()
     const router = useRouter()
     const [stats, setStats] = useState<DashboardStats | null>(null)
     const [loading, setLoading] = useState(true)
-    const [user, setUser] = useState<string>('User')
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        const userName = localStorage.getItem('user_name')
-
-        if (!token) {
+        if (!authLoading && !user) {
             router.push('/login')
             return
         }
 
-        if (userName) setUser(userName)
+        if (!user) return
 
         const fetchDashboardData = async () => {
             try {
+                const token = localStorage.getItem('token')
                 const statsRes = await fetch(`${API_URL}/api/bookings/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
 
                 if (statsRes.status === 401) {
-                    localStorage.removeItem('token')
-                    router.push('/login')
+                    logout()
                     return
                 }
 
@@ -63,12 +60,12 @@ export default function DashboardPage() {
         }
 
         fetchDashboardData()
-    }, [router])
+    }, [user, authLoading, router])
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-white" />
             </div>
         )
     }
@@ -77,7 +74,7 @@ export default function DashboardPage() {
         <div className="space-y-8 animate-fade-in-up">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500">
-                    Welcome back, {user}
+                    Welcome back, {user?.name || 'User'}
                 </h1>
                 <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-xs font-mono animate-pulse">
                     SYSTEM OPERATIONAL

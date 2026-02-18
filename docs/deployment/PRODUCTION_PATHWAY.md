@@ -19,12 +19,12 @@ To be "Live," the code must leave your laptop and live on a **Cloud Server** tha
 
 ### 1. The Frontend (The Face) -> **Vercel**
 *   **What it does:** We push your `frontend/` folder to Vercel.
-*   **The Result:** You get a URL like `https://phoenix-logistics.vercel.app`.
+*   **The Result:** You get a URL like `https://OMEGO-logistics.vercel.app`.
 *   **Status:** Accessible to the world (High Speed CDN).
 
 ### 2. The Backend (The Brain) -> **Railway** or **AWS**
 *   **What it does:** We push your `backend/` (FastAPI) and `database` (Postgres) to a server in a data center (e.g., Virginia or Frankfurt).
-*   **The Result:** A URL like `https://api.phoenix-logistics.com`.
+*   **The Result:** A URL like `https://api.OMEGO-logistics.com`.
 *   **Status:** It runs 24/7/365, processing quotes even while you sleep.
 
 ---
@@ -38,7 +38,7 @@ A "Live" website is just code on a server. A **"Full Active Logistics Business"*
 
 ### 2. 🛡️ The Shield (SSL & Security)
 *   **Now:** `http://localhost`. Unsafe.
-*   **Live:** `https://`. We buy a domain (`www.phoenix-logistics.com`) and attach an SSL Certificate. This tells Maersk and Google "We are legitimate."
+*   **Live:** `https://`. We buy a domain (`www.OMEGO-logistics.com`) and attach an SSL Certificate. This tells Maersk and Google "We are legitimate."
 
 ### 3. 💰 The Wallet (Payments)
 *   **Now:** "Book Now" button creates a database entry.

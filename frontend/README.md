@@ -1,6 +1,6 @@
-# Freightos Clone - Next.js & React
+# OMEGO Clone - Next.js & React
 
-A stunning replica of the Freightos freight management platform built with Next.js 14, React, TypeScript, and Tailwind CSS.
+A stunning replica of the OMEGO freight management platform built with Next.js 14, React, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -38,7 +38,7 @@ A stunning replica of the Freightos freight management platform built with Next.
 
 1. **Install dependencies**
    ```bash
-   cd freightos-clone
+   cd OMEGO-clone
    npm install
    ```
 
@@ -53,7 +53,7 @@ A stunning replica of the Freightos freight management platform built with Next.
 ## Project Structure
 
 ```
-freightos-clone/
+OMEGO-clone/
 ├── src/
 │   └── app/
 │       ├── page.tsx           # Landing page
@@ -148,8 +148,8 @@ npm start
 
 ### Docker
 ```bash
-docker build -t freightos-clone .
-docker run -p 3000:3000 freightos-clone
+docker build -t OMEGO-clone .
+docker run -p 3000:3000 OMEGO-clone
 ```
 
 ## Features to Add (Optional)
@@ -189,7 +189,7 @@ This is a clone project for educational purposes.
 
 ## Credits
 
-Original design: [Freightos.com](https://www.freightos.com)
+Original design: [OMEGO.com](https://www.OMEGO.com)
 Built with ❤️ using Next.js & React
 
 ---

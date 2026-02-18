@@ -16,7 +16,7 @@ export default function TermsPage() {
                     <div className="space-y-8 text-gray-300">
                         <section>
                             <h2 className="text-2xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
-                            <p>By accessing or using the Freightos platform, you agree to be bound by these Terms of Service.</p>
+                            <p>By accessing or using the Omego platform, you agree to be bound by these Terms of Service.</p>
                         </section>
 
                         <section>
@@ -31,7 +31,7 @@ export default function TermsPage() {
 
                         <section>
                             <h2 className="text-2xl font-bold text-white mb-4">4. Liability</h2>
-                            <p>Freightos acts as an intermediary. We are not liable for cargo loss or damage, which is subject to the carrier's terms and applicable international conventions.</p>
+                            <p>Omego acts as a sovereign intermediary. We are not liable for cargo loss or damage, which is subject to the carrier's terms and applicable international conventions.</p>
                         </section>
                     </div>
                 </div>

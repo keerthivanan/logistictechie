@@ -1,5 +1,5 @@
 """
-PHOENIX LOGISTICS OS - GLOBAL HEALTH CHECK (PROPHETIC EDITION)
+OMEGO LOGISTICS OS - GLOBAL HEALTH CHECK (PROPHETIC EDITION)
 Simplified ASCII for 100% Shell Compatibility.
 """
 import requests
@@ -28,7 +28,7 @@ def test(name, method, url, expected_status=200, **kwargs):
         results.append(f"[ERR ] {name} -> ERROR: {str(e)[:80]}")
 
 print("=" * 60)
-print("PHOENIX OS - COMPREHENSIVE BACKEND HEALTH CHECK")
+print("OMEGO OS - COMPREHENSIVE BACKEND HEALTH CHECK")
 print("=" * 60)
 
 # 1. Root Health
@@ -92,6 +92,6 @@ for res in results:
 print("=" * 60)
 print(f"\nRESULT: {passed}/{total} passed | {failed} failed")
 if failed == 0:
-    print("PHOENIX OS IS FULLY OPERATIONAL. BEST IN WORLD STATUS CONFIRMED. 👑")
+    print("OMEGO OS IS FULLY OPERATIONAL. BEST IN WORLD STATUS CONFIRMED. 👑")
 else:
     print(f"ATTENTION: {failed} endpoint(s) require logic adjustment.")

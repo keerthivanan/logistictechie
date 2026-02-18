@@ -40,28 +40,17 @@ export default function Footer() {
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Company</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                            <li><Link href="/customers" className="hover:text-white transition-colors">Customers</Link></li>
-                            <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Resources</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/blog" className="hover:text-white transition-colors">Blog</Link></li>
                             <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
                             <li><Link href="/api" className="hover:text-white transition-colors">API Docs</Link></li>
-                            <li><Link href="/changelog" className="hover:text-white transition-colors">Changelog</Link></li>
                         </ul>
                     </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Compare</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/compare/freightos" className="hover:text-white transition-colors">Freightos</Link></li>
-                            <li><Link href="/compare/flexport" className="hover:text-white transition-colors">Flexport</Link></li>
-                            <li><Link href="/compare/xeneta" className="hover:text-white transition-colors">Xeneta</Link></li>
-                        </ul>
-                    </div>
+
                     <div>
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Legal</h3>
                         <ul className="space-y-4 text-sm text-gray-500">

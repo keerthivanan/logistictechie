@@ -9,7 +9,7 @@ import Prism from '@/components/visuals/Prism'
 import TestimonialsSection from '@/components/sections/TestimonialsSection'
 import GlobalNetworkMap from '@/components/visuals/GlobalNetworkMap'
 import SmartDashboardPreview from '@/components/visuals/SmartDashboardPreview'
-import MarketTicker from '@/components/visuals/MarketTicker'
+
 import SolutionsGrid from '@/components/visuals/SolutionsGrid'
 import IntegrationEcosystem from '@/components/visuals/IntegrationEcosystem'
 import TrustedIndustries from '@/components/visuals/TrustedIndustries'
@@ -42,7 +42,7 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
       <Navbar />
 
-      <MarketTicker />
+
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
@@ -55,10 +55,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-zinc-950 pointer-events-none"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur-md mb-8 animate-fade-in-up">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-sm font-medium text-gray-300">System Operational • v2.0 Live</span>
-          </div>
+
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 animate-fade-in-up delay-100">
             SUPERCHARGE YOUR <br />

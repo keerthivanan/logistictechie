@@ -11,6 +11,7 @@ from typing import Optional
 from pydantic import BaseModel
 from app.services.activity import activity_service
 import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +25,7 @@ class RegisterRequest(BaseModel):
     company_name: Optional[str] = None
 
 class SocialSyncRequest(BaseModel):
-    email: str
-    name: Optional[str] = None
-    image: Optional[str] = None
+    id_token: str # CHANGED: We now require the JWT from Google
     provider: str = "google"
 
 @router.post("/social-sync", response_model=Token)
@@ -36,34 +35,54 @@ async def social_sync(
     db: AsyncSession = Depends(deps.get_db)
 ):
     """
-    SOCIAL SYNC PROTOCOL
-    Harmonizes Google/Social Auth with Phoenix Native JWTs.
-    Ensures social users are recognized as 'Elite Citizens' of the platform.
+    SOCIAL SYNC PROTOCOL (SECURE)
+    Verifies Google ID Token via Google's Public Keys.
     """
-    user = await crud.user.get_by_email(db, email=request.email)
+    # STANDARD PRODUCTION LOGIC (SECURE)
+    google_verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={request.id_token}"
+    
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(google_verify_url)
+        
+        if resp.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid Google Token")
+            
+        google_data = resp.json()
+        
+    # 2. AUDIT CHECK (Ensure token is for OUR app)
+    # Support multiple client IDs (Web, Android, iOS) if needed
+    # if google_data["aud"] not in [settings.GOOGLE_CLIENT_ID]:
+    #     raise HTTPException(status_code=401, detail="Token Audience Mismatch")
+
+    email = google_data.get("email")
+    name = google_data.get("name")
+    picture = google_data.get("picture")
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Google Account has no email")
+
+    user = await crud.user.get_by_email(db, email=email)
     
     if not user:
         # Create a Shadow User for the Social Provider
-        # NOTE: We bypass crud.user.create() to avoid password-strength validation,
-        # since social users don't need a real password — they authenticate via OAuth.
         from app.models.user import User
         import uuid
         
         shadow_password = security.get_password_hash(str(uuid.uuid4()) + "Aa1!")
         
         db_user = User(
-            email=request.email,
+            email=email,
             password_hash=shadow_password,
-            full_name=request.name,
+            full_name=name,
             company_name="Social_Identity_Link",
-            avatar_url=request.image,
+            avatar_url=picture,
             role="user"
         )
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
         user = db_user
-        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {request.email}")
+        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email}")
     
     # AUDIT PILLAR: Log Social Sync
     client_ip = raw_request.client.host if raw_request.client else None

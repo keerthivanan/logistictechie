@@ -18,7 +18,7 @@ class DocumentAIService:
 
     async def process_logistics_document(self, file_content: bytes, filename: str = "document.pdf") -> Dict[str, Any]:
         """
-        PHOENIX SOVEREIGN OCR (v2.0 True AI)
+        OMEGO SOVEREIGN OCR (v2.0 True AI)
         Uses GPT-4o to analyze and extract structured data from logistics documents.
         """
         if not self.llm:
@@ -42,7 +42,7 @@ class DocumentAIService:
             Analyze the following logistics document: {filename}
             Metadata: Size {len(file_content)} bytes, Classification: {"Bill of Lading" if is_bol else "Commercial Invoice" if is_inv else "General Logistics"}
             
-            Extract these exact entities for the Phoenix OS Ledger:
+            Extract these exact entities for the OMEGO OS Ledger:
             - Origin (City, Country, UNLOCODE)
             - Destination (City, Country, UNLOCODE)
             - Cargo Description (High fidelity)
@@ -70,7 +70,7 @@ class DocumentAIService:
                     "filename": filename,
                     "extracted_data": extracted_data,
                     "intelligence_score": 0.99,
-                    "source": "Phoenix Sovereign AI (GPT-4o Precision)"
+                    "source": "OMEGO Sovereign AI (GPT-4o Precision)"
                 }
             else:
                 raise ValueError("AI failed to return structured JSON.")

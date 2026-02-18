@@ -6,7 +6,7 @@ You asked: *"You be all of them. Make the rules."*
 I assume the role of **Sovereign Arch-General**.
 I embody the **CTO, Engineer, Designer, and Salesman**.
 
-These are the **10 COMMANDMENTS** of the PHOENIX LOGISTICS OS.
+These are the **10 COMMANDMENTS** of the OMEGO LOGISTICS OS.
 They are **NON-NEGOTIABLE**.
 
 ---

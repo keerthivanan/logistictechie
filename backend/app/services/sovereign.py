@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 class SovereignEngine:
     """
-    The High-Intelligence Predictive Engine for PHOENIX LOGISTICS OS.
+    The High-Intelligence Predictive Engine for OMEGO LOGISTICS OS.
     Calculates 2026 Sovereign Metrics: Risk, Carbon, and Landed Cost.
     """
     
@@ -383,7 +383,7 @@ class SovereignEngine:
         indices = [
             {"symbol": "SCFI", "name": "Shanghai Containerized Freight Index", "base": 1024.0, "color": "text-green-500"},
             {"symbol": "WCI", "name": "World Container Index", "base": 1850.0, "color": "text-blue-500"},
-            {"symbol": "FBX", "name": "Freightos Baltic Index", "base": 1450.0, "color": "text-purple-500"},
+            {"symbol": "SBX", "name": "Sovereign Baltic Index", "base": 1450.0, "color": "text-purple-500"},
             {"symbol": "BDI", "name": "Baltic Dry Index", "base": 1150.0, "color": "text-yellow-500"},
             {"symbol": "CCFI", "name": "China Containerized Freight Index", "base": 980.0, "color": "text-red-500"},
         ]

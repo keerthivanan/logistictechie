@@ -20,7 +20,7 @@ You connect to **Super-Aggregators** who have already done the hard work.
 *   **What it covers:** 200,000+ Trucking Companies in USA, Europe, and Asia.
 *   **Status:** **Next Step.** You connect *one* API (Project44), and you instantly get access to every trucker in the world.
 
-#### 3. ✈️ WebCargo / Freightos (The Air King)
+#### 3. ✈️ WebCargo / OMEGO (The Air King)
 *   **What it covers:** 400+ Airlines (Lufthansa, Emirates, FedEx).
 *   **Status:** **Next Step.** Connect this for instant global air freight.
 
@@ -29,6 +29,6 @@ You connect to **Super-Aggregators** who have already done the hard work.
 ## 🔱 YOUR ROADMAP TO "EVERY COUNTRY"
 1.  **Phase 1 (Now):** Ocean Sovereignty. (Maersk + SeaRates). This covers 90% of global trade volume.
 2.  **Phase 2 (Next Month):** Land Sovereignty. Integrate **Project44** to track trucks in India, USA, and Germany.
-3.  **Phase 3 (Empire):** Air Sovereignty. Integrate **Freightos** for instant air quotes.
+3.  **Phase 3 (Empire):** Air Sovereignty. Integrate **OMEGO** for instant air quotes.
 
 **This is how you build a Global Empire with just 3 APIs.** 🔱

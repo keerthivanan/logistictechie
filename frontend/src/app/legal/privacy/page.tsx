@@ -16,7 +16,7 @@ export default function PrivacyPage() {
                     <div className="space-y-8 text-gray-300">
                         <section>
                             <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
-                            <p>Freightos Ltd ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your personal information.</p>
+                            <p>Omego Ltd ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your personal information.</p>
                         </section>
 
                         <section>

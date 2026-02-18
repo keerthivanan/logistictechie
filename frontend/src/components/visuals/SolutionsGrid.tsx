@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, ShieldCheck } from 'lucide-react';
 
 const solutions = [
@@ -7,37 +8,43 @@ const solutions = [
         icon: Ship,
         title: 'Ocean Freight',
         desc: 'FCL & LCL shipping with guaranteed capacity on all major trade lanes. Real-time tracking down to the container level.',
-        image: 'https://images.unsplash.com/photo-1543329241-7667232247fb?q=80&w=2070&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1543329241-7667232247fb?q=80&w=2070&auto=format&fit=crop',
+        href: '/services/ocean-freight'
     },
     {
         icon: Plane,
         title: 'Air Freight',
         desc: 'Time-critical air cargo solutions. Next-flight-out options and chartered services for urgent global deliveries.',
-        image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop',
+        href: '/services/air-freight'
     },
     {
         icon: ShieldCheck,
         title: 'Customs Compliance',
         desc: 'AI-powered clearance reduces documentation errors by 99%. Automated HS code classification and duty optimization.',
-        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
+        href: '/services/customs-compliance'
     },
     {
         icon: Warehouse,
         title: 'Smart Warehousing',
         desc: 'Network of 500+ tech-enabled fulfillment centers. On-demand storage and automated picking/packing.',
-        image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop',
+        href: '/services/smart-warehousing'
     },
     {
         icon: Anchor,
         title: 'Port Drayage',
         desc: 'Seamless first/last mile port connections. Digital booking for chassis and drayage trucks to avoid demurrage.',
-        image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop',
+        href: '/services/port-drayage'
     },
     {
         icon: BarChart,
         title: 'Supply Chain Tower',
         desc: 'End-to-end visibility control tower. Predictive analytics to foresee disruptions before they impact inventory.',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
+        href: '/services/supply-chain-tower'
     }
 ];
 
@@ -54,11 +61,11 @@ export default function SolutionsGrid() {
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {solutions.map((item, i) => (
-                        <div key={i} className="group h-[400px] relative rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]">
+                        <Link href={item.href} key={i} className="group h-[400px] relative rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] block">
                             {/* Background Image */}
                             <div className="absolute inset-0">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-40 group-hover:opacity-60" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent"></div>
+                                <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-50" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
                             </div>
 
                             <div className="absolute inset-0 p-8 flex flex-col justify-end">
@@ -75,7 +82,7 @@ export default function SolutionsGrid() {
                                     Learn More <span className="ml-2">→</span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

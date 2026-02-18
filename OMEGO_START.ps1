@@ -1,8 +1,8 @@
-# PHOENIX LOGISTICS OS: G.O.A.T. STARTUP NEXUS
+# OMEGO LOGISTICS OS: G.O.A.T. STARTUP NEXUS
 # Version 2.1 (Self-Contained AI Mode)
 
 Write-Host "================================================" -ForegroundColor Cyan
-Write-Host "  INITIATING PHOENIX LOGISTICS OS (Vision 2.1)  " -ForegroundColor Cyan
+Write-Host "  INITIATING OMEGO LOGISTICS OS (Vision 2.1)  " -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 
 # 1. DATABASE HANDSHAKE

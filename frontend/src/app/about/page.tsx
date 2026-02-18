@@ -24,7 +24,7 @@ export default function AboutPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8">
                             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                            <span className="text-sm font-medium text-gray-300">EST. 2011 • GLOBAL OPS</span>
+                            <span className="text-sm font-medium text-gray-300">AI-NATIVE • GLOBAL OPS</span>
                         </div>
                         <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter">
                             ORCHESTRATING <br />
@@ -82,11 +82,10 @@ export default function AboutPage() {
 
                         <div className="relative border-l border-white/10 ml-8 md:ml-1/2 space-y-16">
                             {[
-                                { year: "2011", title: "The Inception", desc: "Founded with a single goal: Bring freight online." },
-                                { year: "2016", title: "The Marketplace", desc: "Launched the world's first digital freight marketplace." },
-                                { year: "2021", title: "WebCargo Acquisition", desc: "Unified air and ocean booking into one OS." },
-                                { year: "2024", title: "OMEGO AI", desc: "Deployed the first generative AI for supply chain." },
-                                { year: "2026", title: "Global Dominance", desc: "Processing $1 Trillion in annualized cargo value." }
+                                { year: "2024", title: "Project Alpha", desc: "The code was written. A new intelligence was born to solve the fragmentation of global trade." },
+                                { year: "2025", title: "The Neural Network", desc: "OMEGO connected 100+ major ports into a single, real-time nervous system." },
+                                { year: "2026", title: "Global Dominance", desc: "Today, we process billions in cargo value with zero human error. The standard has been set." },
+                                { year: "FUTURE", title: "Autonomous Logistics", desc: "Self-correcting supply chains. The engine that runs the world." }
                             ].map((item, i) => (
                                 <div key={i} className="relative pl-12">
                                     <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-white rounded-full ring-4 ring-black"></div>

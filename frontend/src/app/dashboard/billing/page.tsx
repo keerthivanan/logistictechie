@@ -3,6 +3,8 @@
 import { CreditCard, History, Download, ExternalLink, Shield, Plus, ArrowRight, Loader2 } from 'lucide-react'
 import { API_URL } from '@/lib/config'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 
 interface Invoice {
     id: string
@@ -23,21 +25,32 @@ interface BillingData {
 }
 
 export default function BillingPage() {
+    const { user, logout, loading: authLoading } = useAuth()
+    const router = useRouter()
     const [data, setData] = useState<BillingData | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/login')
+            return
+        }
+        if (!user) return
+
         const token = localStorage.getItem('token')
         fetch(`${API_URL}/api/billing/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-            .then(res => res.json())
             .then(res => {
-                if (res.success) setData(res.data)
+                if (res.status === 401) { logout(); return; }
+                return res.json()
+            })
+            .then(res => {
+                if (res && res.success) setData(res.data)
                 setLoading(false)
             })
             .catch(() => setLoading(false))
-    }, [])
+    }, [user, authLoading])
 
     if (loading) return (
         <div className="h-96 flex items-center justify-center">

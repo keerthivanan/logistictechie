@@ -31,7 +31,7 @@ Here is the **"Standard Unicorn Structure"** (Series A Level).
 **Goal:** Get customers and keep them happy.
 | Role | Count | Responsibility | Skills |
 | :--- | :--- | :--- | :--- |
-| **Sales Manager** | 2 | Calls logistics companies. "Buy our PHOENIX OS!" | Negotiation, CRM (HubSpot). |
+| **Sales Manager** | 2 | Calls logistics companies. "Buy our OMEGO OS!" | Negotiation, CRM (HubSpot). |
 | **Customer Success** | 1 | Helps users who are stuck. "How do I print a BOL?" | Patience, Tech Support. |
 | **TOTAL** | **3** | | |
 

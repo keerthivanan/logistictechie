@@ -2,14 +2,14 @@
 
 To build the **"Best of All Time"** logistics app, you must not just "connect" to ERPs—you must **orchestrate** them.
 
-This document defines the **Elite Tech Stack** required to integrate PHOENIX LOGISTICS OS with global giants like **SAP S/4HANA**, **Oracle NetSuite**, and **Microsoft Dynamics 365**.
+This document defines the **Elite Tech Stack** required to integrate OMEGO LOGISTICS OS with global giants like **SAP S/4HANA**, **Oracle NetSuite**, and **Microsoft Dynamics 365**.
 
 ---
 
 ## 1. The Orchestration Layer (The "Nervous System")
 **Tool:** [Temporal.io](https://temporal.io/) (Open Source)
 -   **Why:** ERP integration is messy. Systems go down, APIs rate-limit you, and transactions fail.
--   **The Sovereign Way:** Temporal ensures **Durable Execution**. If SAP crashes in the middle of a booking sync, Temporal waits and retries until it succeeds. It guarantees that a Booking in Phoenix *always* becomes a Sales Order in the ERP.
+-   **The Sovereign Way:** Temporal ensures **Durable Execution**. If SAP crashes in the middle of a booking sync, Temporal waits and retries until it succeeds. It guarantees that a Booking in OMEGO *always* becomes a Sales Order in the ERP.
 -   **Usage:** Python SDK (`temporalio`) within FastAPI.
 
 ## 2. The Data Pipeline (The "Bloodstream")

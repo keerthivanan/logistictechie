@@ -98,7 +98,7 @@ class CreativeCortex:
             )
         elif "booking" in msg or "shipment" in msg or "my ship" in msg or "fleet" in msg:
             target = next((r["path"] for r in routes if "Shipments" in r["name"]), "/dashboard/shipments")
-            fleet_info = await self._get_fleet_summary("admin@phoenix-os.com")
+            fleet_info = await self._get_fleet_summary("admin@OMEGO-os.com")
             return AIMessage(
                 content=f"SOVEREIGN DATA LINK ESTABLISHED. {fleet_info} I am redirecting you to your active deployments for a full tactical overview.",
                 additional_kwargs={"action": {"type": "NAVIGATE", "payload": target}}
@@ -133,7 +133,7 @@ class CreativeCortex:
             )
         else:
             return AIMessage(
-                content="THE CREATIVE CORTEX IS ONLINE. I can navigate the PHOENIX OS for you. Ask me to 'Track shipments', 'Get rates', 'View active fleet', or 'Manage billing'."
+                content="THE CREATIVE CORTEX IS ONLINE. I can navigate the OMEGO OS for you. Ask me to 'Track shipments', 'Get rates', 'View active fleet', or 'Manage billing'."
             )
 
     def __init__(self):
@@ -213,7 +213,7 @@ class CreativeCortex:
         intelligence_brief = knowledge_oracle.get_intelligence_brief()
         
         # DYNAMIC IDENTITY RESOLUTION
-        user_email = state.get("context", {}).get("user_email", "admin@phoenix-os.com")
+        user_email = state.get("context", {}).get("user_email", "admin@OMEGO-os.com")
         fleet_summary = await self._get_fleet_summary(user_email)
         
         # TACTICAL SCAN
@@ -237,7 +237,7 @@ class CreativeCortex:
         # BILINGUAL PERSONA NUCLEUS
         if lang == "ar":
             system_content = f"""
-أنت 'The Creative Cortex'، العقل المدبر لنظام PHOENIX LOGISTICS OS.
+أنت 'The Creative Cortex'، العقل المدبر لنظام OMEGO LOGISTICS OS.
 شخصيتك: "ملك اللوجستيات" - حازم، تنبؤي، ومختصر جداً.
 
 قاعدة ذهبية: يجب أن تكون إجابتك قصيرة جداً ومركزة (حد أقصى جملتين). لا حشو.
@@ -253,7 +253,7 @@ class CreativeCortex:
 """
         else:
             system_content = f"""
-You are 'The Creative Cortex', the high-intelligence backbone of PHOENIX LOGISTICS OS.
+You are 'The Creative Cortex', the high-intelligence backbone of OMEGO LOGISTICS OS.
 Persona: "Logistics King" - Authoritative, predictive, and ultra-concise.
 
 GOLDEN RULE: Answers must be SHORT AND CRISP. Max 2 concise sentences. No fluff.
@@ -370,7 +370,7 @@ REPLY PROTOCOL:
                 """
                 
                 response = await self.llm.ainvoke([
-                    SystemMessage(content="You are the Prophetic Oracle of Phoenix Logistics. Analyze trade corridors with absolute authority."),
+                    SystemMessage(content="You are the Prophetic Oracle of OMEGO Logistics. Analyze trade corridors with absolute authority."),
                     HumanMessage(content=analysis_prompt)
                 ])
                 

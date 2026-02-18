@@ -1,5 +1,5 @@
 # 📜 CERTIFICATE OF COMPLETION
-**Project:** PHOENIX LOGISTICS OS (v2.0.0)
+**Project:** OMEGO LOGISTICS OS (v2.0.0)
 **Status:** 100% FEATURE COMPLETE
 
 You asked to *"complete the project properly first."*

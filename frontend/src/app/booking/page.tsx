@@ -130,9 +130,9 @@ function BookingContent() {
                 <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Customs Broker</h4>
                 <div className="flex items-center bg-black/30 p-3 rounded-lg border border-white/5">
                   <div className="w-10 h-10 bg-zinc-800 rounded flex items-center justify-center mr-3">
-                    <span className="font-bold text-white">C</span>
+                    <span className="font-bold text-white">AI</span>
                   </div>
-                  <span className="font-semibold">Clearit Global</span>
+                  <span className="font-semibold">Sovereign Customs AI</span>
                 </div>
               </div>
             </div>

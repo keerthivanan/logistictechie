@@ -11,6 +11,10 @@ class Quote(Base):
     __tablename__ = "quotes"
 
     id = Column(String, primary_key=True, default=generate_uuid)
+    
+    # RELATIONAL INTEGRITY (User Link)
+    user_id = Column(String, nullable=True, index=True) # Linked to User.id manually or via FK
+    
     origin = Column(String, nullable=False, index=True)
     destination = Column(String, nullable=False, index=True)
     container_type = Column(String, default="40FT")

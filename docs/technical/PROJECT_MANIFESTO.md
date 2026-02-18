@@ -1,4 +1,4 @@
-# 📜 PROJECT MANIFESTO: PHOENIX LOGISTICS OS
+# 📜 PROJECT MANIFESTO: OMEGO LOGISTICS OS
 
 **Version:** 2.0.0 (Gold Edition)
 **Timeline:** 2026
