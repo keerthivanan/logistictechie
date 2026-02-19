@@ -15,10 +15,12 @@ import IntegrationEcosystem from '@/components/visuals/IntegrationEcosystem'
 import TrustedIndustries from '@/components/visuals/TrustedIndustries'
 import AiChatVisual from '@/components/visuals/AiChatVisual'
 import ComparisonChart from '@/components/visuals/ComparisonChart'
+import { useAuth } from '@/context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { API_URL } from '@/lib/config'
 
 export default function Home() {
+  const { user } = useAuth()
   const [trackingId, setTrackingId] = useState('')
   const [trackingResult, setTrackingResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -67,10 +69,16 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up delay-300">
-            <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-              Launch Operations <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center">
+            {user ? (
+              <Link href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                Go to Dashboard <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                Launch Operations <ArrowRight className="w-5 h-5" />
+              </Link>
+            )}
+            <Link href="/demo" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center text-sm">
               View Live Demo
             </Link>
           </div>
@@ -86,7 +94,7 @@ export default function Home() {
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-                  placeholder="Track ID (e.g., OME-8923X)"
+                  placeholder="Carrier Code or Container ID (e.g., MSKU1234567)"
                   className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 px-6 py-4 text-lg outline-none font-mono"
                 />
                 <button

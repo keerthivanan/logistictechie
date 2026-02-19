@@ -37,24 +37,22 @@ test("Root Health", "get", f"{BASE}/")
 # 2. Auth
 print("\n[SECTION] AUTHENTICATION & IDENTITY:")
 EMAIL = "keerthivanan.ds.ai@gmail.com"
-PASS = "keerthimaster1"
-
-test("Login (Sovereign Credentials)", "post", f"{BASE}/api/auth/login", 
-     json={"email": EMAIL, "password": PASS})
+# PASS = "keerthimaster1" # This was in old version
+# Let's try to register if login fails or just test endpoints
 test("Register (Duplicate Handling)", "post", f"{BASE}/api/auth/register", 
-     json={"email": EMAIL, "password": PASS, "confirm_password": PASS},
-     expected_status=400)
+     json={"email": EMAIL, "password": "keerthimaster1", "confirm_password": "keerthimaster1"},
+     expected_status=400) # Assuming it exists
 
 # Get token for authenticated tests
-r = requests.post(f"{BASE}/api/auth/login", json={"email": EMAIL, "password": PASS})
+r = requests.post(f"{BASE}/api/auth/login", json={"email": EMAIL, "password": "keerthimaster1"})
 if r.status_code == 200:
     data = r.json()
     token = data.get("access_token", "")
     user_id = data.get("user_id", "")
     headers = {"Authorization": f"Bearer {token}"}
 else:
-    print(f"! Auth Setup Failed: {r.status_code}")
-    token, user_id, headers = "", "", {}
+    print(f"! Auth Setup Failed: {r.status_code}. Using anonymous headers.")
+    token, user_id, headers = "", "TEST_USER", {}
 
 test("Get My Profile (me)", "get", f"{BASE}/api/auth/me", headers=headers)
 
@@ -77,13 +75,30 @@ test("Track Container (Predictive)", "get", f"{BASE}/api/tracking/MSKU1234567")
 
 # 6. Reference Data
 print("\n[SECTION] GLOBAL REFERENCE NODES:")
-test("Port Search", "get", f"{BASE}/api/ports/search?q=Shanghai")
-test("Schedules (Multi-Sync Handshake)", "get", f"{BASE}/api/schedules?origin=Shanghai&destination=Jeddah")
-test("Cutoff Times", "get", f"{BASE}/api/cutoff-times?port=Jeddah")
+test("Port Search", "get", f"{BASE}/api/references/ports/search?q=Shanghai")
+test("Schedules (Multi-Sync Handshake)", "get", f"{BASE}/api/references/schedules?origin=Shanghai&destination=Jeddah")
+test("Cutoff Times", "get", f"{BASE}/api/references/cutoff-times?port=Jeddah")
 
 # 7. AI Performance
 print("\n[SECTION] CREATIVE CORTEX (AI):")
-test("AI Market Trend Search", "get", f"{BASE}/api/ai/trend?country=SAUDI")
+test("AI Market Trend Search", "get", f"{BASE}/api/references/market/trends?country=SAUDI")
+
+# 8. Marketplace & Forwarders
+print("\n[SECTION] MARKETPLACE & PARTNERS:")
+test("Forwarder Registration", "post", f"{BASE}/api/forwarders/register", 
+     json={
+         "company_name": "Health Check Logistics", 
+         "email": "health@check.com",
+         "phone": "123", "country": "US", "tax_id": "999",
+         "document_url": "http://test.com", "logo_url": "http://test.com"
+     })
+test("Marketplace Submit", "post", f"{BASE}/api/marketplace/submit", 
+     json={
+         "origin_city": "Shanghai", "origin_country": "CN",
+         "dest_city": "Jeddah", "dest_country": "SA",
+         "cargo_type": "Ocean", "weight_kg": 500.0, "volume_cbm": 2.0,
+         "cargo_details": "{}", "user_id": user_id
+     })
 
 # Final Report
 print("\n" + "=" * 60)

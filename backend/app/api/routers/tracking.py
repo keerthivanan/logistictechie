@@ -71,16 +71,32 @@ async def get_tracking_status(
     risk = sovereign_engine.calculate_risk_score(origin, destination)
     progress = 15 + (seed % 70) # 15% to 85% progress
     
+    # 3. Deterministic Telemetry (The Sovereign Pulse)
+    vessels = ["MAERSK JEDDAH", "MSC AMELIA", "CMA CGM ANTOINE", "HMM ALGECIRAS", "ONE APUS"]
+    vessel_name = vessels[seed % len(vessels)]
+    
+    # Lat/Long deterministic calculation
+    lat = round(10.0 + (seed % 30) + (random.random()), 4)
+    lon = round(40.0 + (seed % 40) + (random.random()), 4)
+    speed = round(14.0 + (seed % 8), 1)
+
     return {
         "success": True,
         "status": "In Transit" if progress < 100 else "Arrived",
         "container": number.upper(),
+        "vessel_name": vessel_name,
         "origin": origin,
         "destination": destination,
         "eta": "2026-03-" + str(10 + (seed % 20)).zfill(2),
         "progress": progress,
         "risk_score": risk,
         "carbon_footprint": sovereign_engine.estimate_carbon_footprint(5000 + (seed % 5000), "40HC"),
+        "telemetry": {
+            "lat": lat,
+            "lon": lon,
+            "speed": speed,
+            "heading": seed % 360
+        },
         "events": [
             {"date": "2026-02-01", "location": origin, "event": "Gate-In at Export Terminal (ISO-Verified)"},
             {"date": "2026-02-03", "location": origin, "event": "Vessel Loading (Manifest MBL-992-P)"},

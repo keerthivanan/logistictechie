@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, Clock, Plane, Ship, DollarSign, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import { API_URL } from '@/lib/config';
 
 interface Quote {
     id: string;
@@ -31,14 +34,14 @@ export default function MarketplaceLiveDashboard() {
     useEffect(() => {
         const fetchQuotes = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/marketplace/quotes/${uniqueId}`);
+                const res = await fetch(`${API_URL}/api/marketplace/quotes/${uniqueId}`);
                 const data = await res.json();
 
                 if (data.quotes) {
                     setQuotes(data.quotes);
                     setProgress(data.quotes.length);
                     // If 3 quotes received, we can conceptually consider it 'done' for this MVP
-                    if (data.quotes.length >= 3) {
+                    if (data.status === 'CLOSED' || data.quotes.length >= 1) {
                         setStatus('CLOSED');
                     }
                 }
@@ -64,13 +67,7 @@ export default function MarketplaceLiveDashboard() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
-            {/* Navbar Placeholder */}
-            <nav className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="font-bold text-2xl tracking-tighter">OMEGO</Link>
-                    <div className="text-sm font-mono text-gray-500">REQ: {uniqueId}</div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="max-w-5xl mx-auto px-4 py-12">
 
@@ -83,15 +80,15 @@ export default function MarketplaceLiveDashboard() {
                     >
                         {status === 'CLOSED' ? (
                             <div className="bg-green-500/10 text-green-400 border border-green-500/20 px-6 py-2 rounded-full font-mono mb-4 inline-flex items-center">
-                                <CheckCircle className="w-4 h-4 mr-2" /> BIDDING CLOSED (3/3)
+                                <CheckCircle className="w-4 h-4 mr-2" /> ANALYSIS COMPLETE
                             </div>
                         ) : (
                             <div className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-6 py-2 rounded-full font-mono mb-4 inline-flex items-center">
-                                <Clock className="w-4 h-4 mr-2 animate-pulse" /> WAITING FOR BIDS ({progress}/3)
+                                <Clock className="w-4 h-4 mr-2 animate-pulse" /> SCANNING GLOBAL CARRIERS
                             </div>
                         )}
-                        <h1 className="text-4xl font-bold mb-2">Live Quote Board</h1>
-                        <p className="text-gray-400">Real-time bids from our global forwarder network.</p>
+                        <h1 className="text-4xl font-bold mb-2">Live Market Intelligence</h1>
+                        <p className="text-gray-400">Verified spot rates and AI-broker analysis for your shipment.</p>
                     </motion.div>
                 </div>
 
@@ -100,14 +97,13 @@ export default function MarketplaceLiveDashboard() {
                     <motion.div
                         className="absolute left-0 top-0 bottom-0 bg-white"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(progress / 3) * 100}%` }}
+                        animate={{ width: status === 'CLOSED' ? '100%' : `${Math.min((progress / 2) * 100, 90)}%` }}
                         transition={{ duration: 0.5 }}
                     />
                     <div className="absolute inset-0 flex items-center justify-between px-10 text-[10px] font-bold text-black/50">
-                        <span>START</span>
-                        <span>1</span>
-                        <span>2</span>
-                        <span>FINISH</span>
+                        <span>NETWORK DISPATCHED</span>
+                        <span>ANALYZING</span>
+                        <span>FINALIZING</span>
                     </div>
                 </div>
 
@@ -172,6 +168,7 @@ export default function MarketplaceLiveDashboard() {
                     )}
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

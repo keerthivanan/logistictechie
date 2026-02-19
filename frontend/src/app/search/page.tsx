@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, ChevronDown, MapPin, ArrowRight, Package, Calendar, DollarSign, Truck, Box, X, Info, Plus } from 'lucide-react'
+import { Search, ChevronDown, MapPin, ArrowRight, Package, Calendar, DollarSign, Truck, Box, X, Info, Plus, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { API_URL } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
 import Footer from '@/components/layout/Footer'
+import Navbar from '@/components/layout/Navbar'
 
 // --- Types ---
 type Location = {
@@ -208,7 +209,13 @@ export default function SearchPage() {
                 <span className="text-xs bg-white/10 px-2 py-1 rounded text-gray-300 uppercase">{r.type}</span>
               </div>
             ))
-          ) : <div className="text-center text-gray-500 text-sm">Enter a location to search</div>}
+          ) : query ? (
+            <div className="text-center py-6 text-gray-500 text-sm">
+              <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
+              No results for <span className="text-white">"{query}"</span>.
+              <div className="mt-2 text-xs text-blue-400">Action: Try searching for a major port hub like "Shanghai", "Jebel Ali", or "Los Angeles" to verify network sync.</div>
+            </div>
+          ) : <div className="text-center text-gray-500 text-sm">Enter a location (City, Country, or UNLOCODE)</div>}
         </div>
       </div>
     )
@@ -252,7 +259,13 @@ export default function SearchPage() {
                 </div>
               </div>
             ))
-          ) : <div className="text-center text-gray-500 text-sm">Search for HS Codes</div>}
+          ) : query ? (
+            <div className="text-center py-6 text-gray-500 text-sm">
+              <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
+              Not found.
+              <div className="mt-2 text-xs text-blue-400">Action: Use general terms like "Electronics", "Furniture", or HS codes like "8517".</div>
+            </div>
+          ) : <div className="text-center text-gray-500 text-sm">Search for HS Codes or Commodities</div>}
         </div>
       </div>
     )
@@ -332,16 +345,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
-      {/* Navigation */}
-      <nav className="bg-black border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <span className="text-2xl font-bold tracking-tight text-white">OMEGO</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative py-20 overflow-visible">
@@ -454,8 +458,8 @@ export default function SearchPage() {
                           <h3 className="font-bold text-lg text-gray-900">What are you shipping?</h3>
                           <div className="group relative">
                             <Search className="w-4 h-4 text-gray-400 cursor-help" />
-                            <div className="absolute left-1/2 bottom-full mb-2 w-48 -translate-x-1/2 rounded bg-black p-2 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
-                              Help text about load types...
+                            <div className="absolute left-1/2 bottom-full mb-2 w-64 -translate-x-1/2 rounded bg-black p-3 text-[11px] leading-relaxed text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none shadow-2xl z-[60]">
+                              Choose LCL (Less than Container Load) for smaller shipments, or FCL (Full Container Load) if you have enough goods to fill an entire 20ft or 40ft container.
                             </div>
                           </div>
                         </div>
@@ -732,7 +736,7 @@ export default function SearchPage() {
       </AnimatePresence>
 
       {/* Features Grid */}
-      <section className="py-20 bg-zinc-950 border-t border-white/5">
+      <section className="py-20 bg-black border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Manage Shipments */}

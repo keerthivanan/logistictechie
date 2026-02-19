@@ -115,20 +115,8 @@ async def search_ports(q: str):
     except Exception as e:
         print(f"Maersk Port Search Failed: {e}")
 
-    # 3. SOVEREIGN FALLBACK (Known Major Hubs)
-    FALLBACK_PORTS = [
-        {"code": "CNSHA", "name": "Shanghai", "country": "China", "type": "port", "geoId": "35T52H1J83751"},
-        {"code": "SAJED", "name": "Jeddah", "country": "Saudi Arabia", "type": "port", "geoId": "22T52H1J83751"},
-        {"code": "AEJEA", "name": "Jebel Ali", "country": "United Arab Emirates", "type": "port", "geoId": "11T52H1J83751"},
-        {"code": "USLAX", "name": "Los Angeles", "country": "United States", "type": "port", "geoId": "44T52H1J83751"}
-    ]
-    
-    fallback_matches = [
-        p for p in FALLBACK_PORTS 
-        if query_lower in p["name"].lower() or query_lower in p["country"].lower() or query_lower in p["code"].lower()
-    ]
-    
-    return {"results": fallback_matches}
+    # 3. ABSOLUTE ZERO-FAKE Policy: If no results from API, return empty
+    return {"results": [], "message": "No verified logistics nodes found for this entry."}
 
 @router.get("/commodities/search", response_model=Dict[str, Any])
 async def search_commodities(q: str):

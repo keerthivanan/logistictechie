@@ -9,13 +9,7 @@ class GlobalKnowledge:
     Linerlytica, or port authority data.
     """
     
-    HOT_SPOTS = [
-        {"location": "Suez Canal", "status": "Caution", "delay": "2-4 days", "reason": "Draft restrictions & maintenance"},
-        {"location": "Port of Long Beach", "status": "Congested", "delay": "5-7 days", "reason": "Labor negotiations & heavy volume"},
-        {"location": "Panama Canal", "status": "Critical", "delay": "10-14 days", "reason": "Freshwater level drought restrictions"},
-        {"location": "Port of Rotterdam", "status": "Fluid", "delay": "0-1 days", "reason": "Operational efficiency optimized"},
-        {"location": "Shanghai Port", "status": "Busy", "delay": "1-2 days", "reason": "Export surge pre-holiday"}
-    ]
+    HOT_SPOTS = [] # Initialized as empty to ensure 0 Fake Content. Populated during startup.
 
     @classmethod
     def get_route_alerts(cls, origin: str = None, destination: str = None) -> List[Dict]:

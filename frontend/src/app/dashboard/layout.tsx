@@ -15,11 +15,11 @@ export default function DashboardLayout({
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
         { name: 'Shipments', href: '/dashboard/shipments', icon: Package },
         { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
-        { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+        { name: 'Settings', href: '/settings', icon: Settings },
     ]
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans flex">
+        <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black flex">
             {/* Sidebar */}
             <aside className="w-64 border-r border-white/10 fixed h-full bg-black z-10 hidden md:block">
                 <div className="flex items-center h-16 px-6 border-b border-white/10">
@@ -52,18 +52,15 @@ export default function DashboardLayout({
                     })}
                 </nav>
 
-                <div className="absolute bottom-0 w-full p-4 border-t border-white/10">
-                    <Link href="/login" className="flex items-center space-x-3 px-4 py-3 text-gray-400 hover:text-white transition-colors">
-                        <LogOut className="w-5 h-5" />
-                        <span>Sign Out</span>
-                    </Link>
+                <div className="absolute bottom-0 w-full p-4 border-t border-white/10 opacity-0 pointer-events-none">
+                    {/* Sign Out Removed */}
                 </div>
             </aside>
 
             {/* Main Content */}
             <div className="flex-1 md:ml-64">
                 {/* Header */}
-                <header className="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black sticky top-0 z-10">
+                <header className="h-16 border-b border-white/10 flex items-center justify-between px-8 bg-black sticky top-0 z-50">
                     <h1 className="text-xl font-bold">Dashboard</h1>
                     <div className="flex items-center space-x-6">
                         <button className="text-gray-400 hover:text-white">

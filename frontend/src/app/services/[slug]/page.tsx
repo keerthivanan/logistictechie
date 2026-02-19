@@ -92,6 +92,26 @@ const services: Record<string, any> = {
         cta: 'Join Network',
         ctaLink: '/signup'
     },
+    'road-freight': {
+        title: 'Road Freight Control',
+        subtitle: 'Unrivaled FTL and LTL connectivity across the continental logistics grid.',
+        icon: Truck,
+        image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=3870&auto=format&fit=crop',
+        desc: 'Trucking is the pulse of commerce. OMEGO connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
+        stats: [
+            { label: 'Carrier Network', value: '10k+' },
+            { label: 'Weekly Loads', value: '25k' },
+            { label: 'On-Time Rate', value: '97.5%' }
+        ],
+        features: [
+            { title: 'Dynamic FTL Routing', desc: 'AI-optimized routes that reduce fuel consumption and transit times by 15%.', icon: Zap },
+            { title: 'LTL Consolidation', desc: 'Smarter cargo pooling to cut costs for smaller shipments without sacrificing speed.', icon: Package },
+            { title: 'ELD Integration', desc: 'Direct data feed from electronic logging devices for 100% accurate tracking.', icon: Activity }
+        ],
+        workflow: ['Quote', 'Book', 'Dispatch', 'Transit', 'Delivered'],
+        cta: 'Check Trucking Rates',
+        ctaLink: '/search?mode=FTL'
+    },
     'port-drayage': {
         title: 'Port Drayage & Trucking',
         subtitle: 'Seamless first-mile connectivity to eliminate demurrage.',

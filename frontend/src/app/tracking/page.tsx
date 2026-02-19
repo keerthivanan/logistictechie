@@ -79,7 +79,7 @@ function TrackingContent() {
                         </div>
 
                         <h1 className="text-4xl font-bold mb-2">{tracking?.vessel_name || 'NEO-PANAMAX CLASS'}</h1>
-                        <p className="text-gray-400 font-mono text-sm mb-8">IMEI: 987654321 • Ref: {id}</p>
+                        <p className="text-gray-400 font-mono text-sm mb-8">TELEMETRY ID: AIS-{id?.substring(0, 6).toUpperCase()} • Ref: {id}</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div>
@@ -88,15 +88,17 @@ function TrackingContent() {
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Position</div>
-                                <div className="text-white font-bold">24.46° N, 54.39° E</div>
+                                <div className="text-white font-bold">
+                                    {tracking?.telemetry?.lat ? `${tracking.telemetry.lat}° N, ${tracking.telemetry.lon}° E` : 'Searching AIS...'}
+                                </div>
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Speed</div>
-                                <div className="text-white font-bold">18.4 knots</div>
+                                <div className="text-white font-bold">{tracking?.telemetry?.speed || '14.0'} knots</div>
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">ETA</div>
-                                <div className="text-white font-bold">March 12, 2026</div>
+                                <div className="text-white font-bold">{tracking?.eta || 'CALCULATING...'}</div>
                             </div>
                         </div>
                     </div>

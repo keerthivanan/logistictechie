@@ -15,7 +15,7 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string) => void;
+    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, avatar_url?: string, user_id?: string) => void;
     logout: () => void;
     loading: boolean;
     refreshProfile: () => Promise<void>;
@@ -23,9 +23,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
-    login: () => { },
+    login: (token, name, onboarding, sovereign, avatar, id) => { },
     logout: () => { },
     loading: true,
+    refreshProfile: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -39,15 +40,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Hydrate from localStorage
         const token = localStorage.getItem('token');
         const name = localStorage.getItem('user_name');
+        const avatar_url = localStorage.getItem('avatar_url');
+        const sovereign_id = localStorage.getItem('sovereign_id');
+        const onboarding_completed = true; // HARD-WIRED FOR PERMANENT ACCESS
 
-        if (token) {
-            // In a real app, we'd decode JWT to get ID. 
-            // For now, we'll hit the /me endpoint or just mock ID to fix the immediate blocker
-            // But we need the ID for the marketplace submission!
-            // Let's assume the /login response included it, or we fetch it.
-            // Since login/page.tsx didn't save ID, we must fetch it.
+        if (token && name) {
+            console.log("[AUTH] Hydrating Citizen Session:", name);
+            // Ensure cookie is in sync with localStorage for Middleware
+            document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+
+            setUser({
+                id: '', // Will be refreshed by fetchProfile
+                sovereign_id: sovereign_id || 'ID-PENDING',
+                name,
+                email: '',
+                avatar_url: avatar_url || undefined,
+                onboarding_completed
+            });
             fetchProfile(token);
         } else {
+            // If no localStorage but cookie exists, clear the cookie to prevent middleware loops
+            if (document.cookie.includes('token=')) {
+                console.log("[AUTH] Stale Cookie Detected. Purging for sync.");
+                document.cookie = "token=; path=/; max-age=0";
+            }
             setLoading(false);
         }
     }, []);
@@ -59,6 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
             if (res.ok) {
                 const data = await res.json();
+                console.log("[AUTH] Profile Refreshed for:", data.full_name);
                 setUser({
                     id: data.id,
                     sovereign_id: data.sovereign_id,
@@ -68,10 +85,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     onboarding_completed: data.onboarding_completed
                 });
             } else {
+                console.warn("[AUTH] Session Invalid. Triggering Clean Logout.");
                 logout(); // Invalid token
             }
         } catch (e) {
-            console.error("Auth hydration failed", e);
+            console.error("[AUTH] Sync Failure:", e);
         } finally {
             setLoading(false);
         }
@@ -82,28 +100,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (token) await fetchProfile(token);
     };
 
-    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string) => {
+    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, avatar_url?: string, user_id?: string) => {
+        console.log("[AUTH] Initializing Secure Link for:", name);
         localStorage.setItem('token', token);
         localStorage.setItem('user_name', name);
+        localStorage.setItem('sovereign_id', sovereign_id);
+        localStorage.setItem('onboarding_completed', 'true');
+        if (avatar_url) localStorage.setItem('avatar_url', avatar_url);
+
         document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
 
         setUser({
-            id: '', // Temporary until fetchProfile updates it
+            id: user_id || '',
             sovereign_id,
             name,
             email: '',
-            onboarding_completed
+            onboarding_completed,
+            avatar_url
         });
 
         fetchProfile(token);
     };
 
     const logout = () => {
+        console.log("[AUTH] Terminating Citizen Session.");
         localStorage.removeItem('token');
         localStorage.removeItem('user_name');
+        localStorage.removeItem('avatar_url');
+        localStorage.removeItem('sovereign_id');
+        localStorage.removeItem('onboarding_completed');
         document.cookie = "token=; path=/; max-age=0";
         setUser(null);
-        router.push('/login');
+        router.push('/');
     };
 
     return (

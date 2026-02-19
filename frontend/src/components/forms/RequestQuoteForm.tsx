@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -11,6 +10,8 @@ import {
 } from 'lucide-react';
 import { countries } from '@/lib/countries';
 import { API_URL } from '@/lib/config';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 export default function RequestQuoteForm() {
     const router = useRouter();
@@ -123,8 +124,8 @@ export default function RequestQuoteForm() {
                 cargo_type: formData.mode,
 
                 // Core fields expected by backend filter
-                weight_kg: formData.weight,
-                volume_cbm: '0', // Calculated or Optional
+                weight_kg: parseFloat(formData.weight) || 0,
+                volume_cbm: 0,
 
                 cargo_details: JSON.stringify(cargoPayload), // THE WISE MOVE
                 user_id: user.id
@@ -154,12 +155,7 @@ export default function RequestQuoteForm() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
-            {/* Navbar Placeholder */}
-            <nav className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="font-bold text-2xl tracking-tighter">OMEGO</Link>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="max-w-5xl mx-auto px-4 py-12">
                 <motion.div
@@ -491,6 +487,7 @@ export default function RequestQuoteForm() {
 
                 </motion.form>
             </div>
+            <Footer />
         </div>
     );
 }

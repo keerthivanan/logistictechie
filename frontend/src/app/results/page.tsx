@@ -7,6 +7,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle } from 'lucide-react'
 
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+
 // Separate component for search params logic to avoid Suspense boundary issues
 function ResultsContent() {
   const router = useRouter()
@@ -88,7 +91,7 @@ function ResultsContent() {
   return (
     <>
       {/* Search Header Info - Dynamic now */}
-      <div className="bg-zinc-900 border-b border-white/10">
+      <div className="bg-black border-b border-white/10 pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm">
@@ -275,20 +278,13 @@ function ResultsContent() {
 export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
-      {/* Navigation */}
-      <nav className="bg-black border-b border-white/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <span className="text-2xl font-bold tracking-tight text-white">OMEGO</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
-      <Suspense fallback={<div className="text-center py-20">Loading Interface...</div>}>
+      <Suspense fallback={<div className="text-center py-20 pt-40">Loading Interface...</div>}>
         <ResultsContent />
       </Suspense>
+      <Footer />
     </div>
   )
 }
+

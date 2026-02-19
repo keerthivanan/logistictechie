@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Github, Twitter, Linkedin, ChevronRight, Mail, Globe } from 'lucide-react'
 
 export default function Footer() {
     return (
@@ -25,6 +26,7 @@ export default function Footer() {
                             <li><Link href="/carriers" className="hover:text-white transition-colors">Yield Agent</Link></li>
                             <li><Link href="/enterprise" className="hover:text-white transition-colors">Enterprise</Link></li>
                             <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                            <li><Link href="/demo" className="hover:text-white transition-colors">Live Demo</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -34,6 +36,7 @@ export default function Footer() {
                             <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
                             <li><Link href="/tools/calculator" className="hover:text-white transition-colors">Calculator</Link></li>
                             <li><Link href="/tools/hs-codes" className="hover:text-white transition-colors">HS Codes</Link></li>
+                            <li><Link href="/vessels" className="hover:text-white transition-colors">Vessel Tracker</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -64,7 +67,11 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10">
                     <p className="text-gray-600 text-sm">© 2011-2026 Omego Ltd. All rights reserved.</p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
-                        {/* Socials placeholder */}
+                        {/* Social Signals Node */}
+                        <div className="flex space-x-6">
+                            <a href="#" className="text-gray-400 hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
+                            <a href="#" className="text-gray-400 hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
+                        </div>
                         <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
                         <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
                         <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>

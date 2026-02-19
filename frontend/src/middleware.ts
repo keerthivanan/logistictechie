@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
     // 4. Logic: If already logged in, don't show Login page
     if (AUTH_ROUTES.includes(pathname)) {
         if (token) {
-            return NextResponse.redirect(new URL('/dashboard', request.url))
+            return NextResponse.redirect(new URL('/', request.url))
         }
     }
 

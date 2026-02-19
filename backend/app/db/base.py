@@ -7,4 +7,4 @@ from app.models.booking import Booking
 from app.models.activity import UserActivity
 # Marketplace Expansion
 from app.models.forwarder import Forwarder
-from app.models.marketplace import ShipmentRequest, MarketplaceQuote, NotificationLog
+from app.models.marketplace import MarketplaceRequest, MarketplaceBid

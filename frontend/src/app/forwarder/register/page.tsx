@@ -7,6 +7,9 @@ import Link from 'next/link';
 import { countries } from '@/lib/countries';
 import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 import Prism from '@/components/visuals/Prism';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import { API_URL } from '@/lib/config';
 
 export default function ForwarderRegisterPage() {
     const [loading, setLoading] = useState(false);
@@ -20,7 +23,7 @@ export default function ForwarderRegisterPage() {
         tax_id: '',
         document_url: '',
         password: '', // In a real app, we'd hash and store this properly via /auth/register
-        logo_url: 'https://via.placeholder.com/150' // Placeholder for MVP
+        logo_url: 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200'
     });
     const [phoneError, setPhoneError] = useState<string | null>(null);
     const [isPhoneValid, setIsPhoneValid] = useState(false);
@@ -88,7 +91,7 @@ export default function ForwarderRegisterPage() {
 
         try {
             // 1. Register Forwarder in DB (Status: Pending Approval)
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/forwarders/register`, {
+            const res = await fetch(`${API_URL}/api/forwarders/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -119,13 +122,7 @@ export default function ForwarderRegisterPage() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-zinc-950 pointer-events-none"></div>
 
-            {/* Navbar Placeholder */}
-            <nav className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="font-bold text-2xl tracking-tighter">OMEGO</Link>
-                    <div className="text-sm font-medium text-gray-400">Partner Network</div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="max-w-6xl mx-auto px-4 py-16 grid lg:grid-cols-2 gap-16 items-center">
 
@@ -325,6 +322,7 @@ export default function ForwarderRegisterPage() {
                     </form>
                 </motion.div>
             </div>
+            <Footer />
         </div>
     );
 }

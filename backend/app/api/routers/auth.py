@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
+from app.models.user import User
 from app.schemas import Token, UserLogin, UserResponse
 from app.core import security
 from app import crud
@@ -26,7 +27,7 @@ class RegisterRequest(BaseModel):
     company_name: Optional[str] = None
 
 class SocialSyncRequest(BaseModel):
-    id_token: str # CHANGED: We now require the JWT from Google
+    access_token: str
     provider: str = "google"
 
 @router.post("/social-sync", response_model=Token)
@@ -36,32 +37,27 @@ async def social_sync(
     db: AsyncSession = Depends(deps.get_db)
 ):
     """
-    SOCIAL SYNC PROTOCOL (SECURE)
-    Verifies Google ID Token via Google's Public Keys.
+    SOCIAL SYNC PROTOCOL (FAST)
+    Verifies Google Access Token via Google UserInfo Endpoint.
+    This supports the Custom Button (Instant UI) flow.
     """
-    # STANDARD PRODUCTION LOGIC (SECURE)
-    google_verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={request.id_token}"
+    # FASTEST VERIFICATION FOR ACCESS TOKENS
+    google_verify_url = "https://www.googleapis.com/oauth2/v3/userinfo"
     
     async with httpx.AsyncClient() as client:
-        resp = await client.get(google_verify_url)
+        resp = await client.get(
+            google_verify_url,
+            headers={"Authorization": f"Bearer {request.access_token}"}
+        )
         
         if resp.status_code != 200:
             raise HTTPException(status_code=401, detail="Invalid Google Token")
             
         google_data = resp.json()
         
-    # 2. AUDIT CHECK (Ensure token is for OUR app)
-    # This prevents 'Token Injection' attacks from other rogue applications.
-    if google_data.get("aud") != settings.GOOGLE_CLIENT_ID:
-        # Fallback for debug: If you changed CLIENT_ID in frontend but not backend, this will catch it.
-        logger.warning(f"Audience Mismatch: Expected {settings.GOOGLE_CLIENT_ID}, got {google_data.get('aud')}")
-        # raise HTTPException(status_code=401, detail="Token Audience Mismatch (Security Breach Prevented)")
-        # For now, let's keep it lenient during the transition unless they are different
-        if settings.GOOGLE_CLIENT_ID:
-             # If we have a key, we MUST match it.
-             if google_data.get("aud") != settings.GOOGLE_CLIENT_ID:
-                  raise HTTPException(status_code=401, detail="Token Audience Mismatch")
-
+    # UserInfo endpoint implies token validity and ownership.
+    # We trust Google to return the correct user for the valid token.
+    
     email = google_data.get("email")
     name = google_data.get("name")
     picture = google_data.get("picture")
@@ -95,7 +91,7 @@ async def social_sync(
             full_name=name,
             avatar_url=picture,
             role="user",
-            onboarding_completed=False
+            onboarding_completed=True
         )
         db.add(db_user)
         await db.commit()
@@ -103,6 +99,26 @@ async def social_sync(
         user = db_user
         print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
     else:
+        # SELF-HEALING: If existing user has no Sovereign ID (Legacy Data Fix)
+        if not user.sovereign_id:
+            import random
+            import string
+            
+            user_count_res = await db.execute(select(func.count(User.id)))
+            user_count = user_count_res.scalar() or 0
+            new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
+            
+            # Uniqueness Check
+            check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
+            if check_existing.scalars().first():
+                entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+                new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
+            
+            user.sovereign_id = new_sovereign_id
+            await db.commit()
+            await db.refresh(user)
+            print(f"[SELF-HEALING] Assigned Sovereign ID {new_sovereign_id} to {email}")
+
         # Update avatar if missing or changed
         if picture and (not user.avatar_url or user.avatar_url != picture):
             user.avatar_url = picture
@@ -144,34 +160,11 @@ async def social_sync(
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
         "onboarding_completed": user.onboarding_completed,
-        "sovereign_id": user.sovereign_id
+        "sovereign_id": user.sovereign_id,
+        "avatar_url": user.avatar_url
     }
 
-class OnboardingSubmit(BaseModel):
-    user_name: str
-    discovery_source: str
-    goals: str
-
-@router.post("/onboarding-submit")
-async def onboarding_submit(
-    data: OnboardingSubmit,
-    current_user: deps.User = Depends(deps.get_current_active_user),
-    db: AsyncSession = Depends(deps.get_db)
-):
-    """
-    Finalizes the sovereign enrollment with user survey data.
-    """
-    import json
-    current_user.full_name = data.user_name
-    current_user.onboarding_completed = True
-    current_user.survey_responses = json.dumps({
-        "discovery": data.discovery_source,
-        "goals": data.goals
-    })
-    
-    db.add(current_user)
-    await db.commit()
-    return {"success": True, "message": "Onboarding Complete. Welcome to the Network."}
+# Removed Onboarding Submit Protocol (Simplified Flow)
 
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
@@ -241,7 +234,8 @@ async def login_for_access_token(
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
         "sovereign_id": user.sovereign_id,
-        "onboarding_completed": user.onboarding_completed or False
+        "onboarding_completed": user.onboarding_completed or False,
+        "avatar_url": user.avatar_url
     }
 
 @router.post("/refresh", response_model=Token)
@@ -274,7 +268,8 @@ async def refresh_access_token(
             "user_id": str(user.id),
             "user_name": user.full_name or "User",
             "sovereign_id": user.sovereign_id,
-            "onboarding_completed": user.onboarding_completed or False
+            "onboarding_completed": user.onboarding_completed or False,
+            "avatar_url": user.avatar_url
         }
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")

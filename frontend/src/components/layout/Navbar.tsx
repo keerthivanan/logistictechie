@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Avatar from '@/components/visuals/Avatar';
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,11 +36,20 @@ export default function Navbar() {
             ]
         },
         {
+            label: "Ecosystem",
+            children: [
+                { label: "Sovereign Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
+                { label: "Forwarder Directory", href: "/forwarders", desc: "Verified Partner Network" },
+                { label: "Partner Registration", href: "/forwarder/register", desc: "Join the Sovereign Network" },
+                { label: "Vessel Tracker", href: "/vessels", desc: "Global Asset Telemetry" },
+                { label: "Container Tracking", href: "/tracking", desc: "Real-time Visibility" },
+            ]
+        },
+        {
             label: "Tools",
             children: [
                 { label: "Freight Calculator", href: "/tools/calculator", desc: "Instant Estimates" },
                 { label: "HS Code Lookup", href: "/tools/hs-codes", desc: "Classification Engine" },
-                { label: "Container Tracking", href: "/tracking", desc: "Real-time Visibility" },
             ]
         },
         {
@@ -105,9 +115,11 @@ export default function Navbar() {
                         <Link href="/search" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
                             Instant Search
                         </Link>
-                        <Link href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                            Dashboard
-                        </Link>
+                        {user && (
+                            <Link href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                                Dashboard
+                            </Link>
+                        )}
 
                         {/* 3. Tools Dropdown */}
                         <div
@@ -146,52 +158,108 @@ export default function Navbar() {
 
                     {/* Right Side Actions */}
                     <div className="hidden md:flex items-center gap-6">
-                        <Link
-                            href="/request-quote"
-                            className="text-sm font-bold text-white hover:text-blue-400 transition-colors"
-                        >
-                            Get a Quote
-                        </Link>
+                        {!user && (
+                            <Link
+                                href="/request-quote"
+                                className="text-sm font-bold text-white hover:text-blue-400 transition-colors"
+                            >
+                                Get a Quote
+                            </Link>
+                        )}
 
                         {user ? (
                             <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-                                <Link
-                                    href="/dashboard/settings"
-                                    className="relative group transition-transform active:scale-95"
-                                >
-                                    {user.avatar_url ? (
-                                        <img
-                                            src={user.avatar_url}
-                                            alt={user.name}
-                                            className="w-9 h-9 rounded-full border border-white/20 object-cover group-hover:border-white transition-colors"
-                                        />
-                                    ) : (
-                                        <div className="w-9 h-9 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-xs font-bold text-white group-hover:border-white transition-colors">
-                                            {user.name.charAt(0).toUpperCase()}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setActiveDropdown(activeDropdown === 'User' ? null : 'User')}
+                                        className="relative group transition-transform active:scale-95 flex items-center gap-3"
+                                    >
+                                        <div className="relative">
+                                            <Avatar
+                                                src={user.avatar_url}
+                                                name={user.name}
+                                                size="md"
+                                                className="border-white/10 group-hover:border-white/40 transition-all shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                                            />
+                                            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-500 border-[3px] border-black rounded-full shadow-[0_0_15px_rgba(34,197,94,0.4)]"></div>
                                         </div>
-                                    )}
-                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-black rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
-                                </Link>
-                                <div className="hidden lg:flex flex-col">
-                                    <span className="text-[9px] uppercase tracking-tighter text-zinc-500 font-black leading-none mb-1">Authenticated</span>
-                                    <span className="text-[10px] font-black text-white tracking-widest">{user.sovereign_id}</span>
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-[10px] font-black text-white tracking-widest leading-none mb-1 uppercase opacity-80 group-hover:opacity-100">{user.name ? user.name.split(' ')[0] : 'User'}</span>
+                                            <span className="text-[7px] font-black text-green-500 tracking-[0.2em] leading-none uppercase mb-1">LOGGED IN</span>
+                                            <span className="text-[8px] font-black text-blue-500 tracking-[0.2em] leading-none uppercase">{user.sovereign_id}</span>
+                                        </div>
+                                        <ChevronDown className={`w-3 h-3 text-zinc-500 transition-transform duration-300 ${activeDropdown === 'User' ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {activeDropdown === 'User' && (
+                                            <>
+                                                <div
+                                                    className="fixed inset-0 z-[-1]"
+                                                    onClick={() => setActiveDropdown(null)}
+                                                />
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                    className="absolute top-full right-0 mt-4 w-72 bg-[#0a0c10] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-[100]"
+                                                >
+                                                    {/* Image-Style Header */}
+                                                    <div className="p-5 border-b border-white/5 bg-[#11141a]">
+                                                        <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mb-1">ACTIVE PROTOCOL: LOGGED IN</p>
+                                                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Authenticated Citizen</p>
+                                                        <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                                                    </div>
+
+                                                    <div className="p-2 py-3">
+                                                        <Link
+                                                            href="/profile"
+                                                            onClick={() => setActiveDropdown(null)}
+                                                            className="flex items-center gap-4 px-4 py-3 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all group/item"
+                                                        >
+                                                            <UserIcon className="w-5 h-5 text-gray-500 group-hover/item:text-white" />
+                                                            <span className="text-sm font-bold">Profile</span>
+                                                        </Link>
+                                                        <Link
+                                                            href="/settings"
+                                                            onClick={() => setActiveDropdown(null)}
+                                                            className="flex items-center gap-4 px-4 py-3 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-all group/item"
+                                                        >
+                                                            <SettingsIcon className="w-5 h-5 text-gray-500 group-hover/item:text-white" />
+                                                            <span className="text-sm font-bold">Settings</span>
+                                                        </Link>
+                                                    </div>
+
+                                                    <div className="p-2 border-t border-white/5">
+                                                        <button
+                                                            onClick={() => {
+                                                                setActiveDropdown(null);
+                                                                logout();
+                                                                router.push('/login');
+                                                            }}
+                                                            className="flex w-full items-center gap-4 px-4 py-3 hover:bg-red-500/10 rounded-xl text-gray-500 hover:text-red-500 transition-all group/item"
+                                                        >
+                                                            <LogOut className="w-5 h-5 group-hover/item:rotate-12 transition-transform" />
+                                                            <span className="text-sm font-bold">Sign Out</span>
+                                                        </button>
+                                                    </div>
+                                                </motion.div>
+                                            </>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                                <button
-                                    onClick={logout}
-                                    className="p-2 text-gray-500 hover:text-red-500 transition-colors"
-                                    title="Logout"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                </button>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-4 border-l border-white/10 pl-6">
-                                <Link href="/login" className="text-sm font-medium text-gray-300 hover:text-white">
+                            <div className="flex items-center gap-4 border-l border-white/10 pl-6 relative z-[60]">
+                                <Link
+                                    href="/login"
+                                    className="text-sm font-bold text-gray-300 hover:text-white transition-colors py-2 px-1"
+                                >
                                     Log In
                                 </Link>
                                 <Link
                                     href="/signup"
-                                    className="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-transform hover:scale-105"
+                                    className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-black hover:bg-gray-200 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-95"
                                 >
                                     Sign Up
                                 </Link>
@@ -230,7 +298,9 @@ export default function Navbar() {
                             {/* Mobile Links */}
                             <div className="space-y-4">
                                 <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Instant Search</Link>
-                                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Dashboard</Link>
+                                {user && (
+                                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Dashboard</Link>
+                                )}
                                 <div className="h-px bg-white/10 my-4" />
                                 {navItems[0].children.map(child => (
                                     <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="block text-gray-400 hover:text-white py-1">
@@ -245,15 +315,24 @@ export default function Navbar() {
                             {user ? (
                                 <div className="space-y-4">
                                     <div className="text-center text-gray-500 font-mono text-xs">Logged In</div>
-                                    <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl">
+                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl text-sm">
                                         Settings
                                     </Link>
-                                    <button onClick={logout} className="block w-full text-center text-red-500 font-bold py-3 border border-red-900/30 rounded-xl">Log Out</button>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            setMobileMenuOpen(false);
+                                            router.push('/login');
+                                        }}
+                                        className="block w-full text-center text-red-500 font-bold py-3 border border-red-900/30 rounded-xl text-sm"
+                                    >
+                                        Sign Out
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-bold">Log In</Link>
-                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-bold">Sign Up</Link>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-bold text-sm">Log In</Link>
+                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-bold text-sm">Sign Up</Link>
                                 </div>
                             )}
                         </div>

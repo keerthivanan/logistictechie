@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin, ShieldCheck, Truck, Plane, Globe, Mail, Phone, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import { API_URL } from '@/lib/config';
 
 interface Forwarder {
     id: string;
@@ -22,7 +25,7 @@ export default function ForwarderDirectoryPage() {
     useEffect(() => {
         const fetchForwarders = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/forwarders/active`);
+                const res = await fetch(`${API_URL}/api/forwarders/active`);
                 const data = await res.json();
                 if (data.forwarders) {
                     setForwarders(data.forwarders);
@@ -44,17 +47,7 @@ export default function ForwarderDirectoryPage() {
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
-            {/* Navbar Placeholder */}
-            <nav className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <Link href="/" className="font-bold text-2xl tracking-tighter">OMEGO</Link>
-                    <div className="flex items-center space-x-6">
-                        <Link href="/forwarder/register" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                            For Forwarders
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 py-16">
 
@@ -105,10 +98,10 @@ export default function ForwarderDirectoryPage() {
                                         <div className="w-16 h-16 rounded-xl bg-white p-2 flex items-center justify-center overflow-hidden">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
-                                                src={forwarder.logo_url || 'https://via.placeholder.com/150'}
+                                                src={forwarder.logo_url || 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200'}
                                                 alt={forwarder.company_name}
                                                 className="object-contain w-full h-full"
-                                                onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/150?text=LOGO' }}
+                                                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200' }}
                                             />
                                         </div>
                                         <div className="bg-green-500/10 text-green-400 p-2 rounded-full">
@@ -148,6 +141,7 @@ export default function ForwarderDirectoryPage() {
                 )}
 
             </div>
+            <Footer />
         </div>
     );
 }

@@ -73,6 +73,7 @@ class Token(BaseModel):
     user_name: str
     onboarding_completed: bool = False
     sovereign_id: str
+    avatar_url: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: str
