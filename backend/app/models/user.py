@@ -36,8 +36,8 @@ class User(Base):
     # quotes = relationship("Quote", back_populates="user") # Optional: Add back_populates in Quote if needed
 
     
-    # Marketplace Relationships
-    # Use string references to allow late-binding and avoid circular imports
-    forwarder_profile = relationship("Forwarder", uselist=False, back_populates="user")
-    shipment_requests = relationship("ShipmentRequest", back_populates="user")
+    
+    # Marketplace Relationships REMOVED (Clean Slate Protocol)
+    # The Sovereign Logistics OS focuses on User -> Booking -> Shipment. 
+    # Marketplace features will be re-architected in Phase 2.
 

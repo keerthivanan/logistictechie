@@ -1,7 +1,4 @@
-# Expose models for easier imports
-# Marketplace models first to resolve circular dependencies in User
-from .forwarder import Forwarder
-from .marketplace import ShipmentRequest, MarketplaceQuote, NotificationLog
+# Marketplace Models REMOVED from Import
 
 from .user import User
 from .quote import Quote
