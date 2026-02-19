@@ -208,15 +208,6 @@ export default function Home() {
                     <p className="text-sm text-gray-400">Refresh critical keywords on demand, instantly.</p>
                   </div>
                 </div>
-                <div className="flex gap-4">
-                  <div className="bg-zinc-900 p-3 rounded-lg h-fit border border-white/10">
-                    <Globe className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Precise Localization</h4>
-                    <p className="text-sm text-gray-400">Track 107,000+ locations down to the zip code.</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
