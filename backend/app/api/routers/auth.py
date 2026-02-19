@@ -334,7 +334,15 @@ async def read_users_me(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
         
-    return user
+    return {
+        "id": str(user.id),
+        "email": user.email,
+        "full_name": user.full_name,
+        "sovereign_id": user.sovereign_id,
+        "onboarding_completed": user.onboarding_completed,
+        "avatar_url": user.avatar_url,
+        "role": user.role
+    }
 
 class ProfileUpdate(BaseModel):
     full_name: Optional[str] = None

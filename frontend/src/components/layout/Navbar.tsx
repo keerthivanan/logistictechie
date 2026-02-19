@@ -102,10 +102,6 @@ export default function Navbar() {
                             </AnimatePresence>
                         </div>
 
-                        {/* 2. Direct Links (Always Visible) */}
-                        <Link href="/marketplace" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-                            Marketplace
-                        </Link>
                         <Link href="/search" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
                             Instant Search
                         </Link>
@@ -235,7 +231,6 @@ export default function Navbar() {
                             <div className="space-y-4">
                                 <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Instant Search</Link>
                                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Dashboard</Link>
-                                <Link href="/marketplace" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Marketplace</Link>
                                 <div className="h-px bg-white/10 my-4" />
                                 {navItems[0].children.map(child => (
                                     <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="block text-gray-400 hover:text-white py-1">
