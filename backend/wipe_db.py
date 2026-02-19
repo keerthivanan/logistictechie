@@ -12,10 +12,9 @@ async def wipe_all_data():
     async with async_session() as session:
         print("[SYSTEM] INITIATING TOTAL DATA PURGE...")
         
-        # List of tables to attempt clearing
+        # List of tables to attempt clearing (Sovereign Core)
         tables = [
-            "users", "bookings", "user_activities", "forwarders", 
-            "shipment_requests", "marketplace_submissions"
+            "quotes", "bookings", "user_activities", "users"
         ]
         
         for table in tables:
