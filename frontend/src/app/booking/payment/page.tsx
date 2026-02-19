@@ -19,6 +19,7 @@ function PaymentContent() {
     const carrier = searchParams.get('carrier') || 'Unknown Carrier'
     const origin = searchParams.get('origin') || 'Unknown'
     const destination = searchParams.get('destination') || 'Unknown'
+    const quoteId = searchParams.get('quoteId')
 
     // Simple breakdown for consistency
     const freight = price * 0.85
@@ -38,7 +39,7 @@ function PaymentContent() {
 
         try {
             const bookingPayload = {
-                quote_id: "Q-" + Math.random().toString(36).substr(2, 9).toUpperCase(), // Generate a client-side ref if no real quote ID
+                quote_id: quoteId || "Q-" + Math.random().toString(36).substr(2, 9).toUpperCase(), // Use real ID or fallback
                 price: price,
                 cargo_details: {
                     origin,

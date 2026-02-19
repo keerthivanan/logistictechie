@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { API_URL } from '@/lib/config'
 import Prism from '@/components/visuals/Prism'
 import { GoogleLogin } from '@react-oauth/google'
@@ -11,6 +11,8 @@ import { useAuth } from '@/context/AuthContext'
 export default function SignupPage() {
     const { login } = useAuth()
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const returnUrl = searchParams.get('returnUrl')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -67,7 +69,9 @@ export default function SignupPage() {
                                             if (res.ok) {
                                                 login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id);
 
-                                                if (!data.onboarding_completed) {
+                                                if (returnUrl) {
+                                                    router.push(decodeURIComponent(returnUrl));
+                                                } else if (!data.onboarding_completed) {
                                                     router.push('/onboarding');
                                                 } else {
                                                     router.push('/dashboard');
