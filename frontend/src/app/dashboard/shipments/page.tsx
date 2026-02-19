@@ -14,12 +14,14 @@ export default function ShipmentsPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (!authLoading && !user) {
+        if (authLoading) return; // Wait until auth is resolved
+
+        if (!user) {
             router.push('/login')
-            return
+        } else {
+            fetchShipments()
         }
-        if (user) fetchShipments()
-    }, [user, authLoading])
+    }, [user, authLoading, router])
 
     const fetchShipments = async () => {
         try {
