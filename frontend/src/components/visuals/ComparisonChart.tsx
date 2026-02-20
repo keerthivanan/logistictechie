@@ -5,18 +5,18 @@ import { motion } from 'framer-motion'
 
 export default function ComparisonChart() {
     return (
-        <div className="bg-zinc-950 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+        <div className="bg-black border border-white/10 rounded-3xl p-8 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
 
             <div className="flex justify-between items-end mb-12">
                 <div>
                     <h3 className="text-2xl font-bold mb-2">Outperforming the industry.</h3>
-                    <p className="text-gray-400">OMEGO vs Legacy Freight</p>
+                    <p className="text-gray-400">SOVEREIGN vs Legacy Freight</p>
                 </div>
                 <div className="flex gap-6">
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                        <span className="text-sm font-bold">OMEGO</span>
+                        <span className="text-sm font-bold">SOVEREIGN</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-zinc-700"></div>

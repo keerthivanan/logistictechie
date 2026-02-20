@@ -47,7 +47,7 @@ export default function ContactPage() {
                                 <Mail className="w-6 h-6 text-white mt-1" />
                                 <div>
                                     <h3 className="font-bold text-xl mb-2">Secure Channel</h3>
-                                    <p className="text-gray-400 font-mono">mission@omego.ai</p>
+                                    <p className="text-gray-400 font-mono">mission@sovereign.ai</p>
                                 </div>
                             </div>
                         </div>

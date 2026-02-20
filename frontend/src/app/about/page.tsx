@@ -8,10 +8,9 @@ export default function AboutPage() {
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
             <Navbar />
-
             <main className="">
                 {/* Hero */}
-                <section className="relative pt-48 pb-32 overflow-hidden">
+                <section className="relative pt-32 pb-32 overflow-hidden">
                     <div className="absolute inset-0">
                         <img
                             src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
@@ -22,10 +21,7 @@ export default function AboutPage() {
                     </div>
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                            <span className="text-sm font-medium text-gray-300">AI-NATIVE • GLOBAL OPS</span>
-                        </div>
+
                         <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter">
                             ORCHESTRATING <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
@@ -83,7 +79,7 @@ export default function AboutPage() {
                         <div className="relative border-l border-white/10 ml-8 md:ml-1/2 space-y-16">
                             {[
                                 { year: "2024", title: "Project Alpha", desc: "The code was written. A new intelligence was born to solve the fragmentation of global trade." },
-                                { year: "2025", title: "The Neural Network", desc: "OMEGO connected 100+ major ports into a single, real-time nervous system." },
+                                { year: "2025", title: "The Neural Network", desc: "Sovereign connected 100+ major ports into a single, real-time nervous system." },
                                 { year: "2026", title: "Global Dominance", desc: "Today, we process billions in cargo value with zero human error. The standard has been set." },
                                 { year: "FUTURE", title: "Autonomous Logistics", desc: "Self-correcting supply chains. The engine that runs the world." }
                             ].map((item, i) => (

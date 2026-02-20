@@ -153,96 +153,234 @@ class SovereignEngine:
         daily_tension = (int(seed[:4], 16) % 15) - 5 # -5% to +10% volatility
         return 1.0 + (daily_tension / 100.0)
 
+    # --- GLOBAL DISTANCE MATRIX (Real Nautical Kilometers) ---
+    DISTANCE_MATRIX = {
+        # China ↔ USA
+        ("SHANGHAI", "LOS ANGELES"): 10500, ("SHANGHAI", "LONG BEACH"): 10500,
+        ("SHANGHAI", "NEW YORK"): 19000, ("SHANGHAI", "SAVANNAH"): 18000,
+        ("NINGBO", "LOS ANGELES"): 10700, ("SHENZHEN", "LOS ANGELES"): 11200,
+        ("GUANGZHOU", "LOS ANGELES"): 11300,
+        # China ↔ Europe
+        ("SHANGHAI", "ROTTERDAM"): 19500, ("SHANGHAI", "HAMBURG"): 20000,
+        ("SHANGHAI", "ANTWERP"): 19700, ("NINGBO", "ROTTERDAM"): 19700,
+        ("SHENZHEN", "ROTTERDAM"): 17800, ("GUANGZHOU", "ROTTERDAM"): 17900,
+        # China ↔ Middle East
+        ("SHANGHAI", "JEDDAH"): 14500, ("SHANGHAI", "DUBAI"): 12500,
+        ("SHANGHAI", "JEBEL ALI"): 12500, ("SHANGHAI", "DAMMAM"): 13000,
+        ("NINGBO", "JEDDAH"): 14700, ("SHENZHEN", "DUBAI"): 10800,
+        # China ↔ India
+        ("SHANGHAI", "CHENNAI"): 7200, ("SHANGHAI", "MUMBAI"): 8500,
+        ("SHANGHAI", "NHAVA SHEVA"): 8500, ("SHENZHEN", "CHENNAI"): 5800,
+        ("GUANGZHOU", "MUMBAI"): 7200,
+        # China ↔ SE Asia
+        ("SHANGHAI", "SINGAPORE"): 4600, ("SHANGHAI", "HONG KONG"): 1700,
+        ("SHANGHAI", "BUSAN"): 850, ("SHANGHAI", "TOKYO"): 1800,
+        ("SHENZHEN", "SINGAPORE"): 3200, ("HONG KONG", "SINGAPORE"): 2600,
+        # India ↔ Middle East
+        ("CHENNAI", "JEDDAH"): 5200, ("CHENNAI", "DUBAI"): 3400,
+        ("CHENNAI", "DAMMAM"): 4000, ("MUMBAI", "JEDDAH"): 4100,
+        ("MUMBAI", "DUBAI"): 1800, ("NHAVA SHEVA", "DUBAI"): 1800,
+        ("NHAVA SHEVA", "JEDDAH"): 4100, ("MUMBAI", "DAMMAM"): 2500,
+        # India ↔ Europe
+        ("CHENNAI", "ROTTERDAM"): 14200, ("MUMBAI", "ROTTERDAM"): 12500,
+        ("NHAVA SHEVA", "ROTTERDAM"): 12500, ("CHENNAI", "HAMBURG"): 14500,
+        # India Domestic (Coastal)
+        ("CHENNAI", "MUMBAI"): 1600, ("CHENNAI", "NHAVA SHEVA"): 1600,
+        ("MUMBAI", "NHAVA SHEVA"): 50, # Same metro area
+        # Middle East ↔ Europe
+        ("JEDDAH", "ROTTERDAM"): 6500, ("DUBAI", "ROTTERDAM"): 11200,
+        ("JEBEL ALI", "ROTTERDAM"): 11200, ("JEDDAH", "HAMBURG"): 6800,
+        ("DAMMAM", "ROTTERDAM"): 11500,
+        # Middle East Intra
+        ("DUBAI", "JEDDAH"): 2100, ("JEBEL ALI", "JEDDAH"): 2100,
+        ("DAMMAM", "JEDDAH"): 1500, ("DUBAI", "DAMMAM"): 600,
+        # SE Asia ↔ India
+        ("SINGAPORE", "CHENNAI"): 2800, ("SINGAPORE", "MUMBAI"): 4400,
+        # SE Asia ↔ Europe
+        ("SINGAPORE", "ROTTERDAM"): 15200,
+        # USA ↔ Europe
+        ("NEW YORK", "ROTTERDAM"): 6000, ("SAVANNAH", "ROTTERDAM"): 7200,
+        # Intra-Asia
+        ("BUSAN", "TOKYO"): 900, ("BUSAN", "SHANGHAI"): 850,
+        ("HONG KONG", "BUSAN"): 2400, ("SINGAPORE", "BUSAN"): 4600,
+    }
+
+    # Region centroid distances for smart fallback
+    REGION_DISTANCES = {
+        ("ASIA", "EUROPE"): 18000,
+        ("ASIA", "NORTH_AMERICA"): 12000,
+        ("ASIA", "MIDDLE_EAST"): 8000,
+        ("ASIA", "INDIA"): 5500,
+        ("ASIA", "ASIA"): 2500,
+        ("INDIA", "EUROPE"): 13000,
+        ("INDIA", "NORTH_AMERICA"): 16000,
+        ("INDIA", "MIDDLE_EAST"): 3500,
+        ("INDIA", "INDIA"): 1200,
+        ("MIDDLE_EAST", "EUROPE"): 8000,
+        ("MIDDLE_EAST", "NORTH_AMERICA"): 14000,
+        ("MIDDLE_EAST", "MIDDLE_EAST"): 1500,
+        ("EUROPE", "NORTH_AMERICA"): 6500,
+        ("EUROPE", "EUROPE"): 2000,
+        ("NORTH_AMERICA", "NORTH_AMERICA"): 4000,
+    }
+
+    REGION_MAP = {
+        "SHANGHAI": "ASIA", "NINGBO": "ASIA", "SHENZHEN": "ASIA", "GUANGZHOU": "ASIA",
+        "HONG KONG": "ASIA", "BUSAN": "ASIA", "TOKYO": "ASIA", "YOKOHAMA": "ASIA",
+        "KAOHSIUNG": "ASIA", "SINGAPORE": "ASIA", "PORT KLANG": "ASIA",
+        "LAEM CHABANG": "ASIA", "HAIPHONG": "ASIA", "HO CHI MINH": "ASIA", "TIANJIN": "ASIA",
+        "CHENNAI": "INDIA", "MUMBAI": "INDIA", "NHAVA SHEVA": "INDIA", "DELHI": "INDIA",
+        "ENNORE": "INDIA", "KOLKATA": "INDIA", "KOCHI": "INDIA", "VISAKHAPATNAM": "INDIA",
+        "JEDDAH": "MIDDLE_EAST", "DUBAI": "MIDDLE_EAST", "JEBEL ALI": "MIDDLE_EAST",
+        "DAMMAM": "MIDDLE_EAST", "RIYADH": "MIDDLE_EAST", "SALALAH": "MIDDLE_EAST",
+        "ROTTERDAM": "EUROPE", "HAMBURG": "EUROPE", "ANTWERP": "EUROPE",
+        "BARCELONA": "EUROPE", "VALENCIA": "EUROPE", "GENOA": "EUROPE",
+        "PIRAEUS": "EUROPE", "FELIXSTOWE": "EUROPE", "LONDON": "EUROPE",
+        "LOS ANGELES": "NORTH_AMERICA", "LONG BEACH": "NORTH_AMERICA",
+        "NEW YORK": "NORTH_AMERICA", "NEWARK": "NORTH_AMERICA",
+        "SAVANNAH": "NORTH_AMERICA", "HOUSTON": "NORTH_AMERICA",
+        "VANCOUVER": "NORTH_AMERICA", "PRINCE RUPERT": "NORTH_AMERICA",
+        "MANZANILLO": "NORTH_AMERICA",
+        "SANTOS": "SOUTH_AMERICA", "DURBAN": "AFRICA",
+        "MELBOURNE": "OCEANIA", "SYDNEY": "OCEANIA",
+    }
+
+    @classmethod
+    def get_route_distance(cls, origin: str, destination: str) -> int:
+        """
+        Get the distance between two ports. Uses exact match first, then region fallback.
+        Returns distance in km.
+        """
+        o = origin.upper().strip()
+        d = destination.upper().strip()
+        
+        # Strip country suffixes (e.g. "Chennai, India" -> "Chennai")
+        o_city = o.split(",")[0].strip()
+        d_city = d.split(",")[0].strip()
+        
+        # 1. Exact match (try both directions)
+        for pair in [(o_city, d_city), (d_city, o_city)]:
+            if pair in cls.DISTANCE_MATRIX:
+                return cls.DISTANCE_MATRIX[pair]
+        
+        # 2. Fuzzy match — check if any key city is contained in the input
+        for (k1, k2), dist in cls.DISTANCE_MATRIX.items():
+            if (k1 in o_city or o_city in k1) and (k2 in d_city or d_city in k2):
+                return dist
+            if (k2 in o_city or o_city in k2) and (k1 in d_city or d_city in k1):
+                return dist
+        
+        # 3. Region-based fallback
+        o_region = None
+        d_region = None
+        for city, region in cls.REGION_MAP.items():
+            if city in o_city or o_city in city:
+                o_region = region
+                break
+        for city, region in cls.REGION_MAP.items():
+            if city in d_city or d_city in city:
+                d_region = region
+                break
+        
+        if o_region and d_region:
+            pair1 = (o_region, d_region)
+            pair2 = (d_region, o_region)
+            if pair1 in cls.REGION_DISTANCES:
+                return cls.REGION_DISTANCES[pair1]
+            if pair2 in cls.REGION_DISTANCES:
+                return cls.REGION_DISTANCES[pair2]
+        
+        # 4. Ultimate fallback — conservative medium-haul estimate
+        return 8000
+
     @staticmethod
     def generate_market_rate(origin: str, destination: str, container: str) -> Dict[str, Any]:
         """
-        # GOD-TIER MATHEMATICS (Absolute Zero-Fakeness)
+        # SOVEREIGN PRICING ENGINE (Physics-Based)
         Calculates pricing based on REAL physics: Distance, Fuel, THC, PSS, and Daily Pulse.
         """
         from datetime import datetime
         
-        # 0. GLOBAL LOGISTICS PULSE (The "Day's Proper Market" Logic)
-        # 100% deterministic but varies daily to reflect global volatility
+        # 0. GLOBAL LOGISTICS PULSE (Daily Market Volatility)
         pulse_index = SovereignEngine.calculate_volatility_factor()
         
-        # 1. PHYSICAL CONSTANTS (2026 Sovereign Standard - Recalibrated)
-        FUEL_PRICE_TON = 680.0 # 2026 High-Sulfur / VLSFO blend
-        FUEL_CONS_KM = 0.22    # Standard Large Container Vessel (Tons per KM)
-        DOC_FEE = 95.0         
-        VESSEL_TEU_CAPACITY = 18000 # Ultra Large Container Vessel (ULCV)
+        # 1. PHYSICAL CONSTANTS (2026 Sovereign Standard)
+        FUEL_PRICE_TON = 680.0
+        FUEL_CONS_KM = 0.22
+        DOC_FEE = 95.0
+        VESSEL_TEU_CAPACITY = 18000
         
-        # 2. GLOBAL HUB THC (Terminal Handling Charges)
-        # Deep Intelligence Map for every major logistics node
+        # 2. TERMINAL HANDLING CHARGES (THC) by port
         thc_map = {
-            "CNSHA": 285.0, # Shanghai
-            "SGSIN": 310.0, # Singapore
-            "NLRTM": 345.0, # Rotterdam
-            "SAJED": 255.0, # Jeddah
-            "USLAX": 580.0, # Los Angeles
-            "AEDXB": 290.0, # Dubai
-            "AEJEA": 290.0, # Jebel Ali
-            "DEHAM": 325.0, # Hamburg
-            "JPTYO": 340.0, # Tokyo
-            "USSAV": 540.0, # Savannah
-            "GRPIR": 280.0, # Piraeus
-            "KRBUS": 295.0, # Busan
-            "SADMM": 260.0, # Dammam
-            "HKHKG": 285.0, # Hong Kong
-            "CNNGB": 280.0, # Ningbo
+            "SHANGHAI": 285.0, "NINGBO": 280.0, "SHENZHEN": 275.0, "GUANGZHOU": 270.0,
+            "HONG KONG": 285.0, "BUSAN": 295.0, "TOKYO": 340.0, "YOKOHAMA": 340.0,
+            "SINGAPORE": 310.0, "PORT KLANG": 260.0, "LAEM CHABANG": 250.0,
+            "CHENNAI": 220.0, "MUMBAI": 230.0, "NHAVA SHEVA": 230.0, "ENNORE": 210.0,
+            "JEDDAH": 255.0, "DUBAI": 290.0, "JEBEL ALI": 290.0, "DAMMAM": 260.0,
+            "ROTTERDAM": 345.0, "HAMBURG": 325.0, "ANTWERP": 330.0, "PIRAEUS": 280.0,
+            "LOS ANGELES": 580.0, "LONG BEACH": 580.0, "NEW YORK": 560.0,
+            "SAVANNAH": 540.0, "NEWARK": 555.0,
         }
         
         origin_code = origin.upper().strip()
         dest_code = destination.upper().strip()
+        o_city = origin_code.split(",")[0].strip()
+        d_city = dest_code.split(",")[0].strip()
         
-        origin_thc = next((v for k, v in thc_map.items() if k in origin_code or k in origin_code.replace(" ","")), 150.0)
-        dest_thc = next((v for k, v in thc_map.items() if k in dest_code or k in dest_code.replace(" ","")), 150.0)
+        origin_thc = next((v for k, v in thc_map.items() if k in o_city or o_city in k), 200.0)
+        dest_thc = next((v for k, v in thc_map.items() if k in d_city or d_city in k), 200.0)
         
-        CANAL_TRANSIT_FEE = 750.0 # $750 per TEU (Strategic Suez Node 2026)
-        
-        # 3. DISTANCE MAPPING (Direct Haul Physics)
-        distance_km = 12000 
-        if "SHA" in origin_code and "JED" in dest_code: distance_km = 14500 
-        if ("JED" in origin_code or "SA" in origin_code) and "RTM" in dest_code: distance_km = 6500  
-        if "SHA" in origin_code and "LAX" in dest_code: distance_km = 10500 
+        # 3. REAL DISTANCE (from the distance matrix)
+        distance_km = SovereignEngine.get_route_distance(origin, destination)
         
         # 4. CORE LOGISTICS FORMULA (Slot Cost Model)
-        # Fuel cost shared across effective capacity (70% load factor)
         vessel_fuel_cost = distance_km * FUEL_CONS_KM * FUEL_PRICE_TON
         fuel_cost_per_teu = vessel_fuel_cost / (VESSEL_TEU_CAPACITY * 0.7)
         
-        if "20" in container:
-            fuel_share = fuel_cost_per_teu
-        else:
-            fuel_share = fuel_cost_per_teu * 1.85
+        container_factor = 1.0 if "20" in container else 1.85
+        fuel_share = fuel_cost_per_teu * container_factor
             
-        # BASE FREIGHT (2026 Market Baseline)
-        base_freight = 1500.0 
-        
-        if "20" in container:
-            slot_cost = base_freight
+        # BASE FREIGHT (scales with distance)
+        if distance_km < 500:
+            base_freight = 300.0
+        elif distance_km < 2000:
+            base_freight = 600.0
+        elif distance_km < 5000:
+            base_freight = 1000.0
+        elif distance_km < 10000:
+            base_freight = 1500.0
         else:
-            slot_cost = base_freight * 1.85
+            base_freight = 2000.0
+            
+        slot_cost = base_freight * container_factor
             
         # 5. SURCHARGES (BAF / LSS / PSS)
-        baf_surcharge = fuel_share * 0.25 # Fuel recovery factor
-        lss_surcharge = 350.0            # Low sulfur surcharge
+        baf_surcharge = fuel_share * 0.25
+        lss_surcharge = 150.0 if distance_km < 3000 else 350.0
         
         current_month = datetime.now().month
         pss_surcharge = 850.0 if current_month in [8, 9, 10, 11] else 250.0
+        # Scale PSS by distance (short routes don't get full PSS)
+        if distance_km < 3000:
+            pss_surcharge *= 0.3
+        elif distance_km < 6000:
+            pss_surcharge *= 0.6
         
-        # 6. CANAL LOGIC (Prophetic Suez Context)
+        # 6. CANAL LOGIC (Suez Context)
+        CANAL_TRANSIT_FEE = 750.0
         canal_additive = 0.0
         tension_multiplier = 1.0
         if any(p in (origin_code + dest_code) for p in ["JED", "SUEZ", "SAUDI"]):
-            canal_additive = CANAL_TRANSIT_FEE
-            tension_multiplier = 1.25 # Strategic node risk premium
+            # Only apply canal fees for long-haul routes that actually cross Suez
+            if distance_km > 4000:
+                canal_additive = CANAL_TRANSIT_FEE
+                tension_multiplier = 1.25
             
-        # 7. MARKET VOLATILITY & TENSION (Daily Pulse Node)
+        # 7. MARKET VOLATILITY & TENSION
         congestion_dest = SovereignEngine.get_port_congestion(destination)
         congestion_factor = 1.0 + (congestion_dest / 200.0) 
         
-        # 8. GLOBAL TAX & COMPLIANCE (Hardened Region Detection v2.1 G.O.A.T.)
-        # Professional regional tax matrix for absolute mathematical parity
+        # 8. REGIONAL TAX MATRIX
         tax_matrix = {
             "SAUDI": 0.15, "JEDDAH": 0.15, "RIYADH": 0.15, "DAMMAM": 0.15, "KSA": 0.15,
             "UAE": 0.05, "DUBAI": 0.05, "JEBEL ALI": 0.05, "ABU DHABI": 0.05,
@@ -254,7 +392,7 @@ class SovereignEngine:
             "USA": 0.00, "AMERICA": 0.00, "LAX": 0.00, "LOS ANGELES": 0.00, "NEW YORK": 0.00, "NYC": 0.00, "SAVANNAH": 0.00, "HOUSTON": 0.00
         }
         
-        tax_rate = 0.05 # Default global service fee node
+        tax_rate = 0.05
         for key, rate in tax_matrix.items():
             if key in dest_code:
                 tax_rate = rate
@@ -267,19 +405,23 @@ class SovereignEngine:
         tax_collectable = base_total * tax_rate
         total_price = base_total + tax_collectable
         
-        # Wisdom Layer (The "Best in World" differentiator)
+        # Transit time from distance (avg 600km/day for ocean freight)
+        transit_days = max(3, int(distance_km / 600) + 2)
+        
+        # Wisdom Layer
         pulse_percent = int((pulse_index - 1) * 100)
-        wisdom_note = f"Logistics Pulse: {pulse_percent:+}%. Optimized for {origin} -> {destination}. Includes ${pss_surcharge} PSS and ${int(tax_collectable)} Regional tax node ({int(tax_rate*100)}%)."
+        wisdom_note = f"Logistics Pulse: {pulse_percent:+}%. Optimized for {origin} -> {destination}. Includes ${pss_surcharge:.0f} PSS and ${int(tax_collectable)} Regional tax node ({int(tax_rate*100)}%)."
         if canal_additive > 0:
             wisdom_note += " Suez Corridor surcharge applied (Strategic Node)."
 
         return {
             "price": int(total_price),
             "currency": "USD",
-            "transit_time": int(distance_km / 800) + 2, 
+            "transit_time": transit_days, 
+            "distance_km": distance_km,
             "service_type": "Priority Sovereign Corridor",
             "is_real_api_rate": False,
-            "source": f"Sovereign Engine v4.5 (High Tension Mode)",
+            "source": f"Sovereign Engine v4.5",
             "wisdom": wisdom_note,
             "breakdown": {
                 "fuel_component": int(fuel_share),
@@ -396,8 +538,8 @@ class SovereignEngine:
             current_value = idx["base"] * (1.0 + (day_change / 20.0))
             
             ticker_data.append({
-                "symbol": idx["symbol"],
-                "value": int(current_value),
+                "label": idx["symbol"],
+                "price": int(current_value),
                 "change": round(day_change, 2),
                 "trend": "UP" if day_change > 0 else "DOWN"
             })

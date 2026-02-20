@@ -17,4 +17,27 @@ class CRUDActivity:
         )
         return result.scalars().all()
 
+    async def create(
+        self, 
+        db: AsyncSession, 
+        *, 
+        user_id: str, 
+        action: str, 
+        entity_type: Optional[str] = None, 
+        entity_id: Optional[str] = None, 
+        extra_data: Optional[dict] = None
+    ) -> UserActivity:
+        import json
+        db_obj = UserActivity(
+            user_id=user_id,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            extra_data=json.dumps(extra_data) if extra_data else None
+        )
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+
 activity = CRUDActivity()

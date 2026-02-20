@@ -23,7 +23,44 @@ async def get_dashboard_stats(
     try:
         stats = await crud.booking.get_dashboard_stats(db, user_id=str(current_user.id))
         
-        # Add Recent Activity (The "Realness" Factor)
+        # 1. Format Shipments for Kanban Board (The "King Maker" View)
+        raw_shipments = stats.pop("shipments", [])
+        formatted_shipments = []
+        
+        for s in raw_shipments:
+            # Parse Details
+            try:
+                cargo = json.loads(s.cargo_details) if isinstance(s.cargo_details, str) else s.cargo_details
+                contact = json.loads(s.contact_details) if isinstance(s.contact_details, str) else s.contact_details
+            except:
+                cargo = {}
+                contact = {}
+                
+            # Status Mapping
+            kanban_status = "processing"
+            if s.status == "CONFIRMED": kanban_status = "processing"
+            elif s.status == "SHIPPED": kanban_status = "transit"
+            elif s.status == "DELIVERED": kanban_status = "delivered"
+            elif s.status == "CUSTOMS_HOLD": kanban_status = "customs"
+            
+            # Highlight Logic (King Maker Feature)
+            is_highlight = "High Value" in str(cargo) or "Hazardous" in str(cargo)
+            
+            formatted_shipments.append({
+                "id": s.booking_reference,
+                "company": contact.get("company_name", "Sovereign Request"),
+                "desc": f"{cargo.get('commodity', 'General Cargo')} ({cargo.get('container', '40FT')})",
+                "date": s.created_at.strftime("%d %b"),
+                "comments": 0, # Placeholder for future messaging feature
+                "views": 1,
+                "status": kanban_status,
+                "mode": "Air" if "Air" in str(cargo) else "Ocean",
+                "highlight": is_highlight
+            })
+            
+        stats["kanban_shipments"] = formatted_shipments
+        
+        # 2. Add Recent Activity (The "Realness" Factor)
         recent_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=5)
         
         # Build Response List

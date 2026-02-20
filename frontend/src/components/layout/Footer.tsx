@@ -10,7 +10,7 @@ export default function Footer() {
                         <div className="w-3 h-6 bg-white rounded-sm"></div>
                         <div className="w-3 h-6 bg-white/70 rounded-sm"></div>
                         <div className="w-3 h-6 bg-white/40 rounded-sm"></div>
-                        <span className="text-2xl font-bold tracking-tight text-white ml-2">OMEGO</span>
+                        <span className="text-2xl font-bold tracking-tight text-white ml-2">SOVEREIGN</span>
                     </div>
                     <p className="text-gray-500 max-w-xl">
                         The evolved Supply Chain & AI performance tracker for the fastest-growing teams. Scale without limits and dominate global trade.
@@ -65,7 +65,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10">
-                    <p className="text-gray-600 text-sm">© 2011-2026 Omego Ltd. All rights reserved.</p>
+                    <p className="text-gray-600 text-sm">© 2011-2026 Sovereign Intelligence. All rights reserved.</p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
                         {/* Social Signals Node */}
                         <div className="flex space-x-6">

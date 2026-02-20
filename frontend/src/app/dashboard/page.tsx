@@ -1,34 +1,25 @@
 'use client'
 
-import { ArrowUpRight, Package, Truck, AlertCircle, History, ExternalLink, ArrowRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { API_URL } from '@/lib/config'
-import { useAuth } from '@/context/AuthContext'
 import { Loader2 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
+import { API_URL } from '@/lib/config'
 
-interface Activity {
-    id: string
-    action: string
-    entity: string
-    timestamp: string
-    metadata: string | null
-    url: string
-}
-
-interface DashboardStats {
-    active_shipments: number
-    containers: number
-    on_time_rate: string
-    recent_activity: Activity[]
-}
+// Ultra-Minimalist Components
+import DashboardHeader from './_components/DashboardHeader'
+import MetricCards from './_components/MetricCards'
+import IntelligenceSidebar from './_components/IntelligenceSidebar'
+import SovereignFlow from './_components/SovereignFlow'
+import { DashboardStats } from './_components/types'
 
 export default function DashboardPage() {
-    const { user, login, logout, loading: authLoading } = useAuth()
+    const { user, loading: authLoading, logout } = useAuth()
     const router = useRouter()
+
     const [stats, setStats] = useState<DashboardStats | null>(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -36,172 +27,82 @@ export default function DashboardPage() {
             return
         }
 
-        if (!user) return
-
         const fetchDashboardData = async () => {
             try {
-                const token = localStorage.getItem('token')
-                const statsRes = await fetch(`${API_URL}/api/dashboard/stats/me`, {
+                setLoading(true)
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+
+                const response = await fetch(`${API_URL}/api/dashboard/stats/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
 
-                if (statsRes.status === 401) {
+                if (response.status === 401) {
                     logout()
+                    router.push('/login')
                     return
                 }
 
-                const statsData = await statsRes.json()
-                setStats(statsData)
-            } catch (err) {
-                console.error('Dashboard telemetry failure:', err)
+                if (!response.ok) throw new Error('Failed to fetch intelligence vector')
+
+                const data = await response.json()
+                setStats(data)
+                setError(null)
+            } catch (err: any) {
+                setError(err.message)
             } finally {
                 setLoading(false)
             }
         }
 
-        fetchDashboardData()
-    }, [user, authLoading, router])
+        if (user) {
+            fetchDashboardData()
+        }
+    }, [user, authLoading, router, logout])
 
     if (loading || authLoading) {
         return (
-            <div className="h-96 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
+            <div className="h-[40vh] flex flex-col items-center justify-center space-y-4">
+                <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
+                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Node Link</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="h-[40vh] flex flex-col items-center justify-center space-y-4 max-w-xs mx-auto text-center">
+                <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-[8px] font-black uppercase tracking-[0.2em] text-white border-b border-white px-2 py-1"
+                >
+                    Retry
+                </button>
             </div>
         )
     }
 
     return (
-        <div className="space-y-8 animate-fade-in-up">
-            <div className="flex justify-between items-end">
-                <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-black tracking-widest text-zinc-500 uppercase">Sovereign Node</span>
-                        <span className="text-[10px] font-black text-white tracking-widest">{user?.sovereign_id}</span>
-                    </div>
-                    <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-500 italic">
-                        Welcome back, {user?.name?.split(' ')[0] || 'User'}
-                    </h1>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                    <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full text-[10px] font-black tracking-widest animate-pulse">
-                        SATELLITE LINK ACTIVE
-                    </div>
-                </div>
+        <div className="space-y-12 max-w-7xl mx-auto py-6">
+            {/* Minimalist Identity & Performance Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pt-4">
+                <DashboardHeader userName={user?.name} />
+                <MetricCards stats={stats} />
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid list-none md:grid-cols-3 gap-6">
-                <Link href="/" className="block group">
-                    <div className="bg-zinc-900 border border-white/10 p-6 rounded-xl hover:border-white/20 hover:bg-white/5 transition-all h-full relative overflow-hidden">
-                        {stats?.active_shipments === 0 && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="flex items-center text-white font-bold border border-white/30 px-4 py-2 rounded-full bg-black">
-                                    Start Booking <ExternalLink className="w-4 h-4 ml-2" />
-                                </span>
-                            </div>
-                        )}
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/10 rounded-lg group-hover:bg-white/20 transition-colors">
-                                <Package className="w-6 h-6 text-white" />
-                            </div>
-                            <span className="flex items-center text-green-400 text-sm font-bold">
-                                Active
-                            </span>
-                        </div>
-                        <div className="text-3xl font-bold mb-1 group-hover:scale-105 transition-transform origin-left">{stats?.active_shipments || 0}</div>
-                        <div className="text-gray-400 text-sm">Active Shipments</div>
-                    </div>
-                </Link>
-
-                <div className="bg-zinc-900 border border-white/10 p-6 rounded-xl hover:border-white/20 transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-white/10 rounded-lg">
-                            <Truck className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="flex items-center text-blue-400 text-sm font-bold">
-                            Volume
-                        </span>
-                    </div>
-                    <div className="text-3xl font-bold mb-1">{stats?.containers || 0} TEU</div>
-                    <div className="text-gray-400 text-sm">Container Volume</div>
+            {/* Strategic Layout: Activity & Flow */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-12">
+                {/* Unified Activity Core */}
+                <div className="xl:col-span-1">
+                    <IntelligenceSidebar activities={stats?.recent_activity || []} />
                 </div>
 
-                <div className="bg-zinc-900 border border-white/10 p-6 rounded-xl hover:border-white/20 transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-white/10 rounded-lg">
-                            <History className="w-6 h-6 text-white" />
-                        </div>
-                        <span className="text-green-500 text-sm font-bold">
-                            {stats?.on_time_rate || '100%'}
-                        </span>
-                    </div>
-                    <div className="text-3xl font-bold mb-1">On Time</div>
-                    <div className="text-gray-400 text-sm">Performance Rate</div>
-                </div>
-            </div>
-
-            {/* Recent Activity / Resume Operations */}
-            <div className="bg-zinc-900 border border-white/10 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <History className="w-5 h-5 text-gray-400" />
-                        Recent Activity & Resume
-                    </h2>
-                    <span className="text-xs text-gray-500 uppercase tracking-widest">Real-time Stream</span>
-                </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-black/50 text-gray-400 text-sm uppercase">
-                                <th className="px-6 py-4">Timestamp</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Action</th>
-                                <th className="px-6 py-4">Entity</th>
-                                <th className="px-6 py-4 text-right">Resume</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/10">
-                            {stats?.recent_activity && stats.recent_activity.length > 0 ? (
-                                stats.recent_activity.map((act) => (
-                                    <tr key={act.id} className="hover:bg-white/5 transition-colors group">
-                                        <td className="px-6 py-4 text-gray-500 text-sm whitespace-nowrap">
-                                            {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-2 h-2 rounded-full ${act.action === 'BOOKING_CREATED' ? 'bg-green-500 animate-pulse' :
-                                                    act.action === 'SEARCH' ? 'bg-blue-500' : 'bg-gray-500'
-                                                    }`}></div>
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                                                    {act.action === 'BOOKING_CREATED' ? 'Active' : 'Logged'}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 font-bold text-white">
-                                            {act.action.replace('_', ' ')}
-                                        </td>
-                                        <td className="px-6 py-4 text-blue-400 font-mono text-xs">
-                                            {act.entity}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <Link
-                                                href={act.url}
-                                                className="inline-flex items-center gap-1 text-[10px] font-bold bg-white text-black px-4 py-1.5 rounded-full hover:bg-gray-200 transition-all opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
-                                            >
-                                                RESUME <ArrowRight className="w-3 h-3" />
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                                        No recent activity recorded. Start by searching specifically.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                {/* Tactical Execution Core */}
+                <div className="xl:col-span-3">
+                    <SovereignFlow
+                        shipments={stats?.kanban_shipments || []}
+                        activeCount={stats?.active_shipments || 0}
+                    />
                 </div>
             </div>
         </div>

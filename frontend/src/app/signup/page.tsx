@@ -68,7 +68,7 @@ function SignupContent() {
                             <div className="w-2 h-4 bg-white/70 rounded-sm"></div>
                             <div className="w-2 h-4 bg-white/40 rounded-sm"></div>
                         </div>
-                        <span className="text-2xl font-bold tracking-tight text-white">OMEGO</span>
+                        <span className="text-2xl font-bold tracking-tight text-white">SOVEREIGN</span>
                     </Link>
                     <h1 className="text-3xl font-bold mb-2">Create an account</h1>
                     <p className="text-gray-400">Join the Sovereign Logistics Network.</p>

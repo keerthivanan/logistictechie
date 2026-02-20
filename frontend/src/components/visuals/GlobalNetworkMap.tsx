@@ -37,7 +37,7 @@ export default function GlobalNetworkMap() {
     if (!mounted) return null;
 
     return (
-        <div className="relative w-full aspect-[2/1] bg-[#050505] rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+        <div className="relative w-full aspect-[2/1] bg-black rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
             {/* Background Grid */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
 

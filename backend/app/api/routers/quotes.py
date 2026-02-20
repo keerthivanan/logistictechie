@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from typing import List, Dict
 from app.schemas import RateRequest, OceanQuote
 from app.models.quote import Quote
 from app.services.ocean.maersk import MaerskClient
-from app.services.sovereign import sovereign_engine
+from app.services.sovereign import sovereign_engine, SovereignEngine
 from app.services.sentinel import sentinel
 import asyncio
 import hashlib
@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 
 def generate_quote_id(quote: dict) -> str:
     """ DETERMINISTIC HASHING: Ensures persistent IDs for stateless quotes."""
-    # Hash critical fields to create a stable reference
     seed = f"{quote.get('carrier_name','')}-{quote.get('origin_locode','')}-{quote.get('dest_locode','')}-{quote.get('price',0)}-{quote.get('departure_date','N/A')}"
     return hashlib.md5(seed.encode()).hexdigest()[:12].upper()
 
@@ -51,6 +50,39 @@ async def get_real_ocean_quotes(
     request.origin = sovereign_engine.resolve_port_code(request.origin)
     request.destination = sovereign_engine.resolve_port_code(request.destination)
     
+    # --- ROUTE VALIDATION GATE ---
+    # 1. Same-city rejection
+    def normalize_city(name: str) -> str:
+        import re
+        city = name.upper().strip().split(",")[0].strip()
+        city = re.sub(r'^(ENNORE|PORT OF|PORT|NEW|OLD|NORTH|SOUTH|EAST|WEST|GREATER|INNER|OUTER)\s+', '', city)
+        city = re.sub(r'\s+(PORT|HARBOUR|HARBOR|TERMINAL|DOCK|CITY|TOWN)$', '', city)
+        return re.sub(r'\s+', '', city)
+    
+    norm_o = normalize_city(request.origin)
+    norm_d = normalize_city(request.destination)
+    
+    if norm_o == norm_d or norm_o in norm_d or norm_d in norm_o:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Origin and destination resolve to the same location: '{request.origin}' ≈ '{request.destination}'. Please select different ports."
+        )
+    
+    # 2. Distance validation
+    route_distance = SovereignEngine.get_route_distance(request.origin, request.destination)
+    
+    if route_distance < 100:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Route too short ({route_distance}km). '{request.origin}' and '{request.destination}' are in the same metro area. Ocean freight is not applicable."
+        )
+    
+    if route_distance < 500:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Route distance is only {route_distance}km between '{request.origin}' and '{request.destination}'. This is too short for ocean container shipping. Consider road or rail transport."
+        )
+    
     quotes = []
     
     # 1. REAL REALITY: Fetch Maersk (Schedules + Real Rates)
@@ -61,12 +93,10 @@ async def get_real_ocean_quotes(
     except Exception as e:
         print(f"[WARN] Maersk Fetch Error: {e}")
     
-    # 2. SOVEREIGN GLOBAL CARRIER MATRIX (G.O.A.T. Expansion)
-    # If real API data is insufficient, we trigger the All-World Sovereign Protocol.
+    # 2. SOVEREIGN GLOBAL CARRIER MATRIX
     if len(quotes) < 5:
-        print(f"[INFO] Expansion Triggered. Current count: {len(quotes)}. Engaging Global Carrier Matrix.")
+        print(f"[INFO] Expansion Triggered. Route: {route_distance}km. Current count: {len(quotes)}. Engaging Global Carrier Matrix.")
         
-        # Pass commodity to influence price/wisdom
         est = sovereign_engine.generate_market_rate(request.origin, request.destination, request.container)
         
         # COMMODITY INTELLIGENCE MODIFIER
@@ -77,29 +107,33 @@ async def get_real_ocean_quotes(
         est["price"] = int(est["price"] * commodity_factor)
         est["wisdom"] += f" Rate adjusted for {request.commodity} specific handling."
         
-        # GLOBAL CARRIER DATABASE (Deterministic Personality Nodes)
-        carriers = [
-            {"id": "MSC", "name": "MSC (Sovereign Direct)", "offset": 1.05, "transit": -1, "vessels": ["MSC OSCAR", "MSC GULSUN", "MSC AMELIA"], "wisdom": "World-leader fleet. Dominates high-capacity corridors with extreme reliability."},
-            {"name": "Hapag-Lloyd (Premium)", "offset": 1.12, "transit": -3, "vessels": ["BERLIN EXPRESS", "HAMBURG EXPRESS"], "wisdom": "Premium German efficiency. Ultra-fast transits for time-sensitive cargo."},
-            {"name": "ZIM (Israel Pioneer)", "offset": 1.15, "transit": -4, "vessels": ["ZIM SAMMY", "ZIM LUANDA"], "wisdom": "Niche priority specialist. Agile schedules for emerging trade lanes."},
-            {"name": "Yang Ming (Taiwan Strong)", "offset": 0.92, "transit": 2, "vessels": ["YM WELLNESS", "YM WREATH"], "wisdom": "Balanced Pacific network. Competitive pricing for large-scale logistics."},
-            {"name": "PIL (Pacific Int)", "offset": 0.94, "transit": 0, "vessels": ["KOTA SALAM", "KOTA SATRIA"], "wisdom": "Intra-Asia/Africa specialist. Deep knowledge of regional hub-spoke logistics."},
-            {"name": "Evergreen (Global Reach)", "offset": 0.98, "transit": 1, "vessels": ["EVER GIVEN", "EVER GREET"], "wisdom": "Massive global reach. Stable pricing across all intercontinental trade lanes."}
+        # GLOBAL CARRIER DATABASE — Distance-filtered
+        all_carriers = [
+            {"id": "MSC", "name": "MSC (Sovereign Direct)", "offset": 1.05, "transit": -1, "vessels": ["MSC OSCAR", "MSC GULSUN", "MSC AMELIA"], "wisdom": "World-leader fleet. Dominates high-capacity corridors with extreme reliability.", "min_distance": 3000},
+            {"name": "Hapag-Lloyd (Premium)", "offset": 1.12, "transit": -3, "vessels": ["BERLIN EXPRESS", "HAMBURG EXPRESS"], "wisdom": "Premium German efficiency. Ultra-fast transits for time-sensitive cargo.", "min_distance": 4000},
+            {"name": "ZIM (Israel Pioneer)", "offset": 1.15, "transit": -4, "vessels": ["ZIM SAMMY", "ZIM LUANDA"], "wisdom": "Niche priority specialist. Agile schedules for emerging trade lanes.", "min_distance": 2000},
+            {"name": "Yang Ming (Taiwan Strong)", "offset": 0.92, "transit": 2, "vessels": ["YM WELLNESS", "YM WREATH"], "wisdom": "Balanced Pacific network. Competitive pricing for large-scale logistics.", "min_distance": 1500},
+            {"name": "PIL (Pacific Int)", "offset": 0.94, "transit": 0, "vessels": ["KOTA SALAM", "KOTA SATRIA"], "wisdom": "Intra-Asia/Africa specialist. Deep knowledge of regional hub-spoke logistics.", "min_distance": 500},
+            {"name": "Evergreen (Global Reach)", "offset": 0.98, "transit": 1, "vessels": ["EVER GIVEN", "EVER GREET"], "wisdom": "Massive global reach. Stable pricing across all intercontinental trade lanes.", "min_distance": 3000}
         ]
         
+        # Filter carriers eligible for this route distance
+        carriers = [c for c in all_carriers if route_distance >= c["min_distance"]]
+        
+        # Cap number of schedules based on distance
+        schedules_per_carrier = 2 if route_distance >= 5000 else 1
+        
         for c in carriers:
-            # Generate 2 unique schedules per carrier for "Reality Depth"
-            for i in range(2):
-                # Physics-based variation per schedule
-                sched_offset = 1.0 + (i * 0.05) # Later sailings slightly more expensive/cheaper
+            for i in range(schedules_per_carrier):
+                sched_offset = 1.0 + (i * 0.05)
                 price = int(est["price"] * c["offset"] * sched_offset)
-                transit = max(7, est["transit_time"] + c["transit"] - i)
+                transit = max(3, est["transit_time"] + c["transit"] - i)
                 vessel = c["vessels"][i % len(c["vessels"])]
                 
                 departure = datetime.now() + timedelta(days=3 + (i * 4))
                 
-                # SENTINEL ANALYSIS (2026 Features)
-                emissions = sovereign_engine.estimate_carbon_footprint(12000, request.container) * (0.9 if c["transit"] > 0 else 1.1)
+                # SENTINEL ANALYSIS — use real route distance
+                emissions = sovereign_engine.estimate_carbon_footprint(route_distance, request.container) * (0.9 if c["transit"] > 0 else 1.1)
                 cbam = sentinel.calculate_cbam_impact(emissions, request.destination, request.goods_value or 50000)
                 security = sentinel.analyze_route_security(request.origin, request.destination, sovereign_engine.calculate_risk_score(request.origin, request.destination))
                 
@@ -146,7 +180,7 @@ async def get_real_ocean_quotes(
         signal = "BUY_NOW" if pulse < 1.05 else "WAIT_72H"
         
         # Prophetic Sentinel Analysis
-        est_emissions = sovereign_engine.estimate_carbon_footprint(12000, request.container) * 0.75
+        est_emissions = sovereign_engine.estimate_carbon_footprint(route_distance, request.container) * 0.75
         est_cbam = sentinel.calculate_cbam_impact(est_emissions, request.destination, request.goods_value or 50000)
         
         prophetic_price = int(est["price"] * 0.92) if signal == "BUY_NOW" else int(est["price"] * 1.08)
@@ -251,6 +285,36 @@ async def get_real_ocean_quotes(
         import traceback
         traceback.print_exc()
         await db.rollback()
+
+    # SOVEREIGN BRANDING: Mask competitor names to maintain trust and premium identity
+    for q in quotes:
+        original = q.get("carrier_name", "") if isinstance(q, dict) else q.carrier_name
+        
+        # Mapping for "Best of All Time" Sovereign Branding
+        mapping = {
+            "Maersk": "Sovereign Prime",
+            "MSC": "Direct Network",
+            "Evergreen": "Global Alliance",
+            "Hapag-Lloyd": "Executive Tier",
+            "CMA CGM": "Priority Node",
+            "ZIM": "Agile Sovereign",
+            "ONE": "Pacific Node",
+            "Yang Ming": "Direct Flow"
+        }
+        
+        new_name = original
+        for key, val in mapping.items():
+            if key in original:
+                new_name = val
+                break
+        
+        if isinstance(q, dict):
+            q["carrier_name"] = new_name
+            # Also clean up wisdom if it mentions Maersk
+            if "Maersk" in q.get("wisdom", ""):
+                 q["wisdom"] = q["wisdom"].replace("Maersk", "Sovereign Network")
+        else:
+            q.carrier_name = new_name
 
     return {
         "quotes": quotes,

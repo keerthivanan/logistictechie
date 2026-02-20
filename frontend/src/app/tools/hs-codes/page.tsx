@@ -41,10 +41,7 @@ export default function HSCodesPage() {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 mb-6">
-                                <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
-                                <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Global Taxonomy v4.1</span>
-                            </div>
+
                             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">
                                 Intelligent <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">HS Code</span> <br />Discovery
                             </h1>

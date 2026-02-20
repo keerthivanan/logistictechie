@@ -54,7 +54,7 @@ export default function Home() {
         </div>
 
         {/* Cinematic Gradient Blend To Body */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-zinc-950 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
 
@@ -65,7 +65,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
-            Built for data-obsessed shippers. OMEGO is the only platform that unifies traditional freight forwarding with the new wave of Sovereign AI intelligence.
+            Built for data-obsessed shippers. Sovereign is the only platform that unifies traditional freight forwarding with the new wave of Sovereign AI intelligence.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up delay-300">
@@ -172,7 +172,7 @@ export default function Home() {
 
 
       {/* The Shift Section - Merged with Hero */}
-      <section className="py-24 bg-gradient-to-b from-zinc-950 to-black border-t-0 -mt-1 relative z-20">
+      <section className="py-24 bg-black border-t-0 -mt-1 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
@@ -203,7 +203,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Outperforming the industry standard.</h2>
               <p className="text-gray-400 text-lg mb-8 leading-relaxed">
                 Most tools give you a map. We give you a command center.
-                OMEGO is engineered for precision at infinite scale. We access more data points more frequently, ensuring your strategy is built on reality, not guesswork.
+                Sovereign is engineered for precision at infinite scale. We access more data points more frequently, ensuring your strategy is built on reality, not guesswork.
               </p>
 
               <div className="space-y-6">
@@ -238,7 +238,7 @@ export default function Home() {
               { icon: Users, label: "Team Access" },
               { icon: Globe, label: "API Global" },
             ].map((feature, i) => (
-              <div key={i} className="flex flex-col items-center justify-center p-8 bg-zinc-950 border border-white/10 rounded-xl hover:border-white/30 transition-all cursor-crosshair">
+              <div key={i} className="flex flex-col items-center justify-center p-8 bg-black border border-white/10 rounded-xl hover:border-white/30 transition-all cursor-crosshair">
                 <feature.icon className="w-8 h-8 text-white mb-4" />
                 <span className="font-bold text-gray-300">{feature.label}</span>
               </div>
@@ -250,7 +250,7 @@ export default function Home() {
       <TrustedIndustries />
 
       {/* Smart Dashboard Section */}
-      <section className="py-32 bg-zinc-950/30 relative overflow-hidden">
+      <section className="py-32 bg-black relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
@@ -277,7 +277,7 @@ export default function Home() {
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Active in 100+ Major Ports</h2>
               <p className="text-lg text-gray-400 mb-8">
-                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, OMEGO ensures your cargo moves with precision and speed, powered by our proprietary routing algorithms.
+                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, Sovereign ensures your cargo moves with precision and speed, powered by our proprietary routing algorithms.
               </p>
               <div className="grid grid-cols-2 gap-6">
                 {[
@@ -310,7 +310,7 @@ export default function Home() {
             Ready to dominate the <br /> new logistics landscape?
           </h2>
           <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-            Join 2,000+ forward-thinking teams orchestrating their global trade across the OMEGO Sovereign Network today.
+            Join 2,000+ forward-thinking teams orchestrating their global trade across the Sovereign Intelligence Network today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup" className="px-10 py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-gray-200 transition-all">

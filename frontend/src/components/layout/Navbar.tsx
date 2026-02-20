@@ -71,9 +71,9 @@ export default function Navbar() {
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 z-50 group">
                         <div className="h-8 w-8 bg-white text-black flex items-center justify-center font-bold text-xl rounded-md group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                            O
+                            S
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">OMEGO</span>
+                        <span className="text-xl font-bold tracking-tight text-white">SOVEREIGN</span>
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -95,7 +95,7 @@ export default function Navbar() {
                                         exit={{ opacity: 0, y: 10 }}
                                         className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
                                     >
-                                        <div className="bg-zinc-950 border border-white/10 rounded-xl shadow-2xl p-2 overflow-hidden">
+                                        <div className="bg-black border border-white/10 rounded-xl shadow-2xl p-2 overflow-hidden">
                                             {navItems[0].children.map(child => (
                                                 <Link
                                                     key={child.label}
@@ -138,7 +138,7 @@ export default function Navbar() {
                                         exit={{ opacity: 0, y: 10 }}
                                         className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
                                     >
-                                        <div className="bg-zinc-950 border border-white/10 rounded-xl shadow-2xl p-2 overflow-hidden">
+                                        <div className="bg-black border border-white/10 rounded-xl shadow-2xl p-2 overflow-hidden">
                                             {navItems[1].children.map(child => (
                                                 <Link
                                                     key={child.label}
@@ -202,16 +202,16 @@ export default function Navbar() {
                                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                    className="absolute top-full right-0 mt-4 w-72 bg-[#0a0c10] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-[100]"
+                                                    className="absolute top-full right-0 mt-4 w-72 bg-black border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden z-[100]"
                                                 >
                                                     {/* Image-Style Header */}
-                                                    <div className="p-5 border-b border-white/5 bg-[#11141a]">
+                                                    <div className="p-5 border-b border-white/5 bg-white/5">
                                                         <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mb-1">ACTIVE PROTOCOL: LOGGED IN</p>
                                                         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Authenticated Citizen</p>
                                                         <p className="text-sm font-bold text-white truncate">{user.name}</p>
                                                     </div>
 
-                                                    <div className="p-2 py-3">
+                                                    <div className="p-2 py-3 space-y-1">
                                                         <Link
                                                             href="/profile"
                                                             onClick={() => setActiveDropdown(null)}
@@ -220,6 +220,7 @@ export default function Navbar() {
                                                             <UserIcon className="w-5 h-5 text-gray-500 group-hover/item:text-white" />
                                                             <span className="text-sm font-bold">Profile</span>
                                                         </Link>
+
                                                         <Link
                                                             href="/settings"
                                                             onClick={() => setActiveDropdown(null)}
@@ -228,18 +229,17 @@ export default function Navbar() {
                                                             <SettingsIcon className="w-5 h-5 text-gray-500 group-hover/item:text-white" />
                                                             <span className="text-sm font-bold">Settings</span>
                                                         </Link>
-                                                    </div>
 
-                                                    <div className="p-2 border-t border-white/5">
+                                                        <div className="h-px bg-white/5 my-2 mx-4" />
+
                                                         <button
                                                             onClick={() => {
-                                                                setActiveDropdown(null);
                                                                 logout();
-                                                                router.push('/login');
+                                                                setActiveDropdown(null);
                                                             }}
-                                                            className="flex w-full items-center gap-4 px-4 py-3 hover:bg-red-500/10 rounded-xl text-gray-500 hover:text-red-500 transition-all group/item"
+                                                            className="w-full flex items-center gap-4 px-4 py-3 hover:bg-red-500/10 rounded-xl text-gray-400 hover:text-red-500 transition-all group/item"
                                                         >
-                                                            <LogOut className="w-5 h-5 group-hover/item:rotate-12 transition-transform" />
+                                                            <LogOut className="w-5 h-5 text-gray-500 group-hover/item:text-red-500" />
                                                             <span className="text-sm font-bold">Sign Out</span>
                                                         </button>
                                                     </div>
@@ -292,7 +292,7 @@ export default function Navbar() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: '100vh' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-zinc-950 fixed top-16 left-0 right-0 z-40 overflow-y-auto"
+                        className="md:hidden bg-black fixed top-16 left-0 right-0 z-40 overflow-y-auto"
                     >
                         <div className="px-6 py-8 space-y-6">
                             {/* Mobile Links */}
@@ -314,7 +314,10 @@ export default function Navbar() {
                             {/* Mobile Auth */}
                             {user ? (
                                 <div className="space-y-4">
-                                    <div className="text-center text-gray-500 font-mono text-xs">Logged In</div>
+                                    <div className="text-center text-gray-800 font-black tracking-widest text-[10px] uppercase mb-4">CITIZEN PROTOCOL: ACTIVE</div>
+                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl text-sm">
+                                        Profile
+                                    </Link>
                                     <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl text-sm">
                                         Settings
                                     </Link>
@@ -322,9 +325,8 @@ export default function Navbar() {
                                         onClick={() => {
                                             logout();
                                             setMobileMenuOpen(false);
-                                            router.push('/login');
                                         }}
-                                        className="block w-full text-center text-red-500 font-bold py-3 border border-red-900/30 rounded-xl text-sm"
+                                        className="block w-full text-center text-red-500 font-bold py-3 border border-red-500/20 bg-red-500/5 rounded-xl text-sm"
                                     >
                                         Sign Out
                                     </button>

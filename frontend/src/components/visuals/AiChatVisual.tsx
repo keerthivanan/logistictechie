@@ -16,7 +16,7 @@ export default function AiChatVisual() {
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'assistant',
-            content: "THE CREATIVE CORTEX IS ONLINE. I can navigate the OMEGO OS for you. Ask me to 'Track', 'Get Rates', or 'View Dashboard'."
+            content: "THE CREATIVE CORTEX IS ONLINE. I can navigate the SOVEREIGN OS for you. Ask me to 'Track', 'Get Rates', or 'View Dashboard'."
         }
     ])
     const [input, setInput] = useState('')
@@ -69,12 +69,12 @@ export default function AiChatVisual() {
     }
 
     return (
-        <div className="bg-zinc-950 border border-white/10 rounded-3xl relative overflow-hidden flex flex-col h-[500px]">
+        <div className="bg-black border border-white/10 rounded-3xl relative overflow-hidden flex flex-col h-[500px]">
             {/* Gradient Glow */}
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
 
             {/* Chat Header */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-zinc-900/50">
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/50">
                 <div className="flex items-center gap-2">
                     <Bot className="w-5 h-5 text-blue-400" />
                     <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Sovereign Oracle v5.0</span>
@@ -101,7 +101,7 @@ export default function AiChatVisual() {
                             px-4 py-3 rounded-2xl max-w-[85%] text-sm leading-relaxed
                             ${m.role === 'user'
                                 ? 'bg-zinc-800 text-white rounded-tr-sm border border-white/5'
-                                : 'bg-zinc-900/80 text-gray-200 rounded-tl-sm border border-white/10 shadow-xl'
+                                : 'bg-black/80 text-gray-200 rounded-tl-sm border border-white/10 shadow-xl'
                             }
                         `}>
                             {m.role === 'assistant' && i === messages.length - 1 && loading && (
@@ -127,7 +127,7 @@ export default function AiChatVisual() {
             </div>
 
             {/* Chat Input */}
-            <form onSubmit={handleSend} className="p-4 bg-zinc-900/80 border-t border-white/5 flex gap-2">
+            <form onSubmit={handleSend} className="p-4 bg-black/80 border-t border-white/5 flex gap-2">
                 <input
                     type="text"
                     value={input}

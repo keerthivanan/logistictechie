@@ -49,18 +49,11 @@ export default function ForwarderDirectoryPage() {
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-4 py-16">
+            <div className="max-w-7xl mx-auto px-4 pt-32 pb-16">
 
                 {/* Hero */}
                 <div className="text-center mb-16">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-6"
-                    >
-                        <ShieldCheck className="w-4 h-4 text-green-400" />
-                        <span className="text-sm font-medium text-gray-300">{forwarders.length} Verified Partners</span>
-                    </motion.div>
+
 
                     <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
                         Global Logistics <br />

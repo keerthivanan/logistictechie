@@ -13,6 +13,16 @@ import { API_URL } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 
+// --- Helpers ---
+const getFlagEmoji = (countryCode: string) => {
+    if (!countryCode) return '🌐';
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+}
+
 export default function RequestQuoteForm() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -157,7 +167,7 @@ export default function RequestQuoteForm() {
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
             <Navbar />
 
-            <div className="max-w-5xl mx-auto px-4 py-12">
+            <div className="max-w-5xl mx-auto px-4 py-12 pt-32">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -172,18 +182,18 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     onSubmit={handleSubmit}
-                    className="bg-white text-black rounded-3xl p-6 md:p-10 shadow-2xl space-y-8"
+                    className="bg-black border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8"
                 >
                     {/* 1. Mode Selection */}
                     <div className="space-y-2">
-                        <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight">Shipping Mode *</label>
+                        <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight">Shipping Mode *</label>
                         <div className="relative">
                             <Ship className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <select
                                 name="mode"
                                 value={formData.mode}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-white/20 font-medium"
                             >
                                 <option value="Ocean">Ocean Freight (FCL/LCL)</option>
                                 <option value="Air">Air Freight</option>
@@ -192,7 +202,7 @@ export default function RequestQuoteForm() {
                         </div>
                     </div>
 
-                    <div className="h-px bg-gray-100" />
+                    <div className="h-px bg-white/5" />
 
                     {/* 2. Route Details (Grid) */}
                     <div className="grid md:grid-cols-2 gap-8">
@@ -208,9 +218,9 @@ export default function RequestQuoteForm() {
                                         name="origin_country"
                                         value={formData.origin_country}
                                         onChange={handleChange}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                                     >
-                                        {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                                        {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -221,7 +231,7 @@ export default function RequestQuoteForm() {
                                             value={formData.origin_district}
                                             onChange={handleChange}
                                             placeholder="Shanghai"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40"
                                         />
                                     </div>
                                     <div>
@@ -230,11 +240,11 @@ export default function RequestQuoteForm() {
                                             name="origin_type"
                                             value={formData.origin_type}
                                             onChange={handleChange}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                                         >
-                                            <option value="Port">Port / Airport</option>
-                                            <option value="Door">Factory / Door</option>
-                                            <option value="CFS">Container Station</option>
+                                            <option value="Port" className="bg-zinc-900">Port / Airport</option>
+                                            <option value="Door" className="bg-zinc-900">Factory / Door</option>
+                                            <option value="CFS" className="bg-zinc-900">Container Station</option>
                                         </select>
                                     </div>
                                 </div>
@@ -253,9 +263,9 @@ export default function RequestQuoteForm() {
                                         name="dest_country"
                                         value={formData.dest_country}
                                         onChange={handleChange}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                                     >
-                                        {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+                                        {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -266,7 +276,7 @@ export default function RequestQuoteForm() {
                                             value={formData.dest_district}
                                             onChange={handleChange}
                                             placeholder="Los Angeles"
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40"
                                         />
                                     </div>
                                     <div>
@@ -275,11 +285,11 @@ export default function RequestQuoteForm() {
                                             name="dest_type"
                                             value={formData.dest_type}
                                             onChange={handleChange}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                                         >
-                                            <option value="Door">Door / Warehouse</option>
-                                            <option value="Port">Port / Airport</option>
-                                            <option value="CFS">Container Station</option>
+                                            <option value="Door" className="bg-zinc-900">Door / Warehouse</option>
+                                            <option value="Port" className="bg-zinc-900">Port / Airport</option>
+                                            <option value="CFS" className="bg-zinc-900">Container Station</option>
                                         </select>
                                     </div>
                                 </div>
@@ -292,7 +302,7 @@ export default function RequestQuoteForm() {
                     {/* 3. Shipment Specs */}
                     <div className="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Arrival Date *</label>
+                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight mb-2">Arrival Date *</label>
                             <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
@@ -300,19 +310,19 @@ export default function RequestQuoteForm() {
                                     name="process_date"
                                     value={formData.process_date}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-white/40"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">What is the Cargo? *</label>
+                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight mb-2">What is the Cargo? *</label>
                             <input
                                 type="text"
                                 name="commodity"
                                 value={formData.commodity}
                                 onChange={handleChange}
-                                placeholder="Describe the cargo (e.g. Chairs)"
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                placeholder="Describe the cargo"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
                             />
                         </div>
 
@@ -322,12 +332,12 @@ export default function RequestQuoteForm() {
                                 name="packing_type"
                                 value={formData.packing_type}
                                 onChange={handleChange}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                             >
-                                <option value="Pallets">Pallets</option>
-                                <option value="Boxes">Boxes / Cartons</option>
-                                <option value="Crates">Crates</option>
-                                <option value="Loose">Loose / Bulk</option>
+                                <option value="Pallets" className="bg-zinc-900">Pallets</option>
+                                <option value="Boxes" className="bg-zinc-900">Boxes / Cartons</option>
+                                <option value="Crates" className="bg-zinc-900">Crates</option>
+                                <option value="Loose" className="bg-zinc-900">Loose / Bulk</option>
                             </select>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -337,12 +347,12 @@ export default function RequestQuoteForm() {
                                     name="incoterms"
                                     value={formData.incoterms}
                                     onChange={handleChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
                                 >
-                                    <option value="FOB">FOB</option>
-                                    <option value="EXW">EXW</option>
-                                    <option value="CIF">CIF</option>
-                                    <option value="DDP">DDP</option>
+                                    <option value="FOB" className="bg-zinc-900">FOB</option>
+                                    <option value="EXW" className="bg-zinc-900">EXW</option>
+                                    <option value="CIF" className="bg-zinc-900">CIF</option>
+                                    <option value="DDP" className="bg-zinc-900">DDP</option>
                                 </select>
                             </div>
                             <div>
@@ -353,7 +363,7 @@ export default function RequestQuoteForm() {
                                     value={formData.quantity}
                                     onChange={handleChange}
                                     placeholder="100"
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
                                 />
                             </div>
                         </div>
@@ -370,16 +380,16 @@ export default function RequestQuoteForm() {
                                     value={formData.weight}
                                     onChange={handleChange}
                                     placeholder="500"
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-l-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500"
+                                    className="w-full bg-white/5 border border-white/10 rounded-l-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
                                 />
                                 <select
                                     name="weight_unit"
                                     value={formData.weight_unit}
                                     onChange={handleChange}
-                                    className="bg-gray-100 border-y border-r border-gray-200 rounded-r-xl px-3 text-sm font-bold text-gray-600 focus:outline-none"
+                                    className="bg-white/10 border-y border-r border-white/10 rounded-r-xl px-3 text-sm font-bold text-gray-400 focus:outline-none"
                                 >
-                                    <option value="KGM">KGs</option>
-                                    <option value="LBS">LBs</option>
+                                    <option value="KGM" className="bg-zinc-900">KGs</option>
+                                    <option value="LBS" className="bg-zinc-900">LBs</option>
                                 </select>
                             </div>
                         </div>
@@ -406,10 +416,10 @@ export default function RequestQuoteForm() {
                                     name="dim_unit"
                                     value={formData.dim_unit}
                                     onChange={handleChange}
-                                    className="bg-gray-100 border border-gray-200 rounded-xl px-2 text-sm font-bold text-gray-600 focus:outline-none"
+                                    className="bg-white/10 border border-white/10 rounded-xl px-2 text-sm font-bold text-gray-400 focus:outline-none"
                                 >
-                                    <option value="CM">CM</option>
-                                    <option value="IN">IN</option>
+                                    <option value="CM" className="bg-zinc-900">CM</option>
+                                    <option value="IN" className="bg-zinc-900">IN</option>
                                 </select>
                             </div>
                         </div>
@@ -445,9 +455,9 @@ export default function RequestQuoteForm() {
                                     name="needs_insurance"
                                     checked={formData.needs_insurance}
                                     onChange={handleChange}
-                                    className="w-5 h-5 accent-green-600"
+                                    className="w-5 h-5 accent-white"
                                 />
-                                <span className="font-medium flex items-center gap-2"><FileText className="w-4 h-4 text-gray-400" /> Cargo Insurance?</span>
+                                <span className="font-medium flex items-center gap-2 text-gray-300"><FileText className="w-4 h-4 text-gray-500" /> Cargo Insurance?</span>
                             </label>
                         </div>
                     </div>
@@ -460,7 +470,7 @@ export default function RequestQuoteForm() {
                             value={formData.notes}
                             onChange={handleChange}
                             placeholder="Please include any specific handling instructions..."
-                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 min-h-[100px]"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 min-h-[100px]"
                         />
                         <p className="text-xs text-gray-500 flex items-center gap-1">
                             <Info className="w-3 h-3" /> Your contact details will be automatically added to the request when you submit.
@@ -471,7 +481,7 @@ export default function RequestQuoteForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 text-white font-bold h-16 rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center text-lg disabled:opacity-50 shadow-lg shadow-blue-500/30"
+                        className="w-full bg-white text-black font-black h-16 rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center text-lg disabled:opacity-50 shadow-lg shadow-white/5"
                     >
                         {loading ? (
                             <>

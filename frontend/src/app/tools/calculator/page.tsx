@@ -50,10 +50,7 @@ export default function CalculatorPage() {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 mb-6">
-                                <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sovereign Physics Engine v4.5</span>
-                            </div>
+
                             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">
                                 Precision <br />Freight <span className="text-gray-500 italic">Calc</span>
                             </h1>

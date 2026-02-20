@@ -1,14 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, ShieldCheck } from 'lucide-react';
+import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const solutions = [
     {
         icon: Ship,
         title: 'Ocean Freight',
         desc: 'FCL & LCL shipping with guaranteed capacity on all major trade lanes. Real-time tracking down to the container level.',
-        image: 'https://images.unsplash.com/photo-1543329241-7667232247fb?q=80&w=2070&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
         href: '/services/ocean-freight'
     },
     {
@@ -50,12 +50,12 @@ const solutions = [
 
 export default function SolutionsGrid() {
     return (
-        <section className="py-32 bg-zinc-950">
+        <section className="py-32 bg-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-20">
                     <h2 className="text-3xl md:text-5xl font-bold mb-6">Comprehensive Logistics Solutions</h2>
                     <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                        From raw material to final mile, OMEGO orchestrates every step of your journey with military-grade precision.
+                        From raw material to final mile, Sovereign orchestrates every step of your journey with military-grade precision.
                     </p>
                 </div>
 
@@ -69,17 +69,15 @@ export default function SolutionsGrid() {
                             </div>
 
                             <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                                <div className="w-12 h-12 bg-blue-500/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500 transition-colors">
-                                    <item.icon className="w-6 h-6 text-blue-400 group-hover:text-white" />
-                                </div>
+                                <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                                    <h3 className="text-3xl font-bold mb-4 text-white group-hover:text-blue-400 transition-colors tracking-tighter">{item.title}</h3>
+                                    <p className="text-zinc-400 leading-relaxed text-sm opacity-80 group-hover:opacity-100 transition-all duration-300">
+                                        {item.desc}
+                                    </p>
 
-                                <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-200 transition-colors">{item.title}</h3>
-                                <p className="text-gray-300 leading-relaxed text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                    {item.desc}
-                                </p>
-
-                                <div className="mt-6 flex items-center text-sm font-bold text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 transform translate-y-4 group-hover:translate-y-0">
-                                    Learn More <span className="ml-2">→</span>
+                                    <div className="mt-8 flex items-center text-xs font-black uppercase tracking-[0.2em] text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                        Explore Protocol <ArrowRight className="ml-2 w-4 h-4" />
+                                    </div>
                                 </div>
                             </div>
                         </Link>

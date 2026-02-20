@@ -17,10 +17,10 @@ export default function MSAPage() {
                         <FileText className="w-16 h-16 text-white mx-auto mb-6" />
                         <h2 className="text-2xl font-bold mb-4">Download the Full MSA</h2>
                         <p className="text-gray-400 mb-8">
-                            Our Master Service Agreement governs the use of the Omego marketplace for all shippers and carriers.
+                            Our Master Service Agreement governs the use of the Sovereign marketplace for all shippers and carriers.
                         </p>
                         <button
-                            onClick={() => alert("⬇️ DOWNLOADING SECURE ASSET...\n\nFILE: OMEGO_MSA_v2.4.pdf\nSIZE: 4.2 MB\nSTATUS: ENCRYPTED")}
+                            onClick={() => alert("⬇️ DOWNLOADING SECURE ASSET...\n\nFILE: SOVEREIGN_MSA_v2.4.pdf\nSIZE: 4.2 MB\nSTATUS: ENCRYPTED")}
                             className="bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-all flex items-center justify-center mx-auto hover:scale-105 active:scale-95"
                         >
                             Download PDF <Download className="w-5 h-5 ml-2" />

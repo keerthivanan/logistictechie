@@ -6,7 +6,7 @@ const testimonials = [
     {
         name: "Henrik Russell",
         role: "Global Logistics Director",
-        quote: "OMEGO has an impressive set of features, super competitive pricing, and the best tracking accuracy in the industry. The UI is very intuitive and the smart use of small diagrams, sparklines and graphs make it easy to follow the progress.",
+        quote: "SOVEREIGN has an impressive set of features, super competitive pricing, and the best tracking accuracy in the industry. The UI is very intuitive and the smart use of small diagrams, sparklines and graphs make it easy to follow the progress.",
     },
     {
         name: "Steffan Fisher",
@@ -21,12 +21,12 @@ const testimonials = [
     {
         name: "Mathew Cooper",
         role: "Import Manager",
-        quote: "One of the best things about OMEGO is the ability to send daily reports that are extremely customizable. Some of my clients have different levels of understanding, so this gives you the ability to showcase brilliant reports.",
+        quote: "One of the best things about SOVEREIGN is the ability to send daily reports that are extremely customizable. Some of my clients have different levels of understanding, so this gives you the ability to showcase brilliant reports.",
     },
     {
         name: "Marvin McKinney",
         role: "CEO, FastShip",
-        quote: "OMEGO is truly amazing and delivers what it promises! I signed up two years ago and haven't looked back. It is definitely giving its rivals a run for their money! The way this platform organizes information is unmatched.",
+        quote: "SOVEREIGN is truly amazing and delivers what it promises! I signed up two years ago and haven't looked back. It is definitely giving its rivals a run for their money! The way this platform organizes information is unmatched.",
     },
     {
         name: "Ethan Sullivan",

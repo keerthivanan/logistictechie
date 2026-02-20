@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -16,8 +17,8 @@ const services: Record<string, any> = {
         title: 'Ocean Freight Control',
         subtitle: 'Dominate the global trade lanes with guaranteed capacity and AI-driven routing.',
         icon: Ship,
-        image: 'https://images.unsplash.com/photo-1543329241-7667232247fb?q=80&w=2070&auto=format&fit=crop',
-        desc: 'The ocean is unpredictable. Your supply chain shouldn’t be. OMEGO aggregates volume across 50+ major carriers (Maersk, MSC, CMA CGM) to secure spot rates that beat the market index by an average of 12%.',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
+        desc: 'The ocean is unpredictable. Your supply chain shouldn’t be. Sovereign aggregates volume across the world’s most efficient tier-one carriers and sovereign nodes to secure spot rates that beat the market index by an average of 12%.',
         stats: [
             { label: 'Global Carriers', value: '50+' },
             { label: 'Daily TEUs', value: '12k' },
@@ -97,7 +98,7 @@ const services: Record<string, any> = {
         subtitle: 'Unrivaled FTL and LTL connectivity across the continental logistics grid.',
         icon: Truck,
         image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Trucking is the pulse of commerce. OMEGO connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
+        desc: 'Trucking is the pulse of commerce. Sovereign connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
         stats: [
             { label: 'Carrier Network', value: '10k+' },
             { label: 'Weekly Loads', value: '25k' },
@@ -137,7 +138,7 @@ const services: Record<string, any> = {
         subtitle: 'The centralized operating system for global trade.',
         icon: BarChart,
         image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Visibility is not enough. You need control. OMEGO unifies your ERP, Carriers, and Customs data into a single source of truth, giving you the power to predict and prevent disruptions.',
+        desc: 'Visibility is not enough. You need control. Sovereign unifies your ERP, Carriers, and Customs data into a single source of truth, giving you the power to predict and prevent disruptions.',
         stats: [
             { label: 'Data Points', value: '1B+' },
             { label: 'Integrations', value: '50+' },
@@ -179,77 +180,64 @@ export default function ServicePage() {
             <Navbar />
 
             {/* --- HERO SECTION --- */}
-            <section className="relative pt-40 pb-32 overflow-hidden">
-                <div className="absolute inset-0 z-0">
-                    <img src={service.image} alt={service.title} className="w-full h-full object-cover opacity-40 scale-105 animate-slow-zoom" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-black"></div>
-                </div>
-
-                <div className="relative max-w-7xl mx-auto px-4 z-10">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/5 backdrop-blur-md mb-8 border border-white/10 shadow-2xl">
-                        <Icon className="w-8 h-8 text-blue-400" />
-                        <span className="ml-3 text-sm font-bold text-blue-200 tracking-widest uppercase">
-                            OMEGO {slug.replace('-', ' ')}
-                        </span>
-                    </div>
-
-                    <h1 className="text-6xl md:text-8xl font-bold mb-8 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500 max-w-4xl">
-                        {service.title}
+            <section className="relative bg-black min-h-screen flex flex-col justify-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
+                    <h1 className="text-4xl md:text-6xl font-bold text-white max-w-4xl mb-12 leading-[1.1] tracking-tighter mx-auto">
+                        {slug === 'ocean-freight' ? (
+                            <>
+                                Dominate the global trade<br />
+                                lanes with guaranteed<br />
+                                capacity and AI-driven<br />
+                                routing.
+                            </>
+                        ) : service.subtitle}
                     </h1>
 
-                    <p className="text-2xl text-gray-400 max-w-2xl mb-12 leading-relaxed">
-                        {service.subtitle}
-                    </p>
-
                     {/* Stats Row */}
-                    <div className="grid grid-cols-3 gap-8 max-w-2xl mb-12 border-t border-white/10 pt-8">
+                    <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-12">
                         {service.stats.map((stat: any, i: number) => (
-                            <div key={i}>
-                                <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
-                                <div className="text-sm text-gray-500 uppercase tracking-wider font-bold">{stat.label}</div>
+                            <div key={i} className="flex flex-col gap-1">
+                                <div className="text-3xl md:text-4xl font-bold text-white tracking-tighter">{stat.value}</div>
+                                <div className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-bold">{stat.label}</div>
                             </div>
                         ))}
                     </div>
 
-                    <Link href={service.ctaLink} className="group inline-flex items-center px-8 py-4 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-500 transition-all transform hover:scale-105 hover:shadow-[0_0_40px_rgba(37,99,235,0.5)]">
+                    <Link href={service.ctaLink} className="inline-flex items-center px-7 py-3.5 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-500 transition-colors text-sm">
                         {service.cta}
-                        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="ml-2 w-4 h-4" />
                     </Link>
                 </div>
             </section>
 
             {/* --- MAIN CONTENT & FEATURES --- */}
-            <section className="py-32 relative bg-zinc-950">
+            <section className="py-24 relative bg-black border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4">
 
                     <div className="grid md:grid-cols-2 gap-20 mb-32 items-center">
-                        <div>
-                            <h2 className="text-4xl font-bold mb-6">Why Industry Leaders Choose OMEGO.</h2>
-                            <p className="text-lg text-gray-400 leading-relaxed">
+                        <div className="space-y-8">
+                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Why the market <br /> is switching.</h2>
+                            <p className="text-lg text-zinc-400 leading-relaxed max-w-xl">
                                 {service.desc}
                             </p>
                         </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full"></div>
-                            <img src={service.image} className="relative z-10 rounded-3xl border border-white/10 shadow-2xl rotate-1 hover:rotate-0 transition-all duration-700" alt="Dashboard Preview" />
+                        <div className="relative aspect-video bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+                            <img src={service.image} className="w-full h-full object-cover" alt="Feature Visual" />
                         </div>
                     </div>
 
                     {/* --- FEATURE CARDS GRID --- */}
-                    <div className="mb-32">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl font-bold mb-4">Engineered for Perfection</h2>
-                            <p className="text-gray-400">Every component is optimized for speed, cost, and reliability.</p>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-8">
+                    <div className={slug === 'ocean-freight' ? '' : 'mb-32'}>
+                        {slug === 'ocean-freight' && (
+                            <div className="mb-12 text-center">
+                                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 mb-8">Intelligence Protocol</h2>
+                            </div>
+                        )}
+                        <div className="grid md:grid-cols-3 gap-12 text-center">
                             {service.features.map((feature: any, i: number) => (
-                                <div key={i} className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-blue-500/30 hover:bg-white/10 transition-all duration-300">
-                                    <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                        <feature.icon className="w-6 h-6 text-blue-400 group-hover:text-white" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
-                                    <p className="text-gray-400 leading-relaxed text-sm">
+                                <div key={i} className="group space-y-4">
+                                    <h3 className="text-xl font-bold text-white">{feature.title}</h3>
+                                    <p className="text-zinc-500 leading-relaxed text-sm">
                                         {feature.desc}
                                     </p>
                                 </div>
@@ -258,35 +246,33 @@ export default function ServicePage() {
                     </div>
 
                     {/* --- WORKFLOW STEPS --- */}
-                    <div className="border-t border-white/10 pt-32">
+                    <div className="border-t border-white/5 pt-24">
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl font-bold mb-4">Operational Workflow</h2>
-                            <p className="text-gray-400">How we execute your shipments from start to finish.</p>
+                            <h2 className="text-3xl font-bold mb-4">The Protocol</h2>
                         </div>
 
-                        <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
+                        <div className="flex flex-wrap justify-center items-center gap-6">
                             {service.workflow.map((step: string, i: number) => (
                                 <div key={i} className="flex items-center">
-                                    <div className="px-6 py-3 rounded-full bg-zinc-900 border border-white/10 text-white font-bold text-sm">
-                                        <span className="text-blue-500 mr-2">0{i + 1}.</span> {step}
+                                    <div className="px-8 py-4 rounded-full bg-black border border-white/10 text-white font-bold text-xs uppercase tracking-widest">
+                                        <span className="text-blue-500 mr-2">{i + 1}.</span> {step}
                                     </div>
                                     {i < service.workflow.length - 1 && (
-                                        <div className="w-12 h-[1px] bg-gradient-to-r from-blue-500/50 to-transparent hidden md:block"></div>
+                                        <ArrowRight className="w-4 h-4 text-zinc-800" />
                                     )}
                                 </div>
                             ))}
                         </div>
                     </div>
-
                 </div>
             </section>
 
             {/* --- CTA SECTION --- */}
-            <section className="py-24 bg-gradient-to-b from-zinc-950 to-blue-950/20 border-t border-white/5">
+            <section className="py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to upgrade your logistics?</h2>
                     <p className="text-xl text-gray-400 mb-10">
-                        Join 2,000+ forward-thinking shippers who have switched to the OMEGO Operating System.
+                        Join 2,000+ forward-thinking shippers who have switched to the Sovereign Operating System.
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all">

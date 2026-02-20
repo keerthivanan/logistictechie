@@ -56,7 +56,7 @@ function LoginContent() {
             <div className="absolute inset-0 z-0 opacity-100 mix-blend-screen pointer-events-none">
                 <Prism />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-zinc-950 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none"></div>
 
             <div className="w-full max-w-md p-8 relative z-10">
 
@@ -67,14 +67,14 @@ function LoginContent() {
                             <div className="w-2 h-4 bg-white/70 rounded-sm"></div>
                             <div className="w-2 h-4 bg-white/40 rounded-sm"></div>
                         </div>
-                        <span className="text-2xl font-bold tracking-tight text-white">OMEGO</span>
+                        <span className="text-2xl font-bold tracking-tight text-white">SOVEREIGN</span>
                     </Link>
                     <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
                     <p className="text-gray-400">Enter your credentials to access your dashboard.</p>
                 </div>
 
 
-                <div className="bg-zinc-900 border border-white/10 p-10 rounded-2xl shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-white/20">
+                <div className="bg-black border border-white/10 p-10 rounded-2xl shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-white/20">
                     <div className="space-y-8">
                         {error && (
                             <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg text-center">

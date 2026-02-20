@@ -5,7 +5,7 @@ import { Database, Server, Smartphone, Globe, Lock, Workflow } from 'lucide-reac
 
 export default function IntegrationEcosystem() {
     return (
-        <section className="py-24 bg-zinc-900 border-y border-white/5 overflow-hidden">
+        <section className="py-24 bg-black border-y border-white/5 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
                     <div>
@@ -14,7 +14,7 @@ export default function IntegrationEcosystem() {
                         </div>
                         <h2 className="text-4xl font-bold mb-6">Your Stack, Supercharged.</h2>
                         <p className="text-gray-400 text-lg mb-8">
-                            OMEGO isn't just another tool; it's the connective tissue of your logistics operations.
+                            Sovereign isn't just another tool; it's the connective tissue of your logistics operations.
                             We integrate natively with your existing ERPs, WMS, and TMS platforms.
                         </p>
 
@@ -43,7 +43,7 @@ export default function IntegrationEcosystem() {
                         {/* Central Node */}
                         <div className="w-32 h-32 bg-purple-600 rounded-full flex items-center justify-center z-10 shadow-[0_0_50px_rgba(147,51,234,0.5)] relative">
                             <div className="absolute inset-0 border-4 border-purple-400/30 rounded-full animate-ping"></div>
-                            <span className="font-bold text-2xl tracking-tighter">OMEGO</span>
+                            <span className="font-bold text-2xl tracking-tighter text-white">SOV</span>
                         </div>
 
                         {/* Orbiting Satellites */}

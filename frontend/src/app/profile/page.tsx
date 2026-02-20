@@ -62,7 +62,7 @@ export default function StandaloneProfilePage() {
                         <div>
                             <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-4">Sovereign Intel Brief</h2>
                             <p className="text-xl font-bold text-zinc-300 leading-relaxed italic">
-                                "The encrypted profile for <span className="text-white">{user.name}</span> represents a unique permanent node within the Omego Logistics OS, enabling friction-less global trade access."
+                                "The encrypted profile for <span className="text-white">{user.name}</span> represents a unique permanent node within the Sovereign Logistics OS, enabling friction-less global trade access."
                             </p>
                         </div>
 

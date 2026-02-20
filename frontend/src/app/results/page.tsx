@@ -25,11 +25,19 @@ function ResultsContent() {
   const destination = searchParams.get('destination') || 'USNYC'
   const container = searchParams.get('container') || '40FT'
   const value = searchParams.get('value')
+  const readyDate = searchParams.get('readyDate')
+  const isHazardous = searchParams.get('hazardous') === 'true'
 
   useEffect(() => {
     async function fetchQuotes() {
       try {
         setLoading(true)
+
+        // Derive commodity from user flags
+        let commodity = "General Cargo"
+        if (isHazardous) commodity = "Hazardous Goods"
+        else if (value && parseFloat(value) > 50000) commodity = "High Value Goods"
+
         const res = await fetch(`${API_URL}/api/quotes/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -37,20 +45,23 @@ function ResultsContent() {
             origin: origin,
             destination: destination,
             container: container,
-            commodity: value ? "High Value Goods" : "General Cargo",
-            ready_date: new Date().toISOString().split('T')[0],
+            commodity: commodity,
+            ready_date: readyDate || new Date().toISOString().split('T')[0],
             goods_value: value ? parseFloat(value) : null
           })
         })
 
-        if (!res.ok) throw new Error("Failed to fetch rates")
+        if (!res.ok) {
+          const errData = await res.json().catch(() => null)
+          throw new Error(errData?.detail || "Failed to fetch rates")
+        }
         const data = await res.json()
         const quoteList = data.quotes || []
         setQuotes(quoteList)
         setFilteredQuotes(quoteList)
-      } catch (err) {
+      } catch (err: any) {
         console.error(err)
-        setError("Unable to connect to Global Carrier Matrix.")
+        setError(err?.message || "Unable to connect to Global Carrier Matrix.")
       } finally {
         setLoading(false)
       }
@@ -124,7 +135,7 @@ function ResultsContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-8"></div>
           <h2 className="text-2xl font-bold mb-2">Analyzing Global Sovereign Routes...</h2>
-          <p className="text-gray-400">Connecting with Maersk, MSC, and CMA CGM Real-time Nodes.</p>
+          <p className="text-gray-400">Connecting with Sovereign Carrier Matrix Real-time Nodes.</p>
         </div>
       ) : error ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
@@ -138,13 +149,13 @@ function ResultsContent() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
             <div className="w-full lg:w-80 flex-shrink-0 hidden lg:block">
-              <div className="bg-zinc-900 rounded-xl p-6 border border-white/10 sticky top-24">
+              <div className="bg-black rounded-xl p-6 border border-white/10 sticky top-24 shadow-2xl">
                 <h3 className="text-lg font-bold mb-6">Live Filters</h3>
                 <div className="space-y-6">
                   <div>
                     <label className="text-xs font-bold text-gray-500 uppercase mb-4 block">Carrier Priority</label>
                     <div className="space-y-2">
-                      {['Maersk', 'MSC', 'Evergreen', 'Hapag-Lloyd', 'CMA CGM'].map(c => (
+                      {['Sovereign Prime', 'Direct Network', 'Global Alliance', 'Executive Tier', 'Priority Node'].map(c => (
                         <label key={c} className="flex items-center gap-3 cursor-pointer group">
                           <input
                             type="checkbox"
@@ -192,7 +203,7 @@ function ResultsContent() {
             {/* Quotes List */}
             <div className="flex-1 space-y-6">
               {filteredQuotes.length > 0 ? filteredQuotes.map((quote, idx) => (
-                <div key={idx} className="bg-zinc-900/50 border border-white/10 rounded-xl overflow-hidden hover:border-white/40 transition-all group relative">
+                <div key={idx} className="bg-black/50 border border-white/10 rounded-xl overflow-hidden hover:border-white/40 transition-all group relative">
                   {/* Wisdom Badge */}
                   {quote.wisdom && quote.wisdom.includes("PROPHETIC") && (
                     <div className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 animate-pulse">
@@ -253,7 +264,7 @@ function ResultsContent() {
                   </div>
                 </div>
               )) : (
-                <div className="py-20 text-center bg-zinc-900 rounded-3xl border border-dashed border-white/10">
+                <div className="py-20 text-center bg-black rounded-3xl border border-dashed border-white/10">
                   <AlertCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
                   <p className="text-gray-400 mb-4">No matching sovereign routes found for current filters.</p>
                   <button

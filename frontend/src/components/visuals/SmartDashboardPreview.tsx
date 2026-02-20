@@ -5,14 +5,14 @@ import { Activity, Box, Map, PieChart, TrendingUp, Users } from 'lucide-react';
 
 export default function SmartDashboardPreview() {
     return (
-        <div className="relative w-full max-w-5xl mx-auto aspect-video bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
+        <div className="relative w-full max-w-5xl mx-auto aspect-video bg-black/50 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
             {/* Sidebar */}
             <div className="absolute left-0 top-0 bottom-0 w-64 bg-black/40 border-r border-white/5 p-6 flex flex-col gap-6">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                         <Box className="w-5 h-5 text-white" />
                     </div>
-                    <span className="font-bold text-lg tracking-tight">OMEGO OS</span>
+                    <span className="font-bold text-lg tracking-tight">SOVEREIGN OS</span>
                 </div>
 
                 <div className="space-y-2">

@@ -23,7 +23,7 @@ export default function CarriersPage() {
                             <span className="text-white">CONTAINER.</span>
                         </h1>
                         <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12 font-light leading-relaxed">
-                            Yield management at infinite scale. OMEGO connects your fleet directly to the demand, ignoring the middlemen.
+                            Yield management at infinite scale. Sovereign connects your fleet directly to the demand, ignoring the middlemen.
                         </p>
 
                         <div className="flex justify-center space-x-4">

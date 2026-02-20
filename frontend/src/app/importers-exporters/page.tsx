@@ -19,10 +19,7 @@ export default function ImportersExportersPage() {
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md mb-8">
-                            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                            <span className="text-sm font-medium text-blue-200">Global Trade OS v2.0</span>
-                        </div>
+
 
                         <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-tight">
                             GLOBAL DOMINANCE <br />
@@ -32,7 +29,7 @@ export default function ImportersExportersPage() {
                         </h1>
 
                         <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 font-light leading-relaxed">
-                            Stop guessing. Start orchestrating. OMEGO gives importers and exporters the
+                            Stop guessing. Start orchestrating. Sovereign gives importers and exporters the
                             <span className="text-white font-bold"> god-mode view </span>
                             of their entire supply chain.
                         </p>
