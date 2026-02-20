@@ -60,179 +60,168 @@ export default function RebuiltSettingsPage() {
     }
 
     if (authLoading) return (
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
-            <div className="w-10 h-10 border-2 border-white/5 border-t-emerald-500 rounded-full animate-spin"></div>
+        <div className="min-h-screen bg-black flex items-center justify-center text-white">
+            <div className="w-6 h-6 border-2 border-white/5 border-t-emerald-500 rounded-full animate-spin"></div>
         </div>
     )
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white pt-24 px-4 pb-40">
-            <div className="max-w-4xl mx-auto">
-
-                {/* 1. Back to Profile Link */}
-                <Link
-                    href="/profile"
-                    className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-12 group"
-                >
-                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-bold tracking-widest uppercase">Back to Profile</span>
-                </Link>
+        <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 overflow-hidden">
+            <div className="max-w-4xl w-full">
+                {/* 1. Precise Navigation */}
+                <div className="mb-6">
+                    <Link
+                        href="/profile"
+                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-[10px] font-bold tracking-[0.2em] uppercase font-inter">Return to Intel</span>
+                    </Link>
+                </div>
 
                 {/* 2. Page Header */}
-                <div className="flex items-center gap-6 mb-12">
-                    <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center">
-                        <SettingsIcon className="w-7 h-7 text-emerald-500" />
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-10 h-10 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-center">
+                        <SettingsIcon className="w-5 h-5 text-zinc-400 font-bold" />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-bold tracking-tight mb-1">Settings</h1>
-                        <p className="text-zinc-500 font-medium tracking-tight">Manage your preferences & identity</p>
+                        <h1 className="text-xl font-bold tracking-tight font-outfit uppercase">Operational Config</h1>
+                        <p className="text-[10px] text-zinc-600 font-medium tracking-wide font-inter">Synchronizing node preferences</p>
                     </div>
                 </div>
 
-                {/* 2.5 Profile Intel Update */}
-                <section className="bg-[#0d1117] border border-white/5 rounded-[28px] p-8 mb-8">
-                    <div className="flex items-center gap-3 mb-10">
-                        <Monitor className="w-5 h-5 text-zinc-400" />
-                        <h2 className="text-lg font-bold">Profile Intel</h2>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="flex flex-col md:flex-row gap-8 items-start">
-                            <div className="relative group">
-                                <Avatar
-                                    src={avatarUrl}
-                                    name={name}
-                                    size="xl"
-                                    className="border-white/10 shadow-2xl"
-                                />
-                                <div className="absolute -bottom-2 -right-2 bg-zinc-900 border border-white/10 p-2 rounded-full cursor-help">
-                                    <SettingsIcon className="w-4 h-4 text-emerald-500" />
-                                </div>
-                            </div>
-
-                            <div className="flex-1 w-full space-y-6">
-                                <div>
-                                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Authenticated Name</label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="Full Name"
-                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-sm font-bold focus:border-emerald-500/50 outline-none transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Identity Visual (URL)</label>
-                                    <input
-                                        type="text"
-                                        value={avatarUrl}
-                                        onChange={(e) => {
-                                            setAvatarUrl(e.target.value)
-                                            setImageError(false)
-                                        }}
-                                        placeholder="Avatar Image URL (e.g. https://...)"
-                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-sm font-bold focus:border-emerald-500/50 outline-none transition-colors"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleUpdateIdentity}
-                                    disabled={isUpdating}
-                                    className="bg-emerald-500 text-black px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.2em] hover:bg-emerald-400 transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-50"
-                                >
-                                    {isUpdating ? 'Synchronizing...' : 'Update Identity'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* 3. Appearance Section */}
-                <section className="bg-[#0d1117] border border-white/5 rounded-[28px] p-8 mb-8">
-                    <div className="flex items-center gap-3 mb-10">
-                        <Moon className="w-5 h-5 text-zinc-400" />
-                        <h2 className="text-lg font-bold">Appearance</h2>
-                    </div>
-
-                    <div className="space-y-10">
-                        {/* Theme Tool */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-bold text-[15px] mb-1">Theme</p>
-                                <p className="text-sm text-zinc-500">System theme</p>
-                            </div>
-                            <button className="flex items-center gap-2 bg-emerald-500 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:scale-105 transition-transform active:scale-95">
-                                <Moon className="w-4 h-4" />
-                                Dark Mode
-                            </button>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="h-px bg-white/5 w-full" />
-
-                        {/* Language Tool */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-bold text-[15px] mb-1">Language</p>
-                                <p className="text-sm text-zinc-500">Choose your preferred language</p>
-                            </div>
-                            <div className="flex bg-[#161b22] p-1.5 rounded-2xl border border-white/5">
-                                <button
-                                    onClick={() => setLanguage('en')}
-                                    className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all ${language === 'en'
-                                        ? 'bg-emerald-500 text-white shadow-lg'
-                                        : 'text-zinc-500 hover:text-zinc-300'
-                                        }`}
-                                >
-                                    <Globe className="w-4 h-4" />
-                                    English
-                                </button>
-                                <button
-                                    onClick={() => setLanguage('ar')}
-                                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${language === 'ar'
-                                        ? 'bg-emerald-500 text-white shadow-lg'
-                                        : 'text-zinc-400 hover:text-zinc-300'
-                                        }`}
-                                >
-                                    العربية
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* 4. Notifications Section */}
-                <section className="bg-[#0d1117] border border-white/5 rounded-[28px] p-8">
-                    <div className="flex items-center gap-3 mb-10">
-                        <Bell className="w-5 h-5 text-zinc-400" />
-                        <h2 className="text-lg font-bold">Notifications</h2>
-                    </div>
-
-                    <div className="flex items-center justify-between">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left Column: Profile Intel */}
+                    <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
                         <div>
-                            <p className="font-bold text-[15px] mb-1">Email Notifications</p>
-                            <p className="text-sm text-zinc-500">Receive updates about your account</p>
+                            <div className="flex items-center gap-2 mb-6">
+                                <Monitor className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Profile Identity</h2>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="relative">
+                                        <Avatar
+                                            src={avatarUrl}
+                                            name={name}
+                                            size="lg"
+                                            className="border-white/5 shadow-xl"
+                                        />
+                                        <div className="absolute -bottom-1 -right-1 bg-black border border-white/10 p-1 rounded-full cursor-help">
+                                            <SettingsIcon className="w-2.5 h-2.5 text-emerald-500" />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 space-y-3">
+                                        <div className="space-y-1">
+                                            <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Node Identifier</label>
+                                            <input
+                                                type="text"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2 text-[10px] font-bold focus:border-emerald-500/50 outline-none transition-colors font-inter"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Visual Protocol (URL)</label>
+                                            <input
+                                                type="text"
+                                                value={avatarUrl}
+                                                onChange={(e) => {
+                                                    setAvatarUrl(e.target.value)
+                                                    setImageError(false)
+                                                }}
+                                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2 text-[10px] font-bold focus:border-emerald-500/50 outline-none transition-colors font-inter"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Custom Toggle Switch */}
                         <button
-                            onClick={() => setEmailNotifications(!emailNotifications)}
-                            className={`w-14 h-8 rounded-full transition-colors relative flex items-center px-1 ${emailNotifications ? 'bg-emerald-500' : 'bg-[#161b22]'
-                                }`}
+                            onClick={handleUpdateIdentity}
+                            disabled={isUpdating}
+                            className="w-full bg-white text-black py-2.5 rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter active:scale-95 disabled:opacity-50 mt-4"
                         >
-                            <motion.div
-                                animate={{ x: emailNotifications ? 24 : 0 }}
-                                className="w-6 h-6 bg-white rounded-full shadow-md"
-                            />
+                            {isUpdating ? 'Indexing...' : 'Commit Changes'}
                         </button>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Action Bar (Optional but good for UX) */}
-                <div className="mt-12 pt-8 border-t border-white/5 flex items-center justify-between">
-                    <p className="text-xs text-zinc-600 font-medium">Synchronized with Sovereign Identity L-14 System</p>
-                    <button className="text-sm font-bold text-emerald-500 hover:text-emerald-400 transition-colors">
-                        Restore Defaults
-                    </button>
+                    {/* Right Column: Preferences */}
+                    <div className="space-y-4">
+                        {/* Appearance section */}
+                        <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Moon className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Appearance</h2>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-bold text-[11px] mb-0.5 font-inter">Interface Language</p>
+                                        <p className="text-[9px] text-zinc-600 font-medium font-inter tracking-tight">Primary terminal dialect</p>
+                                    </div>
+                                    <div className="flex bg-black p-1 rounded-xl border border-white/5">
+                                        <button
+                                            onClick={() => setLanguage('en')}
+                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all ${language === 'en'
+                                                ? 'bg-zinc-800 text-white'
+                                                : 'text-zinc-600 hover:text-zinc-400'
+                                                } font-inter`}
+                                        >
+                                            English
+                                        </button>
+                                        <button
+                                            onClick={() => setLanguage('ar')}
+                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold transition-all ${language === 'ar'
+                                                ? 'bg-zinc-800 text-white'
+                                                : 'text-zinc-600 hover:text-zinc-400'
+                                                } font-inter`}
+                                        >
+                                            العربية
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Notifications section */}
+                        <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Bell className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Telemetry</h2>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-bold text-[11px] mb-0.5 font-inter">Signal Alerts</p>
+                                    <p className="text-[9px] text-zinc-600 font-medium font-inter tracking-tight">Email frequency status</p>
+                                </div>
+
+                                <button
+                                    onClick={() => setEmailNotifications(!emailNotifications)}
+                                    className={`w-10 h-5 rounded-full transition-colors relative flex items-center px-0.5 ${emailNotifications ? 'bg-emerald-500' : 'bg-zinc-900'
+                                        }`}
+                                >
+                                    <motion.div
+                                        animate={{ x: emailNotifications ? 20 : 0 }}
+                                        className="w-4 h-4 bg-white rounded-full shadow-md"
+                                    />
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* Audit Info */}
+                        <div className="bg-emerald-500/[0.02] border border-emerald-500/10 rounded-2xl p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                                <p className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest font-inter">Sync Status: Optimal</p>
+                            </div>
+                            <p className="text-[8px] text-zinc-700 font-bold font-inter">L-14 PROTOCOL</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
