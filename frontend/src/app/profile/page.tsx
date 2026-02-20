@@ -12,116 +12,116 @@ export default function StandaloneProfilePage() {
     if (!user) return null
 
     return (
-        <div className="min-h-screen bg-black text-white pt-32 px-4">
-            <div className="max-w-4xl mx-auto space-y-12 pb-32">
-                {/* Back Link */}
-                <Link href="/dashboard" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group mb-4">
-                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-bold uppercase tracking-widest">Back to Dashboard</span>
-                </Link>
+        <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
+            <div className="max-w-4xl w-full">
+                {/* Clean Navigation */}
+                <div className="mb-8">
+                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group">
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-inter">Return to Terminal</span>
+                    </Link>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-                    {/* Visual Profile Card */}
-                    <div className="md:col-span-5 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    {/* Professional Intel Card */}
+                    <div className="md:col-span-12 lg:col-span-5">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-zinc-950 border border-white/10 rounded-[32px] p-1 overflow-hidden relative group"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="bg-zinc-950 border border-white/5 rounded-[24px] p-1 overflow-hidden relative group shadow-2xl"
                         >
-                            <div className="bg-zinc-900 rounded-[30px] p-8 aspect-[4/5] flex flex-col items-center justify-center text-center relative z-10">
-                                <div className="relative mb-8">
+                            <div className="bg-zinc-900/50 rounded-[22px] p-6 flex flex-col items-center justify-center text-center relative z-10 backdrop-blur-sm">
+                                <div className="relative mb-6">
                                     <Avatar
                                         src={user.avatar_url}
                                         name={user.name}
-                                        size="2xl"
-                                        className="border-white/10 shadow-2xl"
+                                        size="xl"
+                                        className="border-white/5 shadow-2xl"
                                     />
-                                    <div className="absolute -bottom-2 -right-2 bg-emerald-500 px-3 py-1 rounded-full border-4 border-zinc-900 text-[8px] font-black uppercase tracking-widest">Live</div>
+                                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 px-2 py-0.5 rounded-full border-2 border-zinc-900 text-[6px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.4)]">Live</div>
                                 </div>
-                                <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2">{user.name}</h1>
-                                <p className="text-emerald-500 font-mono text-sm font-black tracking-[0.2em]">{user.sovereign_id}</p>
+                                <h1 className="text-2xl font-bold tracking-tight text-white uppercase font-outfit mb-1">{user.name}</h1>
+                                <p className="text-emerald-500 font-medium text-[10px] tracking-[0.3em] font-inter uppercase">{user.sovereign_id}</p>
 
-                                <div className="mt-8 pt-8 border-t border-white/5 w-full space-y-4">
+                                <div className="mt-6 pt-6 border-t border-white/5 w-full space-y-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Network Access</span>
-                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">L-14 Global</span>
+                                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Network Clearance</span>
+                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest font-inter">L-14 Global</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Identity Lock</span>
-                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Identity Status</span>
+                                        <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest font-inter">Verified</span>
                                     </div>
                                 </div>
                             </div>
-                            {/* Decorative Gradient Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/5 via-transparent to-zinc-900/50 pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-black pointer-events-none" />
                         </motion.div>
                     </div>
 
-                    {/* Detailed Intel */}
-                    <div className="md:col-span-7 space-y-8">
-                        <div>
-                            <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-4">Sovereign Intel Brief</h2>
-                            <p className="text-xl font-bold text-zinc-300 leading-relaxed italic">
-                                "The encrypted profile for <span className="text-white">{user.name}</span> represents a unique permanent node within the Sovereign Logistics OS, enabling friction-less global trade access."
+                    {/* Operational Intel Feed */}
+                    <div className="md:col-span-12 lg:col-span-7 space-y-6">
+                        <div className="space-y-2">
+                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.4em] font-outfit">Sovereign Intel Protocol</h2>
+                            <p className="text-lg font-medium text-zinc-400 leading-snug font-inter">
+                                The encrypted profile for <span className="text-white font-bold">{user.name}</span> represents a permanent node within the Sovereign Logistics OS.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-3">
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="bg-white/[0.02] rounded-xl p-4 border border-white/5 flex items-center gap-4 hover:bg-white/[0.04] transition-all"
+                            >
+                                <div className="p-3 bg-black rounded-lg border border-white/5">
+                                    <Mail className="w-4 h-4 text-zinc-400" />
+                                </div>
+                                <div>
+                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Communication Node</p>
+                                    <p className="text-xs font-semibold text-white uppercase font-inter">{user.email}</p>
+                                </div>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, x: 10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="bg-white/5 rounded-2xl p-6 border border-white/5 flex items-center gap-6"
+                                className="bg-white/[0.02] rounded-xl p-4 border border-white/5 flex items-center gap-4 hover:bg-white/[0.04] transition-all"
                             >
-                                <div className="p-4 bg-black rounded-xl">
-                                    <Mail className="w-5 h-5 text-zinc-500" />
+                                <div className="p-3 bg-black rounded-lg border border-white/5">
+                                    <User className="w-4 h-4 text-zinc-400" />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Primary Communication</p>
-                                    <p className="text-sm font-bold text-white uppercase">{user.email}</p>
+                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Registry Identity</p>
+                                    <p className="text-xs font-semibold text-white uppercase font-inter">{user.name}</p>
                                 </div>
                             </motion.div>
 
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
+                                initial={{ opacity: 0, x: 10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="bg-white/5 rounded-2xl p-6 border border-white/5 flex items-center gap-6"
+                                className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/10 flex items-center gap-4 hover:bg-emerald-500/[0.08] transition-all"
                             >
-                                <div className="p-4 bg-black rounded-xl">
-                                    <User className="w-5 h-5 text-zinc-500" />
+                                <div className="p-3 bg-black rounded-lg border border-emerald-500/20 text-emerald-500">
+                                    <Fingerprint className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Authenticated Name</p>
-                                    <p className="text-sm font-bold text-white uppercase">{user.name}</p>
-                                </div>
-                            </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="bg-emerald-500/5 rounded-2xl p-6 border border-emerald-500/10 flex items-center gap-6"
-                            >
-                                <div className="p-4 bg-black rounded-xl text-emerald-500">
-                                    <Fingerprint className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Permanent Node Address</p>
-                                    <p className="text-sm font-bold text-emerald-500 tracking-[0.1em] uppercase">{user.sovereign_id}</p>
+                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Master Node Index</p>
+                                    <p className="text-xs font-bold text-emerald-500 tracking-wider uppercase font-inter">{user.sovereign_id}</p>
                                 </div>
                             </motion.div>
                         </div>
 
-                        <div className="pt-8 border-t border-white/10 flex gap-4">
+                        <div className="pt-6 flex gap-3">
                             <Link
                                 href="/settings"
-                                className="flex-1 bg-white text-black text-center py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-zinc-200 transition-colors"
+                                className="flex-1 bg-white text-black text-center py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter active:scale-95"
                             >
-                                Edit Intel
+                                Modify Intel
                             </Link>
-                            <div className="px-6 flex items-center border border-white/10 rounded-xl">
-                                <Shield className="w-4 h-4 text-zinc-600" />
+                            <div className="px-4 flex items-center border border-white/10 rounded-xl bg-white/5 group hover:border-white/20 transition-all cursor-help">
+                                <Shield className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500 transition-colors" />
                             </div>
                         </div>
                     </div>
