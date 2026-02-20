@@ -11,7 +11,6 @@ import {
 import { countries } from '@/lib/countries';
 import { API_URL } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 // --- Helpers ---
 const getFlagEmoji = (countryCode: string) => {
@@ -497,7 +496,6 @@ export default function RequestQuoteForm() {
 
                 </motion.form>
             </div>
-            <Footer />
         </div>
     );
 }

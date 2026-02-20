@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, Clock, Plane, Ship, DollarSign, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { API_URL } from '@/lib/config';
 
 interface Quote {
@@ -168,7 +167,6 @@ export default function MarketplaceLiveDashboard() {
                     )}
                 </div>
             </div>
-            <Footer />
         </div>
     );
 }
