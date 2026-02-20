@@ -6,10 +6,10 @@ import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { API_URL } from '@/lib/config'
 
-// Ultra-Minimalist Components
+// Professional Command Center Components
 import DashboardHeader from './_components/DashboardHeader'
 import MetricCards from './_components/MetricCards'
-import IntelligenceSidebar from './_components/IntelligenceSidebar'
+import CommandFeed from './_components/CommandFeed'
 import SovereignFlow from './_components/SovereignFlow'
 import { DashboardStats } from './_components/types'
 
@@ -94,7 +94,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-12">
                 {/* Unified Activity Core */}
                 <div className="xl:col-span-1">
-                    <IntelligenceSidebar activities={stats?.recent_activity || []} />
+                    <CommandFeed activities={stats?.recent_activity || []} />
                 </div>
 
                 {/* Tactical Execution Core */}

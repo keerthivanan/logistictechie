@@ -19,9 +19,9 @@ export default function SovereignFlow({ shipments, activeCount }: { shipments: K
         <div className="space-y-8 pt-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <h3 className="text-xs font-black text-white italic uppercase tracking-tighter">Sovereign Flow</h3>
-                    <div className="bg-white/5 px-2 py-0.5 rounded text-[8px] font-black text-zinc-500 uppercase tracking-widest">
-                        {activeCount} Vectors
+                    <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">Sovereign Flow</h3>
+                    <div className="bg-white/5 px-2 py-0.5 rounded text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-inter">
+                        {activeCount} Active Vectors
                     </div>
                 </div>
             </div>
@@ -31,12 +31,12 @@ export default function SovereignFlow({ shipments, activeCount }: { shipments: K
                     const colShipments = shipments.filter(s => s.status === col.status)
                     return (
                         <div key={i} className="space-y-4">
-                            <div className="flex items-center gap-2 px-2">
+                            <div className="flex items-center gap-2 px-2 border-b border-white/5 pb-2">
                                 <span className={`w-1 h-1 rounded-full ${col.color}`}></span>
-                                <h3 className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">
+                                <h3 className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] font-inter">
                                     {col.title}
                                 </h3>
-                                <div className="ml-auto text-[8px] font-black text-zinc-700">{colShipments.length}</div>
+                                <div className="ml-auto text-[8px] font-bold text-zinc-600 font-inter">{colShipments.length}</div>
                             </div>
 
                             <div className="space-y-3 min-h-[300px] p-1">
@@ -49,28 +49,28 @@ export default function SovereignFlow({ shipments, activeCount }: { shipments: K
                                         className="p-4 rounded-xl border border-white/5 bg-zinc-900/40 hover:border-white/20 transition-all cursor-pointer group shadow-sm"
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <h4 className="text-[11px] font-black tracking-tight text-white truncate max-w-[80%] uppercase italic">
+                                            <h4 className="text-[11px] font-bold tracking-tight text-white truncate max-w-[80%] uppercase font-outfit">
                                                 {shipment.company}
                                             </h4>
                                             <ExternalLink className="w-2.5 h-2.5 text-zinc-600 group-hover:text-white transition-colors" />
                                         </div>
 
                                         <div className="flex items-center gap-3 mb-4">
-                                            <div className="flex items-center gap-1.5 grayscale opacity-30">
+                                            <div className="flex items-center gap-1.5 opacity-20 group-hover:opacity-100 transition-opacity">
                                                 {shipment.mode?.toLowerCase() === 'air' ? <Plane className="w-3 h-3 text-white" /> : <Ship className="w-3 h-3 text-white" />}
                                             </div>
-                                            <p className="text-[9px] font-bold text-zinc-500 truncate lowercase opacity-60">
+                                            <p className="text-[9px] font-medium text-zinc-500 truncate font-inter">
                                                 {shipment.desc}
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center justify-between opacity-30 group-hover:opacity-100 transition-opacity">
-                                            <div className="flex items-center gap-1 text-[8px] font-black text-zinc-500 uppercase tracking-widest">
+                                        <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
+                                            <div className="flex items-center gap-1 text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">
                                                 <Calendar className="w-2.5 h-2.5" />
                                                 {shipment.date}
                                             </div>
                                             {shipment.comments > 0 && (
-                                                <div className="flex items-center gap-1 text-[8px] font-black text-zinc-500">
+                                                <div className="flex items-center gap-1 text-[8px] font-bold text-zinc-600 font-inter">
                                                     <MessageSquare className="w-2.5 h-2.5" />
                                                     {shipment.comments}
                                                 </div>

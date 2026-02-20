@@ -61,7 +61,7 @@ async def get_dashboard_stats(
         stats["kanban_shipments"] = formatted_shipments
         
         # 2. Add Recent Activity (The "Realness" Factor)
-        recent_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=5)
+        recent_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=20)
         
         # Build Response List
         activity_list = []
