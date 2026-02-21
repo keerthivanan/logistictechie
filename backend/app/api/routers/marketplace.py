@@ -10,6 +10,7 @@ import asyncio
 import random
 from typing import List, Dict, Any
 from pydantic import BaseModel
+from app.services.activity import activity_service
 
 router = APIRouter()
 
@@ -50,6 +51,22 @@ async def submit_request(
     )
     
     db.add(new_request)
+    
+    # AUDIT PILLAR: Log Marketplace Submission
+    await activity_service.log(
+        db,
+        user_id=str(request_in.user_id),
+        action="MARKETPLACE_SUBMIT",
+        entity_type="QUOTE_REQUEST",
+        entity_id=unique_id,
+        metadata={
+            "origin": f"{request_in.origin_city}, {request_in.origin_country}",
+            "destination": f"{request_in.dest_city}, {request_in.dest_country}",
+            "cargo": request_in.cargo_type
+        },
+        commit=False # Commit will be handled by the manual commit below
+    )
+    
     await db.commit()
     await db.refresh(new_request)
     

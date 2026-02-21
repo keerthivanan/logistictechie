@@ -163,17 +163,17 @@ export default function RequestQuoteForm() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
+        <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
 
-            <div className="max-w-5xl mx-auto px-4 py-12 pt-32">
+            <div className="max-w-4xl mx-auto px-4 py-32">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-10"
+                    className="mb-12"
                 >
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">Request a Quote</h1>
-                    <p className="text-gray-400">Complete the form below to receive competitive rates from verified forwarders.</p>
+                    <h1 className="text-3xl font-bold mb-2 tracking-tight font-outfit uppercase">Operational Request</h1>
+                    <p className="text-zinc-500 font-medium font-inter">Index a new quote request into the Sovereign Logistics Network.</p>
                 </motion.div>
 
                 <motion.form
@@ -181,18 +181,18 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     onSubmit={handleSubmit}
-                    className="bg-black border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8"
+                    className="bg-zinc-950 border border-white/5 rounded-[32px] p-8 md:p-12 shadow-2xl space-y-10"
                 >
                     {/* 1. Mode Selection */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight">Shipping Mode *</label>
+                    <div className="space-y-4">
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Transport Protocol *</label>
                         <div className="relative">
-                            <Ship className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Ship className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                             <select
                                 name="mode"
                                 value={formData.mode}
                                 onChange={handleChange}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-white/20 font-medium"
+                                className="w-full bg-black border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white appearance-none focus:border-white/20 outline-none transition-all font-inter"
                             >
                                 <option value="Ocean">Ocean Freight (FCL/LCL)</option>
                                 <option value="Air">Air Freight</option>
@@ -204,42 +204,42 @@ export default function RequestQuoteForm() {
                     <div className="h-px bg-white/5" />
 
                     {/* 2. Route Details (Grid) */}
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-12">
                         {/* Origin */}
-                        <div className="space-y-4">
-                            <h3 className="font-bold text-lg flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-blue-500"></span> Origin
+                        <div className="space-y-6">
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin Node
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Country *</label>
+                                    <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Territory Control</label>
                                     <select
                                         name="origin_country"
                                         value={formData.origin_country}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
+                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                     >
                                         {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">City / District</label>
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
                                         <input
                                             name="origin_district"
                                             value={formData.origin_district}
                                             onChange={handleChange}
                                             placeholder="Shanghai"
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40"
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Type *</label>
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
                                         <select
                                             name="origin_type"
                                             value={formData.origin_type}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                         >
                                             <option value="Port" className="bg-zinc-900">Port / Airport</option>
                                             <option value="Door" className="bg-zinc-900">Factory / Door</option>
@@ -251,40 +251,40 @@ export default function RequestQuoteForm() {
                         </div>
 
                         {/* Destination */}
-                        <div className="space-y-4">
-                            <h3 className="font-bold text-lg flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-purple-500"></span> Destination
+                        <div className="space-y-6">
+                            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Destination Node
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Country *</label>
+                                    <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory</label>
                                     <select
                                         name="dest_country"
                                         value={formData.dest_country}
                                         onChange={handleChange}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
+                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                     >
                                         {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">City / District</label>
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
                                         <input
                                             name="dest_district"
                                             value={formData.dest_district}
                                             onChange={handleChange}
                                             placeholder="Los Angeles"
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40"
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Type *</label>
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
                                         <select
                                             name="dest_type"
                                             value={formData.dest_type}
                                             onChange={handleChange}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                         >
                                             <option value="Door" className="bg-zinc-900">Door / Warehouse</option>
                                             <option value="Port" className="bg-zinc-900">Port / Airport</option>
@@ -296,57 +296,74 @@ export default function RequestQuoteForm() {
                         </div>
                     </div>
 
-                    <div className="h-px bg-gray-100" />
+                    <div className="h-px bg-white/5" />
 
                     {/* 3. Shipment Specs */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight mb-2">Arrival Date *</label>
+                    <div className="grid md:grid-cols-2 gap-12">
+                        <div className="space-y-4">
+                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date) *</label>
                             <div className="relative">
-                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                 <input
                                     type="date"
                                     name="process_date"
                                     value={formData.process_date}
                                     onChange={handleChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-white/40"
+                                    className="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-bold text-gray-400 uppercase tracking-tight mb-2">What is the Cargo? *</label>
-                            <input
-                                type="text"
-                                name="commodity"
-                                value={formData.commodity}
-                                onChange={handleChange}
-                                placeholder="Describe the cargo"
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
-                            />
+                        <div className="space-y-4">
+                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Specification *</label>
+                            <div className="relative">
+                                <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <input
+                                    type="text"
+                                    name="commodity"
+                                    value={formData.commodity}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Lithium-Ion Modules"
+                                    className="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Packaging *</label>
-                            <select
-                                name="packing_type"
-                                value={formData.packing_type}
-                                onChange={handleChange}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
-                            >
-                                <option value="Pallets" className="bg-zinc-900">Pallets</option>
-                                <option value="Boxes" className="bg-zinc-900">Boxes / Cartons</option>
-                                <option value="Crates" className="bg-zinc-900">Crates</option>
-                                <option value="Loose" className="bg-zinc-900">Loose / Bulk</option>
-                            </select>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Packaging Unit</label>
+                                <select
+                                    name="packing_type"
+                                    value={formData.packing_type}
+                                    onChange={handleChange}
+                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                >
+                                    <option value="Pallets" className="bg-zinc-900">Pallets</option>
+                                    <option value="Boxes" className="bg-zinc-900">Boxes / Cartons</option>
+                                    <option value="Crates" className="bg-zinc-900">Crates</option>
+                                    <option value="Loose" className="bg-zinc-900">Loose / Bulk</option>
+                                </select>
+                            </div>
+                            <div className="space-y-4">
+                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Quantity</label>
+                                <input
+                                    type="number"
+                                    name="quantity"
+                                    value={formData.quantity}
+                                    onChange={handleChange}
+                                    placeholder="100"
+                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
+                                />
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Incoterms</label>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy</label>
                                 <select
                                     name="incoterms"
                                     value={formData.incoterms}
                                     onChange={handleChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 appearance-none cursor-pointer"
+                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                 >
                                     <option value="FOB" className="bg-zinc-900">FOB</option>
                                     <option value="EXW" className="bg-zinc-900">EXW</option>
@@ -354,125 +371,111 @@ export default function RequestQuoteForm() {
                                     <option value="DDP" className="bg-zinc-900">DDP</option>
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Quantity *</label>
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    value={formData.quantity}
-                                    onChange={handleChange}
-                                    placeholder="100"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
-                                />
+                            <div className="space-y-4">
+                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation</label>
+                                <div className="flex">
+                                    <input
+                                        type="number"
+                                        name="weight"
+                                        value={formData.weight}
+                                        onChange={handleChange}
+                                        placeholder="500"
+                                        className="w-full bg-black border border-white/5 border-r-0 rounded-l-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
+                                    />
+                                    <select
+                                        name="weight_unit"
+                                        value={formData.weight_unit}
+                                        onChange={handleChange}
+                                        className="bg-zinc-900 border border-white/5 border-l-0 rounded-r-xl px-3 text-[10px] font-bold text-zinc-500 focus:outline-none font-inter"
+                                    >
+                                        <option value="KGM">KG</option>
+                                        <option value="LBS">LB</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* 4. Measurements */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Total Weight *</label>
-                            <div className="flex">
-                                <input
-                                    type="number"
-                                    name="weight"
-                                    value={formData.weight}
-                                    onChange={handleChange}
-                                    placeholder="500"
-                                    className="w-full bg-white/5 border border-white/10 rounded-l-xl px-4 py-3 text-white focus:outline-none focus:border-white/40"
-                                />
-                                <select
-                                    name="weight_unit"
-                                    value={formData.weight_unit}
-                                    onChange={handleChange}
-                                    className="bg-white/10 border-y border-r border-white/10 rounded-r-xl px-3 text-sm font-bold text-gray-400 focus:outline-none"
-                                >
-                                    <option value="KGM" className="bg-zinc-900">KGs</option>
-                                    <option value="LBS" className="bg-zinc-900">LBs</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2">Dimensions (L x W x H)</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="number" name="length" placeholder="L"
-                                    value={formData.length} onChange={handleChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500 text-center"
-                                />
-                                <input
-                                    type="number" name="width" placeholder="W"
-                                    value={formData.width} onChange={handleChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500 text-center"
-                                />
-                                <input
-                                    type="number" name="height" placeholder="H"
-                                    value={formData.height} onChange={handleChange}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-gray-900 focus:outline-none focus:border-blue-500 text-center"
-                                />
-                                <select
-                                    name="dim_unit"
-                                    value={formData.dim_unit}
-                                    onChange={handleChange}
-                                    className="bg-white/10 border border-white/10 rounded-xl px-2 text-sm font-bold text-gray-400 focus:outline-none"
-                                >
-                                    <option value="CM" className="bg-zinc-900">CM</option>
-                                    <option value="IN" className="bg-zinc-900">IN</option>
-                                </select>
-                            </div>
+                    <div className="space-y-4">
+                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Volumetric Protocol (L x W x H)</label>
+                        <div className="flex gap-4">
+                            <input
+                                type="number" name="length" placeholder="L"
+                                value={formData.length} onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                            />
+                            <input
+                                type="number" name="width" placeholder="W"
+                                value={formData.width} onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                            />
+                            <input
+                                type="number" name="height" placeholder="H"
+                                value={formData.height} onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                            />
+                            <select
+                                name="dim_unit"
+                                value={formData.dim_unit}
+                                onChange={handleChange}
+                                className="bg-zinc-900 border border-white/5 rounded-xl px-4 text-[10px] font-bold text-zinc-500 focus:outline-none font-inter"
+                            >
+                                <option value="CM">CM</option>
+                                <option value="IN">IN</option>
+                            </select>
                         </div>
                     </div>
 
                     {/* 5. Options (Checkboxes) */}
                     <div className="space-y-4">
-                        <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight">Additional Items</label>
+                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Additional Telemetry</label>
                         <div className="grid md:grid-cols-3 gap-4">
-                            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                            <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all group">
                                 <input
                                     type="checkbox"
                                     name="is_stackable"
                                     checked={formData.is_stackable}
                                     onChange={handleChange}
-                                    className="w-5 h-5 accent-blue-600"
+                                    className="w-4 h-4 accent-emerald-500"
                                 />
-                                <span className="font-medium flex items-center gap-2"><Layers className="w-4 h-4 text-gray-400" /> Stackable?</span>
+                                <span className="text-[10px] font-bold font-inter text-zinc-500 group-hover:text-white flex items-center gap-2 uppercase tracking-widest"><Layers className="w-3.5 h-3.5 opacity-50" /> Stackable?</span>
                             </label>
-                            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                            <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all group">
                                 <input
                                     type="checkbox"
                                     name="is_hazardous"
                                     checked={formData.is_hazardous}
                                     onChange={handleChange}
-                                    className="w-5 h-5 accent-red-600"
+                                    className="w-4 h-4 accent-red-500"
                                 />
-                                <span className="font-medium flex items-center gap-2"><ShieldAlert className="w-4 h-4 text-gray-400" /> Hazardous?</span>
+                                <span className="text-[10px] font-bold font-inter text-zinc-500 group-hover:text-white flex items-center gap-2 uppercase tracking-widest"><ShieldAlert className="w-3.5 h-3.5 opacity-50" /> Hazardous?</span>
                             </label>
-                            <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                            <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all group">
                                 <input
                                     type="checkbox"
                                     name="needs_insurance"
                                     checked={formData.needs_insurance}
                                     onChange={handleChange}
-                                    className="w-5 h-5 accent-white"
+                                    className="w-4 h-4 accent-emerald-500"
                                 />
-                                <span className="font-medium flex items-center gap-2 text-gray-300"><FileText className="w-4 h-4 text-gray-500" /> Cargo Insurance?</span>
+                                <span className="text-[10px] font-bold font-inter text-zinc-500 group-hover:text-white flex items-center gap-2 uppercase tracking-widest"><FileText className="w-3.5 h-3.5 opacity-50" /> Insurance?</span>
                             </label>
                         </div>
                     </div>
 
                     {/* 6. Notes */}
-                    <div className="space-y-2">
-                        <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight">Additional Notes</label>
+                    <div className="space-y-4">
+                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Strategic Handling Notes</label>
                         <textarea
                             name="notes"
                             value={formData.notes}
                             onChange={handleChange}
-                            placeholder="Please include any specific handling instructions..."
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 min-h-[100px]"
+                            placeholder="Add specific operational instructions..."
+                            className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:border-white/20 outline-none min-h-[120px] font-inter"
                         />
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <Info className="w-3 h-3" /> Your contact details will be automatically added to the request when you submit.
+                        <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest flex items-center gap-2">
+                            <Info className="w-3 h-3 text-emerald-500" /> Identity signals will be automatically appended to the request packet.
                         </p>
                     </div>
 
@@ -480,16 +483,16 @@ export default function RequestQuoteForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-white text-black font-black h-16 rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center text-lg disabled:opacity-50 shadow-lg shadow-white/5"
+                        className="w-full bg-white text-black font-bold h-16 rounded-2xl hover:bg-zinc-200 transition-all flex items-center justify-center text-xs tracking-[0.2em] font-inter uppercase disabled:opacity-50 shadow-xl active:scale-[0.98]"
                     >
                         {loading ? (
                             <>
-                                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                                Processing Request...
+                                <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                                Indexing...
                             </>
                         ) : (
                             <>
-                                SUBMIT QUOTE REQUEST <ArrowRight className="w-6 h-6 ml-2" />
+                                Commit Quote Request <ArrowRight className="w-5 h-5 ml-3" />
                             </>
                         )}
                     </button>

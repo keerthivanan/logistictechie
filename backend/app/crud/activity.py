@@ -6,7 +6,7 @@ from sqlalchemy import desc
 
 class CRUDActivity:
     async def get_multi_by_user(
-        self, db: AsyncSession, *, user_id: str, limit: int = 5
+        self, db: AsyncSession, *, user_id: str, limit: int = 5, offset: int = 0
     ) -> List[UserActivity]:
         # Fetch latest activities by user_id
         result = await db.execute(
@@ -14,6 +14,7 @@ class CRUDActivity:
             .filter(UserActivity.user_id == user_id)
             .order_by(desc(UserActivity.created_at))
             .limit(limit)
+            .offset(offset)
         )
         return result.scalars().all()
 

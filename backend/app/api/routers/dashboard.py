@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.db.session import get_db
 from app import crud
 from typing import Dict
@@ -60,7 +61,16 @@ async def get_dashboard_stats(
             
         stats["kanban_shipments"] = formatted_shipments
         
-        # 2. Add Recent Activity (The "Realness" Factor)
+        # 2. Add Pending Tasks Count (Strategic Synchronization)
+        from app.models.task import Task
+        from sqlalchemy import func
+        task_count_result = await db.execute(
+            select(func.count(Task.id))
+            .filter(Task.user_id == str(current_user.id), Task.status == "PENDING")
+        )
+        stats["pending_tasks_count"] = task_count_result.scalar() or 0
+
+        # 3. Add Recent Activity (The "Realness" Factor)
         recent_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=20)
         
         # Build Response List
@@ -82,9 +92,14 @@ async def get_dashboard_stats(
                 cont = metadata.get("container", "40FT")
                 resume_url = f"/results?origin={origin}&destination={dest}&container={cont}"
             elif act.action == "BOOKING_CREATED":
-                # Use the human-readable reference (BK-XXXX), not the UUID
                 ref = metadata.get("reference", act.entity_id)
                 resume_url = f"/booking/confirmation?id={ref}"
+            elif act.action == "TASK_COMPLETED" or act.action == "TASK_REOPENED" or act.action == "TASK_CREATED":
+                resume_url = "/dashboard/tasks"
+            elif act.action == "PROFILE_UPDATE" or act.action == "SECURITY_UPDATE":
+                resume_url = "/dashboard/settings"
+            elif act.action == "MARKETPLACE_SUBMIT":
+                resume_url = f"/marketplace/quotes/{act.entity_id}"
                 
             activity_list.append({
                 "id": act.id,
@@ -100,6 +115,52 @@ async def get_dashboard_stats(
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
+
+@router.get("/activity/full", response_model=Dict)
+async def get_full_activity_history(
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_active_user)
+):
+    """
+    Returns full audit log for the current user (high-fidelity paged history).
+    """
+    try:
+        activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=limit, offset=offset)
+        
+        # Build Response List
+        activity_list = []
+        for act in activities:
+            metadata = {}
+            if act.extra_data:
+                try: metadata = json.loads(act.extra_data)
+                except: metadata = {}
+                
+            resume_url = "/dashboard"
+            if act.action == "SEARCH":
+                resume_url = f"/results?origin={metadata.get('origin', '')}&destination={metadata.get('destination', '')}&container={metadata.get('container', '40FT')}"
+            elif act.action == "BOOKING_CREATED":
+                resume_url = f"/booking/confirmation?id={metadata.get('reference', act.entity_id)}"
+            elif "TASK" in act.action:
+                resume_url = "/dashboard/tasks"
+            elif "PROFILE" in act.action or "SECURITY" in act.action:
+                resume_url = "/dashboard/settings"
+            elif act.action == "MARKETPLACE_SUBMIT":
+                resume_url = f"/marketplace/quotes/{act.entity_id}"
+                
+            activity_list.append({
+                "id": act.id,
+                "action": act.action,
+                "entity": f"{act.entity_type} #{act.entity_id}" if act.entity_id else "System",
+                "timestamp": act.created_at.isoformat(),
+                "metadata": metadata,
+                "url": resume_url
+            })
+            
+        return {"activities": activity_list, "total": len(activity_list)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch activity history: {str(e)}")
 
 
 class LeadCreate(BaseModel):

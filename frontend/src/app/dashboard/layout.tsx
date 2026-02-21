@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -16,8 +17,10 @@ import {
     Search,
     Plus
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
+import { API_URL } from '@/lib/config'
 
 export default function DashboardLayout({
     children,
@@ -26,10 +29,39 @@ export default function DashboardLayout({
 }) {
     const pathname = usePathname()
     const { user } = useAuth()
+    const [stats, setStats] = useState<any>(null)
+    const [sortOpen, setSortOpen] = useState(false)
+    const [filterOpen, setFilterOpen] = useState(false)
+    const [notifOpen, setNotifOpen] = useState(false)
+
+    useEffect(() => {
+        const fetchDashboardSummary = async () => {
+            try {
+                const token = localStorage.getItem('token')
+                if (!token) return
+                const res = await fetch(`${API_URL}/api/dashboard/stats/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setStats(data)
+                }
+            } catch (err) {
+                console.error("Dashboard layout sync failed", err)
+            }
+        }
+
+        if (user) fetchDashboardSummary()
+    }, [user])
 
     const mainNav = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-        { name: 'Tasks', href: '/dashboard/tasks', icon: ClipboardList, badge: '2' },
+        {
+            name: 'Tasks',
+            href: '/dashboard/tasks',
+            icon: ClipboardList,
+            badge: stats?.pending_tasks_count > 0 ? stats.pending_tasks_count.toString() : null
+        },
         { name: 'Activity', href: '/dashboard/activity', icon: ActivityIcon },
         { name: 'Shipments', href: '/dashboard/shipments', icon: Package },
     ]
@@ -128,15 +160,133 @@ export default function DashboardLayout({
                     </div>
 
                     <div className="flex items-center gap-6 ml-8">
-                        <div className="hidden lg:flex items-center gap-4 text-xs font-black text-zinc-500 uppercase tracking-widest border-r border-white/5 pr-6">
-                            <button className="hover:text-white transition-colors">Sort by</button>
-                            <button className="hover:text-white transition-colors">Filters</button>
+                        <div className="hidden lg:flex items-center gap-4 text-xs font-black text-zinc-500 uppercase tracking-widest border-r border-white/5 pr-6 relative">
+                            {/* Sort Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setSortOpen(!sortOpen)
+                                        setFilterOpen(false)
+                                        setNotifOpen(false)
+                                    }}
+                                    className={`hover:text-white transition-colors ${sortOpen ? 'text-white' : ''}`}
+                                >
+                                    Sort by
+                                </button>
+                                <AnimatePresence>
+                                    {sortOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-full right-0 mt-4 w-48 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
+                                        >
+                                            {['Newest First', 'Oldest First', 'Priority: High', 'Priority: Low'].map((opt) => (
+                                                <button
+                                                    key={opt}
+                                                    onClick={() => setSortOpen(false)}
+                                                    className="w-full text-left px-4 py-2 hover:bg-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:text-white transition-all uppercase tracking-widest"
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Filter Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setFilterOpen(!filterOpen)
+                                        setSortOpen(false)
+                                        setNotifOpen(false)
+                                    }}
+                                    className={`hover:text-white transition-colors ${filterOpen ? 'text-white' : ''}`}
+                                >
+                                    Filters
+                                </button>
+                                <AnimatePresence>
+                                    {filterOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-full right-0 mt-4 w-56 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
+                                        >
+                                            <div className="px-4 py-2 border-b border-white/5 mb-1">
+                                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">Entity Status</span>
+                                            </div>
+                                            {['All Active', 'In Transit', 'Pending Review', 'Critical Only'].map((opt) => (
+                                                <button
+                                                    key={opt}
+                                                    onClick={() => setFilterOpen(false)}
+                                                    className="w-full text-left px-4 py-2 hover:bg-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:text-white transition-all uppercase tracking-widest"
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
+
                         <div className="flex items-center gap-4">
-                            <button className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors group">
-                                <Bell className="w-5 h-5 text-zinc-500 group-hover:text-white" />
-                                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-[#050505]"></span>
-                            </button>
+                            {/* Notification Popover */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => {
+                                        setNotifOpen(!notifOpen)
+                                        setSortOpen(false)
+                                        setFilterOpen(false)
+                                    }}
+                                    className={`relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors group ${notifOpen ? 'bg-white/10 text-white' : ''}`}
+                                >
+                                    <Bell className={`w-5 h-5 ${notifOpen ? 'text-white' : 'text-zinc-500'} group-hover:text-white transition-colors`} />
+                                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-[#050505]"></span>
+                                </button>
+                                <AnimatePresence>
+                                    {notifOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                            className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-2xl z-[60]"
+                                        >
+                                            <div className="flex items-center justify-between mb-6">
+                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-outfit">Sovereign Alerts</h3>
+                                                <button className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest">Clear All</button>
+                                            </div>
+                                            <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                                                {stats?.recent_activity?.slice(0, 5).map((act: any) => (
+                                                    <div key={act.id} className="flex gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
+                                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
+                                                        <div className="space-y-1">
+                                                            <p className="text-[10px] font-bold text-white tracking-tight uppercase">{act.action.replace('_', ' ')}</p>
+                                                            <p className="text-[8px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
+                                                                Vector: {act.entity || 'System'} detected status change.
+                                                            </p>
+                                                            <p className="text-[7px] font-black text-zinc-700 uppercase">{new Date(act.timestamp).toLocaleTimeString()}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {(!stats?.recent_activity || stats.recent_activity.length === 0) && (
+                                                    <div className="py-10 text-center opacity-20">
+                                                        <Bell className="w-6 h-6 mx-auto mb-2 text-zinc-500" />
+                                                        <p className="text-[8px] font-bold uppercase tracking-widest">No Active Alerts</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-6 pt-4 border-t border-white/5 text-center text-[8px] font-black text-zinc-500 hover:text-white uppercase tracking-[0.3em] transition-colors">
+                                                Full Audit Record
+                                            </Link>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
                             <Link href="/marketplace" className="bg-white text-black text-xs font-black px-6 py-3 rounded-full hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                 <Plus className="w-4 h-4" /> NEW SHIPMENT
                             </Link>

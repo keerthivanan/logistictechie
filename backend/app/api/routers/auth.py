@@ -62,14 +62,17 @@ async def social_sync(
     name = google_data.get("name")
     picture = google_data.get("picture")
     
+    email = google_data.get("email")
+    name = google_data.get("name")
+    picture = google_data.get("picture")
+    
     if not email:
         raise HTTPException(status_code=400, detail="Google Account has no email")
 
     user = await crud.user.get_by_email(db, email=email)
     
-    is_new_user = False
+    needs_commit = False
     if not user:
-        is_new_user = True
         import random
         import string
         
@@ -77,15 +80,13 @@ async def social_sync(
         user_count = user_count_res.scalar() or 0
         new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
         
-        # DOUBLE-CHECK UNIQUENESS (To be the Best of All Time)
+        # DOUBLE-CHECK UNIQUENESS
         check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
         if check_existing.scalars().first():
-            # Collision detected (rare) -> Append unique entropy
             entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
             new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
         
-        # Create user without password (Social-Only)
-        db_user = User(
+        user = User(
             email=email,
             sovereign_id=new_sovereign_id,
             full_name=name,
@@ -93,49 +94,49 @@ async def social_sync(
             role="user",
             onboarding_completed=True
         )
-        db.add(db_user)
-        await db.commit()
-        await db.refresh(db_user)
-        user = db_user
+        db.add(user)
+        needs_commit = True
         print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
     else:
-        # SELF-HEALING: If existing user has no Sovereign ID (Legacy Data Fix)
+        # SELF-HEALING: Legacy Data Fix
         if not user.sovereign_id:
             import random
             import string
-            
             user_count_res = await db.execute(select(func.count(User.id)))
             user_count = user_count_res.scalar() or 0
             new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
             
-            # Uniqueness Check
             check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
             if check_existing.scalars().first():
                 entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
                 new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
             
             user.sovereign_id = new_sovereign_id
-            await db.commit()
-            await db.refresh(user)
+            needs_commit = True
             print(f"[SELF-HEALING] Assigned Sovereign ID {new_sovereign_id} to {email}")
 
         # Update avatar if missing or changed
         if picture and (not user.avatar_url or user.avatar_url != picture):
             user.avatar_url = picture
-            await db.commit()
-            await db.refresh(user)
+            needs_commit = True
     
-    # AUDIT PILLAR: Log Social Sync
+    # AUDIT PILLAR: Log Social Sync (Optimized with single commit)
     client_ip = raw_request.client.host if raw_request.client else None
     await activity_service.log(
         db, 
-        user_id=user.id, 
+        user_id=user.id if user.id else None, 
         action="SOCIAL_LINK", 
         entity_type="USER", 
-        entity_id=user.id,
-        ip_address=client_ip
+        entity_id=user.id if user.id else None,
+        ip_address=client_ip,
+        commit=False
     )
-
+    
+    if needs_commit or True: # Always commit at end to capture activity log and user changes
+        await db.commit()
+        if user.id: # Refresh only if we have an ID
+            await db.refresh(user)
+    
     if not user.is_active:
         raise HTTPException(status_code=401, detail="Account Inactive")
 
@@ -307,6 +308,15 @@ async def register_user(
         company_name=form_data.company_name
     )
     
+    # AUDIT PILLAR: Log Signup event
+    await activity_service.log(
+        db,
+        user_id=str(user.id),
+        action="SIGNUP",
+        entity_type="USER",
+        entity_id=str(user.id)
+    )
+    
     return {
         "success": True,
         "message": "Account created successfully. Please sign in.",
@@ -360,6 +370,16 @@ async def update_profile(
         raise HTTPException(status_code=401, detail="Invalid token")
         
     updated_user = await crud.user.update(db, user_id=user_id, obj_in=update_data.dict(exclude_unset=True))
+    
+    # AUDIT PILLAR: Log Profile Update
+    await activity_service.log(
+        db,
+        user_id=str(user_id),
+        action="PROFILE_UPDATE",
+        entity_type="USER",
+        entity_id=str(user_id)
+    )
+    
     return updated_user
 
 @router.post("/logout")
@@ -389,6 +409,16 @@ async def change_password(
         raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
         
     await crud.user.update(db, user_id=user_id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
+    
+    # AUDIT PILLAR: Log Password Change
+    await activity_service.log(
+        db,
+        user_id=str(user_id),
+        action="SECURITY_UPDATE",
+        entity_type="USER",
+        entity_id=str(user_id)
+    )
+    
     return {"success": True, "message": "Password updated successfully"}
 
 class ForgotPassword(BaseModel):

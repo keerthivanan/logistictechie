@@ -119,7 +119,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             avatar_url
         });
 
-        fetchProfile(token);
+        // Finalize state immediately. We trust the login provider details.
+        setLoading(false);
     };
 
     const logout = () => {

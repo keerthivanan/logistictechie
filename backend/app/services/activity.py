@@ -15,7 +15,8 @@ class ActivityService:
         entity_id: Optional[str] = None,
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None,
-        metadata: Optional[dict] = None
+        metadata: Optional[dict] = None,
+        commit: bool = True
     ) -> UserActivity:
         """Log a user activity."""
         activity = UserActivity(
@@ -28,7 +29,8 @@ class ActivityService:
             extra_data=json.dumps(metadata) if metadata else None
         )
         db.add(activity)
-        await db.commit()
+        if commit:
+            await db.commit()
         return activity
 
 activity_service = ActivityService()

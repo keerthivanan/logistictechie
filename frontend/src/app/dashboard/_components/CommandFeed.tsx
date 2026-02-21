@@ -49,9 +49,11 @@ export default function CommandFeed({ activities }: { activities: Activity[] }) 
                 )}
             </div>
 
-            <button className="mt-6 w-full py-3 border border-white/5 rounded-xl text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-inter hover:bg-white hover:text-black transition-all">
-                Access Audit Logs
-            </button>
+            <Link href="/dashboard/activity" className="block w-full">
+                <button className="mt-6 w-full py-3 border border-white/5 rounded-xl text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-inter hover:bg-white hover:text-black transition-all">
+                    Access Audit Logs
+                </button>
+            </Link>
         </div>
     )
 }

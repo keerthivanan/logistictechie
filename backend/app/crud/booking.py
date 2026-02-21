@@ -89,7 +89,7 @@ class CRUDBooking:
             
             chart_data.append({
                 "label": day_target.strftime("%a")[0], # M, T, W...
-                "value": count or (0 if i > 0 else 1) # Ensure at least 1 for "Today" if user is active
+                "value": count
             })
 
         return {
