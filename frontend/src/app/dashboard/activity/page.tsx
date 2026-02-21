@@ -75,91 +75,91 @@ export default function ActivityPage() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-12 py-6">
-            {/* Header section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="max-w-6xl mx-auto space-y-12 py-6">
+            {/* Header section - Realigned to Dashboard Pattern */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10">
                 <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-zinc-400">
-                            <ActivityIcon className="w-4 h-4" />
-                        </div>
-                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Operational Oversight</span>
+                    <div className="flex items-center gap-6">
+                        <h1 className="text-xl font-bold tracking-tight text-white uppercase font-outfit">
+                            Audit <span className="text-zinc-600">Ledger</span>
+                        </h1>
+                        <div className="h-4 w-px bg-white/10" />
+                        <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-[0.2em] font-inter">
+                            Signal: Intelligence History
+                        </p>
                     </div>
-                    <h1 className="text-5xl font-bold font-outfit tracking-tighter uppercase italic italic-none">Audit Log <span className="text-zinc-700">/</span> Activity</h1>
-                    <p className="text-zinc-500 font-medium font-inter max-w-md text-sm">A permanent ledger of all intelligence vectors and operational commits within your Sovereign node.</p>
+                    <p className="text-zinc-500 font-medium font-inter max-w-md text-xs leading-relaxed">A permanent ledger of all intelligence vectors and operational commits within your Sovereign node.</p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 transition-all">
+                    <button className="flex items-center gap-2 px-6 py-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:border-white/20 transition-all font-inter shadow-sm">
                         <Filter className="w-3.5 h-3.5" /> Filter Feed
                     </button>
-                    <button className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-200 transition-all">
-                        Export Ledger
+                    <button className="flex items-center gap-2 px-6 py-4 bg-white text-black rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all font-inter shadow-xl">
+                        Export Protocol
                     </button>
                 </div>
             </div>
 
-            {/* Main Log View */}
-            <div className="bg-[#080808] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent" />
-
+            {/* Main Log View - Sovereign Ledger Pattern */}
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl relative">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-white/5 bg-white/[0.01]">
-                                <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em]">Timestamp</th>
-                                <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em]">Action Protocol</th>
-                                <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em]">Entity Vector</th>
-                                <th className="px-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em]">Details</th>
-                                <th className="pr-8 py-5 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] text-right">Resume</th>
+                                <th className="pl-10 pr-6 py-6 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Timestamp</th>
+                                <th className="px-6 py-6 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Action Protocol</th>
+                                <th className="px-6 py-6 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Entity Vector</th>
+                                <th className="px-6 py-6 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Intelligence</th>
+                                <th className="pr-10 py-6 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter text-right">Commit</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/[0.03]">
+                        <tbody className="divide-y divide-white/[0.02]">
                             {activities.map((act) => (
                                 <tr key={act.id} className="group hover:bg-white/[0.02] transition-colors relative">
-                                    <td className="px-8 py-6 whitespace-nowrap">
+                                    <td className="pl-10 pr-6 py-8 whitespace-nowrap">
                                         <div className="flex flex-col">
-                                            <span className="text-[11px] font-bold text-white font-inter">
-                                                {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                            <span className="text-[11px] font-bold text-white font-inter tracking-tight">
+                                                {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-1">
+                                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">
                                                 {new Date(act.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-6 h-6 rounded bg-white/5 flex items-center justify-center">
-                                                {act.action === 'SEARCH' ? <Search className="w-3 h-3 text-blue-400" /> :
-                                                    act.action === 'BOOKING_CREATED' ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> :
-                                                        act.action === 'SOCIAL_LINK' ? <Globe className="w-3 h-3 text-purple-400" /> :
-                                                            <History className="w-3 h-3 text-zinc-500" />}
+                                    <td className="px-6 py-8">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center group-hover:border-white/20 transition-all shadow-sm">
+                                                {act.action === 'SEARCH' ? <Search className="w-3.5 h-3.5 text-blue-400" /> :
+                                                    act.action === 'BOOKING_CREATED' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> :
+                                                        act.action === 'SOCIAL_LINK' ? <Globe className="w-3.5 h-3.5 text-purple-400" /> :
+                                                            <History className="w-3.5 h-3.5 text-zinc-500" />}
                                             </div>
-                                            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.15em] font-outfit">
+                                            <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-tighter font-outfit group-hover:text-white transition-colors">
                                                 {act.action.replace('_', ' ')}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-6">
-                                        <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider">
+                                    <td className="px-6 py-8">
+                                        <span className="text-[9px] font-mono font-bold text-zinc-600 tracking-[0.1em] bg-white/[0.02] px-2.5 py-1 rounded border border-white/5">
                                             {act.entity}
                                         </span>
                                     </td>
-                                    <td className="px-8 py-6">
+                                    <td className="px-6 py-8">
                                         <div className="max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                                            <span className="text-[10px] font-medium text-zinc-500 font-inter">
+                                            <span className="text-[11px] font-medium text-zinc-500 font-inter opacity-80 group-hover:opacity-100 transition-opacity">
                                                 {act.action === 'SEARCH' ? `${act.metadata.origin} → ${act.metadata.destination}` :
-                                                    act.action === 'BOOKING_CREATED' ? `Booking Reference: ${act.metadata.reference}` :
-                                                        'System Operational Commit'}
+                                                    act.action === 'BOOKING_CREATED' ? `Reference: ${act.metadata.reference}` :
+                                                        'Operational Commit Verified'}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="pr-8 py-6 text-right">
+                                    <td className="pr-10 py-8 text-right">
                                         <Link
                                             href={act.url}
-                                            className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-white/5 text-zinc-600 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all"
+                                            className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/5 text-zinc-700 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all shadow-sm group-hover:scale-110"
                                         >
-                                            <ArrowUpRight className="w-3.5 h-3.5" />
+                                            <ArrowUpRight className="w-4 h-4" />
                                         </Link>
                                     </td>
                                 </tr>
@@ -169,31 +169,31 @@ export default function ActivityPage() {
                 </div>
 
                 {/* Pagination */}
-                <div className="px-8 py-6 bg-white/[0.01] border-t border-white/5 flex items-center justify-between">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
-                        Showing protocol <span className="text-zinc-400">{page * limit + 1}</span> - <span className="text-zinc-400">{page * limit + activities.length}</span>
+                <div className="px-10 py-6 bg-white/[0.01] border-t border-white/5 flex items-center justify-between">
+                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest font-inter">
+                        Operational Slice: <span className="text-zinc-500">{page * limit + 1}</span> — <span className="text-zinc-500">{page * limit + activities.length}</span>
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => setPage(p => Math.max(0, p - 1))}
                             disabled={page === 0}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/5 text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                            className="w-11 h-11 flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-zinc-600 hover:text-white hover:bg-white/5 hover:border-white/20 disabled:opacity-20 transition-all shadow-sm"
                         >
-                            <ChevronLeft className="w-4 h-4" />
+                            <ChevronLeft className="w-5 h-5" />
                         </button>
                         <button
                             onClick={() => setPage(p => p + 1)}
                             disabled={activities.length < limit}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/5 text-zinc-500 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+                            className="w-11 h-11 flex items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-zinc-600 hover:text-white hover:bg-white/5 hover:border-white/20 disabled:opacity-20 transition-all shadow-sm"
                         >
-                            <ChevronRight className="w-4 h-4" />
+                            <ChevronRight className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center justify-center pb-12">
-                <p className="text-[9px] font-black text-zinc-800 uppercase tracking-[0.4em]">End of Ledger Stream</p>
+            <div className="flex items-center justify-center pb-20 opacity-20">
+                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.5em]">Ledger Stream Termination</p>
             </div>
         </div>
     )
