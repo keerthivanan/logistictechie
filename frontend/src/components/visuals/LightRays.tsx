@@ -15,6 +15,7 @@ export type RaysOrigin =
 
 interface LightRaysProps {
     raysOrigin?: RaysOrigin;
+    anchorOffset?: { x?: number; y?: number };
     raysColor?: string;
     raysSpeed?: number;
     lightSpread?: number;
@@ -39,27 +40,36 @@ const hexToRgb = (hex: string): [number, number, number] => {
 const getAnchorAndDir = (
     origin: RaysOrigin,
     w: number,
-    h: number
+    h: number,
+    anchorOffset?: { x?: number; y?: number }
 ): { anchor: [number, number]; dir: [number, number] } => {
     const outside = 0.2;
-    switch (origin) {
-        case 'top-left':
-            return { anchor: [0, -outside * h], dir: [0, 1] };
-        case 'top-right':
-            return { anchor: [w, -outside * h], dir: [0, 1] };
-        case 'left':
-            return { anchor: [-outside * w, 0.5 * h], dir: [1, 0] };
-        case 'right':
-            return { anchor: [(1 + outside) * w, 0.5 * h], dir: [-1, 0] };
-        case 'bottom-left':
-            return { anchor: [0, (1 + outside) * h], dir: [0, -1] };
-        case 'bottom-center':
-            return { anchor: [0.5 * w, (1 + outside) * h], dir: [0, -1] };
-        case 'bottom-right':
-            return { anchor: [w, (1 + outside) * h], dir: [0, -1] };
-        default: // "top-center"
-            return { anchor: [0.5 * w, -outside * h], dir: [0, 1] };
+    const res = (() => {
+        switch (origin) {
+            case 'top-left':
+                return { anchor: [0, -outside * h] as [number, number], dir: [0, 1] as [number, number] };
+            case 'top-right':
+                return { anchor: [w, -outside * h] as [number, number], dir: [0, 1] as [number, number] };
+            case 'left':
+                return { anchor: [-outside * w, 0.5 * h] as [number, number], dir: [1, 0] as [number, number] };
+            case 'right':
+                return { anchor: [(1 + outside) * w, 0.5 * h] as [number, number], dir: [-1, 0] as [number, number] };
+            case 'bottom-left':
+                return { anchor: [0, (1 + outside) * h] as [number, number], dir: [0, -1] as [number, number] };
+            case 'bottom-center':
+                return { anchor: [0.5 * w, (1 + outside) * h] as [number, number], dir: [0, -1] as [number, number] };
+            case 'bottom-right':
+                return { anchor: [w, (1 + outside) * h] as [number, number], dir: [0, -1] as [number, number] };
+            default: // "top-center"
+                return { anchor: [0.5 * w, -outside * h] as [number, number], dir: [0, 1] as [number, number] };
+        }
+    })();
+
+    if (anchorOffset) {
+        if (anchorOffset.x !== undefined) res.anchor[0] += anchorOffset.x;
+        if (anchorOffset.y !== undefined) res.anchor[1] += anchorOffset.y;
     }
+    return res;
 };
 
 type Vec2 = [number, number];
@@ -85,6 +95,7 @@ interface Uniforms {
 
 const LightRays: React.FC<LightRaysProps> = ({
     raysOrigin = 'top-center',
+    anchorOffset,
     raysColor = DEFAULT_COLOR,
     raysSpeed = 1,
     lightSpread = 1,
@@ -298,7 +309,7 @@ void main() {
                 rendererRef.current.setSize(width, height);
                 if (uniformsRef.current) {
                     uniformsRef.current.iResolution.value = [width, height];
-                    const { anchor, dir } = getAnchorAndDir(raysOrigin, width, height);
+                    const { anchor, dir } = getAnchorAndDir(raysOrigin, width, height, anchorOffset);
                     uniformsRef.current.rayPos.value = anchor;
                     uniformsRef.current.rayDir.value = dir;
                 }
@@ -358,7 +369,8 @@ void main() {
         followMouse,
         mouseInfluence,
         noiseAmount,
-        distortion
+        distortion,
+        anchorOffset
     ]);
 
     return (

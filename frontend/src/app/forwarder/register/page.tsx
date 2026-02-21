@@ -119,16 +119,17 @@ export default function ForwarderRegisterPage() {
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <LightRays
                     raysOrigin="top-center"
+                    anchorOffset={{ x: -150 }}
                     raysColor="#d3c892"
-                    raysSpeed={1}
-                    lightSpread={0.5}
-                    rayLength={3}
+                    raysSpeed={1.5}
+                    lightSpread={0.18}
+                    rayLength={1.2}
                     followMouse={true}
-                    mouseInfluence={0.1}
-                    noiseAmount={0}
-                    distortion={0}
+                    mouseInfluence={0.4}
+                    noiseAmount={0.02}
+                    distortion={0.1}
                     className="opacity-100"
-                    pulsating={false}
+                    pulsating={true}
                     fadeDistance={1}
                     saturation={1}
                 />
