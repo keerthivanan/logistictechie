@@ -97,6 +97,9 @@ async def social_sync(
         db.add(user)
         needs_commit = True
         print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
+        
+        # OMEGO PROTOCOL: Create Initial Mission Set
+        await create_default_tasks(db, user.id)
     else:
         # SELF-HEALING: Legacy Data Fix
         if not user.sovereign_id:
@@ -164,6 +167,32 @@ async def social_sync(
         "sovereign_id": user.sovereign_id,
         "avatar_url": user.avatar_url
     }
+
+async def create_default_tasks(db: AsyncSession, user_id: str):
+    """Enroll the user in the Sovereign Onboarding sequence."""
+    from app import crud
+    default_tasks = [
+        {
+            "title": "Complete Profile Verification",
+            "description": "Ensure your Sovereign identity is fully verified for priority boarding.",
+            "task_type": "SECURITY",
+            "priority": "HIGH"
+        },
+        {
+            "title": "Setup Payment Method",
+            "description": "Link your billing node for instant throughput and frictionless settlements.",
+            "task_type": "BILLING",
+            "priority": "CRITICAL"
+        },
+        {
+            "title": "Explore Global Marketplace",
+            "description": "Scan the marketplace for the most efficient logistics vectors.",
+            "task_type": "DOCUMENT",
+            "priority": "MEDIUM"
+        }
+    ]
+    for task_data in default_tasks:
+        await crud.task.create(db, obj_in=task_data, user_id=user_id)
 
 # Removed Onboarding Submit Protocol (Simplified Flow)
 
@@ -307,6 +336,9 @@ async def register_user(
         full_name=form_data.full_name,
         company_name=form_data.company_name
     )
+    
+    # OMEGO PROTOCOL: Create Initial Mission Set
+    await create_default_tasks(db, str(user.id))
     
     # AUDIT PILLAR: Log Signup event
     await activity_service.log(

@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Package, Clock, Truck, TrendingUp, Zap } from 'lucide-react'
+import { Package, Clock, Truck, TrendingUp, Zap, ClipboardList } from 'lucide-react'
 import { DashboardStats } from './types'
 
 export default function MetricCards({ stats }: { stats: DashboardStats | null }) {
@@ -16,6 +16,12 @@ export default function MetricCards({ stats }: { stats: DashboardStats | null })
             icon: Clock,
             value: stats?.on_time_rate || '100%',
             label: 'On-Time',
+            bgColor: 'bg-white/[0.02]'
+        },
+        {
+            icon: ClipboardList,
+            value: stats?.pending_tasks_count || 0,
+            label: 'Active Tasks',
             bgColor: 'bg-white/[0.02]'
         },
         {

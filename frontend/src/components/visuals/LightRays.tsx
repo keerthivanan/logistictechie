@@ -43,7 +43,7 @@ const getAnchorAndDir = (
     h: number,
     anchorOffset?: { x?: number; y?: number }
 ): { anchor: [number, number]; dir: [number, number] } => {
-    const outside = 0.2;
+    const outside = 0.05;
     const res = (() => {
         switch (origin) {
             case 'top-left':
@@ -247,8 +247,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec4 rays2 = vec4(1.0) *
                rayStrength(rayPos, finalRayDir, coord, 22.3991, 18.0234,
                            1.1 * raysSpeed);
+  vec4 rays3 = vec4(1.0) *
+               rayStrength(rayPos, finalRayDir, coord, 45.123, 31.567,
+                           1.9 * raysSpeed);
 
-  fragColor = rays1 * 0.5 + rays2 * 0.4;
+  fragColor = rays1 * 0.4 + rays2 * 0.3 + rays3 * 0.3;
 
   if (noiseAmount > 0.0) {
     float n = noise(coord * 0.01 + iTime * 0.1);
