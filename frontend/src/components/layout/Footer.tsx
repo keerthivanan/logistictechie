@@ -24,9 +24,9 @@ export default function Footer() {
                             <li><Link href="/importers-exporters" className="hover:text-white transition-colors">Rate Tracker</Link></li>
                             <li><Link href="/forwarders" className="hover:text-white transition-colors">AI Quoting</Link></li>
                             <li><Link href="/carriers" className="hover:text-white transition-colors">Yield Agent</Link></li>
-                            <li><Link href="/enterprise" className="hover:text-white transition-colors">Enterprise</Link></li>
-                            <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                            <li><Link href="/demo" className="hover:text-white transition-colors">Live Demo</Link></li>
+                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Enterprise</Link></li>
+                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Pricing</Link></li>
+                            <li><Link href="/demo" className="hover:text-white transition-colors">Tactical Simulation</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -50,7 +50,7 @@ export default function Footer() {
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Resources</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                            <li><Link href="/api" className="hover:text-white transition-colors">API Docs</Link></li>
+                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">API Docs</Link></li>
                         </ul>
                     </div>
 

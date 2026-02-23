@@ -21,6 +21,7 @@ Direct integration with real-world carrier APIs, moving beyond mock data:
 - **Verified Logistics API**: A unified backend standard for honest freight procurement.
 
 ### 💎 Ultra-Best UI Aesthetics
+- **Tactical Simulation Engine**: High-fidelity experiential preview node for pre-deployment validation.
 - **Holographic Branding**: Premium silver/white accents on pure #000000 backgrounds.
 - **Glassmorphic Components**: High-contrast, sleek interface with micro-animations.
 - **Mobile Responsive**: Perfected Quote Wizard flow for any device.
@@ -31,7 +32,11 @@ Direct integration with real-world carrier APIs, moving beyond mock data:
 
 This is a **Full-Stack Logistics Super-App**. It empowers users to:
 
-1.  **🚀 Instant Rate Discovery**:
+1.  **🎮 Tactical Simulation**:
+    -   Experience the Sovereign OS in a cinematic "Read-Only" mode.
+    -   Visualize global mesh connectivity and real-time telemetry projections.
+
+2.  **🚀 Instant Rate Discovery**:
     -   Type any port (e.g., "Shanghai") and any commodity (e.g., "Electronics").
     -   Get real-time shipping prices from major carriers (Maersk, MSC, CMA CGM).
     -   Compare transit times and carbon emissions instantly.

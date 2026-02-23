@@ -79,7 +79,7 @@ export default function Home() {
               </Link>
             )}
             <Link href="/demo" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center text-sm">
-              View Live Demo
+              View Tactical Simulation
             </Link>
           </div>
 
