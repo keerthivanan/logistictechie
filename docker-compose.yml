@@ -1,6 +1,10 @@
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: omego-backend
+    restart: always
     ports:
       - "8000:8000"
     environment:
@@ -15,18 +19,27 @@ services:
         condition: service_started
       qdrant:
         condition: service_started
+    networks:
+      - omego-network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: omego-frontend
+    restart: always
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
+    networks:
+      - omego-network
 
   db:
     image: postgres:16-alpine
+    container_name: omego-db
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=2003
@@ -40,19 +53,31 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - omego-network
 
   redis:
     image: redis:7-alpine
+    container_name: omego-redis
     ports:
       - "6379:6379"
+    networks:
+      - omego-network
 
   qdrant:
     image: qdrant/qdrant:latest
+    container_name: omego-qdrant
     ports:
       - "6333:6333"
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
+    networks:
+      - omego-network
+
+networks:
+  omego-network:
+    driver: bridge
 
 volumes:
   postgres_data:
