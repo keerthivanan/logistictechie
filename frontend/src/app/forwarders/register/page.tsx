@@ -10,6 +10,12 @@ import LightRays from '@/components/visuals/LightRays';
 import Navbar from '@/components/layout/Navbar';
 import { API_URL } from '@/lib/config';
 
+interface Country {
+    name: string;
+    code: string;
+    dial_code: string;
+}
+
 export default function ForwarderRegisterPage() {
     const [loading, setLoading] = useState(false);
 
@@ -32,7 +38,7 @@ export default function ForwarderRegisterPage() {
 
         // Smart Country Logic: Pre-fill dial code
         if (name === 'country') {
-            const selectedCountry = countries.find(c => c.code === value);
+            const selectedCountry = countries.find((c: Country) => c.code === value);
             if (selectedCountry) {
                 setFormData(prev => ({
                     ...prev,
@@ -99,9 +105,9 @@ export default function ForwarderRegisterPage() {
             const data = await res.json();
 
             if (data.success) {
-                // SUCCESS: Immediate Listing
-                alert(`Welcome Aboard, ${formData.company_name}!\n\nYou have been successfully registered and added to our Global Directory.`);
-                window.location.href = '/forwarders'; // Redirect to directory to see themselves
+                // SUCCESS: Verification Pending
+                alert(`Welcome Aboard, ${formData.company_name}!\n\nYour profile is now in queue for Sovereign Verification ($15 Fee). Once payment is confirmed via our tactical partner, your listing will go LIVE in the Global Directory.`);
+                window.location.href = '/services/coming-soon'; // Redirect to a graceful pending state
             } else {
                 alert('Registration failed: ' + data.message || 'Unknown error');
             }
@@ -165,7 +171,7 @@ export default function ForwarderRegisterPage() {
                             'Smart Country Targeting (Only relevant cargo)',
                             'Instant "One-Click" Quoting',
                             'Verified Shippers & Real Cargo',
-                            'No Commission. Just Subscription.'
+                            'Sovereign Verification Protocol ($15)'
                         ].map((item, i) => (
                             <div key={i} className="flex items-center space-x-3 text-lg text-white">
                                 <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -268,7 +274,7 @@ export default function ForwarderRegisterPage() {
                                 onChange={handleChange}
                             >
                                 <option value="">Select Country...</option>
-                                {countries.map((c) => (
+                                {countries.map((c: Country) => (
                                     <option key={c.code} value={c.code}>
                                         {c.name} ({c.dial_code})
                                     </option>

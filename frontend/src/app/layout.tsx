@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AppProviders } from '@/components/AppProviders'
-
 export const metadata: Metadata = {
+  metadataBase: new URL('https://omego.logistics'),
   title: 'SOVEREIGN | The Global Logistics OS (G.O.A.T. Build)',
   description: 'The world\'s most advanced digital freight marketplace. Compare ocean/air rates, automate tenders, and orchestrate global trade with Sovereign AI.',
   keywords: ['logistics', 'freight forwarding', 'supply chain', 'AI logistics', 'ocean freight', 'air freight', 'digital marketplace'],

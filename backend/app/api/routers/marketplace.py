@@ -35,7 +35,7 @@ async def submit_request(
     Submits a new shipment request to the marketplace.
     Triggers a simulation of forwarder interest.
     """
-    unique_id = str(uuid.uuid4())[:8].upper()
+    unique_id = f"REQ-{str(uuid.uuid4())[:6].upper()}"
     
     new_request = MarketplaceRequest(
         unique_id=unique_id,
@@ -70,8 +70,22 @@ async def submit_request(
     await db.commit()
     await db.refresh(new_request)
     
-    # Trigger simulation in background
-    background_tasks.add_task(simulate_forwarder_bids, new_request.id, db)
+    # 📡 OUTBOUND PROTOCOL: Notify n8n for Excel & Broadcast
+    from app.services.webhook import webhook_service
+    background_tasks.add_task(
+        webhook_service.trigger_marketplace_webhook,
+        {
+            "id": new_request.id,
+            "unique_id": unique_id,
+            "origin": f"{request_in.origin_city}, {request_in.origin_country}",
+            "destination": f"{request_in.dest_city}, {request_in.dest_country}",
+            "cargo_type": request_in.cargo_type,
+            "weight": request_in.weight_kg,
+            "volume": request_in.volume_cbm,
+            "details": request_in.cargo_details,
+            "user_id": request_in.user_id
+        }
+    )
     
     return {"success": True, "uniqueId": unique_id}
 
@@ -108,6 +122,62 @@ async def get_marketplace_quotes(unique_id: str, db: AsyncSession = Depends(get_
         })
         
     return {"quotes": formatted_quotes, "status": req.status}
+
+class BidSubmit(BaseModel):
+    request_id: str
+    forwarder_id: str
+    price: float
+    currency: str = "USD"
+    transit_days: int
+    vendor_name: str
+    vendor_logo: str = ""
+    vendor_country: str = ""
+    notes: str = ""
+
+@router.post("/bid")
+async def submit_bid(bid_in: BidSubmit, db: AsyncSession = Depends(get_db)):
+    """
+    Injects a bid from n8n. Implements First-3 Priority logic.
+    """
+    # 1. Find the request
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.id == bid_in.request_id)
+    result = await db.execute(stmt)
+    req = result.scalars().first()
+    
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found")
+        
+    if req.status == "CLOSED" or req.bid_count >= 3:
+        return {"success": False, "message": "Request is closed. Max bids reached."}
+        
+    # 2. Record Bid
+    new_bid = MarketplaceBid(
+        request_id=bid_in.request_id,
+        forwarder_id=bid_in.forwarder_id,
+        price=bid_in.price,
+        currency=bid_in.currency,
+        transit_days=bid_in.transit_days,
+        vendor_name=bid_in.vendor_name,
+        vendor_logo=bid_in.vendor_logo,
+        vendor_country=bid_in.vendor_country,
+        notes=bid_in.notes
+    )
+    
+    db.add(new_bid)
+    req.bid_count += 1
+    
+    # 3. Handle Auto-Closure
+    if req.bid_count >= 3:
+        req.status = "CLOSED"
+        
+    await db.commit()
+    
+    return {
+        "success": True, 
+        "bid_count": req.bid_count, 
+        "status": req.status,
+        "message": "Bid accepted." if req.bid_count < 3 else "Bid accepted. Request now CLOSED."
+    }
 
 async def simulate_forwarder_bids(request_internal_id: str, db_outer: AsyncSession):
     """

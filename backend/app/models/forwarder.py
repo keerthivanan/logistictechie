@@ -18,8 +18,9 @@ class Forwarder(Base):
     document_url = Column(String)
     logo_url = Column(String)
     
-    is_verified = Column(Boolean, default=True) # Set to True for MVP reality
-    status = Column(String, default="ACTIVE")
+    is_verified = Column(Boolean, default=False) 
+    is_paid = Column(Boolean, default=False)
+    status = Column(String, default="PENDING_VERIFICATION")
     
     # Financial performance metrics
     reliability_score = Column(Float, default=4.9)

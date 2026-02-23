@@ -34,13 +34,48 @@ async def register_forwarder(f_in: ForwarderRegister, db: AsyncSession = Depends
         country=f_in.country,
         tax_id=f_in.tax_id,
         document_url=f_in.document_url,
-        logo_url=f_in.logo_url
+        logo_url=f_in.logo_url,
+        status="PENDING_VERIFICATION",
+        is_verified=False
     )
     
     db.add(new_f)
     await db.commit()
+    await db.refresh(new_f)
     
-    return {"success": True, "message": "Onboarding Complete."}
+    # 📡 OUTBOUND PROTOCOL: Send to n8n for Excel storage
+    from app.services.webhook import webhook_service
+    await webhook_service.trigger_registration_webhook({
+        "id": new_f.id,
+        "company_name": new_f.company_name,
+        "email": new_f.email,
+        "phone": new_f.phone,
+        "country": new_f.country,
+        "tax_id": new_f.tax_id,
+        "document_url": f_in.document_url,
+        "logo_url": f_in.logo_url
+    })
+    
+    return {"success": True, "message": "Onboarding Pending Verification."}
+
+@router.put("/activate/{f_id}")
+async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Secure endpoint for n8n to activate a forwarder after $15 payment.
+    """
+    stmt = select(Forwarder).where(Forwarder.id == f_id)
+    result = await db.execute(stmt)
+    f = result.scalars().first()
+    
+    if not f:
+        raise HTTPException(status_code=404, detail="Partner not found")
+        
+    f.status = "ACTIVE"
+    f.is_verified = True
+    f.is_paid = True
+    
+    await db.commit()
+    return {"success": True, "message": "Partner Activated."}
 
 @router.get("/active")
 async def list_forwarders(db: AsyncSession = Depends(get_db)):
@@ -66,6 +101,7 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
                 "company_name": f.company_name,
                 "country": f.country,
                 "email": f.email,
+                "phone": f.phone,
                 "reliability_score": f.reliability_score,
                 "logo_url": f.logo_url,
                 "is_verified": f.is_verified

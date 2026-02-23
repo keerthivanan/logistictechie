@@ -38,8 +38,8 @@ export default function MarketplaceLiveDashboard() {
                 if (data.quotes) {
                     setQuotes(data.quotes);
                     setProgress(data.quotes.length);
-                    // If 3 quotes received, we can conceptually consider it 'done' for this MVP
-                    if (data.status === 'CLOSED' || data.quotes.length >= 1) {
+                    // Only close if backend says so (which happens after 3 bids)
+                    if (data.status === 'CLOSED') {
                         setStatus('CLOSED');
                     }
                 }
@@ -91,13 +91,16 @@ export default function MarketplaceLiveDashboard() {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mb-20 bg-white/[0.02] rounded-full h-1 overflow-hidden relative max-w-md mx-auto border border-white/5">
+                <div className="mb-2 bg-white/[0.02] rounded-full h-1 overflow-hidden relative max-w-md mx-auto border border-white/5">
                     <motion.div
                         className="absolute left-0 top-0 bottom-0 bg-emerald-500"
                         initial={{ width: 0 }}
-                        animate={{ width: status === 'CLOSED' ? '100%' : `${Math.min((progress / 2) * 100, 90)}%` }}
+                        animate={{ width: `${(progress / 3) * 100}%` }}
                         transition={{ duration: 0.5 }}
                     />
+                </div>
+                <div className="text-center mb-20 text-[8px] font-black text-zinc-700 uppercase tracking-[0.3em]">
+                    Tactical Priority: Only First 3 Quotations Accepted
                 </div>
 
                 {/* Quotes List */}

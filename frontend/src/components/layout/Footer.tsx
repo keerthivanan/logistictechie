@@ -21,7 +21,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/importers-exporters" className="hover:text-white transition-colors">Rate Tracker</Link></li>
+                            <li><Link href="/shippers" className="hover:text-white transition-colors">Shipper Portal</Link></li>
                             <li><Link href="/forwarders" className="hover:text-white transition-colors">AI Quoting</Link></li>
                             <li><Link href="/carriers" className="hover:text-white transition-colors">Yield Agent</Link></li>
                             <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Enterprise</Link></li>

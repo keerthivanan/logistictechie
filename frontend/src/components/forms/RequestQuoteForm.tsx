@@ -12,6 +12,12 @@ import { countries } from '@/lib/countries';
 import { API_URL } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
 
+interface Country {
+    name: string;
+    code: string;
+    dial_code: string;
+}
+
 // --- Helpers ---
 const getFlagEmoji = (countryCode: string) => {
     if (!countryCode) return '🌐';
@@ -219,7 +225,7 @@ export default function RequestQuoteForm() {
                                         onChange={handleChange}
                                         className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                     >
-                                        {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
+                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -264,7 +270,7 @@ export default function RequestQuoteForm() {
                                         onChange={handleChange}
                                         className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                     >
-                                        {countries.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
+                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">

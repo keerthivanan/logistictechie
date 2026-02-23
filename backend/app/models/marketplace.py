@@ -24,6 +24,7 @@ class MarketplaceRequest(Base):
     
     cargo_details = Column(JSON) # Rich JSON specs
     status = Column(String, default="OPEN") # OPEN, CLOSED, CANCELLED
+    bid_count = Column(Integer, default=0)
     
     created_at = Column(DateTime, default=datetime.utcnow)
 
