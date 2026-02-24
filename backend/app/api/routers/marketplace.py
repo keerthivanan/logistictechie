@@ -164,7 +164,7 @@ async def submit_quote(bid_in: QuoteSubmit, db: AsyncSession = Depends(get_db)):
     Implements First-3 atomic counter logic.
     """
     # Find the request by request_id
-    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == bid_in.request_id)
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == bid_in.request_id).with_for_update()
     result = await db.execute(stmt)
     req = result.scalars().first()
     

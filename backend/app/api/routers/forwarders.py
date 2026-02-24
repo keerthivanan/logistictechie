@@ -24,6 +24,9 @@ class ForwarderSave(BaseModel):
     logo_url: str = ""
     forwarder_id: str = ""  # n8n can pass this, or we auto-generate
     stripe_customer_id: str = ""
+    status: str = "PENDING_REVIEW"
+    is_verified: bool = False
+    is_paid: bool = False
 
 @router.post("/save")
 async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)):
@@ -54,9 +57,9 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
         document_url=f_in.document_url,
         logo_url=f_in.logo_url,
         stripe_customer_id=f_in.stripe_customer_id,
-        status="ACTIVE",
-        is_verified=True,
-        is_paid=True,
+        status=f_in.status,
+        is_verified=f_in.is_verified,
+        is_paid=f_in.is_paid,
         expires_at=datetime.utcnow() + timedelta(days=30)
     )
     
