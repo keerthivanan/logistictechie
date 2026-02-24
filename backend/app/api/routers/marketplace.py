@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.api import deps
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
 from app.models.forwarder import Forwarder
-from sqlalchemy import select
-import uuid
-import asyncio
-import random
+from sqlalchemy import select, func
+from datetime import datetime
+import uuid, asyncio
 from typing import List, Dict, Any
 from pydantic import BaseModel
-from app.services.activity import activity_service
+from app.services.webhook import webhook_service
 
 router = APIRouter()
 
@@ -21,9 +19,19 @@ class MarketplaceSubmit(BaseModel):
     dest_country: str
     cargo_type: str
     weight_kg: float
-    volume_cbm: float
-    cargo_details: str
+    volume_cbm: float = 0
+    cargo_details: str = ""
     user_id: str
+    sovereign_id: str = ""  # OMEGO-0009
+    user_name: str = "Client"
+    user_email: str = ""
+    cargo_value: float = 0
+    incoterms: str = "FOB"
+    notes: str = ""
+
+def _fire_webhook(payload: dict):
+    """Fire-and-forget webhook in a background thread."""
+    asyncio.run(webhook_service.trigger_marketplace_webhook(payload))
 
 @router.post("/submit")
 async def submit_request(
@@ -32,14 +40,26 @@ async def submit_request(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Submits a new shipment request to the marketplace.
-    Triggers a simulation of forwarder interest.
+    User submits a cargo quotation request.
+    Saves to PostgreSQL and fires webhook to n8n Cloud (non-blocking).
+    Request ID format: OMEGO-0009-REQ-01 (user's sovereign_id + per-user counter)
     """
-    unique_id = f"REQ-{str(uuid.uuid4())[:6].upper()}"
+    sid = request_in.sovereign_id or "OMEGO-0000"
+    
+    # Count THIS user's requests (per-user sequential counter)
+    user_count = await db.execute(
+        select(func.count()).select_from(MarketplaceRequest)
+        .where(MarketplaceRequest.sovereign_id == sid)
+    )
+    seq = (user_count.scalar() or 0) + 1
+    request_id = f"{sid}-REQ-{str(seq).zfill(2)}"
     
     new_request = MarketplaceRequest(
-        unique_id=unique_id,
+        request_id=request_id,
+        sovereign_id=sid,
         user_id=request_in.user_id,
+        user_name=request_in.user_name,
+        user_email=request_in.user_email,
         origin_city=request_in.origin_city,
         origin_country=request_in.origin_country,
         dest_city=request_in.dest_city,
@@ -47,203 +67,147 @@ async def submit_request(
         cargo_type=request_in.cargo_type,
         weight_kg=request_in.weight_kg,
         volume_cbm=request_in.volume_cbm,
-        cargo_details=request_in.cargo_details
+        cargo_value=request_in.cargo_value,
+        incoterms=request_in.incoterms,
+        cargo_details=request_in.cargo_details,
+        notes=request_in.notes,
+        status="OPEN",
+        quotes_count=0
     )
     
     db.add(new_request)
-    
-    # AUDIT PILLAR: Log Marketplace Submission
-    await activity_service.log(
-        db,
-        user_id=str(request_in.user_id),
-        action="MARKETPLACE_SUBMIT",
-        entity_type="QUOTE_REQUEST",
-        entity_id=unique_id,
-        metadata={
-            "origin": f"{request_in.origin_city}, {request_in.origin_country}",
-            "destination": f"{request_in.dest_city}, {request_in.dest_country}",
-            "cargo": request_in.cargo_type
-        },
-        commit=False # Commit will be handled by the manual commit below
-    )
-    
     await db.commit()
     await db.refresh(new_request)
     
-    # 📡 OUTBOUND PROTOCOL: Notify n8n for Excel & Broadcast
-    from app.services.webhook import webhook_service
-    background_tasks.add_task(
-        webhook_service.trigger_marketplace_webhook,
-        {
-            "id": new_request.id,
-            "unique_id": unique_id,
-            "origin": f"{request_in.origin_city}, {request_in.origin_country}",
-            "destination": f"{request_in.dest_city}, {request_in.dest_country}",
-            "cargo_type": request_in.cargo_type,
-            "weight": request_in.weight_kg,
-            "volume": request_in.volume_cbm,
-            "details": request_in.cargo_details,
-            "user_id": request_in.user_id
-        }
-    )
+    # Fire webhook to n8n Cloud (non-blocking — never delays user response)
+    background_tasks.add_task(_fire_webhook, {
+        "request_id": request_id,
+        "sovereign_id": sid,
+        "origin": f"{request_in.origin_city}, {request_in.origin_country}",
+        "destination": f"{request_in.dest_city}, {request_in.dest_country}",
+        "cargo_type": request_in.cargo_type,
+        "weight": request_in.weight_kg,
+        "volume": request_in.volume_cbm,
+        "cargo_value": request_in.cargo_value,
+        "incoterms": request_in.incoterms,
+        "details": request_in.cargo_details,
+        "notes": request_in.notes,
+        "user_id": request_in.user_id,
+        "user_name": request_in.user_name,
+        "user_email": request_in.user_email
+    })
     
-    return {"success": True, "uniqueId": unique_id}
+    return {"success": True, "uniqueId": request_id, "request_id": request_id}
 
-@router.get("/quotes/{unique_id}")
-async def get_marketplace_quotes(unique_id: str, db: AsyncSession = Depends(get_db)):
+@router.get("/quotes/{request_id}")
+async def get_marketplace_quotes(request_id: str, db: AsyncSession = Depends(get_db)):
     """
-    Returns live bids for a specific marketplace request.
+    Frontend polls this every 5 seconds to get live quotes.
     """
-    # 1. Find the request
-    stmt = select(MarketplaceRequest).where(MarketplaceRequest.unique_id == unique_id)
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == request_id)
     result = await db.execute(stmt)
     req = result.scalars().first()
     
     if not req:
         raise HTTPException(status_code=404, detail="Request not found")
         
-    # 2. Get Bids
-    bid_stmt = select(MarketplaceBid).where(MarketplaceBid.request_id == req.id).order_by(MarketplaceBid.created_at.asc())
+    bid_stmt = select(MarketplaceBid).where(
+        MarketplaceBid.request_id == request_id
+    ).order_by(MarketplaceBid.created_at.asc())
     bid_result = await db.execute(bid_stmt)
     bids = bid_result.scalars().all()
     
     formatted_quotes = []
-    for i, b in enumerate(bids):
+    for b in bids:
         formatted_quotes.append({
             "id": b.id,
+            "forwarder_id": b.forwarder_id,
             "price": b.price,
             "currency": b.currency,
             "transit_days": b.transit_days,
-            "mode": req.cargo_type,
+            "mode": b.mode or req.cargo_type,
+            "terms": b.terms,
+            "validity_days": b.validity_days,
             "company_name": b.vendor_name,
             "logo_url": b.vendor_logo,
             "country": b.vendor_country,
-            "position": i + 1
+            "position": b.position,
+            "notes": b.notes
         })
         
-    return {"quotes": formatted_quotes, "status": req.status}
+    return {
+        "request_id": request_id,
+        "status": req.status,
+        "quotes_count": req.quotes_count,
+        "quotes": formatted_quotes
+    }
 
-class BidSubmit(BaseModel):
+class QuoteSubmit(BaseModel):
     request_id: str
     forwarder_id: str
     price: float
     currency: str = "USD"
     transit_days: int
-    vendor_name: str
+    mode: str = ""
+    terms: str = ""
+    validity_days: int = 7
+    vendor_name: str = ""
     vendor_logo: str = ""
     vendor_country: str = ""
+    raw_reply: str = ""
     notes: str = ""
 
-@router.post("/bid")
-async def submit_bid(bid_in: BidSubmit, db: AsyncSession = Depends(get_db)):
+@router.post("/quote/submit")
+async def submit_quote(bid_in: QuoteSubmit, db: AsyncSession = Depends(get_db)):
     """
-    Injects a bid from n8n. Implements First-3 Priority logic.
+    n8n calls this endpoint to inject an AI-extracted quote.
+    Implements First-3 atomic counter logic.
     """
-    # 1. Find the request
-    stmt = select(MarketplaceRequest).where(MarketplaceRequest.id == bid_in.request_id)
+    # Find the request by request_id
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == bid_in.request_id)
     result = await db.execute(stmt)
     req = result.scalars().first()
     
     if not req:
-        raise HTTPException(status_code=404, detail="Request not found")
+        return {"accepted": False, "reason": "not_found"}
         
-    if req.status == "CLOSED" or req.bid_count >= 3:
-        return {"success": False, "message": "Request is closed. Max bids reached."}
+    # Atomic counter check
+    if req.quotes_count >= 3 or req.status == "CLOSED":
+        return {"accepted": False, "reason": "closed"}
         
-    # 2. Record Bid
+    # Increment counter
+    req.quotes_count += 1
+    position = req.quotes_count
+    
+    # Auto-close at 3
+    if req.quotes_count >= 3:
+        req.status = "CLOSED"
+        req.closed_at = datetime.utcnow()
+    
+    # Save the quote
     new_bid = MarketplaceBid(
         request_id=bid_in.request_id,
         forwarder_id=bid_in.forwarder_id,
         price=bid_in.price,
         currency=bid_in.currency,
         transit_days=bid_in.transit_days,
+        mode=bid_in.mode,
+        terms=bid_in.terms,
+        validity_days=bid_in.validity_days,
         vendor_name=bid_in.vendor_name,
         vendor_logo=bid_in.vendor_logo,
         vendor_country=bid_in.vendor_country,
+        raw_reply=bid_in.raw_reply,
+        position=position,
         notes=bid_in.notes
     )
     
     db.add(new_bid)
-    req.bid_count += 1
-    
-    # 3. Handle Auto-Closure
-    if req.bid_count >= 3:
-        req.status = "CLOSED"
-        
     await db.commit()
     
     return {
-        "success": True, 
-        "bid_count": req.bid_count, 
-        "status": req.status,
-        "message": "Bid accepted." if req.bid_count < 3 else "Bid accepted. Request now CLOSED."
+        "accepted": True,
+        "position": position,
+        "quotes_count": req.quotes_count,
+        "is_now_closed": req.status == "CLOSED"
     }
-
-async def simulate_forwarder_bids(request_internal_id: str, db_outer: AsyncSession):
-    """
-    Sovereign Intelligence Engine: Analyzes the market and provides real-time verified insights.
-    """
-    from app.db.session import AsyncSessionLocal
-    from app.services.sovereign import sovereign_engine
-    from app.services.ocean.maersk import MaerskClient
-    
-    async with AsyncSessionLocal() as db:
-        # 1. Fetch Request Details
-        stmt = select(MarketplaceRequest).where(MarketplaceRequest.id == request_internal_id)
-        res = await db.execute(stmt)
-        req = res.scalars().first()
-        if not req: return
-
-        # 2. Engage Real Carrier Verification (Maersk etc.)
-        maersk = MaerskClient()
-        verified_options = []
-        try:
-            # We use the real engine to get a baseline
-            from app.schemas import RateRequest
-            rate_req = RateRequest(
-                origin=req.origin_city,
-                destination=req.dest_city,
-                container="40FT", # Default
-                commodity="General Cargo"
-            )
-            real_rates = await maersk.fetch_real_rates(rate_req)
-            if real_rates:
-                for r in real_rates[:2]:
-                    verified_options.append({
-                        "name": f"{r.carrier_name} (Verified Spot)",
-                        "logo": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Maersk_Group_Logo.svg" if "Maersk" in r.carrier_name else "",
-                        "price": r.price,
-                        "transit": r.transit_time_days,
-                        "country": "EU",
-                        "note": "Live API Rate: Confirmed via OMEGO Carrier Handshake."
-                    })
-        except Exception as e:
-            print(f"[MARKETPLACE] Real Rate Fetch Wait/Fail: {e}")
-
-        # 3. Engage Sovereign Intelligence if needed
-        if not verified_options:
-            intel = sovereign_engine.generate_market_rate(req.origin_city, req.dest_city, "40FT")
-            verified_options.append({
-                "name": "OMEGO AI Broker",
-                "logo": "https://omego.logistics/ai-core.png",
-                "price": intel["price"],
-                "transit": intel["transit_time"],
-                "country": "AQ",
-                "note": intel["wisdom"]
-            })
-
-        # 4. Commit results as verified market bids
-        for opt in verified_options:
-            bid = MarketplaceBid(
-                request_id=request_internal_id,
-                price=opt["price"],
-                transit_days=opt["transit"],
-                vendor_name=opt["name"],
-                vendor_logo=opt["logo"],
-                vendor_country=opt["country"],
-                notes=opt["note"]
-            )
-            db.add(bid)
-        
-        req.status = "CLOSED"
-        await db.commit()

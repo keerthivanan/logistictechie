@@ -95,8 +95,8 @@ export default function ForwarderRegisterPage() {
         setLoading(true);
 
         try {
-            // 1. Register Forwarder in DB (Status: Pending Approval)
-            const res = await fetch(`${API_URL}/api/forwarders/register`, {
+            // 📡 SOVEREIGN PROTOCOL: Create Stripe Checkout Session
+            const res = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -104,16 +104,15 @@ export default function ForwarderRegisterPage() {
 
             const data = await res.json();
 
-            if (data.success) {
-                // SUCCESS: Verification Pending
-                alert(`Welcome Aboard, ${formData.company_name}!\n\nYour profile is now in queue for Sovereign Verification ($15 Fee). Once payment is confirmed via our tactical partner, your listing will go LIVE in the Global Directory.`);
-                window.location.href = '/services/coming-soon'; // Redirect to a graceful pending state
+            if (data.sessionId && data.url) {
+                // Redirect to OMEGO Sovereign Checkout (Stripe)
+                window.location.href = data.url;
             } else {
-                alert('Registration failed: ' + data.message || 'Unknown error');
+                alert('Checkout failed: ' + (data.detail || 'Unknown error'));
             }
         } catch (error) {
             console.error(error);
-            alert('Registration failed. Please check your data.');
+            alert('Handshake failed. Please verify your connection to the Sovereign Grid.');
         } finally {
             setLoading(false);
         }

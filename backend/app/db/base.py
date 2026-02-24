@@ -8,3 +8,4 @@ from app.models.activity import UserActivity
 # Marketplace Expansion
 from app.models.forwarder import Forwarder
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
+from app.models.task import Task

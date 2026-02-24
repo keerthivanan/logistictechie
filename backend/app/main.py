@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from collections import defaultdict
-from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references, dashboard, vessels, billing, marketplace, forwarders, tasks
+from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references, dashboard, vessels, billing, marketplace, forwarders, tasks, stripe
 from app.core.config import settings
 from contextlib import asynccontextmanager
 
@@ -88,6 +88,7 @@ app.include_router(billing.router, prefix="/api/billing", tags=["Sovereign Billi
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace Bidding"])
 app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarder Network"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
+app.include_router(stripe.router, prefix="/api/stripe", tags=["Sovereign Payments"])
 
 @app.get("/health")
 @app.get("/")

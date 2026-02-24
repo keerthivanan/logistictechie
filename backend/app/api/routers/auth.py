@@ -77,14 +77,14 @@ async def social_sync(
         import string
         
         user_count_res = await db.execute(select(func.count(User.id)))
-        user_count = user_count_res.scalar() or 0
-        new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
+        user_count = user_count_res.scalar() or 1
+        new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
         
         # DOUBLE-CHECK UNIQUENESS
         check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
         if check_existing.scalars().first():
             entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-            new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
+            new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
         
         user = User(
             email=email,
@@ -95,24 +95,26 @@ async def social_sync(
             onboarding_completed=True
         )
         db.add(user)
+        await db.flush()       # Send INSERT so DB assigns user.id
+        await db.refresh(user) # Populate user.id from the DB
         needs_commit = True
         print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
         
         # OMEGO PROTOCOL: Create Initial Mission Set
-        await create_default_tasks(db, user.id)
+        await create_default_tasks(db, str(user.id))
     else:
         # SELF-HEALING: Legacy Data Fix
         if not user.sovereign_id:
             import random
             import string
             user_count_res = await db.execute(select(func.count(User.id)))
-            user_count = user_count_res.scalar() or 0
-            new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
+            user_count = user_count_res.scalar() or 1
+            new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
             
             check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
             if check_existing.scalars().first():
                 entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-                new_sovereign_id = f"OMEGO-{entropy}-{str(user_count + 1).zfill(4)}"
+                new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
             
             user.sovereign_id = new_sovereign_id
             needs_commit = True
@@ -263,7 +265,7 @@ async def login_for_access_token(
         "token_type": "bearer",
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
-        "sovereign_id": user.sovereign_id,
+        "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url
     }
@@ -336,6 +338,19 @@ async def register_user(
         full_name=form_data.full_name,
         company_name=form_data.company_name
     )
+    
+    # SOVEREIGN ID ASSIGNMENT (same logic as social-sync)
+    import random, string
+    user_count_res = await db.execute(select(func.count(User.id)))
+    user_count = user_count_res.scalar() or 1
+    new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
+    check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
+    if check_existing.scalars().first():
+        entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+        new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
+    user.sovereign_id = new_sovereign_id
+    await db.commit()
+    await db.refresh(user)
     
     # OMEGO PROTOCOL: Create Initial Mission Set
     await create_default_tasks(db, str(user.id))

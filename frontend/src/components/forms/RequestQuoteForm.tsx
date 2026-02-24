@@ -130,20 +130,19 @@ export default function RequestQuoteForm() {
             };
 
             const payload = {
-                // Flatten core fields for indexability if needed, 
-                // but mostly we rely on the JSON blob.
                 origin_city: formData.origin_district || formData.origin_country,
                 origin_country: formData.origin_country,
                 dest_city: formData.dest_district || formData.dest_country,
                 dest_country: formData.dest_country,
                 cargo_type: formData.mode,
-
-                // Core fields expected by backend filter
                 weight_kg: parseFloat(formData.weight) || 0,
                 volume_cbm: 0,
-
-                cargo_details: JSON.stringify(cargoPayload), // THE WISE MOVE
-                user_id: user.id
+                incoterms: formData.incoterms || 'FOB',
+                cargo_details: JSON.stringify(cargoPayload),
+                user_id: user.id,
+                sovereign_id: user.sovereign_id,  // OMEGO-0009
+                user_name: user.name || user.email || 'Client',
+                user_email: user.email
             };
 
             const res = await fetch(`${API_URL}/api/marketplace/submit`, {
