@@ -1,0 +1,796 @@
+{
+  "name": "WF1 - OMEGO Request Intake & Broadcast",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omego-request-intake",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        "authentication": "headerAuth"
+      },
+      "name": "Webhook - New Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "omego-intake-webhook",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "OMEGO Webhook Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "user_name",
+              "value": "={{ $json.body.name }}"
+            },
+            {
+              "name": "user_email",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "name": "user_phone",
+              "value": "={{ $json.body.phone }}"
+            },
+            {
+              "name": "origin",
+              "value": "={{ $json.body.origin }}"
+            },
+            {
+              "name": "destination",
+              "value": "={{ $json.body.destination }}"
+            },
+            {
+              "name": "cargo_type",
+              "value": "={{ $json.body.cargo_type }}"
+            },
+            {
+              "name": "weight_kg",
+              "value": "={{ $json.body.weight }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "={{ $json.body.dimensions || 'Not specified' }}"
+            },
+            {
+              "name": "special_requirements",
+              "value": "={{ $json.body.special_requirements || 'None' }}"
+            },
+            {
+              "name": "incoterms",
+              "value": "={{ $json.body.incoterms || 'FOB' }}"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $json.body.currency || 'USD' }}"
+            },
+            {
+              "name": "submission_timestamp",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Extract & Clean Form Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "sheetId": {
+          "__rl": true,
+          "value": "={{ $env.OMEGO_MASTER_SHEET_ID }}",
+          "mode": "id"
+        },
+        "range": "USERS!A:D",
+        "options": {
+          "valueRenderMode": "FORMATTED_VALUE"
+        }
+      },
+      "name": "Lookup User Sovereign ID",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        650,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate or retrieve User Sovereign ID\nconst userEmail = $input.first().json.user_email;\nconst usersData = $('Lookup User Sovereign ID').all();\n\n// Check if user exists\nlet sovereignId = null;\nlet isNewUser = true;\n\nfor (const row of usersData) {\n  if (row.json.email === userEmail) {\n    sovereignId = row.json.sovereign_id;\n    isNewUser = false;\n    break;\n  }\n}\n\n// If new user, generate next sovereign ID\nif (isNewUser) {\n  const existingIds = usersData\n    .map(row => row.json.sovereign_id)\n    .filter(id => id && id.startsWith('OMEGO-'))\n    .map(id => parseInt(id.split('-')[1]))\n    .filter(num => !isNaN(num));\n  \n  const nextIdNumber = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;\n  sovereignId = `OMEGO-${String(nextIdNumber).padStart(4, '0')}`;\n}\n\nreturn {\n  json: {\n    sovereign_id: sovereignId,\n    is_new_user: isNewUser,\n    user_email: userEmail\n  }\n};"
+      },
+      "name": "Generate User Sovereign ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.is_new_user }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Is New User?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "sheetId": {
+          "__rl": true,
+          "value": "={{ $env.OMEGO_MASTER_SHEET_ID }}",
+          "mode": "id"
+        },
+        "range": "USERS!A:D",
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        },
+        "columns": {
+          "mappingsMode": "defineBelow",
+          "value": {
+            "sovereign_id": "={{ $('Generate User Sovereign ID').item.json.sovereign_id }}",
+            "name": "={{ $('Extract & Clean Form Data').item.json.user_name }}",
+            "email": "={{ $('Extract & Clean Form Data').item.json.user_email }}",
+            "phone": "={{ $('Extract & Clean Form Data').item.json.user_phone }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        }
+      },
+      "name": "Save New User",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1250,
+        200
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "read",
+        "sheetId": {
+          "__rl": true,
+          "value": "={{ $env.OMEGO_MASTER_SHEET_ID }}",
+          "mode": "id"
+        },
+        "range": "REQUESTS!A:Z",
+        "options": {
+          "valueRenderMode": "FORMATTED_VALUE"
+        }
+      },
+      "name": "Count User Requests",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1450,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate unique Request ID\nconst sovereignId = $('Generate User Sovereign ID').item.json.sovereign_id;\nconst requestsData = $input.all();\n\n// Count existing requests by this user\nconst userRequestCount = requestsData.filter(\n  row => row.json.user_sovereign_id === sovereignId\n).length;\n\nconst requestNumber = userRequestCount + 1;\nconst requestId = `${sovereignId}-REQ-${String(requestNumber).padStart(2, '0')}`;\n\nreturn {\n  json: {\n    request_id: requestId,\n    sovereign_id: sovereignId,\n    request_number: requestNumber\n  }\n};"
+      },
+      "name": "Generate Request ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "request_id",
+              "value": "={{ $json.request_id }}"
+            },
+            {
+              "name": "user_sovereign_id",
+              "value": "={{ $json.sovereign_id }}"
+            },
+            {
+              "name": "status",
+              "value": "OPEN"
+            },
+            {
+              "name": "quotation_count",
+              "value": "0"
+            },
+            {
+              "name": "submitted_at",
+              "value": "={{ $now.toISO() }}"
+            },
+            {
+              "name": "closed_at",
+              "value": ""
+            },
+            {
+              "name": "closed_reason",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Add Metadata",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "sheetId": {
+          "__rl": true,
+          "value": "={{ $env.OMEGO_MASTER_SHEET_ID }}",
+          "mode": "id"
+        },
+        "range": "REQUESTS!A:Z",
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        },
+        "columns": {
+          "mappingsMode": "defineBelow",
+          "value": {
+            "request_id": "={{ $json.request_id }}",
+            "user_sovereign_id": "={{ $json.user_sovereign_id }}",
+            "user_email": "={{ $('Extract & Clean Form Data').item.json.user_email }}",
+            "user_name": "={{ $('Extract & Clean Form Data').item.json.user_name }}",
+            "origin": "={{ $('Extract & Clean Form Data').item.json.origin }}",
+            "destination": "={{ $('Extract & Clean Form Data').item.json.destination }}",
+            "cargo_type": "={{ $('Extract & Clean Form Data').item.json.cargo_type }}",
+            "weight_kg": "={{ $('Extract & Clean Form Data').item.json.weight_kg }}",
+            "dimensions": "={{ $('Extract & Clean Form Data').item.json.dimensions }}",
+            "special_requirements": "={{ $('Extract & Clean Form Data').item.json.special_requirements }}",
+            "incoterms": "={{ $('Extract & Clean Form Data').item.json.incoterms }}",
+            "currency": "={{ $('Extract & Clean Form Data').item.json.currency }}",
+            "status": "={{ $json.status }}",
+            "quotation_count": "={{ $json.quotation_count }}",
+            "submitted_at": "={{ $json.submitted_at }}",
+            "closed_at": "={{ $json.closed_at }}",
+            "closed_reason": "={{ $json.closed_reason }}"
+          }
+        }
+      },
+      "name": "Save to Requests Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        2050,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.OMEGO_DASHBOARD_URL }}/api/forwarders/active",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.OMEGO_API_SECRET }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Get All Active Forwarders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter forwarders based on route and cargo type specialization\nconst requestOrigin = $('Extract & Clean Form Data').item.json.origin;\nconst requestDestination = $('Extract & Clean Form Data').item.json.destination;\nconst requestCargoType = $('Extract & Clean Form Data').item.json.cargo_type;\n\nconst forwarders = $input.all();\nconst relevantForwarders = [];\n\nfor (const forwarder of forwarders) {\n  const status = forwarder.json.status;\n  const specializations = forwarder.json.specializations || '';\n  const routes = forwarder.json.routes || '';\n  \n  // Only include APPROVED/ACTIVE forwarders\n  if (status !== 'APPROVED' && status !== 'ACTIVE') {\n    continue;\n  }\n  \n  // Smart routing: Check if forwarder handles this route/cargo type\n  // If no specialization specified, assume they handle all\n  const routeMatch = !routes || \n    routes.toLowerCase().includes(requestOrigin.toLowerCase()) ||\n    routes.toLowerCase().includes(requestDestination.toLowerCase()) ||\n    routes.toLowerCase().includes('all') ||\n    routes.toLowerCase().includes('global');\n  \n  const cargoMatch = !specializations ||\n    specializations.toLowerCase().includes(requestCargoType.toLowerCase()) ||\n    specializations.toLowerCase().includes('all');\n  \n  if (routeMatch && cargoMatch) {\n    relevantForwarders.push(forwarder);\n  }\n}\n\nreturn relevantForwarders;"
+      },
+      "name": "Filter Relevant Forwarders",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "email_subject",
+              "value": "\ud83d\udea2 [NEW REQUEST] {{ $('Add Metadata').item.json.request_id }} - {{ $('Extract & Clean Form Data').item.json.origin }} to {{ $('Extract & Clean Form Data').item.json.destination }}"
+            },
+            {
+              "name": "email_body",
+              "value": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .header { background: #2E75B6; color: white; padding: 20px; text-align: center; }\n    .content { padding: 20px; }\n    .request-id { font-size: 24px; font-weight: bold; color: #2E75B6; margin: 20px 0; }\n    .details { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }\n    .detail-row { margin: 10px 0; }\n    .label { font-weight: bold; color: #666; }\n    .cta-button { background: #2E75B6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }\n    .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; }\n  </style>\n</head>\n<body>\n  <div class=\"header\">\n    <h1>\ud83d\udea2 New Freight Request</h1>\n  </div>\n  \n  <div class=\"content\">\n    <div class=\"request-id\">{{ $('Add Metadata').item.json.request_id }}</div>\n    \n    <p>Dear {{ $json.company_name }},</p>\n    \n    <p>A new freight request has been posted on OMEGO that matches your expertise. Please review the details below and submit your competitive quotation.</p>\n    \n    <div class=\"details\">\n      <div class=\"detail-row\"><span class=\"label\">Origin:</span> {{ $('Extract & Clean Form Data').item.json.origin }}</div>\n      <div class=\"detail-row\"><span class=\"label\">Destination:</span> {{ $('Extract & Clean Form Data').item.json.destination }}</div>\n      <div class=\"detail-row\"><span class=\"label\">Cargo Type:</span> {{ $('Extract & Clean Form Data').item.json.cargo_type }}</div>\n      <div class=\"detail-row\"><span class=\"label\">Weight:</span> {{ $('Extract & Clean Form Data').item.json.weight_kg }} kg</div>\n      <div class=\"detail-row\"><span class=\"label\">Dimensions:</span> {{ $('Extract & Clean Form Data').item.json.dimensions }}</div>\n      <div class=\"detail-row\"><span class=\"label\">Incoterms:</span> {{ $('Extract & Clean Form Data').item.json.incoterms }}</div>\n      <div class=\"detail-row\"><span class=\"label\">Special Requirements:</span> {{ $('Extract & Clean Form Data').item.json.special_requirements }}</div>\n    </div>\n    \n    <p><strong>\u23f0 First 3 quotes win!</strong> This request will automatically close once 3 quotations are received.</p>\n    \n    <p><strong>How to submit your quotation:</strong><br>\nSimply REPLY to this email with your quote including:</p>\n    <ul>\n      <li>Total price (with currency)</li>\n      <li>Transit time (in days)</li>\n      <li>Validity period</li>\n      <li>Carrier/shipping line</li>\n      <li>Any additional charges or terms</li>\n    </ul>\n    \n    <p><strong>\u26a0\ufe0f Important:</strong> Keep the Request ID ({{ $('Add Metadata').item.json.request_id }}) in your reply subject line.</p>\n    \n    <a href=\"mailto:{{ $env.OMEGO_REPLY_EMAIL }}?subject=RE: {{ $('Add Metadata').item.json.request_id }}\" class=\"cta-button\">\ud83d\udce7 Reply with Your Quote</a>\n  </div>\n  \n  <div class=\"footer\">\n    <p>OMEGO Freight Forwarding Platform</p>\n    <p>This is an automated notification. Replies will be processed by our AI system.</p>\n  </div>\n</body>\n</html>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Build Gmail Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        2850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Split Into Batches').item.json.email }}",
+        "subject": "={{ $json.email_subject }}",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {
+          "replyTo": "={{ $env.OMEGO_REPLY_EMAIL }}",
+          "ccList": "",
+          "bccList": ""
+        }
+      },
+      "name": "Send Gmail to Forwarder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3050,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "whatsapp_message",
+              "value": "\ud83d\udea2 *OMEGO NEW REQUEST*\n\n*Request ID:* {{ $('Add Metadata').item.json.request_id }}\n\n\ud83d\udccd *Route:* {{ $('Extract & Clean Form Data').item.json.origin }} \u2192 {{ $('Extract & Clean Form Data').item.json.destination }}\n\ud83d\udce6 *Cargo:* {{ $('Extract & Clean Form Data').item.json.cargo_type }}\n\u2696\ufe0f *Weight:* {{ $('Extract & Clean Form Data').item.json.weight_kg }} kg\n\n\u23f0 *URGENT:* First 3 quotes close the request!\n\n\ud83d\udce7 Check your email for full details and reply to submit your quotation.\n\n--\nOMEGO Platform"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Build WhatsApp Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        3250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WHATSAPP_API_URL }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "twilioApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "To",
+              "value": "={{ 'whatsapp:' + $('Split Into Batches').item.json.whatsapp }}"
+            },
+            {
+              "name": "From",
+              "value": "={{ 'whatsapp:' + $env.WHATSAPP_FROM_NUMBER }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.whatsapp_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Send WhatsApp (Twilio)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        3450,
+        300
+      ],
+      "credentials": {
+        "twilioApi": {
+          "id": "4",
+          "name": "Twilio API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "sheet",
+        "operation": "append",
+        "sheetId": {
+          "__rl": true,
+          "value": "={{ $env.OMEGO_MASTER_SHEET_ID }}",
+          "mode": "id"
+        },
+        "range": "BROADCAST_LOG!A:Z",
+        "columns": {
+          "mappingsMode": "defineBelow",
+          "value": {
+            "log_id": "={{ $now.toMillis() }}-{{ $('Split Into Batches').item.json.forwarder_id }}",
+            "request_id": "={{ $('Add Metadata').item.json.request_id }}",
+            "forwarder_id": "={{ $('Split Into Batches').item.json.forwarder_id }}",
+            "forwarder_company": "={{ $('Split Into Batches').item.json.company_name }}",
+            "email_sent": "={{ $('Send Gmail to Forwarder').item.json.success !== false ? 'SUCCESS' : 'FAILED' }}",
+            "whatsapp_sent": "={{ $('Send WhatsApp (Twilio)').item.json.success !== false ? 'SUCCESS' : 'FAILED' }}",
+            "sent_at": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "name": "Log Broadcast",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        3650,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Extract & Clean Form Data').item.json.user_email }}",
+        "subject": "\u2705 Your Freight Request is Confirmed - {{ $('Add Metadata').item.json.request_id }}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<body style=\"font-family: Arial, sans-serif;\">\n  <div style=\"background: #2E75B6; color: white; padding: 20px; text-align: center;\">\n    <h1>\u2705 Request Confirmed!</h1>\n  </div>\n  \n  <div style=\"padding: 20px;\">\n    <p>Dear {{ $('Extract & Clean Form Data').item.json.user_name }},</p>\n    \n    <p>Your freight request has been successfully submitted and broadcasted to our network of verified forwarders.</p>\n    \n    <div style=\"background: #E8F4F8; padding: 20px; border-radius: 5px; margin: 20px 0;\">\n      <h2 style=\"color: #2E75B6; margin-top: 0;\">{{ $('Add Metadata').item.json.request_id }}</h2>\n      <p><strong>Route:</strong> {{ $('Extract & Clean Form Data').item.json.origin }} \u2192 {{ $('Extract & Clean Form Data').item.json.destination }}</p>\n      <p><strong>Cargo:</strong> {{ $('Extract & Clean Form Data').item.json.cargo_type }} ({{ $('Extract & Clean Form Data').item.json.weight_kg }} kg)</p>\n    </div>\n    \n    <h3>What Happens Next?</h3>\n    <ol>\n      <li>\u2705 Your request is now visible to {{ $('Filter Relevant Forwarders').all().length }} relevant freight forwarders</li>\n      <li>\ud83d\udce7 You'll receive email notifications as quotations arrive</li>\n      <li>\ud83d\udcca View and compare up to 3 quotations in your dashboard</li>\n      <li>\ud83d\udd12 Request auto-closes after 3 quotations received</li>\n    </ol>\n    \n    <p><strong>Expected Timeline:</strong> Most requests receive quotations within 24-48 hours.</p>\n    \n    <div style=\"text-align: center; margin: 30px 0;\">\n      <a href=\"{{ $env.OMEGO_DASHBOARD_URL }}/requests/{{ $('Add Metadata').item.json.request_id }}\" style=\"background: #2E75B6; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;\">\ud83d\udcca Track Your Request</a>\n    </div>\n  </div>\n  \n  <div style=\"background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px;\">\n    <p>OMEGO Freight Forwarding Platform</p>\n    <p>Need help? Contact us at {{ $env.OMEGO_SUPPORT_EMAIL }}</p>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "name": "Send User Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3850,
+        150
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"request_id\": $('Add Metadata').item.json.request_id,\n  \"message\": \"Your request has been submitted successfully!\",\n  \"forwarders_notified\": $('Filter Relevant Forwarders').all().length,\n  \"status\": \"OPEN\",\n  \"next_steps\": \"You will receive email notifications as quotations arrive. Your request will auto-close after 3 quotations.\"\n} }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        4050,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - New Request": {
+      "main": [
+        [
+          {
+            "node": "Extract & Clean Form Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract & Clean Form Data": {
+      "main": [
+        [
+          {
+            "node": "Lookup User Sovereign ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup User Sovereign ID": {
+      "main": [
+        [
+          {
+            "node": "Generate User Sovereign ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate User Sovereign ID": {
+      "main": [
+        [
+          {
+            "node": "Is New User?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New User?": {
+      "main": [
+        [
+          {
+            "node": "Save New User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Count User Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save New User": {
+      "main": [
+        [
+          {
+            "node": "Count User Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count User Requests": {
+      "main": [
+        [
+          {
+            "node": "Generate Request ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Request ID": {
+      "main": [
+        [
+          {
+            "node": "Add Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Metadata": {
+      "main": [
+        [
+          {
+            "node": "Save to Requests Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Requests Sheet": {
+      "main": [
+        [
+          {
+            "node": "Get All Active Forwarders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Active Forwarders": {
+      "main": [
+        [
+          {
+            "node": "Filter Relevant Forwarders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Relevant Forwarders": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Build Gmail Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Gmail Email": {
+      "main": [
+        [
+          {
+            "node": "Send Gmail to Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Gmail to Forwarder": {
+      "main": [
+        [
+          {
+            "node": "Build WhatsApp Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "Send WhatsApp (Twilio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp (Twilio)": {
+      "main": [
+        [
+          {
+            "node": "Log Broadcast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Broadcast": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send User Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send User Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

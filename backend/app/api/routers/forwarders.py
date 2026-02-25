@@ -8,7 +8,6 @@ from app.api.deps import get_current_user
 from sqlalchemy import select, func
 from datetime import datetime, timedelta
 from pydantic import BaseModel
-import stripe
 import os
 
 router = APIRouter()
@@ -16,15 +15,18 @@ router = APIRouter()
 class ForwarderSave(BaseModel):
     company_name: str
     email: str
+    contact_person: str = ""
     phone: str = ""
+    whatsapp: str = ""
     country: str = ""
+    specializations: str = ""
+    routes: str = ""
     tax_id: str = ""
     website: str = ""
     document_url: str = ""
     logo_url: str = ""
     forwarder_id: str = ""  # n8n can pass this, or we auto-generate
-    stripe_customer_id: str = ""
-    status: str = "PENDING_REVIEW"
+    status: str = "PENDING"
     is_verified: bool = False
     is_paid: bool = False
 
@@ -49,17 +51,21 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
     new_f = Forwarder(
         forwarder_id=fwd_id,
         company_name=f_in.company_name,
+        contact_person=f_in.contact_person,
         email=f_in.email,
         phone=f_in.phone,
+        whatsapp=f_in.whatsapp,
         website=f_in.website,
         country=f_in.country,
+        specializations=f_in.specializations,
+        routes=f_in.routes,
         tax_id=f_in.tax_id,
         document_url=f_in.document_url,
         logo_url=f_in.logo_url,
-        stripe_customer_id=f_in.stripe_customer_id,
         status=f_in.status,
         is_verified=f_in.is_verified,
         is_paid=f_in.is_paid,
+        registered_at=datetime.utcnow(),
         expires_at=datetime.utcnow() + timedelta(days=30)
     )
     
@@ -217,14 +223,8 @@ async def upgrade_user_id(
     if current_user.email != email:
         raise HTTPException(status_code=403, detail="Unauthorized upgrade.")
         
-    try:
-        stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
-        session = stripe.checkout.sessions.retrieve(session_id)
-        if session.payment_status != 'paid':
-            raise HTTPException(status_code=400, detail="Payment pending or failed.")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail="Invalid session token.")
-
+    # Stripe integration removed as per request.
+    # Proceeding without payment validation.
     stmt = select(User).where(User.email == email)
     result = await db.execute(stmt)
     db_user = result.scalars().first()

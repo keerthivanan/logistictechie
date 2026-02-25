@@ -9,3 +9,4 @@ from app.models.activity import UserActivity
 from app.models.forwarder import Forwarder
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
 from app.models.task import Task
+from app.models.n8n_logs import BroadcastLog, EventsLog, AnalyticsLog, RejectedAttempt
