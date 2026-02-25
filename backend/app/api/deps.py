@@ -66,3 +66,34 @@ async def get_current_user_optional(
         return await crud.user.get_by_email(db, email=email)
     except:
         return None
+
+from fastapi import Security
+from fastapi.security import APIKeyHeader
+
+api_key_auth = APIKeyHeader(name="Authorization", auto_error=False)
+api_key_x = APIKeyHeader(name="X-OMEGO-API-KEY", auto_error=False)
+
+def verify_n8n_webhook(
+    auth_header: str = Security(api_key_auth),
+    x_header: str = Security(api_key_x)
+):
+    """
+    Cryptographic verification to ensure only authenticated n8n instances
+    can push data into the Sovereign Database.
+    """
+    valid_key = settings.OMEGO_API_SECRET
+    
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.replace("Bearer ", "")
+        if token == valid_key:
+            return True
+    elif auth_header and auth_header == f"OMEGO {valid_key}":
+        return True
+            
+    if x_header and x_header == valid_key:
+        return True
+        
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Sovereign Access Denied. Invalid or missing Webhook API Key."
+    )

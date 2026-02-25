@@ -95,21 +95,10 @@ export default function ForwarderRegisterPage() {
         setLoading(true);
 
         try {
-            // 📡 SOVEREIGN PROTOCOL: Create Stripe Checkout Session
-            const res = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            const data = await res.json();
-
-            if (data.sessionId && data.url) {
-                // Redirect to OMEGO Sovereign Checkout (Stripe)
-                window.location.href = data.url;
-            } else {
-                alert('Checkout failed: ' + (data.detail || 'Unknown error'));
-            }
+            // 📡 SOVEREIGN PROTOCOL: Payment Gateway Disabled
+            // Dead end registration as per request
+            alert('Registration received! Partner network applications are currently under manual review. Payment gateway is offline for this region.');
+            setFormData({ company_name: '', email: '', country: '', phone: '', tax_id: '', document_url: '', password: '', logo_url: 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200' });
         } catch (error) {
             console.error(error);
             alert('Handshake failed. Please verify your connection to the Sovereign Grid.');
@@ -170,7 +159,7 @@ export default function ForwarderRegisterPage() {
                             'Smart Country Targeting (Only relevant cargo)',
                             'Instant "One-Click" Quoting',
                             'Verified Shippers & Real Cargo',
-                            'Sovereign Verification Protocol ($15)'
+                            'Sovereign Verification Protocol (Invite-Only)'
                         ].map((item, i) => (
                             <div key={i} className="flex items-center space-x-3 text-lg text-white">
                                 <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -184,10 +173,10 @@ export default function ForwarderRegisterPage() {
                     <div className="p-6 bg-black border border-white/20 rounded-2xl">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/60 uppercase tracking-widest font-black">Monthly Subscription</p>
+                                <p className="text-xs text-white/60 uppercase tracking-widest font-black">Network Access</p>
                                 <div className="flex items-baseline mt-2">
-                                    <span className="text-4xl font-black text-white tracking-tighter">$15</span>
-                                    <span className="text-white/40 ml-2 font-bold">/ month</span>
+                                    <span className="text-4xl font-black text-white tracking-tighter">INVITE</span>
+                                    <span className="text-white/40 ml-2 font-bold">ONLY</span>
                                 </div>
                             </div>
                             <CreditCard className="w-10 h-10 text-white/20" />

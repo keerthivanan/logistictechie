@@ -20,4 +20,3 @@ langgraph>=0.0.10
 openai>=1.0.0
 langchain-openai
 sse_starlette>=3.0.0
-stripe>=8.0.0

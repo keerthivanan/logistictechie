@@ -9,25 +9,23 @@ import uuid, asyncio
 from typing import List, Dict, Any
 from pydantic import BaseModel
 from app.services.webhook import webhook_service
+from app.api.deps import verify_n8n_webhook
 
 router = APIRouter()
 
 class MarketplaceSubmit(BaseModel):
-    origin_city: str
-    origin_country: str
-    dest_city: str
-    dest_country: str
-    cargo_type: str
-    weight_kg: float
-    volume_cbm: float = 0
-    cargo_details: str = ""
     user_id: str
-    sovereign_id: str = ""  # OMEGO-0009
+    sovereign_id: str = ""
     user_name: str = "Client"
     user_email: str = ""
-    cargo_value: float = 0
+    origin: str
+    destination: str
+    cargo_type: str
+    weight_kg: float
+    dimensions: str = ""
+    special_requirements: str = ""
     incoterms: str = "FOB"
-    notes: str = ""
+    currency: str = "USD"
 
 def _fire_webhook(payload: dict):
     """Fire-and-forget webhook in a background thread."""
@@ -42,59 +40,53 @@ async def submit_request(
     """
     User submits a cargo quotation request.
     Saves to PostgreSQL and fires webhook to n8n Cloud (non-blocking).
-    Request ID format: OMEGO-0009-REQ-01 (user's sovereign_id + per-user counter)
+    Request ID format: OMEGO-0009-REQ-01
     """
     sid = request_in.sovereign_id or "OMEGO-0000"
     
     # Count THIS user's requests (per-user sequential counter)
     user_count = await db.execute(
         select(func.count()).select_from(MarketplaceRequest)
-        .where(MarketplaceRequest.sovereign_id == sid)
+        .where(MarketplaceRequest.user_sovereign_id == sid)
     )
     seq = (user_count.scalar() or 0) + 1
     request_id = f"{sid}-REQ-{str(seq).zfill(2)}"
     
     new_request = MarketplaceRequest(
         request_id=request_id,
-        sovereign_id=sid,
-        user_id=request_in.user_id,
-        user_name=request_in.user_name,
+        user_sovereign_id=sid,
         user_email=request_in.user_email,
-        origin_city=request_in.origin_city,
-        origin_country=request_in.origin_country,
-        dest_city=request_in.dest_city,
-        dest_country=request_in.dest_country,
+        user_name=request_in.user_name,
+        origin=request_in.origin,
+        destination=request_in.destination,
         cargo_type=request_in.cargo_type,
         weight_kg=request_in.weight_kg,
-        volume_cbm=request_in.volume_cbm,
-        cargo_value=request_in.cargo_value,
+        dimensions=request_in.dimensions,
+        special_requirements=request_in.special_requirements,
         incoterms=request_in.incoterms,
-        cargo_details=request_in.cargo_details,
-        notes=request_in.notes,
+        currency=request_in.currency,
         status="OPEN",
-        quotes_count=0
+        quotation_count=0
     )
     
     db.add(new_request)
     await db.commit()
     await db.refresh(new_request)
     
-    # Fire webhook to n8n Cloud (non-blocking — never delays user response)
+    # Fire webhook to n8n Cloud (non-blocking)
     background_tasks.add_task(_fire_webhook, {
         "request_id": request_id,
-        "sovereign_id": sid,
-        "origin": f"{request_in.origin_city}, {request_in.origin_country}",
-        "destination": f"{request_in.dest_city}, {request_in.dest_country}",
-        "cargo_type": request_in.cargo_type,
-        "weight": request_in.weight_kg,
-        "volume": request_in.volume_cbm,
-        "cargo_value": request_in.cargo_value,
-        "incoterms": request_in.incoterms,
-        "details": request_in.cargo_details,
-        "notes": request_in.notes,
-        "user_id": request_in.user_id,
+        "user_sovereign_id": sid,
         "user_name": request_in.user_name,
-        "user_email": request_in.user_email
+        "user_email": request_in.user_email,
+        "origin": request_in.origin,
+        "destination": request_in.destination,
+        "cargo_type": request_in.cargo_type,
+        "weight_kg": request_in.weight_kg,
+        "dimensions": request_in.dimensions,
+        "special_requirements": request_in.special_requirements,
+        "incoterms": request_in.incoterms,
+        "currency": request_in.currency
     })
     
     return {"success": True, "uniqueId": request_id, "request_id": request_id}
@@ -121,93 +113,140 @@ async def get_marketplace_quotes(request_id: str, db: AsyncSession = Depends(get
     for b in bids:
         formatted_quotes.append({
             "id": b.id,
+            "quotation_id": b.quotation_id,
             "forwarder_id": b.forwarder_id,
-            "price": b.price,
+            "company_name": b.forwarder_company,
+            "price": b.total_price,
             "currency": b.currency,
             "transit_days": b.transit_days,
-            "mode": b.mode or req.cargo_type,
-            "terms": b.terms,
             "validity_days": b.validity_days,
-            "company_name": b.vendor_name,
-            "logo_url": b.vendor_logo,
-            "country": b.vendor_country,
-            "position": b.position,
-            "notes": b.notes
+            "carrier": b.carrier,
+            "service_type": b.service_type,
+            "surcharges": b.surcharges,
+            "payment_terms": b.payment_terms,
+            "notes": b.notes,
+            "ai_summary": b.ai_summary,
+            "status": b.status
         })
         
     return {
         "request_id": request_id,
         "status": req.status,
-        "quotes_count": req.quotes_count,
+        "quotation_count": req.quotation_count,
         "quotes": formatted_quotes
     }
 
-class QuoteSubmit(BaseModel):
+class N8nStatusUpdate(BaseModel):
     request_id: str
-    forwarder_id: str
-    price: float
-    currency: str = "USD"
-    transit_days: int
-    mode: str = ""
-    terms: str = ""
-    validity_days: int = 7
-    vendor_name: str = ""
-    vendor_logo: str = ""
-    vendor_country: str = ""
-    raw_reply: str = ""
-    notes: str = ""
+    status: str
+    closed_at: str = ""
+    closed_reason: str = ""
+    quotations: list = []
 
-@router.post("/quote/submit")
-async def submit_quote(bid_in: QuoteSubmit, db: AsyncSession = Depends(get_db)):
+@router.post("/close", dependencies=[Depends(verify_n8n_webhook)])
+async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depends(get_db)):
     """
-    n8n calls this endpoint to inject an AI-extracted quote.
-    Implements First-3 atomic counter logic.
+    Webhook for n8n (WF3) to change the status of a request to CLOSED.
+    Matches the exact payload of the WF3 HTTP Request Node.
     """
-    # Find the request by request_id
-    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == bid_in.request_id).with_for_update()
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id)
     result = await db.execute(stmt)
     req = result.scalars().first()
     
     if not req:
-        return {"accepted": False, "reason": "not_found"}
+        raise HTTPException(status_code=404, detail=f"Request {sync_in.request_id} not found.")
         
-    # Atomic counter check
-    if req.quotes_count >= 3 or req.status == "CLOSED":
-        return {"accepted": False, "reason": "closed"}
-        
-    # Increment counter
-    req.quotes_count += 1
-    position = req.quotes_count
-    
-    # Auto-close at 3
-    if req.quotes_count >= 3:
-        req.status = "CLOSED"
+    req.status = sync_in.status
+    if sync_in.status == "CLOSED":
         req.closed_at = datetime.utcnow()
+        req.closed_reason = sync_in.closed_reason
+        
+    await db.commit()
+    return {"success": True, "message": f"Status updated to {sync_in.status} by n8n"}
+
+class QuotationNewMock(BaseModel):
+    request_id: str
+    quotation_id: str
+    forwarder_company: str
+    price: float
+    currency: str
+    transit_days: int
+    summary: str
+    user_id: str
+
+@router.post("/quotations/new", dependencies=[Depends(verify_n8n_webhook)])
+async def n8n_quotations_new(data: QuotationNewMock):
+    """
+    WF2 calls this node after calling n8n-sync.
+    We simply acknowledge the receipt to prevent n8n from failing,
+    as the data was already inserted into the PostgreSQL db via n8n-sync.
+    """
+    return {"success": True, "message": "Quotation acknowledged and verified."}
+
+class N8nQuoteSync(BaseModel):
+    quotation_id: str
+    request_id: str
+    forwarder_id: str = ""
+    forwarder_company: str
+    total_price: float
+    currency: str = "USD"
+    transit_days: int = 0
+    validity_days: int = 7
+    carrier: str = ""
+    service_type: str = ""
+    surcharges: Any = None
+    payment_terms: str = ""
+    notes: str = ""
+    ai_summary: str = ""
+    raw_email: str = ""
+
+@router.post("/n8n-sync", dependencies=[Depends(verify_n8n_webhook)])
+async def n8n_quote_sync(sync_in: N8nQuoteSync, db: AsyncSession = Depends(get_db)):
+    """
+    Dedicated highly-secure webhook for n8n to push AI-extracted quotes directly into the Sovereign Database (Postgres).
+    Matches QUOTATIONS format.
+    """
+    # 1. Verify the Request exists
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id).with_for_update()
+    result = await db.execute(stmt)
+    req = result.scalars().first()
     
-    # Save the quote
+    if not req:
+        raise HTTPException(status_code=404, detail=f"Request {sync_in.request_id} not found in Sovereign Database.")
+
+    if req.status == "CLOSED":
+        return {"success": False, "message": "Backend: Request already explicitly CLOSED by n8n."}
+
+    # 2. Increment the quote count accurately
+    req.quotation_count += 1
+    position = req.quotation_count
+
+    # 3. Insert the MarketplaceBid
     new_bid = MarketplaceBid(
-        request_id=bid_in.request_id,
-        forwarder_id=bid_in.forwarder_id,
-        price=bid_in.price,
-        currency=bid_in.currency,
-        transit_days=bid_in.transit_days,
-        mode=bid_in.mode,
-        terms=bid_in.terms,
-        validity_days=bid_in.validity_days,
-        vendor_name=bid_in.vendor_name,
-        vendor_logo=bid_in.vendor_logo,
-        vendor_country=bid_in.vendor_country,
-        raw_reply=bid_in.raw_reply,
-        position=position,
-        notes=bid_in.notes
+        quotation_id=sync_in.quotation_id,
+        request_id=sync_in.request_id,
+        forwarder_id=sync_in.forwarder_id,
+        forwarder_company=sync_in.forwarder_company,
+        total_price=sync_in.total_price,
+        currency=sync_in.currency,
+        transit_days=sync_in.transit_days,
+        validity_days=sync_in.validity_days,
+        carrier=sync_in.carrier,
+        service_type=sync_in.service_type,
+        surcharges=sync_in.surcharges,
+        payment_terms=sync_in.payment_terms,
+        notes=sync_in.notes,
+        ai_summary=sync_in.ai_summary,
+        raw_email=sync_in.raw_email,
+        status="EVALUATING"
     )
     
     db.add(new_bid)
     await db.commit()
     
     return {
-        "accepted": True,
-        "position": position,
-        "quotes_count": req.quotes_count,
-        "is_now_closed": req.status == "CLOSED"
+        "success": True,
+        "message": "Quote successfully synced from n8n to Sovereign DB.",
+        "quotation_count": position,
+        "request_status": req.status
     }

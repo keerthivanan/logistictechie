@@ -116,23 +116,12 @@ function PaymentContent() {
 
             <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                    <div className="bg-zinc-900 border border-white/10 p-6 rounded-xl">
-                        <h3 className="font-bold mb-4 flex items-center">
-                            <CreditCard className="w-5 h-5 mr-2" /> Credit Card
-                        </h3>
-                        <div className="space-y-4">
-                            <input type="text" placeholder="Card Number" className="w-full bg-black border border-white/10 p-3 rounded-lg text-white" />
-                            <div className="grid grid-cols-2 gap-4">
-                                <input type="text" placeholder="MM/YY" className="w-full bg-black border border-white/10 p-3 rounded-lg text-white" />
-                                <input type="text" placeholder="CVC" className="w-full bg-black border border-white/10 p-3 rounded-lg text-white" />
-                            </div>
-                            <input type="text" placeholder="Cardholder Name" className="w-full bg-black border border-white/10 p-3 rounded-lg text-white" />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2 text-sm text-gray-400">
-                        <Lock className="w-4 h-4" />
-                        <span>Your payment is secured by Stripe 256-bit encryption.</span>
+                    <div className="bg-zinc-900 border border-white/10 p-6 rounded-xl flex flex-col justify-center items-center text-center h-full">
+                        <Lock className="w-12 h-12 text-white/20 mb-4" />
+                        <h3 className="font-bold mb-2 text-xl">Payment Gateway Offline</h3>
+                        <p className="text-sm text-gray-400">
+                            Online card processing is currently unavailable in your region. Please proceed to book offline.
+                        </p>
                     </div>
                 </div>
 
@@ -156,10 +145,10 @@ function PaymentContent() {
                         </div>
                         <button
                             onClick={handlePay}
-                            disabled={loading}
-                            className="block w-full bg-black text-white py-4 rounded-lg font-bold text-center mt-6 hover:bg-gray-800 transition-all disabled:opacity-50"
+                            disabled={true}
+                            className="block w-full bg-white/10 text-white/50 py-4 rounded-lg font-bold text-center mt-6 cursor-not-allowed"
                         >
-                            {loading ? 'Processing...' : 'Pay & Book Shipment'}
+                            Checkout Disabled
                         </button>
                     </div>
                 </div>

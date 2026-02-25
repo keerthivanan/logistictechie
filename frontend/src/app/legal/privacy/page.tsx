@@ -25,7 +25,7 @@ export default function PrivacyPage() {
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Account information (name, email, password)</li>
                                 <li>Company details (address, tax ID)</li>
-                                <li>Payment information (processed securely by Stripe)</li>
+                                <li>Payment history (Stored safely off-site)</li>
                                 <li>Shipment data (origin, destination, goods description)</li>
                             </ul>
                         </section>

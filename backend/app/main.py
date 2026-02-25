@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from collections import defaultdict
-from app.api.routers import quotes, auth, bookings, tracking, ai, documents, references, dashboard, vessels, billing, marketplace, forwarders, tasks, stripe
+from app.api.routers import auth, tracking, documents, references, dashboard, vessels, billing, marketplace, forwarders, tasks, n8n
 from app.core.config import settings
 from contextlib import asynccontextmanager
 
@@ -76,11 +76,8 @@ async def security_and_rate_limit(request: Request, call_next):
 
 # Mount the 'Honest' Routers
 app.include_router(references.router, prefix="/api/references", tags=["Reference Data"])
-app.include_router(quotes.router, prefix="/api/quotes", tags=["Ocean Quotes"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(tracking.router, prefix="/api/tracking", tags=["Global Tracking"])
-app.include_router(ai.router, prefix="/api/ai", tags=["Creative Cortex AI"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Document AI"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(vessels.router, prefix="/api/vessels", tags=["Maritime Assets"])
@@ -88,7 +85,8 @@ app.include_router(billing.router, prefix="/api/billing", tags=["Sovereign Billi
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace Bidding"])
 app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarder Network"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
-app.include_router(stripe.router, prefix="/api/stripe", tags=["Sovereign Payments"])
+app.include_router(n8n.router, prefix="/api", tags=["n8n Deep Webhooks"])
+
 
 @app.get("/health")
 @app.get("/")
