@@ -101,36 +101,29 @@ async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db)):
 @router.get("/active")
 async def list_forwarders(db: AsyncSession = Depends(get_db)):
     """
-    Returns all verified OMEGO partners.
+    Returns all verified OMEGO partners as a flat JSON array for n8n compatibility.
     """
     result = await db.execute(select(Forwarder).where(Forwarder.status == "ACTIVE"))
     forwarders = result.scalars().all()
     
-    if not forwarders:
-        return {
-            "success": True,
-            "forwarders": [],
-            "message": "No active partners found."
-        }
-        
-    return {
-        "success": True,
-        "forwarders": [
-            {
-                "id": f.id,
-                "forwarder_id": f.forwarder_id,
-                "company_name": f.company_name,
-                "country": f.country,
-                "email": f.email,
-                "phone": f.phone,
-                "website": f.website,
-                "reliability_score": f.reliability_score,
-                "logo_url": f.logo_url,
-                "is_verified": f.is_verified,
-                "expires_at": str(f.expires_at) if f.expires_at else None
-            } for f in forwarders
-        ]
-    }
+    return [
+        {
+            "id": f.id,
+            "forwarder_id": f.forwarder_id,
+            "company_name": f.company_name,
+            "country": f.country,
+            "email": f.email,
+            "phone": f.phone,
+            "website": f.website,
+            "reliability_score": f.reliability_score,
+            "logo_url": f.logo_url,
+            "is_verified": f.is_verified,
+            "status": f.status,
+            "routes": f.routes or "",
+            "specializations": f.specializations or "",
+            "expires_at": str(f.expires_at) if f.expires_at else None
+        } for f in forwarders
+    ]
 
 class LoginRequest(BaseModel):
     forwarder_id: str

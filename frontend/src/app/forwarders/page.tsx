@@ -27,7 +27,9 @@ export default function ForwarderDirectoryPage() {
             try {
                 const res = await fetch(`${API_URL}/api/forwarders/active`);
                 const data = await res.json();
-                if (data.forwarders) {
+                if (Array.isArray(data)) {
+                    setForwarders(data);
+                } else if (data.forwarders) {
                     setForwarders(data.forwarders);
                 }
             } catch (error) {
