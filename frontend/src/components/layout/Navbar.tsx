@@ -77,87 +77,96 @@ export default function Navbar() {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center space-x-12 whitespace-nowrap">
-                    {/* 1. Services Dropdown */}
-                    <div
-                        className="relative group h-full flex items-center"
-                        onMouseEnter={() => setActiveDropdown('Services')}
-                        onMouseLeave={() => setActiveDropdown(null)}
-                    >
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Services <ChevronDown className="w-3 h-3 opacity-50" />
-                        </button>
-                        <AnimatePresence>
-                            {activeDropdown === 'Services' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
-                                >
-                                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
-                                        {navItems[0].children.map(child => (
-                                            <Link
-                                                key={child.label}
-                                                href={child.href}
-                                                className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
-                                            >
-                                                <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
-                                                <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    {/* HIDE SHIPPER TOOLS FOR FORWARDERS */}
+                    {user?.role !== 'forwarder' && (
+                        <>
+                            {/* 1. Services Dropdown */}
+                            <div
+                                className="relative group h-full flex items-center"
+                                onMouseEnter={() => setActiveDropdown('Services')}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                            >
+                                <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                                    Services <ChevronDown className="w-3 h-3 opacity-50" />
+                                </button>
+                                <AnimatePresence>
+                                    {activeDropdown === 'Services' && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
+                                        >
+                                            <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
+                                                {navItems[0].children.map(child => (
+                                                    <Link
+                                                        key={child.label}
+                                                        href={child.href}
+                                                        className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
+                                                    >
+                                                        <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
+                                                        <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
 
-                    <Link href="/search" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                        Instant Search
-                    </Link>
+                            <Link href="/search" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                                Instant Search
+                            </Link>
+                        </>
+                    )}
+
                     {user && (
-                        <Link href="/dashboard" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Dashboard
-                        </Link>
-                    )}
-                    {user?.sovereign_id?.startsWith('REG-') && (
-                        <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 hover:text-white transition-colors flex items-center gap-1.5">
-                            <ShieldCheck className="w-3 h-3" /> Partner Portal
+                        <Link href="/dashboard" className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${user?.role === 'forwarder' ? 'text-emerald-400 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
+                            {user?.role === 'forwarder' ? 'Partner Dashboard' : 'Dashboard'}
                         </Link>
                     )}
 
-                    {/* 3. Tools Dropdown */}
-                    <div
-                        className="relative group h-full flex items-center"
-                        onMouseEnter={() => setActiveDropdown('Tools')}
-                        onMouseLeave={() => setActiveDropdown(null)}
-                    >
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Tools <ChevronDown className="w-3 h-3 opacity-50" />
-                        </button>
-                        <AnimatePresence>
-                            {activeDropdown === 'Tools' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
-                                >
-                                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
-                                        {navItems[1].children.map(child => (
-                                            <Link
-                                                key={child.label}
-                                                href={child.href}
-                                                className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
-                                            >
-                                                <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
-                                                <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    {user?.role === 'forwarder' && (
+                        <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 hover:text-white transition-colors flex items-center gap-1.5">
+                            <ShieldCheck className="w-3 h-3" /> Secure Portal
+                        </Link>
+                    )}
+
+                    {/* HIDE TOOLS FOR FORWARDERS */}
+                    {user?.role !== 'forwarder' && (
+                        <div
+                            className="relative group h-full flex items-center"
+                            onMouseEnter={() => setActiveDropdown('Tools')}
+                            onMouseLeave={() => setActiveDropdown(null)}
+                        >
+                            <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                                Tools <ChevronDown className="w-3 h-3 opacity-50" />
+                            </button>
+                            <AnimatePresence>
+                                {activeDropdown === 'Tools' && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
+                                    >
+                                        <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
+                                            {navItems[1].children.map(child => (
+                                                <Link
+                                                    key={child.label}
+                                                    href={child.href}
+                                                    className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
+                                                >
+                                                    <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
+                                                    <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Side Actions */}
@@ -252,16 +261,28 @@ export default function Navbar() {
                         <div className="px-6 py-8 space-y-6">
                             {/* Mobile Links */}
                             <div className="space-y-4">
-                                <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Instant Search</Link>
-                                {user && (
-                                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Dashboard</Link>
+                                {user?.role !== 'forwarder' && (
+                                    <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">Instant Search</Link>
                                 )}
-                                <div className="h-px bg-white/10 my-4" />
-                                {navItems[0].children.map(child => (
-                                    <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="block text-gray-400 hover:text-white py-1">
-                                        {child.label}
+                                {user && (
+                                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-white">
+                                        {user?.role === 'forwarder' ? 'Partner Dashboard' : 'Dashboard'}
                                     </Link>
-                                ))}
+                                )}
+                                {user?.role === 'forwarder' && (
+                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-emerald-400">Partner Portal</Link>
+                                )}
+
+                                {user?.role !== 'forwarder' && (
+                                    <>
+                                        <div className="h-px bg-white/10 my-4" />
+                                        {navItems[0].children.map(child => (
+                                            <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="block text-gray-400 hover:text-white py-1">
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </>
+                                )}
                             </div>
 
                             <div className="h-px bg-white/10 my-4" />

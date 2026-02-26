@@ -369,78 +369,6 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "={{ $env.OMEGO_DASHBOARD_URL }}/api/marketplace/n8n-sync",
-        "sendBody": true,
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "Bearer {{ $env.OMEGO_API_SECRET }}"
-            }
-          ]
-        },
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "request_id",
-              "value": "={{ $json.request_id }}"
-            },
-            {
-              "name": "forwarder_email",
-              "value": "={{ $('Verify Forwarder').item.json.email }}"
-            },
-            {
-              "name": "forwarder_company",
-              "value": "={{ $json.forwarder_company }}"
-            },
-            {
-              "name": "total_price",
-              "value": "={{ $json.total_price }}"
-            },
-            {
-              "name": "currency",
-              "value": "={{ $json.currency }}"
-            },
-            {
-              "name": "transit_days",
-              "value": "={{ $json.transit_days }}"
-            },
-            {
-              "name": "validity_days",
-              "value": "={{ $json.validity_days }}"
-            },
-            {
-              "name": "carrier",
-              "value": "={{ $json.carrier }}"
-            },
-            {
-              "name": "service_type",
-              "value": "={{ $json.service_type }}"
-            },
-            {
-              "name": "raw_email",
-              "value": "={{ $json.raw_email }}"
-            },
-            {
-              "name": "ai_summary",
-              "value": "={{ $json.ai_summary }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "name": "Save to PostgreSQL API",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        2850,
-        400
-      ]
-    },
-    {
-      "parameters": {
         "authentication": "serviceAccount",
         "resource": "sheet",
         "operation": "update",
@@ -485,9 +413,16 @@
       "parameters": {
         "method": "POST",
         "url": "={{ $env.OMEGO_DASHBOARD_URL }}/api/quotations/new",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
         "sendBody": true,
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.OMEGO_API_SECRET }}"
+            }
+          ]
+        },
         "bodyParameters": {
           "parameters": [
             {
@@ -499,8 +434,8 @@
               "value": "={{ $('Build Quotation Record').item.json.quotation_id }}"
             },
             {
-              "name": "forwarder_company",
-              "value": "={{ $('Build Quotation Record').item.json.forwarder_company }}"
+              "name": "forwarder_email",
+              "value": "={{ $('Verify Forwarder').item.json.email }}"
             },
             {
               "name": "price",
@@ -519,14 +454,26 @@
               "value": "={{ $('Build Quotation Record').item.json.ai_summary }}"
             },
             {
-              "name": "user_id",
-              "value": "={{ $('Validate Request Status').item.json.user_sovereign_id }}"
+              "name": "carrier",
+              "value": "={{ $('Build Quotation Record').item.json.carrier }}"
+            },
+            {
+              "name": "service_type",
+              "value": "={{ $('Build Quotation Record').item.json.service_type }}"
+            },
+            {
+              "name": "raw_email",
+              "value": "={{ $('Build Quotation Record').item.json.raw_email }}"
+            },
+            {
+              "name": "quotation_count",
+              "value": "={{ $('Validate Request Status').item.json.quotation_count + 1 }}"
             }
           ]
         },
         "options": {}
       },
-      "name": "Update User Dashboard",
+      "name": "Sync to PostgreSQL",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
@@ -538,8 +485,7 @@
           "id": "6",
           "name": "OMEGO API Auth"
         }
-      },
-      "continueOnFail": true
+      }
     },
     {
       "parameters": {
@@ -775,7 +721,7 @@
       "main": [
         [
           {
-            "node": "Save to PostgreSQL API",
+            "node": "Increment Quotation Count",
             "type": "main",
             "index": 0
           }
@@ -786,10 +732,16 @@
       "main": [
         [
           {
-            "node": "Update User Dashboard",
+            "node": "Sync to PostgreSQL",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Sync to PostgreSQL": {
+      "main": [
+        [
           {
             "node": "Send User Email Alert",
             "type": "main",
@@ -843,17 +795,6 @@
         [
           {
             "node": "Mark Email as Read",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Save to PostgreSQL API": {
-      "main": [
-        [
-          {
-            "node": "Increment Quotation Count",
             "type": "main",
             "index": 0
           }

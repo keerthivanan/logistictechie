@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, CreditCard, Building2, Globe, Mail, Phone, Upload, Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import { countries } from '@/lib/countries';
 import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 import LightRays from '@/components/visuals/LightRays';
@@ -17,6 +18,7 @@ interface Country {
 }
 
 export default function ForwarderRegisterPage() {
+    const { refreshProfile } = useAuth();
     const [loading, setLoading] = useState(false);
 
     // Form State
@@ -95,10 +97,36 @@ export default function ForwarderRegisterPage() {
         setLoading(true);
 
         try {
-            // 📡 SOVEREIGN PROTOCOL: Payment Gateway Disabled
-            // Dead end registration as per request
-            alert('Registration received! Partner network applications are currently under manual review. Payment gateway is offline for this region.');
-            setFormData({ company_name: '', email: '', country: '', phone: '', tax_id: '', document_url: '', password: '', logo_url: 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200' });
+            // 📡 SOVEREIGN PROMOTION: Direct Backend Upgrade (Free Trial)
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/forwarders/promote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    company_name: formData.company_name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    country: formData.country,
+                    tax_id: formData.tax_id,
+                    document_url: formData.document_url,
+                    logo_url: formData.logo_url
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // 🚀 REFRESH ENTIRE IDENTITY VIA PROMOTION HANDSHAKE
+                await refreshProfile();
+
+                alert('🚀 Handshake Complete! Your account has been upgraded to REG-OMEGO. Redirecting to your Partner Dashboard...');
+                window.location.href = '/dashboard';
+            } else {
+                alert(`Handshake Failed: ${data.detail || 'Internal Grid Error'}`);
+            }
         } catch (error) {
             console.error(error);
             alert('Handshake failed. Please verify your connection to the Sovereign Grid.');

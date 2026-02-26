@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.12.1",
     "clsx": "^2.1.1",
     "framer-motion": "11.0.8",
     "libphonenumber-js": "^1.12.37",

@@ -22,40 +22,62 @@ async def get_dashboard_stats(
     Returns real-time dashboard statistics via Auth Token.
     """
     try:
-        stats = await crud.booking.get_dashboard_stats(db, user_id=str(current_user.id))
+        # ROLE-BASED INTELLIGENCE DISPATCH
+        if current_user.role == "forwarder":
+            from app.api.routers.forwarders import forwarder_dashboard
+            # We call the existing forwarder_dashboard logic but adapt it for stats/me
+            f_stats = await forwarder_dashboard(current_user.sovereign_id, db)
+            
+            # Format forwarder stats to match the expected unified structure
+            return {
+                "active_shipments": f_stats.get("metrics", {}).get("active_bids", 0),
+                "total_shipments": f_stats.get("metrics", {}).get("total_quotes_submitted", 0),
+                "delivered_shipments": f_stats.get("metrics", {}).get("won_bids", 0),
+                "pending_tasks_count": 0, # Forwarder tasks coming soon
+                "kanban_shipments": [
+                   {
+                        "id": q["request_id"],
+                        "company": "Shipper",
+                        "desc": f"{q['cargo_type']} ({q['origin']} ➔ {q['destination']})",
+                        "date": q["submitted_at"][:10],
+                        "comments": q["your_position"],
+                        "views": 1,
+                        "status": "processing" if q["status"] == "OPEN" else "delivered",
+                        "mode": q["cargo_type"],
+                        "highlight": q["your_position"] == 1
+                   } for q in f_stats.get("quotes", [])
+                ],
+                "recent_activity": [] # Add forwarder activity if needed
+            }
+
+        stats = await crud.marketplace.get_dashboard_stats(db, user_id=current_user.sovereign_id)
         
         # 1. Format Shipments for Kanban Board (The "King Maker" View)
         raw_shipments = stats.pop("shipments", [])
         formatted_shipments = []
         
         for s in raw_shipments:
-            # Parse Details
-            try:
-                cargo = json.loads(s.cargo_details) if isinstance(s.cargo_details, str) else s.cargo_details
-                contact = json.loads(s.contact_details) if isinstance(s.contact_details, str) else s.contact_details
-            except:
-                cargo = {}
-                contact = {}
-                
-            # Status Mapping
+            # Sovereign Status Mapping (Alignment with n8n workflow)
             kanban_status = "processing"
-            if s.status == "CONFIRMED": kanban_status = "processing"
-            elif s.status == "SHIPPED": kanban_status = "transit"
-            elif s.status == "DELIVERED": kanban_status = "delivered"
-            elif s.status == "CUSTOMS_HOLD": kanban_status = "customs"
-            
-            # Highlight Logic (King Maker Feature)
-            is_highlight = "High Value" in str(cargo) or "Hazardous" in str(cargo)
+            if s.status == "OPEN": 
+                kanban_status = "processing"
+            elif s.status == "CLOSED": 
+                kanban_status = "delivered"
+            elif s.status == "CANCELLED":
+                kanban_status = "customs" # Using 'customs' as a visual proxy for 'Flagged'
+                
+            # Highlight Logic (High Precision)
+            is_highlight = s.is_hazardous or (s.weight_kg and s.weight_kg > 10000)
             
             formatted_shipments.append({
-                "id": s.booking_reference,
-                "company": contact.get("company_name", "Sovereign Request"),
-                "desc": f"{cargo.get('commodity', 'General Cargo')} ({cargo.get('container', '40FT')})",
-                "date": s.created_at.strftime("%d %b"),
-                "comments": 0, # Placeholder for future messaging feature
+                "id": s.request_id,
+                "company": s.user_name or s.user_email,
+                "desc": f"{s.commodity or 'General Cargo'} ({s.cargo_type})",
+                "date": s.created_at.strftime("%d %b") if s.created_at else "Now",
+                "comments": s.quotation_count or 0,
                 "views": 1,
                 "status": kanban_status,
-                "mode": "Air" if "Air" in str(cargo) else "Ocean",
+                "mode": s.cargo_type or "Ocean",
                 "highlight": is_highlight
             })
             
@@ -183,8 +205,11 @@ async def create_lead(lead: LeadCreate):
 @router.get("/market-ticker")
 async def get_market_ticker():
     """
-    # SOVEREIGN MARKET WATCH
-    Returns live volatile indices for the ticker.
+    # SOVEREIGN MARKET WATCH (Pure n8n Era)
+    Returns fixed indices for the ticker in Phase 1.
     """
-    from app.services.sovereign import sovereign_engine
-    return sovereign_engine.get_market_ticker()
+    return {
+        "status": "STABLE",
+        "pulse": 0.98,
+        "note": "Market intelligence is now handled by n8n Brain."
+    }

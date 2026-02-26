@@ -83,7 +83,7 @@ function SuccessContent() {
                         <p className="text-2xl font-mono text-emerald-400 font-bold">{user?.sovereign_id?.startsWith('REG-') ? user.sovereign_id : `REG-${user?.sovereign_id}`}</p>
                         <div className="h-px bg-white/5 my-4" />
                         <p className="text-zinc-400 font-inter text-sm leading-relaxed">
-                            Your payment was successful and your company profile is now being processed by our system. You will receive an email shortly with your private <strong className="text-white">Partner ID (FXXX)</strong> and instructions on how to access the Secure Portal.
+                            Your partner verification is complete and your company profile is now being processed by our system. You will receive an email shortly with your private <strong className="text-white">Partner ID (REG-OMEGO-XXXX)</strong> and instructions on how to access the Secure Portal.
                         </p>
                     </div>
 

@@ -9,13 +9,14 @@ interface User {
     sovereign_id: string;
     name: string;
     email: string;
+    role: string;
     avatar_url?: string;
     onboarding_completed: boolean;
 }
 
 interface AuthContextType {
     user: User | null;
-    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, avatar_url?: string, user_id?: string) => void;
+    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string) => void;
     logout: () => void;
     loading: boolean;
     refreshProfile: () => Promise<void>;
@@ -23,7 +24,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
-    login: (token, name, onboarding, sovereign, avatar, id) => { },
+    login: (token, name, onboarding, sovereign, role, avatar, id) => { },
     logout: () => { },
     loading: true,
     refreshProfile: async () => { },
@@ -42,6 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const name = localStorage.getItem('user_name');
         const avatar_url = localStorage.getItem('avatar_url');
         const sovereign_id = localStorage.getItem('sovereign_id');
+        const role = localStorage.getItem('user_role') || 'user';
         const onboarding_completed = true; // HARD-WIRED FOR PERMANENT ACCESS
 
         if (token && name) {
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 sovereign_id: sovereign_id || 'ID-PENDING',
                 name,
                 email: '',
+                role,
                 avatar_url: avatar_url || undefined,
                 onboarding_completed
             });
@@ -81,6 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     sovereign_id: data.sovereign_id,
                     name: data.full_name || data.email,
                     email: data.email,
+                    role: data.role || 'user',
                     avatar_url: data.avatar_url,
                     onboarding_completed: data.onboarding_completed
                 });
@@ -100,11 +104,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (token) await fetchProfile(token);
     };
 
-    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, avatar_url?: string, user_id?: string) => {
+    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string) => {
         console.log("[AUTH] Initializing Secure Link for:", name);
         localStorage.setItem('token', token);
         localStorage.setItem('user_name', name);
         localStorage.setItem('sovereign_id', sovereign_id);
+        localStorage.setItem('user_role', role);
         localStorage.setItem('onboarding_completed', 'true');
         if (avatar_url) localStorage.setItem('avatar_url', avatar_url);
 
@@ -115,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             sovereign_id,
             name,
             email: '',
+            role,
             onboarding_completed,
             avatar_url
         });
@@ -129,6 +135,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('user_name');
         localStorage.removeItem('avatar_url');
         localStorage.removeItem('sovereign_id');
+        localStorage.removeItem('user_role');
         localStorage.removeItem('onboarding_completed');
         document.cookie = "token=; path=/; max-age=0";
         setUser(null);

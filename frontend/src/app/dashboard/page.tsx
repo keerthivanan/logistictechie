@@ -82,11 +82,15 @@ export default function DashboardPage() {
         )
     }
 
+    const isForwarder = user?.role === 'forwarder'
+
     return (
         <div className="space-y-12 max-w-7xl mx-auto py-6">
             {/* Minimalist Identity & Performance Bar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pt-4">
-                <DashboardHeader userName={user?.name} />
+                <DashboardHeader
+                    userName={isForwarder ? `Partner: ${user?.name}` : user?.name}
+                />
                 <MetricCards stats={stats} />
             </div>
 
@@ -94,7 +98,10 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-12">
                 {/* Unified Activity Core */}
                 <div className="xl:col-span-1">
-                    <CommandFeed activities={stats?.recent_activity || []} />
+                    <CommandFeed
+                        activities={stats?.recent_activity || []}
+                        title={isForwarder ? "Partner Log" : "Command Feed"}
+                    />
                 </div>
 
                 {/* Tactical Execution Core */}
@@ -102,6 +109,7 @@ export default function DashboardPage() {
                     <SovereignFlow
                         shipments={stats?.kanban_shipments || []}
                         activeCount={stats?.active_shipments || 0}
+                        title={isForwarder ? "Live Market Bids" : "Operational Flow"}
                     />
                 </div>
             </div>

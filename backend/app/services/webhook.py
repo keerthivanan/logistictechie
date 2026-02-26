@@ -23,8 +23,14 @@ class WebhookService:
             return False
 
         try:
+            api_secret = os.getenv("OMEGO_API_SECRET", "")
+            headers = {
+                "Authorization": f"Bearer {api_secret}",
+                "X-OMEGO-Auth": api_secret,
+                "Content-Type": "application/json"
+            }
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, timeout=20.0)
+                response = await client.post(url, json=payload, headers=headers, timeout=20.0)
                 response.raise_for_status()
                 logger.info(f"[WEBHOOK] Event {event_name} dispatched securely to {url}")
                 try:

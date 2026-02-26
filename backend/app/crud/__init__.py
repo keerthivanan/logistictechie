@@ -1,5 +1,4 @@
 from .user import user
-from .quote import quote
-from .booking import booking
+from .marketplace import marketplace
 from .activity import activity
 from .task import task

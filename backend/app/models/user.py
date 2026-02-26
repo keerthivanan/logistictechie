@@ -31,13 +31,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    bookings = relationship("Booking", back_populates="user")
     activities = relationship("UserActivity", back_populates="user")
-    # quotes = relationship("Quote", back_populates="user") # Optional: Add back_populates in Quote if needed
 
-    
-    
-    # Marketplace Relationships REMOVED (Clean Slate Protocol)
-    # The Sovereign Logistics OS focuses on User -> Booking -> Shipment. 
-    # Marketplace features will be re-architected in Phase 2.
+    # Marketplace Relationships (Clean Slate Protocol)
+    # The Sovereign Logistics OS focuses on User -> Request -> Quotation.
 

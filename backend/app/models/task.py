@@ -18,7 +18,7 @@ class Task(Base):
     
     title = Column(String, nullable=False)
     description = Column(Text)
-    task_type = Column(String) # e.g., 'DOCUMENT', 'PAYMENT', 'APPROVAL'
+    task_type = Column(String) # e.g., 'DOCUMENT', 'APPROVAL'
     
     status = Column(String, default="PENDING") # PENDING, COMPLETED, ARCHIVED
     priority = Column(String, default="MEDIUM") # LOW, MEDIUM, HIGH, CRITICAL

@@ -8,6 +8,7 @@ from app.api.deps import get_current_user
 from sqlalchemy import select, func
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+from app.services.activity import activity_service
 import os
 
 router = APIRouter()
@@ -33,8 +34,8 @@ class ForwarderSave(BaseModel):
 @router.post("/save")
 async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)):
     """
-    Secure endpoint for n8n Cloud to save a verified/paid partner.
-    Called after Stripe payment succeeds.
+    Secure endpoint for n8n Cloud to save a verified partner.
+    Called after partner verification succeeds.
     """
     # Check if already exists (idempotent)
     existing = await db.execute(select(Forwarder).where(Forwarder.email == f_in.email))
@@ -81,7 +82,7 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
 @router.put("/activate/{f_id}")
 async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db)):
     """
-    Activates a forwarder after payment confirmation.
+    Activates a forwarder after verification confirmation.
     """
     stmt = select(Forwarder).where(Forwarder.id == f_id)
     result = await db.execute(stmt)
@@ -103,7 +104,7 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
     """
     Returns all verified OMEGO partners as a flat JSON array for n8n compatibility.
     """
-    result = await db.execute(select(Forwarder).where(Forwarder.status == "ACTIVE"))
+    result = await db.execute(select(Forwarder).where(Forwarder.status.in_(["ACTIVE", "APPROVED"])))
     forwarders = result.scalars().all()
     
     return [
@@ -114,6 +115,7 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
             "country": f.country,
             "email": f.email,
             "phone": f.phone,
+            "whatsapp": f.whatsapp or "", # CRITICAL for n8n broadcast
             "website": f.website,
             "reliability_score": f.reliability_score,
             "logo_url": f.logo_url,
@@ -203,31 +205,75 @@ async def forwarder_dashboard(forwarder_id: str, db: AsyncSession = Depends(get_
         "quotes": quotes_data
     }
 
-@router.post("/upgrade-id")
-async def upgrade_user_id(
-    email: str, 
-    session_id: str,
+@router.post("/promote")
+async def promote_user_to_partner(
+    f_in: ForwarderSave,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Upgrades a normal user to REG-OMEGO after securely verifying Stripe payment.
+    SOVEREIGN PROMOTION PROTOCOL (FREE TRIAL PHASE)
+    Upgrades a normal user to a Registered Forwarder (REG-OMEGO).
+    No payment required during the startup phase.
     """
-    if current_user.email != email:
-        raise HTTPException(status_code=403, detail="Unauthorized upgrade.")
-        
-    # Stripe integration removed as per request.
-    # Proceeding without payment validation.
-    stmt = select(User).where(User.email == email)
+    # 1. Fetch the user to be promoted
+    stmt = select(User).where(User.id == current_user.id)
     result = await db.execute(stmt)
-    db_user = result.scalars().first()
+    user = result.scalars().first()
     
-    if not db_user:
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
-    if not db_user.sovereign_id.startswith("REG-"):
-        db_user.sovereign_id = "REG-" + db_user.sovereign_id
-        db_user.role = "forwarder"
-        await db.commit()
-        
-    return {"success": True, "new_id": db_user.sovereign_id}
+    # 2. Check if already promoted
+    if user.role == "forwarder" or user.sovereign_id.startswith("REG-"):
+        return {"success": True, "message": "User is already an active partner.", "id": user.sovereign_id}
+
+    # 3. Perform the Transformation
+    old_id = user.sovereign_id
+    new_id = f"REG-{old_id}"
+    
+    user.sovereign_id = new_id
+    user.role = "forwarder"
+    user.company_name = f_in.company_name # Sync company info
+    
+    # 4. Create the Forwarder Profile Record
+    # This allows them to appear in the active bidder list (WF1 matching)
+    forwarder_record = Forwarder(
+        forwarder_id=new_id,
+        company_name=f_in.company_name,
+        contact_person=user.full_name,
+        email=user.email,
+        phone=f_in.phone,
+        whatsapp=f_in.whatsapp,
+        country=f_in.country,
+        specializations=f_in.specializations,
+        routes=f_in.routes,
+        status="ACTIVE",
+        is_verified=True,
+        is_paid=True, # Free trial auto-paid status
+        registered_at=datetime.utcnow(),
+        activated_at=datetime.utcnow(),
+        expires_at=datetime.utcnow() + timedelta(days=90) # 90-day extended startup trial
+    )
+    
+    db.add(forwarder_record)
+    
+    # 5. Log the Promotion
+    await activity_service.log(
+        db,
+        user_id=str(user.id),
+        action="PARTNER_PROMOTION",
+        entity_type="USER",
+        entity_id=str(user.id),
+        extra_data=f"Upgraded {old_id} to {new_id} (Startup Trial)",
+        commit=False
+    )
+    
+    await db.commit()
+    await db.refresh(user)
+    
+    return {
+        "success": True,
+        "new_id": new_id,
+        "message": f"Sovereign Handshake Complete. You are now a Registered Partner."
+    }

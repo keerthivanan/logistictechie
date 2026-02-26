@@ -42,7 +42,7 @@ export default function HelpPage() {
 
                     <div className="space-y-4">
                         <h2 className="text-2xl font-bold mb-4">Sovereign Protocols</h2>
-                        {['Tracking a Sovereign Shipment', 'Customs & Duty Automation', 'Payment & Credit Ledgers', 'Sovereign API Access Protocols'].map((article, i) => (
+                        {['Tracking a Sovereign Shipment', 'Customs & Duty Automation', 'Digital Documentation Storage', 'Sovereign API Access Protocols'].map((article, i) => (
                             <div key={i} className="bg-black border border-white/10 p-4 rounded-lg flex items-center justify-between hover:bg-zinc-900 cursor-pointer">
                                 <span>{article}</span>
                                 <HelpCircle className="w-4 h-4 text-gray-500" />

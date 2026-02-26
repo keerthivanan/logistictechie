@@ -77,8 +77,8 @@ async def social_sync(
         import string
         
         user_count_res = await db.execute(select(func.count(User.id)))
-        user_count = user_count_res.scalar() or 1
-        new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
+        user_count = user_count_res.scalar() or 0
+        new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
         
         # DOUBLE-CHECK UNIQUENESS
         check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
@@ -108,8 +108,8 @@ async def social_sync(
             import random
             import string
             user_count_res = await db.execute(select(func.count(User.id)))
-            user_count = user_count_res.scalar() or 1
-            new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
+            user_count = user_count_res.scalar() or 0
+            new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
             
             check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
             if check_existing.scalars().first():
@@ -181,9 +181,9 @@ async def create_default_tasks(db: AsyncSession, user_id: str):
             "priority": "HIGH"
         },
         {
-            "title": "Setup Payment Method",
-            "description": "Link your billing node for instant throughput and frictionless settlements.",
-            "task_type": "BILLING",
+            "title": "Partner Network Verification",
+            "description": "Complete your forwarder profile for inclusion in the global broadcast network.",
+            "task_type": "SECURITY",
             "priority": "CRITICAL"
         },
         {
@@ -342,8 +342,8 @@ async def register_user(
     # SOVEREIGN ID ASSIGNMENT (same logic as social-sync)
     import random, string
     user_count_res = await db.execute(select(func.count(User.id)))
-    user_count = user_count_res.scalar() or 1
-    new_sovereign_id = f"OMEGO-{str(user_count).zfill(4)}"
+    user_count = user_count_res.scalar() or 0
+    new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
     check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
     if check_existing.scalars().first():
         entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
