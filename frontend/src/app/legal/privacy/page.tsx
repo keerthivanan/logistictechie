@@ -25,14 +25,14 @@ export default function PrivacyPage() {
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Account information (name, email, password)</li>
                                 <li>Company details (address, tax ID)</li>
-                                <li>Payment history (Stored safely off-site)</li>
+                                <li>Shipment history and logistics metrics</li>
                                 <li>Shipment data (origin, destination, goods description)</li>
                             </ul>
                         </section>
 
                         <section>
-                            <h2 className="text-2xl font-bold text-white mb-4">3. How We Use Your Data</h2>
-                            <p>We use your data to provide our logistics services, process payments, and improve our platform. We do not sell your personal data to third parties.</p>
+                            <h2 className="text-2xl font-bold text-white mb-4">3. Use of Information</h2>
+                            <p>We use your data to provide our logistics services, coordinate shipments, and improve our platform. We do not sell your personal data to third parties.</p>
                         </section>
 
                         <section>

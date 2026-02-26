@@ -25,8 +25,8 @@ export default function TermsPage() {
                         </section>
 
                         <section>
-                            <h2 className="text-2xl font-bold text-white mb-4">3. Booking & Payments</h2>
-                            <p>All bookings made through the platform are subject to carrier availability. Payments must be made in accordance with the agreed payment terms.</p>
+                            <h2 className="text-2xl font-bold text-white mb-4">3. Booking & Service Protocols</h2>
+                            <p>All bookings made through the platform are subject to carrier availability and sovereign verification. Fulfillment is governed by the agreed logistics service protocols.</p>
                         </section>
 
                         <section>

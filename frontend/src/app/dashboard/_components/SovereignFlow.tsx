@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation'
 import { ExternalLink, Calendar, MessageSquare, Plane, Ship, Plus } from 'lucide-react'
 import { KanbanShipment } from './types'
 
-export default function SovereignFlow({ shipments, activeCount }: { shipments: KanbanShipment[], activeCount: number }) {
+export default function SovereignFlow({
+    shipments,
+    activeCount,
+    title = "Sovereign Flow"
+}: {
+    shipments: KanbanShipment[],
+    activeCount: number,
+    title?: string
+}) {
     const router = useRouter()
 
     const columns = [
@@ -19,7 +27,7 @@ export default function SovereignFlow({ shipments, activeCount }: { shipments: K
         <div className="space-y-8 pt-4">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">Sovereign Flow</h3>
+                    <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">{title}</h3>
                     <div className="bg-white/5 px-2 py-0.5 rounded text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-inter">
                         {activeCount} Active Vectors
                     </div>

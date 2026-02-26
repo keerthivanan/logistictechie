@@ -35,17 +35,9 @@ function BookingContent() {
   const surcharges = breakdown.surcharges || price * 0.3
 
   const handleConfirm = () => {
-    const query = new URLSearchParams({
-      quoteId,
-      carrier,
-      price: priceStr,
-      origin,
-      destination,
-      transit,
-      container,
-      breakdown: breakdownStr
-    }).toString()
-    router.push(`/booking/payment?${query}`)
+    // 🛡️ SOVEREIGN PROTOCOL: DIRECT CONFIRMATION (NO PAYMENT)
+    alert('Booking Confirmed! Our Sovereign Logistics AI is now finalizing your shipment details. Redirecting to your dashboard...');
+    router.push('/dashboard')
   }
 
   return (
@@ -172,11 +164,11 @@ function BookingContent() {
               onClick={handleConfirm}
               className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center group"
             >
-              Confirm & Pay <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              Confirm Booking <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <p className="text-xs text-center text-gray-600 mt-4">
-              Secure SSL Encrypted Transaction. By confirming you agree to our Terms of Service.
+              Sovereign Direct Booking. By confirming you agree to our Terms of Service.
             </p>
           </div>
         </div>
@@ -221,7 +213,7 @@ export default function BookingPage() {
               <div className="h-px w-8 sm:w-12 bg-white/20"></div>
               <div className="flex items-center">
                 <div className="w-6 h-6 bg-zinc-800 text-gray-500 rounded-full flex items-center justify-center font-bold text-xs">4</div>
-                <span className="ml-2 font-medium text-gray-600 hidden sm:inline">Payment</span>
+                <span className="ml-2 font-medium text-gray-600 hidden sm:inline">Confirmation</span>
               </div>
             </div>
           </div>

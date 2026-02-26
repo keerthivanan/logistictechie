@@ -142,7 +142,9 @@ export default function RequestQuoteForm() {
                 destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
                 cargo_type: formData.mode,
                 weight: parseFloat(formData.weight) || 0,
-                dimensions: `${formData.length}x${formData.width}x${formData.height} ${formData.dim_unit}`,
+                weight_unit: formData.weight_unit || 'KGM',
+                dimensions: `${formData.length}x${formData.width}x${formData.height}`,
+                dim_unit: formData.dim_unit || 'CM',
                 special_requirements: `Commodity: ${formData.commodity} | Packing: ${formData.packing_type} | Hazard: ${formData.is_hazardous} | Stack: ${formData.is_stackable} | Notes: ${formData.notes}`,
                 incoterms: formData.incoterms || 'FOB',
                 currency: 'USD'

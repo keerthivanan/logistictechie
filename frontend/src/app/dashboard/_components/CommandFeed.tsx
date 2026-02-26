@@ -4,12 +4,12 @@ import Link from 'next/link'
 import { Activity as ActivityIcon, Search, CheckCircle2, History, Clock, ArrowUpRight, AlertCircle } from 'lucide-react'
 import { Activity } from './types'
 
-export default function CommandFeed({ activities }: { activities: Activity[] }) {
+export default function CommandFeed({ activities, title = "Command Feed" }: { activities: Activity[], title?: string }) {
     return (
         <div className="bg-black border border-white/5 rounded-3xl p-6 h-full flex flex-col shadow-xl">
             <div className="flex items-center gap-3 mb-6">
                 <ActivityIcon className="w-4 h-4 text-zinc-400" />
-                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">Command Feed</h3>
+                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">{title}</h3>
             </div>
 
             <div className="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">

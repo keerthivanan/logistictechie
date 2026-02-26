@@ -1033,42 +1033,42 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* Manage Payments */}
+            {/* Digital Customs AI */}
             <div className="bg-black border border-white/10 rounded-2xl p-8 hover:border-white/30 transition-all group">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">Payment Portal</h3>
+                <h3 className="text-xl font-bold text-white">Digital Customs AI</h3>
                 <div className="bg-white/10 p-2 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-all">
                   <ArrowRight className="w-5 h-5 text-white" />
                 </div>
               </div>
               <p className="text-gray-400 mb-8 text-sm leading-relaxed">
-                Centralized billing. Pay suppliers and carriers directly through our secure platform.
+                Automated HS code classification and duty estimation. Bypass manual filing protocols.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center text-sm text-gray-500">
                   <div className="w-2 h-2 bg-gray-600 rounded-full mr-3"></div>
-                  <span>Invoice #1024 - Paid</span>
+                  <span>HS Code Validated</span>
                 </div>
                 <div className="flex items-center text-sm text-white">
                   <div className="w-2 h-2 bg-white rounded-full mr-3"></div>
-                  <span>Invoice #1025 - Due</span>
+                  <span>Electronic Filing Complete</span>
                 </div>
               </div>
             </div>
 
-            {/* Sovereign Credit */}
-            <div className="bg-black border border-white/10 rounded-2xl p-8 hover:border-white/30 transition-all">
+            {/* Sovereign Analytics */}
+            <div className="bg-zinc-900 border border-white/10 rounded-2xl p-8 hover:border-white/30 transition-all">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">Credit Line</h3>
+                <h3 className="text-xl font-bold text-white">Network Analytics</h3>
                 <div className="bg-white/10 p-2 rounded-lg">
-                  <DollarSign className="w-5 h-5 text-white" />
+                  <Package className="w-5 h-5 text-white" />
                 </div>
               </div>
               <p className="text-gray-400 mb-8 text-sm leading-relaxed">
-                Flexible payment terms for qualified businesses. Keep your cash flow moving.
+                Aggregated logistics data to optimize your transit paths and cargo density.
               </p>
               <button className="w-full border border-white/20 text-white py-3 rounded-xl font-bold hover:bg-white hover:text-black transition-all">
-                Apply for Credit
+                Access Intelligence Report
               </button>
             </div>
           </div>

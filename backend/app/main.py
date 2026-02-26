@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import get_db
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from collections import defaultdict
-from app.api.routers import auth, tracking, documents, references, dashboard, vessels, billing, marketplace, forwarders, tasks, n8n
+from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks
 from app.core.config import settings
 from contextlib import asynccontextmanager
 
@@ -10,10 +12,8 @@ import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Sovereign Database Handshake
     try:
-        from app.services.knowledge import knowledge_oracle
-        await knowledge_oracle.initialize()
+        # The 'Heart' of the Sovereign Mirror
         
         print(f"[SYSTEM] OMEGO LOGISTICS OS Backend Initialized.")
         print(f"[SYSTEM] CORS WHITELIST: {settings.ALLOWED_ORIGINS}")
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="The 'True Ocean' Protocol. Uses strictly real API integrations.",
+    description="The 'Sovereign Mirror' Engine. Powered by the n8n Brain.",
     lifespan=lifespan
 )
 
@@ -77,15 +77,23 @@ async def security_and_rate_limit(request: Request, call_next):
 # Mount the 'Honest' Routers
 app.include_router(references.router, prefix="/api/references", tags=["Reference Data"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(tracking.router, prefix="/api/tracking", tags=["Global Tracking"])
-app.include_router(documents.router, prefix="/api/documents", tags=["Document AI"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
-app.include_router(vessels.router, prefix="/api/vessels", tags=["Maritime Assets"])
-app.include_router(billing.router, prefix="/api/billing", tags=["Sovereign Billing"])
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace Bidding"])
 app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarder Network"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
-app.include_router(n8n.router, prefix="/api", tags=["n8n Deep Webhooks"])
+
+# GLOBAL BRIDGE: Headless n8n Aliases (Matches COMPLETE_SETUP_GUIDE hardcoded URLs)
+@app.post("/api/request-sync", tags=["n8n Global Bridge"])
+async def global_request_sync(sync_in: marketplace.N8nRequestSync, db: AsyncSession = Depends(get_db)):
+    return await marketplace.n8n_request_sync(sync_in, db)
+
+@app.post("/api/quotations/new", tags=["n8n Global Bridge"])
+async def global_quote_sync(sync_in: marketplace.N8nQuoteSync, db: AsyncSession = Depends(get_db)):
+    return await marketplace.n8n_quote_sync(sync_in, db)
+
+@app.post("/api/requests/close", tags=["n8n Global Bridge"])
+async def global_request_close(sync_in: marketplace.N8nStatusUpdate, db: AsyncSession = Depends(get_db)):
+    return await marketplace.n8n_requests_close(sync_in, db)
 
 
 @app.get("/health")

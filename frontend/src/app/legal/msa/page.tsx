@@ -31,7 +31,7 @@ export default function MSAPage() {
                         <h2 className="text-2xl font-bold text-white">Key Provisions Summary</h2>
                         <ul className="list-disc pl-6 space-y-4">
                             <li><strong className="text-white">Service Scope:</strong> We provide a digital platform for booking international freight.</li>
-                            <li><strong className="text-white">Payment Terms:</strong> Invoices are due upon receipt unless credit terms are approved.</li>
+                            <li><strong className="text-white">Service Availability:</strong> Logistics nodes and vessel access are subject to current network capacity and sovereign synchronization.</li>
                             <li><strong className="text-white">Confidentiality:</strong> Both parties agree to protect proprietary information.</li>
                             <li><strong className="text-white">Termination:</strong> Either party may terminate with 30 days written notice.</li>
                         </ul>

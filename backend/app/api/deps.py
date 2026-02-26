@@ -72,10 +72,12 @@ from fastapi.security import APIKeyHeader
 
 api_key_auth = APIKeyHeader(name="Authorization", auto_error=False)
 api_key_x = APIKeyHeader(name="X-OMEGO-API-KEY", auto_error=False)
+api_key_omego = APIKeyHeader(name="X-OMEGO-Auth", auto_error=False)
 
 def verify_n8n_webhook(
     auth_header: str = Security(api_key_auth),
-    x_header: str = Security(api_key_x)
+    x_header: str = Security(api_key_x),
+    omego_header: str = Security(api_key_omego)
 ):
     """
     Cryptographic verification to ensure only authenticated n8n instances
@@ -91,6 +93,9 @@ def verify_n8n_webhook(
         return True
             
     if x_header and x_header == valid_key:
+        return True
+        
+    if omego_header and omego_header == valid_key:
         return True
         
     raise HTTPException(

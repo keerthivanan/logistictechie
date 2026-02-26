@@ -128,7 +128,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Generate or retrieve User Sovereign ID\nconst userEmail = $input.first().json.user_email;\nconst usersData = $('Lookup User Sovereign ID').all();\n\n// Check if user exists\nlet sovereignId = null;\nlet isNewUser = true;\n\nfor (const row of usersData) {\n  if (row.json.email === userEmail) {\n    sovereignId = row.json.sovereign_id;\n    isNewUser = false;\n    break;\n  }\n}\n\n// If new user, generate next sovereign ID\nif (isNewUser) {\n  const existingIds = usersData\n    .map(row => row.json.sovereign_id)\n    .filter(id => id && id.startsWith('OMEGO-'))\n    .map(id => parseInt(id.split('-')[1]))\n    .filter(num => !isNaN(num));\n  \n  const nextIdNumber = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;\n  sovereignId = `OMEGO-${String(nextIdNumber).padStart(4, '0')}`;\n}\n\nreturn {\n  json: {\n    sovereign_id: sovereignId,\n    is_new_user: isNewUser,\n    user_email: userEmail\n  }\n};"
+        "jsCode": "const input = $input.first().json;\nconst sovereignIdFromPayload = input.sovereign_id;\n\nif (sovereignIdFromPayload && sovereignIdFromPayload.startsWith('OMEGO-')) {\n  return { json: { sovereign_id: sovereignIdFromPayload, is_new_user: false } };\n}\n\n// FALLBACK: Lookup logic if not provided by backend\nconst userEmail = input.user_email;\nconst usersData = $('Lookup User Sovereign ID').all();\nconst existingUser = usersData.find(u => u.json.email === userEmail);\n\nif (existingUser) {\n  return { json: { sovereign_id: existingUser.json.sovereign_id, is_new_user: false } };\n} else {\n  const maxId = usersData.reduce((max, u) => {\n    const id = parseInt(u.json.sovereign_id.split('-')[1]);\n    return id > max ? id : max;\n  }, 0);\n  return { json: { sovereign_id: `OMEGO-${String(maxId + 1).padStart(4, '0')}`, is_new_user: true } };\n}"
       },
       "name": "Generate User Sovereign ID",
       "type": "n8n-nodes-base.code",
@@ -330,6 +330,96 @@
         "googleSheetsOAuth2Api": {
           "id": "2",
           "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OMEGO_DASHBOARD_URL }}/api/request-sync",
+        "sendBody": true,
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.OMEGO_API_SECRET }}"
+            }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "value": "={{ $('Add Metadata').item.json.request_id }}"
+            },
+            {
+              "name": "user_sovereign_id",
+              "value": "={{ $('Add Metadata').item.json.user_sovereign_id }}"
+            },
+            {
+              "name": "user_email",
+              "value": "={{ $('Extract & Clean Form Data').item.json.user_email }}"
+            },
+            {
+              "name": "user_name",
+              "value": "={{ $('Extract & Clean Form Data').item.json.user_name }}"
+            },
+            {
+              "name": "origin",
+              "value": "={{ $('Extract & Clean Form Data').item.json.origin }}"
+            },
+            {
+              "name": "destination",
+              "value": "={{ $('Extract & Clean Form Data').item.json.destination }}"
+            },
+            {
+              "name": "cargo_type",
+              "value": "={{ $('Extract & Clean Form Data').item.json.cargo_type }}"
+            },
+            {
+              "name": "weight_kg",
+              "value": "={{ $('Extract & Clean Form Data').item.json.weight_kg }}"
+            },
+            {
+              "name": "dimensions",
+              "value": "={{ $('Extract & Clean Form Data').item.json.dimensions }}"
+            },
+            {
+              "name": "special_requirements",
+              "value": "={{ $('Extract & Clean Form Data').item.json.special_requirements }}"
+            },
+            {
+              "name": "incoterms",
+              "value": "={{ $('Extract & Clean Form Data').item.json.incoterms }}"
+            },
+            {
+              "name": "currency",
+              "value": "={{ $('Extract & Clean Form Data').item.json.currency }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $('Add Metadata').item.json.status }}"
+            },
+            {
+              "name": "submitted_at",
+              "value": "={{ $('Add Metadata').item.json.submitted_at }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Sync to PostgreSQL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2150,
+        450
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6",
+          "name": "OMEGO API Auth"
         }
       }
     },
@@ -675,6 +765,17 @@
       ]
     },
     "Save to Requests Sheet": {
+      "main": [
+        [
+          {
+            "node": "Sync to PostgreSQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync to PostgreSQL": {
       "main": [
         [
           {
