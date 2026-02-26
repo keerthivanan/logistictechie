@@ -35,6 +35,9 @@ export default function RequestQuoteForm() {
 
     // Advanced Form State (Matches Screenshot Logic)
     const [formData, setFormData] = useState({
+        // Identity
+        phone: '',
+
         // Mode
         mode: 'Ocean',
 
@@ -132,12 +135,13 @@ export default function RequestQuoteForm() {
             const payload = {
                 user_id: user.id,
                 sovereign_id: user.sovereign_id || '',
-                user_name: user.name || user.email || 'Client',
-                user_email: user.email,
+                name: user.name || user.email || 'Client',
+                email: user.email,
+                phone: formData.phone || '',
                 origin: `${formData.origin_district || ''} ${formData.origin_country}`.trim(),
                 destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
                 cargo_type: formData.mode,
-                weight_kg: parseFloat(formData.weight) || 0,
+                weight: parseFloat(formData.weight) || 0,
                 dimensions: `${formData.length}x${formData.width}x${formData.height} ${formData.dim_unit}`,
                 special_requirements: `Commodity: ${formData.commodity} | Packing: ${formData.packing_type} | Hazard: ${formData.is_hazardous} | Stack: ${formData.is_stackable} | Notes: ${formData.notes}`,
                 incoterms: formData.incoterms || 'FOB',
