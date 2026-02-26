@@ -16,12 +16,13 @@ router = APIRouter()
 class MarketplaceSubmit(BaseModel):
     user_id: str
     sovereign_id: str = ""
-    user_name: str = "Client"
-    user_email: str = ""
+    name: str = "Client"
+    email: str = ""
+    phone: str = ""
     origin: str
     destination: str
     cargo_type: str
-    weight_kg: float
+    weight: float
     dimensions: str = ""
     special_requirements: str = ""
     incoterms: str = "FOB"
@@ -34,33 +35,57 @@ def _fire_webhook(payload: dict):
 @router.post("/submit")
 async def submit_request(
     request_in: MarketplaceSubmit,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     """
     User submits a cargo quotation request.
-    Saves to PostgreSQL and fires webhook to n8n Cloud (non-blocking).
-    Request ID format: OMEGO-0009-REQ-01
+    Strict Master-Slave Protocol: 
+    1. Fires webhook to n8n Cloud to generate the master Request ID.
+    2. Awaits the master ID from n8n.
+    3. Saves exactly that ID to PostgreSQL.
     """
-    sid = request_in.sovereign_id or "OMEGO-0000"
     
-    # Count THIS user's requests (per-user sequential counter)
-    user_count = await db.execute(
-        select(func.count()).select_from(MarketplaceRequest)
-        .where(MarketplaceRequest.user_sovereign_id == sid)
-    )
-    seq = (user_count.scalar() or 0) + 1
-    request_id = f"{sid}-REQ-{str(seq).zfill(2)}"
+    # 1. Prepare exact payload defined by COMPLETE_SETUP_GUIDE.md
+    payload = {
+        "user_id": request_in.user_id,
+        "sovereign_id": request_in.sovereign_id,
+        "name": request_in.name,
+        "email": request_in.email,
+        "phone": request_in.phone,
+        "origin": request_in.origin,
+        "destination": request_in.destination,
+        "cargo_type": request_in.cargo_type,
+        "weight": request_in.weight,
+        "dimensions": request_in.dimensions,
+        "special_requirements": request_in.special_requirements,
+        "incoterms": request_in.incoterms,
+        "currency": request_in.currency
+    }
+
+    # 2. Fire webhook synchronously to get the Master Data from n8n WF1
+    n8n_response = await webhook_service.trigger_marketplace_webhook(payload)
     
+    if not n8n_response or not n8n_response.get("request_id"):
+        # Fallback pseudo-generation only if n8n is critically down
+        sid = request_in.sovereign_id or "OMEGO-0000"
+        user_count = await db.execute(select(func.count()).select_from(MarketplaceRequest).where(MarketplaceRequest.user_sovereign_id == sid))
+        seq = (user_count.scalar() or 0) + 1
+        request_id = f"{sid}-REQ-{str(seq).zfill(2)}"
+    else:
+        request_id = n8n_response.get("request_id")
+        
+    sid = request_id.split('-REQ-')[0] if '-REQ-' in request_id else (request_in.sovereign_id or "OMEGO-0000")
+    
+    # 3. Save to PostgreSQL strictly using the final synchronized Request ID
     new_request = MarketplaceRequest(
         request_id=request_id,
         user_sovereign_id=sid,
-        user_email=request_in.user_email,
-        user_name=request_in.user_name,
+        user_email=request_in.email,
+        user_name=request_in.name,
         origin=request_in.origin,
         destination=request_in.destination,
         cargo_type=request_in.cargo_type,
-        weight_kg=request_in.weight_kg,
+        weight_kg=request_in.weight,
         dimensions=request_in.dimensions,
         special_requirements=request_in.special_requirements,
         incoterms=request_in.incoterms,
@@ -72,22 +97,6 @@ async def submit_request(
     db.add(new_request)
     await db.commit()
     await db.refresh(new_request)
-    
-    # Fire webhook to n8n Cloud (non-blocking)
-    background_tasks.add_task(_fire_webhook, {
-        "request_id": request_id,
-        "user_sovereign_id": sid,
-        "user_name": request_in.user_name,
-        "user_email": request_in.user_email,
-        "origin": request_in.origin,
-        "destination": request_in.destination,
-        "cargo_type": request_in.cargo_type,
-        "weight_kg": request_in.weight_kg,
-        "dimensions": request_in.dimensions,
-        "special_requirements": request_in.special_requirements,
-        "incoterms": request_in.incoterms,
-        "currency": request_in.currency
-    })
     
     return {"success": True, "uniqueId": request_id, "request_id": request_id}
 
@@ -141,7 +150,7 @@ class N8nStatusUpdate(BaseModel):
     status: str
     closed_at: str = ""
     closed_reason: str = ""
-    quotations: list = []
+    quotations: Any = None
 
 @router.post("/close", dependencies=[Depends(verify_n8n_webhook)])
 async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depends(get_db)):
@@ -184,9 +193,8 @@ async def n8n_quotations_new(data: QuotationNewMock):
     return {"success": True, "message": "Quotation acknowledged and verified."}
 
 class N8nQuoteSync(BaseModel):
-    quotation_id: str
     request_id: str
-    forwarder_id: str = ""
+    forwarder_email: str = ""
     forwarder_company: str
     total_price: float
     currency: str = "USD"
@@ -194,11 +202,14 @@ class N8nQuoteSync(BaseModel):
     validity_days: int = 7
     carrier: str = ""
     service_type: str = ""
+    raw_email: str = ""
+    ai_summary: str = ""
+    # Optional fields
+    quotation_id: str = ""
+    forwarder_id: str = ""
     surcharges: Any = None
     payment_terms: str = ""
     notes: str = ""
-    ai_summary: str = ""
-    raw_email: str = ""
 
 @router.post("/n8n-sync", dependencies=[Depends(verify_n8n_webhook)])
 async def n8n_quote_sync(sync_in: N8nQuoteSync, db: AsyncSession = Depends(get_db)):
@@ -207,25 +218,39 @@ async def n8n_quote_sync(sync_in: N8nQuoteSync, db: AsyncSession = Depends(get_d
     Matches QUOTATIONS format.
     """
     # 1. Verify the Request exists
-    stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id).with_for_update()
-    result = await db.execute(stmt)
-    req = result.scalars().first()
+async def n8n_quote_sync(
+    sync_in: N8nQuoteSync,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Highly secure endpoint for n8n WF2 to inject AI-parsed quotations.
+    """
+    logger.info(f"Received n8n quote sync for request {sync_in.request_id}")
+    
+    # 1. Look up forwarder by email to get their ID if missing
+    forwarder_id = sync_in.forwarder_id or "FWD-UNKNOWN"
+    if sync_in.forwarder_email:
+        fwd_stmt = select(Forwarder).where(Forwarder.email == sync_in.forwarder_email)
+        fwd_res = await db.execute(fwd_stmt)
+        fwd = fwd_res.scalars().first()
+        if fwd:
+            forwarder_id = fwd.forwarder_id
+            
+    # 2. Get current quote count to generate quotation_id if missing
+    req_stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id)
+    req_res = await db.execute(req_stmt)
+    req = req_res.scalars().first()
     
     if not req:
-        raise HTTPException(status_code=404, detail=f"Request {sync_in.request_id} not found in Sovereign Database.")
-
-    if req.status == "CLOSED":
-        return {"success": False, "message": "Backend: Request already explicitly CLOSED by n8n."}
-
-    # 2. Increment the quote count accurately
-    req.quotation_count += 1
-    position = req.quotation_count
-
-    # 3. Insert the MarketplaceBid
+        raise HTTPException(status_code=404, detail="Request not found")
+        
+    position = req.quotation_count + 1
+    generated_quote_id = sync_in.quotation_id or f"{sync_in.request_id}-Q{position}"
+    
     new_bid = MarketplaceBid(
-        quotation_id=sync_in.quotation_id,
+        quotation_id=generated_quote_id,
         request_id=sync_in.request_id,
-        forwarder_id=sync_in.forwarder_id,
+        forwarder_id=forwarder_id,
         forwarder_company=sync_in.forwarder_company,
         total_price=sync_in.total_price,
         currency=sync_in.currency,

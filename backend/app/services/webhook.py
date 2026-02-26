@@ -24,13 +24,16 @@ class WebhookService:
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, timeout=10.0)
+                response = await client.post(url, json=payload, timeout=20.0)
                 response.raise_for_status()
-                logger.info(f"[WEBHOOK] Event {event_name} dispatched successfully to {url}")
-                return True
+                logger.info(f"[WEBHOOK] Event {event_name} dispatched securely to {url}")
+                try:
+                    return response.json()
+                except Exception:
+                    return {"success": True, "raw_text": response.text}
         except Exception as e:
             logger.error(f"[WEBHOOK] Mission Failure: Failed to dispatch {event_name} to {url}. Error: {e}")
-            return False
+            return None
 
     async def trigger_registration_webhook(self, forwarder_data: Dict[str, Any]):
         """
