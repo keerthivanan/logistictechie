@@ -38,11 +38,7 @@ class WebhookService:
         """
         return await self._trigger(
             self.forwarder_webhook, 
-            {
-                "event": "FORWARDER_REGISTERED",
-                "forwarder": forwarder_data,
-                "timestamp": str(httpx.QueryParams()) # Placeholder for real timing if needed
-            }, 
+            forwarder_data, 
             "FORWARDER_REGISTER"
         )
 
@@ -52,10 +48,7 @@ class WebhookService:
         """
         return await self._trigger(
             self.marketplace_webhook, 
-            {
-                "event": "MARKETPLACE_SUBMITTED",
-                "request": request_data
-            }, 
+            request_data, 
             "MARKETPLACE_SUBMIT"
         )
 
