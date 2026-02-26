@@ -130,19 +130,18 @@ export default function RequestQuoteForm() {
             };
 
             const payload = {
-                origin_city: formData.origin_district || formData.origin_country,
-                origin_country: formData.origin_country,
-                dest_city: formData.dest_district || formData.dest_country,
-                dest_country: formData.dest_country,
+                user_id: user.id,
+                sovereign_id: user.sovereign_id || '',
+                user_name: user.name || user.email || 'Client',
+                user_email: user.email,
+                origin: `${formData.origin_district || ''} ${formData.origin_country}`.trim(),
+                destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
                 cargo_type: formData.mode,
                 weight_kg: parseFloat(formData.weight) || 0,
-                volume_cbm: 0,
+                dimensions: `${formData.length}x${formData.width}x${formData.height} ${formData.dim_unit}`,
+                special_requirements: `Commodity: ${formData.commodity} | Packing: ${formData.packing_type} | Hazard: ${formData.is_hazardous} | Stack: ${formData.is_stackable} | Notes: ${formData.notes}`,
                 incoterms: formData.incoterms || 'FOB',
-                cargo_details: JSON.stringify(cargoPayload),
-                user_id: user.id,
-                sovereign_id: user.sovereign_id,  // OMEGO-0009
-                user_name: user.name || user.email || 'Client',
-                user_email: user.email
+                currency: 'USD'
             };
 
             const res = await fetch(`${API_URL}/api/marketplace/submit`, {
