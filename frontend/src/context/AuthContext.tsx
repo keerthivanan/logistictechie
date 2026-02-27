@@ -10,6 +10,9 @@ interface User {
     name: string;
     email: string;
     role: string;
+    phone_number?: string;
+    company_name?: string;
+    company_email?: string;
     avatar_url?: string;
     onboarding_completed: boolean;
 }
@@ -85,6 +88,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     name: data.full_name || data.email,
                     email: data.email,
                     role: data.role || 'user',
+                    phone_number: data.phone_number,
+                    company_name: data.company_name,
+                    company_email: data.company_email,
                     avatar_url: data.avatar_url,
                     onboarding_completed: data.onboarding_completed
                 });

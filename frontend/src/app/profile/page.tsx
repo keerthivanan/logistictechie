@@ -2,127 +2,153 @@
 
 import { useAuth } from '@/context/AuthContext'
 import { motion } from 'framer-motion'
-import { User, Shield, Globe, ChevronLeft, Mail, Fingerprint, Building2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { User, Shield, Globe, ChevronLeft, Mail, Fingerprint, Building2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import Avatar from '@/components/visuals/Avatar'
+import Navbar from '@/components/layout/Navbar'
 
 export default function StandaloneProfilePage() {
     const { user } = useAuth()
+    const router = useRouter()
 
     if (!user) return null
 
+    const isForwarder = user.role === 'forwarder'
+
     return (
-        <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-            <div className="max-w-4xl w-full">
-                {/* Clean Navigation */}
-                <div className="mb-8">
-                    <Link href="/dashboard" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group">
+        <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 overflow-hidden selection:bg-white selection:text-black">
+            <Navbar />
+
+            <div className="max-w-4xl w-full pt-10">
+                {/* 1. Precise Navigation */}
+                <div className="mb-6">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
+                    >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] font-inter">Return to Terminal</span>
+                        <span className="text-[10px] font-bold tracking-[0.2em] uppercase font-inter">Return to Terminal</span>
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-                    {/* Professional Intel Card */}
-                    <div className="md:col-span-12 lg:col-span-5">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-zinc-950 border border-white/5 rounded-[24px] p-1 overflow-hidden relative group shadow-2xl"
-                        >
-                            <div className="bg-zinc-900/50 rounded-[22px] p-6 flex flex-col items-center justify-center text-center relative z-10 backdrop-blur-sm">
-                                <div className="relative mb-6">
+                {/* 2. Page Header */}
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="w-10 h-10 bg-white/[0.02] border border-white/5 rounded-xl flex items-center justify-center">
+                        <User className="w-5 h-5 text-zinc-400 font-bold" />
+                    </div>
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight font-outfit uppercase">Sovereign Profile</h1>
+                        <p className="text-[10px] text-zinc-600 font-medium tracking-wide font-inter">Synchronizing network identity</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left Column: Profile Card */}
+                    <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden group">
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-8">
+                                <Shield className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Core Identity</h2>
+                            </div>
+
+                            <div className="flex flex-col items-center text-center space-y-6">
+                                <div className="relative">
                                     <Avatar
                                         src={user.avatar_url}
                                         name={user.name}
                                         size="xl"
+                                        shape="square"
                                         className="border-white/5 shadow-2xl"
                                     />
-                                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 px-2 py-0.5 rounded-full border-2 border-zinc-900 text-[6px] font-bold uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.4)]">Live</div>
+                                    <div className={`absolute -bottom-2 -right-2 bg-black border border-white/10 p-2 rounded-xl shadow-2xl`}>
+                                        <div className={`w-2.5 h-2.5 rounded-full ${isForwarder ? 'bg-emerald-500' : 'bg-white'} animate-pulse`} />
+                                    </div>
                                 </div>
-                                <h1 className="text-2xl font-bold tracking-tight text-white uppercase font-outfit mb-1">{user.name}</h1>
-                                <p className="text-emerald-500 font-medium text-[10px] tracking-[0.3em] font-inter uppercase">{user.sovereign_id}</p>
 
-                                <div className="mt-6 pt-6 border-t border-white/5 w-full space-y-3">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-black font-outfit uppercase tracking-tighter">{user.name}</h3>
+                                    <p className={`text-[10px] font-bold ${isForwarder ? 'text-emerald-500' : 'text-zinc-500'} uppercase tracking-[0.3em]`}>
+                                        {isForwarder ? 'Sovereign Partner' : 'Global Node'}
+                                    </p>
+                                </div>
+
+                                <div className="w-full pt-8 border-t border-white/5 space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Network Clearance</span>
-                                        <span className="text-[8px] font-bold text-white uppercase tracking-widest font-inter">L-14 Global</span>
+                                        <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest font-inter">Master Node ID</span>
+                                        <span className="text-[10px] font-mono font-bold text-white uppercase">{user.sovereign_id}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Identity Status</span>
-                                        <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest font-inter">Verified</span>
+                                        <span className="text-[8px] font-bold text-zinc-700 uppercase tracking-widest font-inter">Registry Status</span>
+                                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Active</span>
                                     </div>
                                 </div>
                             </div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-black pointer-events-none" />
-                        </motion.div>
-                    </div>
-
-                    {/* Operational Intel Feed */}
-                    <div className="md:col-span-12 lg:col-span-7 space-y-6">
-                        <div className="space-y-2">
-                            <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.4em] font-outfit">Sovereign Intel Protocol</h2>
-                            <p className="text-lg font-medium text-zinc-400 leading-snug font-inter">
-                                The encrypted profile for <span className="text-white font-bold">{user.name}</span> represents a permanent node within the Sovereign Logistics OS.
-                            </p>
                         </div>
 
-                        <div className="space-y-3">
-                            <motion.div
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white/[0.02] rounded-xl p-4 border border-white/5 flex items-center gap-4 hover:bg-white/[0.04] transition-all"
-                            >
-                                <div className="p-3 bg-black rounded-lg border border-white/5">
-                                    <Mail className="w-4 h-4 text-zinc-400" />
-                                </div>
-                                <div>
-                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Communication Node</p>
-                                    <p className="text-xs font-semibold text-white uppercase font-inter">{user.email}</p>
-                                </div>
-                            </motion.div>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] blur-3xl pointer-events-none" />
+                    </section>
 
-                            <motion.div
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="bg-white/[0.02] rounded-xl p-4 border border-white/5 flex items-center gap-4 hover:bg-white/[0.04] transition-all"
-                            >
-                                <div className="p-3 bg-black rounded-lg border border-white/5">
-                                    <User className="w-4 h-4 text-zinc-400" />
-                                </div>
-                                <div>
-                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Registry Identity</p>
-                                    <p className="text-xs font-semibold text-white uppercase font-inter">{user.name}</p>
-                                </div>
-                            </motion.div>
-
-                            <motion.div
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="bg-emerald-500/5 rounded-xl p-4 border border-emerald-500/10 flex items-center gap-4 hover:bg-emerald-500/[0.08] transition-all"
-                            >
-                                <div className="p-3 bg-black rounded-lg border border-emerald-500/20 text-emerald-500">
-                                    <Fingerprint className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-0.5 font-inter">Master Node Index</p>
-                                    <p className="text-xs font-bold text-emerald-500 tracking-wider uppercase font-inter">{user.sovereign_id}</p>
-                                </div>
-                            </motion.div>
-                        </div>
-
-                        <div className="pt-6 flex gap-3">
-                            <Link
-                                href="/settings"
-                                className="flex-1 bg-white text-black text-center py-3 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter active:scale-95"
-                            >
-                                Modify Intel
-                            </Link>
-                            <div className="px-4 flex items-center border border-white/10 rounded-xl bg-white/5 group hover:border-white/20 transition-all cursor-help">
-                                <Shield className="w-4 h-4 text-zinc-600 group-hover:text-emerald-500 transition-colors" />
+                    {/* Right Column: Operational Intel */}
+                    <div className="space-y-4">
+                        {/* Intel section */}
+                        <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Globe className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Communication Hub</h2>
                             </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mb-1 font-inter">Primary Signal</p>
+                                        <p className="text-[11px] font-bold text-white uppercase font-inter truncate max-w-[180px]">{user.email}</p>
+                                    </div>
+                                    <Mail className="w-4 h-4 text-zinc-800" />
+                                </div>
+
+                                {isForwarder && (
+                                    <div className="pt-6 border-t border-white/5 space-y-6">
+                                        <div>
+                                            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mb-1 font-inter">Company Entity</p>
+                                            <p className="text-[11px] font-bold text-white uppercase font-inter">{user.company_name || 'PENDING'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest mb-1 font-inter">Operational Email</p>
+                                            <p className="text-[11px] font-bold text-white uppercase font-inter truncate max-w-[180px]">{user.company_email || 'PENDING'}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Tactical Actions */}
+                        <section className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <Fingerprint className="w-4 h-4 text-zinc-500" />
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest font-outfit">Sovereign Control</h2>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Link
+                                    href="/settings"
+                                    className="flex-1 bg-white text-black py-3 rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter text-center active:scale-95"
+                                >
+                                    Refine Node
+                                </Link>
+                                <button className="px-5 border border-white/10 rounded-xl hover:bg-white/5 transition-all text-zinc-600 hover:text-white">
+                                    <Shield className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </section>
+
+                        {/* Audit Info */}
+                        <div className="bg-emerald-500/[0.02] border border-emerald-500/10 rounded-2xl p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                                <p className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest font-inter">Sync Status: Optimal</p>
+                            </div>
+                            <p className="text-[8px] text-zinc-700 font-bold font-inter tracking-[0.1em]">L-14 PROTOCOL</p>
                         </div>
                     </div>
                 </div>

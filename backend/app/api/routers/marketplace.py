@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.models.marketplace import MarketplaceRequest, MarketplaceBid
+from app.models.marketplace import MarketplaceRequest, MarketplaceBid, ForwarderBidStatus
 from app.models.forwarder import Forwarder
 from sqlalchemy import select, func
 from datetime import datetime
@@ -10,8 +10,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from app.services.webhook import webhook_service
 from app.models.user import User
-from app.api import deps
-from app.api.deps import verify_n8n_webhook
+from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.services.activity import activity_service
 
@@ -48,10 +47,12 @@ def _fire_webhook(payload: dict):
     asyncio.run(webhook_service.trigger_marketplace_webhook(payload))
 
 @router.post("/submit")
+@router.post("/requests/create") # n8n Guide Compatibility Alias
 async def submit_request(
     request_in: MarketplaceSubmit,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """
     User submits a cargo quotation request via the 'Sovereign Protocol'.
@@ -63,22 +64,41 @@ async def submit_request(
             detail="Registered Partners cannot post shipment requests. Please use a Client account for shipping."
         )
 
-    # 1. Backend prepares the payload.
-    # 2. Backend fires the webhook to n8n (Intake).
-    # 3. Backend returns the n8n-assigned request_id to the frontend.
-    # 4. n8n is responsible for writing to both Sheets AND PostgreSQL.
+    # Logic: [SOVEREIGN_ID]-REQ-[COUNT+1] with collision safety
+    generated_req_id = None
+    offset = 0
+    while not generated_req_id:
+        count_stmt = select(func.count(MarketplaceRequest.id)).where(
+            MarketplaceRequest.user_sovereign_id == current_user.sovereign_id
+        )
+        count_res = await db.execute(count_stmt)
+        total_existing = count_res.scalar() or 0
+        candidate_id = f"{current_user.sovereign_id}-REQ-{total_existing + 1 + offset:02d}"
+        
+        # Check if candidate exists (prevents race condition collisions)
+        check_stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == candidate_id)
+        check_res = await db.execute(check_stmt)
+        if not check_res.scalars().first():
+            generated_req_id = candidate_id
+        else:
+            offset += 1 # Collision detected, increment and try again
+
+    # 2. Backend prepares the payload.
+    # 3. Backend fires the webhook to n8n (Intake).
+    # 4. Backend returns the generated request_id.
     
-    # Normalize Weight to KG for the Sovereign Mirror
+    # Normalize Weight to KG
     weight_kg = request_in.weight
     if request_in.weight_unit.upper() in ["LBS", "LB"]:
         weight_kg = request_in.weight * 0.453592
     
     payload = {
-        "user_id": request_in.user_id,
-        "sovereign_id": request_in.sovereign_id,
-        "name": request_in.name,
-        "email": request_in.email,
-        "phone": request_in.phone,
+        "request_id": generated_req_id,
+        "user_id": str(current_user.id),
+        "sovereign_id": current_user.sovereign_id,
+        "name": current_user.full_name or "Client",
+        "email": current_user.email,
+        "phone": current_user.phone_number or request_in.phone,
         "origin": request_in.origin,
         "origin_type": request_in.origin_type,
         "destination": request_in.destination,
@@ -101,15 +121,42 @@ async def submit_request(
         "currency": request_in.currency
     }
 
-    # Fire webhook synchronously to n8n (The Master Processor)
-    n8n_response = await webhook_service.trigger_marketplace_webhook(payload)
+    # 2. SAVE TO POSTGRESQL IMMEDIATELY (ZERO LAG DASHBOARD)
+    new_request = MarketplaceRequest(
+        request_id=generated_req_id,
+        user_sovereign_id=current_user.sovereign_id,
+        user_email=current_user.email,
+        user_phone=current_user.phone_number or request_in.phone,
+        user_name=current_user.full_name or "Client",
+        origin=request_in.origin,
+        origin_type=request_in.origin_type,
+        destination=request_in.destination,
+        destination_type=request_in.destination_type,
+        cargo_type=request_in.cargo_type,
+        commodity=request_in.commodity,
+        packing_type=request_in.packing_type,
+        quantity=request_in.quantity,
+        weight_kg=weight_kg,
+        dimensions=request_in.dimensions,
+        is_stackable=request_in.is_stackable,
+        is_hazardous=request_in.is_hazardous,
+        needs_insurance=request_in.needs_insurance,
+        target_date=datetime.fromisoformat(request_in.target_date.replace("Z", "+00:00")) if request_in.target_date else None,
+        special_requirements=request_in.special_requirements,
+        incoterms=request_in.incoterms,
+        currency=request_in.currency,
+        status="OPEN"
+    )
+    db.add(new_request)
+    await db.commit()
+    await db.refresh(new_request)
+
+    # 3. Backend fires the webhook to n8n (Intake Brain) via BackgroundTasks
+    # This makes the UI "Amazing" by not waiting for n8n's internal logic.
+    background_tasks.add_task(webhook_service.trigger_marketplace_webhook, payload)
     
-    if not n8n_response or not n8n_response.get("request_id"):
-        # Critical Fallback if n8n is unreachable
-        sid = request_in.sovereign_id or "OMEGO-0000"
-        request_id = f"{sid}-REQ-PENDING"
-    else:
-        request_id = n8n_response.get("request_id")
+    # We use the generated ID as the source of truth
+    request_id = generated_req_id
         
     # LOG ACTIVITY: Track the submission for the Sovereign Dashboard
     await activity_service.log(
@@ -118,7 +165,7 @@ async def submit_request(
         action="MARKETPLACE_SUBMIT",
         entity_type="REQUEST",
         entity_id=request_id,
-        extra_data=payload
+        metadata=payload
     )
         
     return {
@@ -130,26 +177,75 @@ async def submit_request(
         "normalized_weight_kg": round(weight_kg, 2)
     }
 
-@router.get("/user/{email}/requests")
-async def get_user_requests(email: str, db: AsyncSession = Depends(get_db)):
+@router.get("/my-requests")
+async def get_my_requests(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
-    Sovereign Dashboard: Fetches all requests for a specific user mirror.
+    ULTIMATE SHIPPER COCKPIT: Returns all requests for the current user.
+    Each request includes the list of quotations received so far.
     """
+    if current_user.role == "forwarder":
+        raise HTTPException(status_code=403, detail="Partners should use /api/forwarder/my-bids")
+
+    # SOVEREIGN IDENTITY RESOLUTION: 
+    # If the user is a partner (REG-), they might have historical requests under their old ID.
+    sovereign_id = current_user.sovereign_id
+    original_id = sovereign_id.replace("REG-", "") 
+    
+    # Fetch requests (Lookup both identity versions)
     stmt = select(MarketplaceRequest).where(
-        MarketplaceRequest.user_email == email
+        MarketplaceRequest.user_sovereign_id.in_([sovereign_id, original_id])
     ).order_by(MarketplaceRequest.submitted_at.desc())
     result = await db.execute(stmt)
     requests = result.scalars().all()
     
-    return [{
-        "request_id": r.request_id,
-        "origin": r.origin,
-        "destination": r.destination,
-        "cargo_type": r.cargo_type,
-        "status": r.status,
-        "quotation_count": r.quotation_count,
-        "submitted_at": r.submitted_at
-    } for r in requests]
+    response = []
+    for r in requests:
+        # Fetch quotes for this request
+        quote_stmt = select(MarketplaceBid).where(
+            MarketplaceBid.request_id == r.request_id
+        ).order_by(MarketplaceBid.total_price.asc())
+        quote_res = await db.execute(quote_stmt)
+        quotes = quote_res.scalars().all()
+        
+        response.append({
+            "request_id": r.request_id,
+            "origin": r.origin,
+            "destination": r.destination,
+            "cargo_type": r.cargo_type,
+            "commodity": r.commodity,
+            "quantity": r.quantity,
+            "is_hazardous": r.is_hazardous,
+            "needs_insurance": r.needs_insurance,
+            "status": r.status,
+            "quotation_count": r.quotation_count,
+            "submitted_at": r.submitted_at,
+            "quotations": [{
+                "quotation_id": q.quotation_id,
+                "forwarder_company": q.forwarder_company,
+                "total_price": float(q.total_price),
+                "currency": q.currency,
+                "transit_days": q.transit_days,
+                "ai_summary": q.ai_summary,
+                "received_at": q.received_at
+            } for q in quotes]
+        })
+        
+    return {
+        "success": True,
+        "sovereign_id": current_user.sovereign_id,
+        "requests": response
+    }
+
+@router.get("/user/{email}/requests")
+async def legacy_get_user_requests(email: str, db: AsyncSession = Depends(get_db)):
+    """Legacy bridge for email-based lookup."""
+    stmt = select(MarketplaceRequest).where(MarketplaceRequest.user_email == email).order_by(MarketplaceRequest.submitted_at.desc())
+    result = await db.execute(stmt)
+    requests = result.scalars().all()
+    return [{"request_id": r.request_id, "status": r.status} for r in requests]
 
 @router.get("/request/{request_id}")
 async def get_request_details(request_id: str, db: AsyncSession = Depends(get_db)):
@@ -205,12 +301,21 @@ class N8nRequestSync(BaseModel):
     request_id: str
     user_sovereign_id: str
     user_email: str
+    user_phone: Optional[str] = None
     user_name: str
     origin: str
+    origin_type: str = "PORT"
     destination: str
+    destination_type: str = "PORT"
     cargo_type: str
+    commodity: str = ""
+    packing_type: str = "PALLETS"
+    quantity: int = 1
     weight_kg: float
     dimensions: str = ""
+    is_stackable: bool = True
+    is_hazardous: bool = False
+    needs_insurance: bool = False
     special_requirements: str = ""
     incoterms: str = "FOB"
     currency: str = "USD"
@@ -227,12 +332,21 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
         request_id=sync_in.request_id,
         user_sovereign_id=sync_in.user_sovereign_id,
         user_email=sync_in.user_email,
+        user_phone=sync_in.user_phone,
         user_name=sync_in.user_name,
         origin=sync_in.origin,
+        origin_type=sync_in.origin_type,
         destination=sync_in.destination,
+        destination_type=sync_in.destination_type,
         cargo_type=sync_in.cargo_type,
+        commodity=sync_in.commodity,
+        packing_type=sync_in.packing_type,
+        quantity=sync_in.quantity,
         weight_kg=sync_in.weight_kg,
         dimensions=sync_in.dimensions,
+        is_stackable=sync_in.is_stackable,
+        is_hazardous=sync_in.is_hazardous,
+        needs_insurance=sync_in.needs_insurance,
         special_requirements=sync_in.special_requirements,
         incoterms=sync_in.incoterms,
         currency=sync_in.currency,
@@ -367,3 +481,40 @@ async def n8n_quote_sync(
         "success": True,
         "request_id": sync_in.request_id
     }
+
+class N8nBidStatusSync(BaseModel):
+    request_id: str
+    forwarder_id: str
+    status: str
+    price: Optional[float] = None
+    attempted_at: Optional[str] = None
+    quoted_at: Optional[str] = None
+
+@router.post("/bid-status-sync", dependencies=[Depends(verify_n8n_webhook)])
+async def n8n_bid_status_sync(sync_in: N8nBidStatusSync, db: AsyncSession = Depends(get_db)):
+    """
+    WF2 calls this to log bid attempts (ANSWERED, DECLINED_LATE, DUPLICATE).
+    Ensures the forwarder dashboard is in sync with the n8n Brain.
+    """
+    stmt = pg_insert(ForwarderBidStatus).values(
+        request_id=sync_in.request_id,
+        forwarder_id=sync_in.forwarder_id,
+        status=sync_in.status,
+        quoted_price=sync_in.price,
+        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")) if sync_in.attempted_at else datetime.utcnow(),
+        quoted_at=datetime.fromisoformat(sync_in.quoted_at.replace("Z", "+00:00")) if sync_in.quoted_at else None
+    )
+    
+    stmt = stmt.on_conflict_do_update(
+        index_elements=[ForwarderBidStatus.request_id, ForwarderBidStatus.forwarder_id],
+        set_={
+            "status": stmt.excluded.status,
+            "quoted_price": stmt.excluded.quoted_price or ForwarderBidStatus.quoted_price,
+            "quoted_at": stmt.excluded.quoted_at or ForwarderBidStatus.quoted_at
+        }
+    )
+    
+    await db.execute(stmt)
+    await db.commit()
+    
+    return {"success": True, "request_id": sync_in.request_id, "forwarder_id": sync_in.forwarder_id}

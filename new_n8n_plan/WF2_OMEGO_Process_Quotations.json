@@ -1,0 +1,893 @@
+{
+  "name": "WF2 - OMEGO Process Quotation Replies (AI + 3-Quote Limit)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ],
+          "includeSpamTrash": false
+        },
+        "options": {
+          "attachments": false,
+          "dataPropertyAttachmentsPrefixName": "attachment_"
+        }
+      },
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger - Monitor Inbox",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract request_id from email subject\nconst subject = $json.subject || '';\nconst from = $json.from || '';\nconst body = $json.textPlain || $json.textHtml || '';\n\n// Regex to find OMEGO-XXXX-REQ-XX pattern\nconst regex = /OMEGO-\\d{4}-REQ-\\d{2}/;\nconst match = subject.match(regex);\n\nif (!match) {\n  throw new Error('Request ID not found in subject');\n}\n\nconst requestId = match[0];\n\n// Extract sender email\nconst emailRegex = /<(.+?)>|([\\w.-]+@[\\w.-]+\\.\\w+)/;\nconst emailMatch = from.match(emailRegex);\nconst senderEmail = emailMatch ? (emailMatch[1] || emailMatch[2]) : from;\n\nreturn {\n  json: {\n    request_id: requestId,\n    sender_email: senderEmail.toLowerCase().trim(),\n    email_subject: subject,\n    email_body: body,\n    received_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "extract-request-id",
+      "name": "Code - Extract Request ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        400
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM forwarders WHERE LOWER(email) = '{{ $json.sender_email }}' AND (status = 'APPROVED' OR status = 'ACTIVE')",
+        "options": {}
+      },
+      "id": "verify-forwarder",
+      "name": "PostgreSQL - Verify Forwarder",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        680,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "check-forwarder-exists",
+      "name": "Forwarder Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT status, quotation_count FROM requests WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "check-request-status",
+      "name": "PostgreSQL - Check Request Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equals",
+              "value2": "OPEN"
+            }
+          ]
+        }
+      },
+      "id": "check-is-open",
+      "name": "Request is OPEN?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as existing_count FROM quotations WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "count-existing-quotes",
+      "name": "PostgreSQL - Count Existing Quotes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        1560,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.existing_count }}",
+              "operation": "smaller",
+              "value2": 3
+            }
+          ]
+        }
+      },
+      "id": "check-under-3-quotes",
+      "name": "Less than 3 Quotes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as duplicate_count FROM quotations WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}' AND forwarder_id = '{{ $('PostgreSQL - Verify Forwarder').item.json.forwarder_id }}'",
+        "options": {}
+      },
+      "id": "check-duplicate",
+      "name": "PostgreSQL - Check Duplicate",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2000,
+        100
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.duplicate_count }}",
+              "operation": "equals",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "check-not-duplicate",
+      "name": "Not Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a freight quotation extraction AI. Extract structured data from forwarder quotation emails.\\n\\nExtract these fields from the email:\\n- total_price: The numeric price (extract just the number, no currency symbols)\\n- currency: Currency code (USD, EUR, etc.)\\n- transit_days: Transit time in days (extract just the number)\\n- validity_days: Quote validity in days (default to 7 if not mentioned)\\n- carrier: Shipping line/carrier name (e.g., Maersk, CMA CGM)\\n- service_type: Service type (e.g., FCL, LCL, Air Freight)\\n- notes: Any additional important information\\n\\nRespond ONLY with a valid JSON object. No preamble, no explanation, no markdown code blocks. Example:\\n{\\n  \\\"total_price\\\": 2500,\\n  \\\"currency\\\": \\\"USD\\\",\\n  \\\"transit_days\\\": 15,\\n  \\\"validity_days\\\": 7,\\n  \\\"carrier\\\": \\\"Maersk\\\",\\n  \\\"service_type\\\": \\\"FCL Direct\\\",\\n  \\\"notes\\\": \\\"Direct service, no transshipment\\\"\\n}\\n\\nIf any field cannot be determined, use null.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ $('Code - Extract Request ID').item.json.email_body }}\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+        "options": {}
+      },
+      "id": "ai-extract",
+      "name": "OpenAI GPT-4 - Extract Quotation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2440,
+        0
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "5",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and validate OpenAI response\nconst openaiResponse = $json;\n\n// OpenAI returns: { choices: [{ message: { content: '{...}' } }] }\nlet aiResponseText = '';\n\nif (openaiResponse.choices && openaiResponse.choices[0] && openaiResponse.choices[0].message) {\n  aiResponseText = openaiResponse.choices[0].message.content;\n} else if (openaiResponse.response) {\n  aiResponseText = openaiResponse.response;\n} else if (openaiResponse.text) {\n  aiResponseText = openaiResponse.text;\n} else {\n  throw new Error('Could not find AI response in OpenAI output: ' + JSON.stringify(openaiResponse));\n}\n\nlet extractedData;\ntry {\n  // Remove markdown code blocks if present\n  let cleanedResponse = aiResponseText.replace(/```json\\n|```/g, '').trim();\n  extractedData = JSON.parse(cleanedResponse);\n} catch (e) {\n  throw new Error('AI response is not valid JSON: ' + aiResponseText);\n}\n\n// Validate required fields\nif (!extractedData.total_price || !extractedData.currency) {\n  throw new Error('Missing required fields: total_price or currency');\n}\n\n// Get data from previous nodes\nconst requestData = $('Code - Extract Request ID').item.json;\nconst forwarderData = $('PostgreSQL - Verify Forwarder').item.json;\nconst existingCount = $('PostgreSQL - Count Existing Quotes').item.json.existing_count;\n\n// Generate quotation_id\nconst quotationNumber = existingCount + 1;\nconst quotationId = `${requestData.request_id}-Q${quotationNumber}`;\n\n// Create AI summary\nconst aiSummary = `${forwarderData.company_name} offers ${extractedData.currency} ${extractedData.total_price} for ${extractedData.transit_days || 'N/A'} days transit via ${extractedData.carrier || 'carrier TBD'}.`;\n\nreturn {\n  json: {\n    quotation_id: quotationId,\n    request_id: requestData.request_id,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_company: forwarderData.company_name,\n    total_price: extractedData.total_price,\n    currency: extractedData.currency,\n    transit_days: extractedData.transit_days || null,\n    validity_days: extractedData.validity_days || 7,\n    carrier: extractedData.carrier || 'Not specified',\n    service_type: extractedData.service_type || 'Not specified',\n    notes: extractedData.notes || '',\n    ai_summary: aiSummary,\n    raw_email: requestData.email_body,\n    status: 'ACTIVE',\n    received_at: requestData.received_at,\n    expires_at: new Date(Date.now() + (extractedData.validity_days || 7) * 24 * 60 * 60 * 1000).toISOString()\n  }\n};"
+      },
+      "id": "validate-ai-output",
+      "name": "Code - Validate AI Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2660,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "quotations",
+        "columns": "quotation_id,request_id,forwarder_id,forwarder_company,total_price,currency,transit_days,validity_days,carrier,service_type,notes,ai_summary,raw_email,status,received_at,expires_at",
+        "additionalFields": {}
+      },
+      "id": "save-quotation",
+      "name": "PostgreSQL - Save Quotation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2880,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE requests SET quotation_count = quotation_count + 1 WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "update-count",
+      "name": "PostgreSQL - Update Quote Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        3100,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "forwarder_bid_status",
+        "columns": "forwarder_id,request_id,status,quoted_at",
+        "additionalFields": {}
+      },
+      "id": "update-forwarder-status",
+      "name": "PostgreSQL - Update Forwarder Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        3320,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT quotation_count FROM requests WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "get-updated-count",
+      "name": "PostgreSQL - Get Updated Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        3540,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.quotation_count }}",
+              "operation": "equals",
+              "value2": 3
+            }
+          ]
+        }
+      },
+      "id": "check-3-quotes",
+      "name": "Reached 3 Quotes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        3760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $env.WF3_AUTO_CLOSE_WORKFLOW_ID }}",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "trigger-wf3",
+      "name": "Execute Workflow - Trigger WF3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        3980,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.email, u.full_name FROM requests r JOIN users u ON u.sovereign_id = r.user_sovereign_id WHERE r.request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "get-user-email",
+      "name": "PostgreSQL - Get User Email",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        3980,
+        100
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "🎉 New quote received for {{ $('Code - Extract Request ID').item.json.request_id }}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; background: white; }\n    .header { background: #28A745; color: white; padding: 30px; text-align: center; }\n    .content { padding: 30px; }\n    .quote-box { background: #E8F4F8; padding: 20px; border-radius: 5px; border-left: 4px solid #2E75B6; margin: 20px 0; }\n    .price { font-size: 32px; font-weight: bold; color: #2E75B6; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🎉 New Quotation Received!</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear {{ $json.full_name }},</p>\n      <p>Great news! A new quotation has been submitted for your request <strong>{{ $('Code - Extract Request ID').item.json.request_id }}</strong>.</p>\n      <div class=\"quote-box\">\n        <h3 style=\"margin-top: 0;\">{{ $('Code - Validate AI Output').item.json.forwarder_company }}</h3>\n        <div class=\"price\">{{ $('Code - Validate AI Output').item.json.currency }} {{ $('Code - Validate AI Output').item.json.total_price }}</div>\n        <p><strong>Transit Time:</strong> {{ $('Code - Validate AI Output').item.json.transit_days || 'TBD' }} days</p>\n        <p><strong>Carrier:</strong> {{ $('Code - Validate AI Output').item.json.carrier }}</p>\n        <p><strong>Service:</strong> {{ $('Code - Validate AI Output').item.json.service_type }}</p>\n      </div>\n      <p><strong>Current Status:</strong> {{ $('PostgreSQL - Get Updated Count').item.json.quotation_count }}/3 quotations received</p>\n      <p>{{ $('PostgreSQL - Get Updated Count').item.json.quotation_count === 3 ? '✅ Your request has received 3 quotes and will be closed shortly. Check your email for a comparison!' : '⏳ Waiting for more quotations...' }}</p>\n      <p style=\"margin-top: 30px;\">\n        <a href=\"https://omegoonline.com/dashboard/requests/{{ $('Code - Extract Request ID').item.json.request_id }}\" style=\"background: #2E75B6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;\">View All Quotes</a>\n      </p>\n    </div>\n    <div class=\"footer\">\n      <p>OMEGO Freight Forwarding Platform</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "notify-user",
+      "name": "Gmail - Notify User",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4200,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth - Support"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code - Extract Request ID').item.json.sender_email }}",
+        "subject": "✅ Your quote for {{ $('Code - Extract Request ID').item.json.request_id }} received",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; background: white; }\n    .header { background: #28A745; color: white; padding: 30px; text-align: center; }\n    .content { padding: 30px; }\n    .status-box { background: #D4EDDA; border: 2px solid #28A745; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>✅ Quotation Submitted Successfully</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear {{ $('PostgreSQL - Verify Forwarder').item.json.company_name }},</p>\n      <p>Your quotation for request <strong>{{ $('Code - Extract Request ID').item.json.request_id }}</strong> has been successfully received and processed.</p>\n      <div class=\"status-box\">\n        <h2 style=\"margin: 0; color: #28A745;\">✓ STATUS: ANSWERED</h2>\n        <p style=\"margin: 10px 0 0 0;\">Your quote has been submitted to the customer</p>\n      </div>\n      <p><strong>Your Quotation Summary:</strong></p>\n      <ul>\n        <li>Price: {{ $('Code - Validate AI Output').item.json.currency }} {{ $('Code - Validate AI Output').item.json.total_price }}</li>\n        <li>Transit: {{ $('Code - Validate AI Output').item.json.transit_days || 'TBD' }} days</li>\n        <li>Valid for: {{ $('Code - Validate AI Output').item.json.validity_days }} days</li>\n      </ul>\n      <p><strong>What happens next?</strong></p>\n      <p>The customer will review all quotations and may contact you directly if they choose your offer. You can track the status of this bid in your partner dashboard.</p>\n    </div>\n    <div class=\"footer\">\n      <p>OMEGO Freight Forwarding Platform</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "confirm-forwarder",
+      "name": "Gmail - Confirm to Forwarder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4200,
+        200
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "n8n_events_logs",
+        "columns": "event_type,request_id,description",
+        "additionalFields": {}
+      },
+      "id": "log-quote-received",
+      "name": "PostgreSQL - Log Quote Event",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        4420,
+        150
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code - Extract Request ID').item.json.sender_email }}",
+        "subject": "❌ Quote DECLINED - {{ $('Code - Extract Request ID').item.json.request_id }}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; background: white; }\n    .header { background: #DC3545; color: white; padding: 30px; text-align: center; }\n    .content { padding: 30px; }\n    .status-box { background: #F8D7DA; border: 2px solid #DC3545; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>❌ Quotation Declined</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear Forwarder,</p>\n      <p>Thank you for your quotation for request <strong>{{ $('Code - Extract Request ID').item.json.request_id }}</strong>.</p>\n      <div class=\"status-box\">\n        <h2 style=\"margin: 0; color: #DC3545;\">✗ STATUS: DECLINED</h2>\n        <p style=\"margin: 10px 0 0 0;\">This request already has 3 quotations</p>\n      </div>\n      <p><strong>Reason:</strong> This request has already received the maximum of 3 quotations and has been automatically closed. No further quotations can be accepted.</p>\n      <p>We appreciate your interest and look forward to working with you on future requests. You'll continue to receive notifications for new freight requests that match your specializations.</p>\n    </div>\n    <div class=\"footer\">\n      <p>OMEGO Freight Forwarding Platform</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "send-declined-email",
+      "name": "Gmail - Send DECLINED Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2000,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "forwarder_bid_status",
+        "columns": "forwarder_id,request_id,status,attempted_at",
+        "additionalFields": {}
+      },
+      "id": "log-declined-status",
+      "name": "PostgreSQL - Log DECLINED Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2220,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "rejected_attempts",
+        "columns": "timestamp,sender_email,request_id,error_type,error_message",
+        "additionalFields": {}
+      },
+      "id": "log-rejected",
+      "name": "PostgreSQL - Log Rejected Attempt",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2440,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code - Extract Request ID').item.json.sender_email }}",
+        "subject": "❌ Request CLOSED - {{ $('Code - Extract Request ID').item.json.request_id }}",
+        "message": "Dear Forwarder,\n\nThank you for your interest in request {{ $('Code - Extract Request ID').item.json.request_id }}.\n\nUnfortunately, this request status is CLOSED and is no longer accepting quotations.\n\nWe appreciate your interest and look forward to working with you on future opportunities.\n\nBest regards,\nOMEGO Platform",
+        "options": {}
+      },
+      "id": "send-closed-email",
+      "name": "Gmail - Send Request CLOSED Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        400
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code - Extract Request ID').item.json.sender_email }}",
+        "subject": "❌ Registration Required - OMEGO Platform",
+        "message": "Hello,\n\nWe received your email regarding a freight quotation, but your email address ({{ $('Code - Extract Request ID').item.json.sender_email }}) is not registered in our OMEGO partner network.\n\nTo submit quotations, please register as a partner at:\nhttps://omegoonline.com/register-partner\n\nOnce approved, you'll be able to receive and respond to freight requests.\n\nBest regards,\nOMEGO Platform",
+        "options": {}
+      },
+      "id": "send-unknown-sender",
+      "name": "Gmail - Unknown Sender Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        500
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger - Monitor Inbox": {
+      "main": [
+        [
+          {
+            "node": "Code - Extract Request ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Extract Request ID": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Verify Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Verify Forwarder": {
+      "main": [
+        [
+          {
+            "node": "Forwarder Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forwarder Exists?": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Check Request Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - Unknown Sender Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Check Request Status": {
+      "main": [
+        [
+          {
+            "node": "Request is OPEN?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request is OPEN?": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Count Existing Quotes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - Send Request CLOSED Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Count Existing Quotes": {
+      "main": [
+        [
+          {
+            "node": "Less than 3 Quotes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Less than 3 Quotes?": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Check Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - Send DECLINED Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Check Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Not Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "OpenAI GPT-4 - Extract Quotation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4 - Extract Quotation": {
+      "main": [
+        [
+          {
+            "node": "Code - Validate AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Validate AI Output": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Save Quotation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Save Quotation": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Update Quote Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Update Quote Count": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Update Forwarder Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Update Forwarder Status": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Get Updated Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Get Updated Count": {
+      "main": [
+        [
+          {
+            "node": "Reached 3 Quotes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reached 3 Quotes?": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow - Trigger WF3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PostgreSQL - Get User Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostgreSQL - Get User Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Get User Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Notify User",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail - Confirm to Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Notify User": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Quote Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Confirm to Forwarder": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Quote Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send DECLINED Email": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log DECLINED Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Log DECLINED Status": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Rejected Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2024-02-26T00:00:00.000Z",
+  "versionId": "1"
+}

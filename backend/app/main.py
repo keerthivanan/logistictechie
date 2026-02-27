@@ -7,6 +7,8 @@ from collections import defaultdict
 from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks
 from app.core.config import settings
 from contextlib import asynccontextmanager
+from app.models.user import User
+from app.api.deps import get_current_user
 
 import asyncio
 
@@ -94,6 +96,14 @@ async def global_quote_sync(sync_in: marketplace.N8nQuoteSync, db: AsyncSession 
 @app.post("/api/requests/close", tags=["n8n Global Bridge"])
 async def global_request_close(sync_in: marketplace.N8nStatusUpdate, db: AsyncSession = Depends(get_db)):
     return await marketplace.n8n_requests_close(sync_in, db)
+
+@app.post("/api/bid-status-sync", tags=["n8n Global Bridge"])
+async def global_bid_status_sync(sync_in: marketplace.N8nBidStatusSync, db: AsyncSession = Depends(get_db)):
+    return await marketplace.n8n_bid_status_sync(sync_in, db)
+
+@app.get("/api/forwarder/my-bids", tags=["n8n Global Bridge"]) # Singular alias for Guide Step 10
+async def global_forwarder_my_bids(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return await forwarders.get_forwarder_bids(db, current_user)
 
 
 @app.get("/health")

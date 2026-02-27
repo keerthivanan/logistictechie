@@ -81,6 +81,7 @@ class UserResponse(BaseModel):
     sovereign_id: Optional[str] = None
     full_name: Optional[str] = None
     company_name: Optional[str] = None
+    company_email: Optional[str] = None
     phone_number: Optional[str] = None
     avatar_url: Optional[str] = None
     preferences: Optional[str] = None

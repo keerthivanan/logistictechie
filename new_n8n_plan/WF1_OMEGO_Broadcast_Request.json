@@ -1,0 +1,429 @@
+{
+  "name": "WF1 - OMEGO Broadcast Request to Forwarders",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "broadcast-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Trigger from Backend",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "omego-broadcast-webhook"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM requests WHERE request_id = '{{ $json.request_id }}'",
+        "options": {}
+      },
+      "id": "read-request",
+      "name": "PostgreSQL - Read Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT full_name, email FROM users WHERE sovereign_id = '{{ $json.sovereign_id }}'",
+        "options": {}
+      },
+      "id": "read-user",
+      "name": "PostgreSQL - Read User",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        680,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM forwarders WHERE status = 'APPROVED' OR status = 'ACTIVE'",
+        "options": {}
+      },
+      "id": "read-forwarders",
+      "name": "PostgreSQL - Read Active Forwarders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        900,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter forwarders by specialization\nconst requestData = $('PostgreSQL - Read Request').first().json;\nconst cargoType = requestData.cargo_type;\nconst forwarders = $input.all();\n\nconst relevantForwarders = forwarders.filter(f => {\n  const specs = (f.json.specializations || '').toLowerCase();\n  const cargoMatch = specs.includes(cargoType.toLowerCase()) || \n                     specs.includes('all') || \n                     specs === '';\n  return cargoMatch;\n});\n\nreturn relevantForwarders;"
+      },
+      "id": "filter-forwarders",
+      "name": "Code - Filter by Specialization",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-batches",
+      "name": "Split Into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1340,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build email for current forwarder\nconst requestData = $('PostgreSQL - Read Request').first().json;\nconst userData = $('PostgreSQL - Read User').first().json;\nconst forwarderData = $json;\n\nconst emailSubject = `🚢 [NEW REQUEST] ${requestData.request_id} - ${requestData.origin} to ${requestData.destination}`;\n\nconst emailBody = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }\n    .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }\n    .header { background: #2E75B6; color: white; padding: 30px; text-align: center; }\n    .header h1 { margin: 0; font-size: 28px; }\n    .content { padding: 30px; }\n    .request-id { font-size: 24px; font-weight: bold; color: #2E75B6; margin: 20px 0; text-align: center; border: 2px solid #2E75B6; padding: 15px; border-radius: 5px; background: #E8F4F8; }\n    .details { background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2E75B6; }\n    .detail-row { margin: 12px 0; display: flex; }\n    .label { font-weight: bold; color: #666; min-width: 150px; }\n    .value { color: #333; }\n    .highlight-box { background: #FFF3CD; border: 2px solid #FFC107; padding: 15px; border-radius: 5px; margin: 20px 0; }\n    .cta-button { display: inline-block; background: #28A745; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 16px; }\n    .cta-button:hover { background: #218838; }\n    .instructions { background: #E8F4F8; padding: 20px; border-radius: 5px; margin: 20px 0; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #666; }\n    ul { padding-left: 25px; }\n    ul li { margin: 8px 0; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🚢 New Freight Request</h1>\n      <p style=\"margin: 10px 0 0 0; font-size: 16px;\">OMEGO Marketplace</p>\n    </div>\n    \n    <div class=\"content\">\n      <div class=\"request-id\">${requestData.request_id}</div>\n      \n      <p>Dear ${forwarderData.company_name},</p>\n      \n      <p>A new freight request has been posted on the OMEGO platform that matches your expertise. Please review the details below and submit your competitive quotation.</p>\n      \n      <div class=\"details\">\n        <div class=\"detail-row\">\n          <span class=\"label\">📍 Origin:</span>\n          <span class=\"value\">${requestData.origin}</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">📍 Destination:</span>\n          <span class=\"value\">${requestData.destination}</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">📦 Cargo Type:</span>\n          <span class=\"value\">${requestData.cargo_type}</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">⚖️ Weight:</span>\n          <span class=\"value\">${requestData.weight_kg} kg</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">📐 Dimensions:</span>\n          <span class=\"value\">${requestData.dimensions || 'Not specified'}</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">📋 Incoterms:</span>\n          <span class=\"value\">${requestData.incoterms}</span>\n        </div>\n        <div class=\"detail-row\">\n          <span class=\"label\">📝 Special Requirements:</span>\n          <span class=\"value\">${requestData.special_requirements || 'None'}</span>\n        </div>\n      </div>\n      \n      <div class=\"highlight-box\">\n        <strong>⏰ IMPORTANT: First 3 Quotes Win!</strong><br>\n        This request will automatically close once <strong>3 quotations</strong> are received. Submit your quote quickly to secure your spot!\n      </div>\n      \n      <div class=\"instructions\">\n        <h3 style=\"margin-top: 0; color: #2E75B6;\">📧 How to Submit Your Quotation:</h3>\n        <p><strong>Simply REPLY to this email</strong> with your quote including:</p>\n        <ul>\n          <li><strong>Total price</strong> (with currency, e.g., USD 2,500)</li>\n          <li><strong>Transit time</strong> (in days)</li>\n          <li><strong>Validity period</strong> (e.g., 7 days)</li>\n          <li><strong>Carrier/shipping line</strong> (e.g., Maersk, CMA CGM)</li>\n          <li><strong>Service type</strong> (e.g., FCL Direct, LCL)</li>\n          <li><strong>Any additional charges or terms</strong></li>\n        </ul>\n        <p><strong>⚠️ CRITICAL:</strong> Keep the Request ID (<strong>${requestData.request_id}</strong>) in your reply subject line. Our AI system uses this to match your quote.</p>\n      </div>\n      \n      <div style=\"text-align: center;\">\n        <a href=\"mailto:quote@omegoonline.com?subject=RE: ${requestData.request_id} Quote\" class=\"cta-button\">\n          📧 Reply with Your Quote\n        </a>\n      </div>\n      \n      <p style=\"margin-top: 30px; font-size: 14px; color: #666;\">\n        <strong>Note:</strong> Only registered and approved forwarders can submit quotations. Your quote will be processed by our AI system and presented to the customer along with other competitive quotes.\n      </p>\n    </div>\n    \n    <div class=\"footer\">\n      <p><strong>OMEGO Freight Forwarding Platform</strong></p>\n      <p>This is an automated notification. Replies will be processed by our AI system.</p>\n      <p style=\"margin-top: 10px;\">© 2024 OMEGO. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    email_to: forwarderData.email,\n    email_subject: emailSubject,\n    email_body: emailBody,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_company: forwarderData.company_name,\n    request_id: requestData.request_id\n  }\n};"
+      },
+      "id": "build-email",
+      "name": "Code - Build Email Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email_to }}",
+        "subject": "={{ $json.email_subject }}",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {
+          "replyTo": "quote@omegoonline.com"
+        }
+      },
+      "id": "send-gmail",
+      "name": "Gmail - Send to Forwarder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1780,
+        300
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "n8n_broadcast_logs",
+        "columns": "request_id,forwarder_id,forwarder_company,email_sent,whatsapp_sent,sent_at",
+        "additionalFields": {}
+      },
+      "id": "log-broadcast",
+      "name": "PostgreSQL - Log Broadcast",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2000,
+        300
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      },
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Split Into Batches').item.json.context.noItemsLeft }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-batches-done",
+      "name": "All Batches Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Count total forwarders notified\nconst broadcastLogs = $('PostgreSQL - Log Broadcast').all();\nconst requestData = $('PostgreSQL - Read Request').first().json;\nconst userData = $('PostgreSQL - Read User').first().json;\n\nreturn {\n  json: {\n    total_notified: broadcastLogs.length,\n    request_id: requestData.request_id,\n    user_email: userData.email,\n    user_name: userData.full_name\n  }\n};"
+      },
+      "id": "summary",
+      "name": "Code - Create Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.user_email }}",
+        "subject": "✅ Your request {{ $json.request_id }} is live!",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; background: white; }\n    .header { background: #28A745; color: white; padding: 30px; text-align: center; }\n    .content { padding: 30px; }\n    .stats { background: #E8F4F8; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center; }\n    .big-number { font-size: 48px; font-weight: bold; color: #2E75B6; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>✅ Request Broadcasted Successfully!</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear {{ $json.user_name }},</p>\n      <p>Your freight request <strong>{{ $json.request_id }}</strong> has been successfully posted on the OMEGO marketplace!</p>\n      <div class=\"stats\">\n        <div class=\"big-number\">{{ $json.total_notified }}</div>\n        <p>Forwarders Notified</p>\n      </div>\n      <p><strong>What happens next?</strong></p>\n      <ul>\n        <li>Forwarders will review your request and submit competitive quotations</li>\n        <li>You'll receive an email notification for each quote received</li>\n        <li><strong>The request will automatically close after receiving 3 quotations</strong></li>\n        <li>You can compare all quotes and choose the best option</li>\n      </ul>\n      <p><strong>Expected timeline:</strong> Most quotations arrive within 24-48 hours.</p>\n      <p style=\"margin-top: 30px;\">\n        <a href=\"https://omegoonline.com/dashboard\" style=\"background: #2E75B6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;\">View Dashboard</a>\n      </p>\n    </div>\n    <div class=\"footer\">\n      <p>OMEGO Freight Forwarding Platform</p>\n      <p>© 2024 OMEGO. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "confirm-user",
+      "name": "Gmail - Send User Confirmation",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2660,
+        200
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth - Support"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "n8n_events_logs",
+        "columns": "event_type,request_id,description",
+        "additionalFields": {}
+      },
+      "id": "log-event",
+      "name": "PostgreSQL - Log Event",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2880,
+        200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"request_id\": $('PostgreSQL - Read Request').first().json.request_id, \"forwarders_notified\": $('Code - Create Summary').first().json.total_notified, \"message\": \"Request broadcasted successfully\" } }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        3100,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Trigger from Backend": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Read Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Read Request": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Read User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Read User": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Read Active Forwarders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Read Active Forwarders": {
+      "main": [
+        [
+          {
+            "node": "Code - Filter by Specialization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Filter by Specialization": {
+      "main": [
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Code - Build Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build Email Content": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send to Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send to Forwarder": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Broadcast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Log Broadcast": {
+      "main": [
+        [
+          {
+            "node": "All Batches Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Batches Complete?": {
+      "main": [
+        [
+          {
+            "node": "Code - Create Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Create Summary": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send User Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send User Confirmation": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Log Event": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2024-02-26T00:00:00.000Z",
+  "versionId": "1"
+}

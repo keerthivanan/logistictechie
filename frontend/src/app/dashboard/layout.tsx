@@ -71,6 +71,11 @@ export default function DashboardLayout({
         { name: 'Forwarders', href: '/forwarders', icon: Users },
     ]
 
+    const partnerNav = [
+        { name: 'Partner Center', href: '/dashboard/partner', icon: Zap },
+        { name: 'Service Profile', href: '/profile', icon: Settings },
+    ]
+
     return (
         <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black flex">
             {/* Sidebar */}
@@ -130,6 +135,25 @@ export default function DashboardLayout({
                             ))}
                         </nav>
                     </div>
+
+                    {/* Partner Section (Dynamic) */}
+                    {user?.role === 'forwarder' && (
+                        <div>
+                            <h3 className="px-4 text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-4">Partner Center</h3>
+                            <nav className="space-y-1">
+                                {partnerNav.map((item) => (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all group"
+                                    >
+                                        <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-white" />
+                                        <span className="text-sm tracking-tight">{item.name}</span>
+                                    </Link>
+                                ))}
+                            </nav>
+                        </div>
+                    )}
                 </div>
 
                 {/* Account Section - User Center */}

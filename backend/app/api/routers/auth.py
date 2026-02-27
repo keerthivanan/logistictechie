@@ -151,7 +151,8 @@ async def social_sync(
             "sub": user.email, 
             "user_id": user.id, 
             "name": user.full_name or "User",
-            "sovereign_id": user.sovereign_id
+            "sovereign_id": user.sovereign_id,
+            "role": user.role # ADDED: Role Visibility
         },
         expires_delta=access_token_expires
     )
@@ -167,6 +168,7 @@ async def social_sync(
         "user_name": user.full_name or "User",
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
+        "role": user.role, # ADDED: Role Visibility
         "avatar_url": user.avatar_url
     }
 
@@ -242,7 +244,12 @@ async def login_for_access_token(
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.email, "user_id": user.id, "name": user.full_name or "User"},
+        data={
+            "sub": user.email, 
+            "user_id": user.id, 
+            "name": user.full_name or "User",
+            "role": user.role # ADDED: Role Visibility
+        },
         expires_delta=access_token_expires
     )
     refresh_token = security.create_refresh_token(
@@ -266,6 +273,7 @@ async def login_for_access_token(
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
+        "role": user.role, # ADDED: Role Visibility
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url
     }
@@ -390,6 +398,9 @@ async def read_users_me(
         "id": str(user.id),
         "email": user.email,
         "full_name": user.full_name,
+        "company_name": user.company_name,
+        "company_email": user.company_email,
+        "phone_number": user.phone_number,
         "sovereign_id": user.sovereign_id,
         "onboarding_completed": user.onboarding_completed,
         "avatar_url": user.avatar_url,

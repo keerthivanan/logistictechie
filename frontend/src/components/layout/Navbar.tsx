@@ -128,7 +128,7 @@ export default function Navbar() {
 
                     {user?.role === 'forwarder' && (
                         <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 hover:text-white transition-colors flex items-center gap-1.5">
-                            <ShieldCheck className="w-3 h-3" /> Secure Portal
+                            <ShieldCheck className="w-3 h-3" />
                         </Link>
                     )}
 

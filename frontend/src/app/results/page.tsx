@@ -9,12 +9,21 @@ import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle } from 
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import { useAuth } from '@/context/AuthContext'
 
 // Separate component for search params logic to avoid Suspense boundary issues
 function ResultsContent() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
+
+  // --- Role Protection ---
+  useEffect(() => {
+    if (!authLoading && user?.role === 'forwarder') {
+      router.push('/dashboard')
+    }
+  }, [user, authLoading, router])
   const [quotes, setQuotes] = useState<any[]>([])
   const [filteredQuotes, setFilteredQuotes] = useState<any[]>([])
   const [error, setError] = useState('')
