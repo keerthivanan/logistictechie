@@ -39,7 +39,7 @@ class Settings(BaseSettings):
 
     # CORS & RATE LIMITING
     # We load the raw string and then parse it via property
-    ALLOWED_ORIGINS_RAW: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
+    ALLOWED_ORIGINS_RAW: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8000,http://127.0.0.1:8000"
     
     @property
     def ALLOWED_ORIGINS(self) -> list:

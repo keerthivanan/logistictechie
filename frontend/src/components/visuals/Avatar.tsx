@@ -7,10 +7,11 @@ interface AvatarProps {
     src?: string;
     name?: string;
     size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    shape?: 'circle' | 'square';
     className?: string;
 }
 
-export default function Avatar({ src, name, size = 'md', className = '' }: AvatarProps) {
+export default function Avatar({ src, name, size = 'md', shape = 'circle', className = '' }: AvatarProps) {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(src ? 'loading' : 'error');
 
     // Reset status when src changes
@@ -30,14 +31,19 @@ export default function Avatar({ src, name, size = 'md', className = '' }: Avata
         '2xl': 'w-32 h-32 text-5xl',
     };
 
+    const shapeClasses = {
+        circle: 'rounded-full',
+        square: 'rounded-[32%] md:rounded-[24%]'
+    };
+
     const initials = name
         ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
         : '?';
 
     return (
-        <div className={`relative flex-shrink-0 rounded-full overflow-hidden bg-zinc-900 border border-white/10 ${sizeClasses[size]} ${className}`}>
+        <div className={`relative flex-shrink-0 overflow-hidden bg-black border border-white/10 ${sizeClasses[size]} ${shapeClasses[shape]} ${className}`}>
             {/* Fallback / Initial State */}
-            <div className="absolute inset-0 flex items-center justify-center font-black text-white bg-gradient-to-br from-zinc-800 to-zinc-950">
+            <div className="absolute inset-0 flex items-center justify-center font-black text-white bg-gradient-to-br from-zinc-800 to-black">
                 {name ? initials : <User className="w-1/2 h-1/2 opacity-20" />}
             </div>
 

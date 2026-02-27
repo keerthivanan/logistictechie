@@ -26,7 +26,7 @@ export default function ShipmentsPage() {
     const fetchShipments = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`${API_URL}/api/bookings/me`, {
+            const res = await fetch(`${API_URL}/api/marketplace/my-requests`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.status === 401) {
@@ -35,7 +35,7 @@ export default function ShipmentsPage() {
             }
             const data = await res.json()
             if (data.success) {
-                setShipments(data.data)
+                setShipments(data.requests)
             }
         } catch (e) {
             console.error('Failed to fetch shipments', e)
@@ -102,69 +102,75 @@ export default function ShipmentsPage() {
                             </thead>
                             <tbody className="divide-y divide-white/[0.02]">
                                 {shipments.map((s) => {
-                                    let cargo = s.cargo_details
-                                    if (typeof cargo === 'string') {
-                                        try {
-                                            cargo = JSON.parse(cargo)
-                                        } catch (e) {
-                                            cargo = {}
-                                        }
-                                    }
                                     return (
-                                        <tr key={s.id} className="group hover:bg-white/[0.02] transition-colors relative">
+                                        <tr key={s.request_id} className="group hover:bg-white/[0.02] transition-colors relative">
                                             <td className="pl-10 pr-6 py-8">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[12px] font-mono font-bold text-white tracking-widest">{s.booking_reference}</span>
-                                                    <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">System Verified</span>
+                                                    <span className="text-[12px] font-mono font-bold text-white tracking-widest">{s.request_id}</span>
+                                                    <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">Marketplace Verified</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-8">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-300 font-inter tracking-tight">
-                                                        <span>{cargo?.origin || 'Unknown'}</span>
+                                                        <span>{s.origin || 'Unknown'}</span>
                                                         <ArrowUpRight className="w-3 h-3 text-zinc-700 group-hover:text-emerald-500 transition-colors" />
-                                                        <span>{cargo?.destination || 'Unknown'}</span>
+                                                        <span>{s.destination || 'Unknown'}</span>
                                                     </div>
-                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1 font-inter leading-none">Global Vector Path</span>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest font-inter leading-none">Global Vector Path</span>
+                                                        {s.commodity && (
+                                                            <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest font-inter px-1.5 py-0.5 bg-emerald-500/10 rounded-sm">
+                                                                {s.commodity}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-8">
                                                 <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-white/[0.02] px-3 py-1.5 rounded-lg border border-white/5 font-inter">
-                                                    {cargo?.containerSize || 'FCL'} MODAL
+                                                    {s.cargo_type} MODAL
                                                 </span>
                                             </td>
                                             <td className="px-6 py-8 text-zinc-600 text-sm">
                                                 <div className="flex flex-col">
-                                                    <span className="text-[11px] font-bold text-zinc-400 font-inter">{new Date(s.created_at).toLocaleDateString()}</span>
-                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1 font-inter">Creation Point</span>
+                                                    <span className="text-[11px] font-bold text-zinc-400 font-inter">{new Date(s.submitted_at).toLocaleDateString()}</span>
+                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1 font-inter">Submission Point</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-8">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'SHIPPED' ? 'bg-emerald-500 animate-pulse' :
-                                                        s.status === 'PENDING' ? 'bg-amber-500' : 'bg-blue-500'
-                                                        } shadow-[0_0_8px_currentColor]`} />
-                                                    <span className={`text-[10px] font-black uppercase tracking-[0.1em] font-inter ${s.status === 'SHIPPED' ? 'text-emerald-400' :
-                                                        s.status === 'PENDING' ? 'text-amber-400' : 'text-blue-400'
-                                                        }`}>
-                                                        {s.status}
-                                                    </span>
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'SHIPPED' || s.status === 'CLOSED' ? 'bg-emerald-500' :
+                                                            s.status === 'OPEN' ? 'bg-amber-500 animate-pulse' : 'bg-blue-500'
+                                                            } shadow-[0_0_8px_currentColor]`} />
+                                                        <span className={`text-[10px] font-black uppercase tracking-[0.1em] font-inter ${s.status === 'SHIPPED' || s.status === 'CLOSED' ? 'text-emerald-400' :
+                                                            s.status === 'OPEN' ? 'text-amber-400' : 'text-blue-400'
+                                                            }`}>
+                                                            {s.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        {s.is_hazardous && (
+                                                            <span className="text-[7px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">HAZ</span>
+                                                        )}
+                                                        {s.needs_insurance && (
+                                                            <span className="text-[7px] font-black bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">INS</span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="pr-10 py-8 text-right">
                                                 <div className="flex items-center justify-end gap-3">
                                                     <Link
-                                                        href={`/booking/confirmation?id=${s.booking_reference}`}
+                                                        href={`/dashboard/request/${s.request_id}`}
                                                         className="w-9 h-9 flex items-center justify-center rounded-full border border-white/5 bg-white/[0.01] text-zinc-700 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all shadow-sm group-hover:scale-110"
                                                     >
-                                                        <Link2 className="w-4 h-4" />
+                                                        <ArrowUpRight className="w-4 h-4" />
                                                     </Link>
-                                                    <Link
-                                                        href={`/tracking?id=${s.booking_reference}`}
-                                                        className="px-4 py-2 bg-white/[0.02] border border-white/5 rounded-xl text-[8px] font-black text-zinc-500 hover:text-white hover:border-white/20 transition-all uppercase tracking-[0.2em] font-inter"
-                                                    >
-                                                        Track
-                                                    </Link>
+                                                    <div className="px-4 py-2 bg-white/[0.02] border border-white/5 rounded-xl text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] font-inter">
+                                                        {s.quotation_count} QUOTES
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>

@@ -1,0 +1,104 @@
+{
+    "name": "OMEGO-WF2-Quote-Processor",
+    "nodes": [
+        {
+            "parameters": {
+                "pollTimes": {
+                    "item": [
+                        {
+                            "mode": "everyMinute"
+                        }
+                    ]
+                },
+                "filters": {
+                    "q": "label:INBOX subject:OMEGO"
+                },
+                "options": {}
+            },
+            "name": "Gmail Trigger",
+            "type": "n8n-nodes-base.gmailTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "id": "1"
+        },
+        {
+            "parameters": {
+                "jsCode": "const subject = items[0].json.subject;\nconst match = subject.match(/OMEGO-\\d{4}-REQ-\\d{2}/);\nitems[0].json.request_id = match ? match[0] : null;\nreturn items;"
+            },
+            "name": "Extract ID",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ],
+            "id": "2"
+        },
+        {
+            "parameters": {
+                "model": "claude-3-5-sonnet-20240620",
+                "prompt": "Extract total_price, currency, and carrier from this email: {{ $json.body }}. Return JSON only."
+            },
+            "name": "AI Extraction",
+            "type": "n8n-nodes-base.anthropic",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ],
+            "id": "3"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "INSERT INTO quotations (request_id, total_price, currency, carrier) VALUES ('{{ $node[\"Extract ID\"].json.request_id }}', {{ $json.total_price }}, '{{ $json.currency }}', '{{ $json.carrier }}');"
+            },
+            "name": "Save Bid",
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ],
+            "id": "4"
+        }
+    ],
+    "connections": {
+        "Gmail Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Extract ID",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract ID": {
+            "main": [
+                [
+                    {
+                        "node": "AI Extraction",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Extraction": {
+            "main": [
+                [
+                    {
+                        "node": "Save Bid",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

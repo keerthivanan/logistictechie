@@ -137,15 +137,24 @@ export default function RequestQuoteForm() {
                 sovereign_id: user.sovereign_id || '',
                 name: user.name || user.email || 'Client',
                 email: user.email,
-                phone: formData.phone || '',
+                phone: formData.phone || '', // Critical Identity Sync
                 origin: `${formData.origin_district || ''} ${formData.origin_country}`.trim(),
+                origin_type: formData.origin_type.toUpperCase(),
                 destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
+                destination_type: formData.dest_type.toUpperCase(),
                 cargo_type: formData.mode,
+                commodity: formData.commodity,
+                packing_type: formData.packing_type.toUpperCase(),
+                quantity: parseInt(formData.quantity) || 1,
                 weight: parseFloat(formData.weight) || 0,
                 weight_unit: formData.weight_unit || 'KGM',
-                dimensions: `${formData.length}x${formData.width}x${formData.height}`,
+                dimensions: `${formData.length}x${formData.width}x${formData.height}`, // Structured Dims
                 dim_unit: formData.dim_unit || 'CM',
-                special_requirements: `Commodity: ${formData.commodity} | Packing: ${formData.packing_type} | Hazard: ${formData.is_hazardous} | Stack: ${formData.is_stackable} | Notes: ${formData.notes}`,
+                is_stackable: formData.is_stackable,
+                is_hazardous: formData.is_hazardous,
+                needs_insurance: formData.needs_insurance,
+                target_date: formData.process_date,
+                special_requirements: formData.notes,
                 incoterms: formData.incoterms || 'FOB',
                 currency: 'USD'
             };
@@ -221,16 +230,29 @@ export default function RequestQuoteForm() {
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin Node
                             </h3>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Territory Control</label>
-                                    <select
-                                        name="origin_country"
-                                        value={formData.origin_country}
-                                        onChange={handleChange}
-                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
-                                    >
-                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
-                                    </select>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control</label>
+                                        <select
+                                            name="origin_country"
+                                            value={formData.origin_country}
+                                            onChange={handleChange}
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                        >
+                                            {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Contact Number</label>
+                                        <input
+                                            name="phone"
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            placeholder="+1 (555) 000-0000"
+                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
+                                        />
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">

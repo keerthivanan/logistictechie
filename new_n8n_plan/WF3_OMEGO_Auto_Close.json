@@ -1,0 +1,404 @@
+{
+  "name": "WF3 - OMEGO Auto-Close After 3 Quotes",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "execute-trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE requests SET status = 'CLOSED', closed_reason = 'MAX_QUOTES_REACHED', closed_at = NOW() WHERE request_id = '{{ $json.request_id }}' RETURNING *",
+        "options": {}
+      },
+      "id": "close-request",
+      "name": "PostgreSQL - Close Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM quotations WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' ORDER BY total_price ASC",
+        "options": {}
+      },
+      "id": "get-quotations",
+      "name": "PostgreSQL - Get All 3 Quotations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.email, u.full_name FROM requests r JOIN users u ON u.sovereign_id = r.user_sovereign_id WHERE r.request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}'",
+        "options": {}
+      },
+      "id": "get-user",
+      "name": "PostgreSQL - Get User",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [900, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build comparison email\nconst quotations = $('PostgreSQL - Get All 3 Quotations').all();\nconst requestData = $('PostgreSQL - Close Request').first().json;\nconst userData = $('PostgreSQL - Get User').first().json;\n\n// Sort quotations by price\nconst sortedQuotes = quotations.sort((a, b) => a.json.total_price - b.json.total_price);\n\n// Identify best options\nconst cheapest = sortedQuotes[0].json;\nconst fastest = sortedQuotes.reduce((prev, curr) => \n  (curr.json.transit_days || 999) < (prev.json.transit_days || 999) ? curr : prev\n).json;\n\n// Build quote rows HTML\nlet quoteRows = '';\nsortedQuotes.forEach((q, index) => {\n  const quote = q.json;\n  const isCheapest = quote.quotation_id === cheapest.quotation_id;\n  const isFastest = quote.quotation_id === fastest.quotation_id;\n  \n  let badge = '';\n  if (isCheapest) badge = '<span style=\"background: #28A745; color: white; padding: 5px 10px; border-radius: 3px; font-size: 12px;\">🏆 BEST PRICE</span>';\n  else if (isFastest) badge = '<span style=\"background: #FFC107; color: black; padding: 5px 10px; border-radius: 3px; font-size: 12px;\">⚡ FASTEST</span>';\n  \n  const rowStyle = isCheapest ? 'background: #D4EDDA;' : '';\n  \n  quoteRows += `\n    <tr style=\"${rowStyle}\">\n      <td style=\"padding: 15px; border-bottom: 1px solid #ddd;\">\n        <strong>${quote.forwarder_company}</strong><br>\n        <small style=\"color: #666;\">${quote.service_type}</small>\n      </td>\n      <td style=\"padding: 15px; border-bottom: 1px solid #ddd; text-align: right;\">\n        <strong style=\"font-size: 18px; color: #2E75B6;\">${quote.currency} ${quote.total_price.toLocaleString()}</strong>\n      </td>\n      <td style=\"padding: 15px; border-bottom: 1px solid #ddd; text-align: center;\">\n        ${quote.transit_days || 'TBD'} days\n      </td>\n      <td style=\"padding: 15px; border-bottom: 1px solid #ddd; text-align: center;\">\n        ${quote.carrier}\n      </td>\n      <td style=\"padding: 15px; border-bottom: 1px solid #ddd;\">\n        ${badge}\n      </td>\n    </tr>\n  `;\n});\n\nconst emailBody = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; margin: 0; padding: 0; }\n    .container { max-width: 800px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }\n    .header { background: linear-gradient(135deg, #2E75B6 0%, #1A5490 100%); color: white; padding: 40px 30px; text-align: center; }\n    .header h1 { margin: 0 0 10px 0; font-size: 32px; }\n    .content { padding: 40px 30px; }\n    .request-info { background: #E8F4F8; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #2E75B6; }\n    .request-info h3 { margin-top: 0; color: #2E75B6; }\n    table { width: 100%; border-collapse: collapse; margin: 30px 0; }\n    th { background: #2E75B6; color: white; padding: 15px; text-align: left; }\n    .cta-button { display: inline-block; background: #28A745; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; margin: 20px 0; }\n    .cta-button:hover { background: #218838; }\n    .summary-box { background: #FFF3CD; border: 2px solid #FFC107; padding: 20px; border-radius: 5px; margin: 30px 0; }\n    .footer { background: #f0f0f0; padding: 25px; text-align: center; font-size: 12px; color: #666; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🎯 Your Request is Complete!</h1>\n      <p style=\"margin: 0; font-size: 18px; opacity: 0.9;\">3 Competitive Quotations Received</p>\n    </div>\n    \n    <div class=\"content\">\n      <div class=\"request-info\">\n        <h3>Request: ${requestData.request_id}</h3>\n        <p style=\"margin: 5px 0;\"><strong>Route:</strong> ${requestData.origin} → ${requestData.destination}</p>\n        <p style=\"margin: 5px 0;\"><strong>Cargo:</strong> ${requestData.cargo_type} | ${requestData.weight_kg} kg</p>\n        <p style=\"margin: 5px 0;\"><strong>Status:</strong> <span style=\"color: #DC3545; font-weight: bold;\">CLOSED</span> (Maximum quotes reached)</p>\n      </div>\n      \n      <p>Dear ${userData.full_name},</p>\n      \n      <p><strong>Great news!</strong> Your freight request has received the maximum of 3 competitive quotations. The request has been automatically closed, and you can now compare all offers to choose the best option for your needs.</p>\n      \n      <div class=\"summary-box\">\n        <h3 style=\"margin-top: 0;\">💰 Price Range</h3>\n        <p style=\"font-size: 24px; margin: 10px 0;\"><strong>${cheapest.currency} ${cheapest.total_price.toLocaleString()}</strong> - <strong>${cheapest.currency} ${sortedQuotes[sortedQuotes.length - 1].json.total_price.toLocaleString()}</strong></p>\n        <p style=\"margin: 0;\">Potential savings: <strong>${cheapest.currency} ${(sortedQuotes[sortedQuotes.length - 1].json.total_price - cheapest.total_price).toLocaleString()}</strong> by choosing the best price!</p>\n      </div>\n      \n      <h2>📊 Compare All 3 Quotations</h2>\n      \n      <table>\n        <thead>\n          <tr>\n            <th>Forwarder</th>\n            <th style=\"text-align: right;\">Total Price</th>\n            <th style=\"text-align: center;\">Transit Time</th>\n            <th style=\"text-align: center;\">Carrier</th>\n            <th></th>\n          </tr>\n        </thead>\n        <tbody>\n          ${quoteRows}\n        </tbody>\n      </table>\n      \n      <div style=\"background: #E8F4F8; padding: 20px; border-radius: 5px; margin: 30px 0;\">\n        <h3 style=\"margin-top: 0; color: #2E75B6;\">📋 What to Consider:</h3>\n        <ul style=\"margin: 10px 0;\">\n          <li><strong>Best Price:</strong> ${cheapest.forwarder_company} offers the lowest rate at ${cheapest.currency} ${cheapest.total_price.toLocaleString()}</li>\n          <li><strong>Fastest Delivery:</strong> ${fastest.forwarder_company} provides the quickest transit time of ${fastest.transit_days} days</li>\n          <li><strong>Carrier Reputation:</strong> Consider the reliability and track record of each shipping line</li>\n          <li><strong>Service Type:</strong> Review the service details and any additional terms</li>\n        </ul>\n      </div>\n      \n      <div style=\"text-align: center; margin: 40px 0;\">\n        <a href=\"https://omegoonline.com/dashboard/requests/${requestData.request_id}\" class=\"cta-button\">\n          📊 View Full Details & Choose Quote\n        </a>\n      </div>\n      \n      <div style=\"border-top: 2px solid #ddd; padding-top: 20px; margin-top: 40px;\">\n        <p><strong>Next Steps:</strong></p>\n        <ol>\n          <li>Review all quotations carefully in your dashboard</li>\n          <li>Contact forwarders directly if you need clarification</li>\n          <li>Select your preferred option and proceed with booking</li>\n          <li>The forwarder will guide you through the shipment process</li>\n        </ol>\n      </div>\n      \n      <p style=\"margin-top: 30px; font-size: 14px; color: #666;\">\n        <strong>Note:</strong> All quotations are valid for the period specified by each forwarder. Act quickly to secure your preferred rate!\n      </p>\n    </div>\n    \n    <div class=\"footer\">\n      <p><strong>OMEGO Freight Forwarding Platform</strong></p>\n      <p>Connecting shippers with the world's best freight forwarders</p>\n      <p style=\"margin-top: 15px;\">© 2024 OMEGO. All rights reserved.</p>\n      <p style=\"margin-top: 10px;\">\n        <a href=\"https://omegoonline.com\" style=\"color: #2E75B6; text-decoration: none;\">Visit Website</a> | \n        <a href=\"https://omegoonline.com/support\" style=\"color: #2E75B6; text-decoration: none;\">Support</a>\n      </p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  json: {\n    user_email: userData.email,\n    user_name: userData.full_name,\n    request_id: requestData.request_id,\n    email_body: emailBody,\n    total_quotations: sortedQuotes.length,\n    cheapest_price: cheapest.total_price,\n    cheapest_company: cheapest.forwarder_company\n  }\n};"
+      },
+      "id": "build-comparison-email",
+      "name": "Code - Build Comparison Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.user_email }}",
+        "subject": "🎯 3 Quotes Received - {{ $json.request_id }} CLOSED",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "send-comparison-email",
+      "name": "Gmail - Send Comparison to User",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1340, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth - Support"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT f.forwarder_id, f.email, f.company_name FROM n8n_broadcast_logs bl JOIN forwarders f ON f.forwarder_id = bl.forwarder_id WHERE bl.request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' AND bl.forwarder_id NOT IN (SELECT forwarder_id FROM quotations WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}')",
+        "options": {}
+      },
+      "id": "get-non-quoters",
+      "name": "PostgreSQL - Get Non-Quoting Forwarders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1560, 300],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "check-non-quoters-exist",
+      "name": "Non-Quoters Exist?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-non-quoters",
+      "name": "Split Non-Quoters",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2000, 200]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Request {{ $('Execute Workflow Trigger').item.json.request_id }} is now closed",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; background: white; }\n    .header { background: #6C757D; color: white; padding: 30px; text-align: center; }\n    .content { padding: 30px; }\n    .status-box { background: #F8F9FA; border: 2px solid #6C757D; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: center; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>📫 Request Closed</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear {{ $json.company_name }},</p>\n      <p>This is to inform you that freight request <strong>{{ $('Execute Workflow Trigger').item.json.request_id }}</strong> has been closed.</p>\n      <div class=\"status-box\">\n        <h3 style=\"margin: 0;\">Request Status: CLOSED</h3>\n        <p style=\"margin: 10px 0 0 0;\">Maximum quotations (3) received</p>\n      </div>\n      <p><strong>What this means:</strong></p>\n      <ul>\n        <li>The request has received 3 competitive quotations</li>\n        <li>No further quotations will be accepted</li>\n        <li>The customer will select from the received quotes</li>\n      </ul>\n      <p>We appreciate your participation in the OMEGO network. You'll continue to receive notifications for new freight requests that match your specializations.</p>\n      <p><strong>Tip:</strong> To increase your success rate, try to respond quickly to new requests. The first 3 quotes always win!</p>\n    </div>\n    <div class=\"footer\">\n      <p>OMEGO Freight Forwarding Platform</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "notify-non-quoters",
+      "name": "Gmail - Notify Non-Quoters",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2220, 200],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Split Non-Quoters').item.json.context.noItemsLeft }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-batches-complete",
+      "name": "All Notified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [2440, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE forwarder_bid_status SET status = 'COMPLETED' WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' AND status = 'ANSWERED'",
+        "options": {}
+      },
+      "id": "update-forwarder-statuses",
+      "name": "PostgreSQL - Update Forwarder Statuses",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2660, 100],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "n8n_events_logs",
+        "columns": "event_type,request_id,description",
+        "additionalFields": {}
+      },
+      "id": "log-closure",
+      "name": "PostgreSQL - Log Closure Event",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2880, 100],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_analytics (date, requests_closed, total_quotations) VALUES (CURRENT_DATE, 1, 3) ON CONFLICT (date) DO UPDATE SET requests_closed = n8n_analytics.requests_closed + 1, total_quotations = n8n_analytics.total_quotations + 3",
+        "options": {}
+      },
+      "id": "update-analytics",
+      "name": "PostgreSQL - Update Analytics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [3100, 100],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Close Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Close Request": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Get All 3 Quotations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Get All 3 Quotations": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Get User": {
+      "main": [
+        [
+          {
+            "node": "Code - Build Comparison Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build Comparison Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Comparison to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send Comparison to User": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Get Non-Quoting Forwarders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Get Non-Quoting Forwarders": {
+      "main": [
+        [
+          {
+            "node": "Non-Quoters Exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Non-Quoters Exist?": {
+      "main": [
+        [
+          {
+            "node": "Split Non-Quoters",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostgreSQL - Update Forwarder Statuses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Non-Quoters": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Notify Non-Quoters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Notify Non-Quoters": {
+      "main": [
+        [
+          {
+            "node": "All Notified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Notified?": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Update Forwarder Statuses",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Non-Quoters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Update Forwarder Statuses": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Closure Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Log Closure Event": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Update Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-02-26T00:00:00.000Z",
+  "versionId": "1"
+}

@@ -16,6 +16,7 @@ class User(Base):
     password_hash = Column(String, nullable=True) # Optional for Social-Only nodes
     full_name = Column(String)
     company_name = Column(String)
+    company_email = Column(String)
     phone_number = Column(String)
     avatar_url = Column(String) 
     preferences = Column(String) 

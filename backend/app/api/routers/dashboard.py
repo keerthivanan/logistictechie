@@ -24,64 +24,60 @@ async def get_dashboard_stats(
     try:
         # ROLE-BASED INTELLIGENCE DISPATCH
         if current_user.role == "forwarder":
-            from app.api.routers.forwarders import forwarder_dashboard
-            # We call the existing forwarder_dashboard logic but adapt it for stats/me
-            f_stats = await forwarder_dashboard(current_user.sovereign_id, db)
+            from app.api.routers.forwarders import get_forwarder_bids
+            f_bids_res = await get_forwarder_bids(db, current_user)
+            f_bids = f_bids_res.get("bids", [])
             
-            # Format forwarder stats to match the expected unified structure
             return {
-                "active_shipments": f_stats.get("metrics", {}).get("active_bids", 0),
-                "total_shipments": f_stats.get("metrics", {}).get("total_quotes_submitted", 0),
-                "delivered_shipments": f_stats.get("metrics", {}).get("won_bids", 0),
-                "pending_tasks_count": 0, # Forwarder tasks coming soon
+                "active_shipments": len([b for b in f_bids if b["request_status"] == "OPEN"]),
+                "total_shipments": len(f_bids),
+                "delivered_shipments": len([b for b in f_bids if b["bid_status"] == "COMPLETED"]),
+                "pending_tasks_count": 0,
                 "kanban_shipments": [
-                   {
-                        "id": q["request_id"],
+                    {
+                        "id": b["request_id"],
                         "company": "Shipper",
-                        "desc": f"{q['cargo_type']} ({q['origin']} ➔ {q['destination']})",
-                        "date": q["submitted_at"][:10],
-                        "comments": q["your_position"],
+                        "desc": f"{b['cargo_type']} ({b['origin']} ➔ {b['destination']})",
+                        "date": b["attempted_at"].strftime("%d %b") if b["attempted_at"] else "Now",
+                        "comments": b["bid_status"], # Show bid status in comments
                         "views": 1,
-                        "status": "processing" if q["status"] == "OPEN" else "delivered",
-                        "mode": q["cargo_type"],
-                        "highlight": q["your_position"] == 1
-                   } for q in f_stats.get("quotes", [])
+                        "status": "processing" if b["request_status"] == "OPEN" else "delivered",
+                        "mode": b["cargo_type"],
+                        "highlight": b["bid_status"] == "ANSWERED"
+                    } for b in f_bids
                 ],
-                "recent_activity": [] # Add forwarder activity if needed
+                "recent_activity": [] 
             }
 
-        stats = await crud.marketplace.get_dashboard_stats(db, user_id=current_user.sovereign_id)
+        # SHIPPER LOGIC: Enhanced with Nested Quotes
+        from app.api.routers.marketplace import get_my_requests
+        s_requests_res = await get_my_requests(db, current_user)
+        s_requests = s_requests_res.get("requests", [])
         
-        # 1. Format Shipments for Kanban Board (The "King Maker" View)
-        raw_shipments = stats.pop("shipments", [])
         formatted_shipments = []
-        
-        for s in raw_shipments:
-            # Sovereign Status Mapping (Alignment with n8n workflow)
+        for r in s_requests:
             kanban_status = "processing"
-            if s.status == "OPEN": 
-                kanban_status = "processing"
-            elif s.status == "CLOSED": 
-                kanban_status = "delivered"
-            elif s.status == "CANCELLED":
-                kanban_status = "customs" # Using 'customs' as a visual proxy for 'Flagged'
-                
-            # Highlight Logic (High Precision)
-            is_highlight = s.is_hazardous or (s.weight_kg and s.weight_kg > 10000)
+            if r["status"] == "OPEN": kanban_status = "processing"
+            elif r["status"] == "CLOSED": kanban_status = "delivered"
             
             formatted_shipments.append({
-                "id": s.request_id,
-                "company": s.user_name or s.user_email,
-                "desc": f"{s.commodity or 'General Cargo'} ({s.cargo_type})",
-                "date": s.created_at.strftime("%d %b") if s.created_at else "Now",
-                "comments": s.quotation_count or 0,
+                "id": r["request_id"],
+                "company": current_user.full_name or "Client",
+                "desc": f"{r['cargo_type']} ({r['origin']} ➔ {r['destination']})",
+                "date": r["submitted_at"].strftime("%d %b") if r["submitted_at"] else "Now",
+                "comments": r["quotation_count"],
                 "views": 1,
                 "status": kanban_status,
-                "mode": s.cargo_type or "Ocean",
-                "highlight": is_highlight
+                "mode": r["cargo_type"],
+                "highlight": r["quotation_count"] > 0
             })
-            
-        stats["kanban_shipments"] = formatted_shipments
+        
+        stats = {
+            "active_shipments": len([r for r in s_requests if r["status"] == "OPEN"]),
+            "total_shipments": len(s_requests),
+            "delivered_shipments": len([r for r in s_requests if r["status"] == "CLOSED"]),
+            "kanban_shipments": formatted_shipments
+        }
         
         # 2. Add Pending Tasks Count (Strategic Synchronization)
         from app.models.task import Task

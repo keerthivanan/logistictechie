@@ -1,14 +1,23 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 import { Ship, MapPin, Package, Info, ArrowRight, CheckCircle } from 'lucide-react'
 
 // Separate component for search params logic
 function BookingContent() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
+
+  // --- Role Protection ---
+  useEffect(() => {
+    if (!authLoading && user?.role === 'forwarder') {
+      router.push('/dashboard')
+    }
+  }, [user, authLoading, router])
 
   const quoteId = searchParams.get('quoteId') || ''
   const carrier = searchParams.get('carrier') || 'Generic Carrier'

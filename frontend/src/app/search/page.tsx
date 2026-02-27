@@ -8,6 +8,7 @@ import { API_URL } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
+import { useAuth } from '@/context/AuthContext'
 import { countries } from '@/lib/countries'
 
 // --- Helpers ---
@@ -48,6 +49,14 @@ type Goods = {
 
 export default function SearchPage() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+
+  // --- Role Protection ---
+  useEffect(() => {
+    if (!authLoading && user?.role === 'forwarder') {
+      router.push('/dashboard')
+    }
+  }, [user, authLoading, router])
 
   // --- State ---
   const [activePopup, setActivePopup] = useState<'origin' | 'destination' | 'load' | 'goods' | 'vessels' | 'locations' | 'commodities' | 'offices' | 'deadlines' | null>(null)

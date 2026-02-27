@@ -77,10 +77,18 @@ export default function SovereignFlow({
                                                 <Calendar className="w-2.5 h-2.5" />
                                                 {shipment.date}
                                             </div>
-                                            {shipment.comments > 0 && (
-                                                <div className="flex items-center gap-1 text-[8px] font-bold text-zinc-600 font-inter">
-                                                    <MessageSquare className="w-2.5 h-2.5" />
-                                                    {shipment.comments}
+                                            {shipment.comments !== undefined && (
+                                                <div className="flex items-center gap-1 text-[8px] font-bold text-zinc-400 font-inter">
+                                                    {typeof shipment.comments === 'string' ? (
+                                                        <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10 uppercase">
+                                                            {shipment.comments}
+                                                        </span>
+                                                    ) : (
+                                                        <>
+                                                            <MessageSquare className="w-2.5 h-2.5" />
+                                                            {shipment.comments} Quotes
+                                                        </>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>

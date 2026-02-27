@@ -15,7 +15,8 @@ class Forwarder(Base):
     forwarder_id = Column(String, unique=True, index=True) # Column A
     company_name = Column(String, index=True) # Column B
     contact_person = Column(String, nullable=True) # Column C
-    email = Column(String, unique=True, index=True) # Column D
+    email = Column(String, unique=True, index=True) # Column D (Personal/Linked Email)
+    company_email = Column(String, nullable=True) # Business contact email
     phone = Column(String) # Column E
     whatsapp = Column(String, nullable=True) # Column F
     country = Column(String) # Column G
