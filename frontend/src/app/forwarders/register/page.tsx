@@ -9,6 +9,7 @@ import { countries } from '@/lib/countries';
 import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 import Navbar from '@/components/layout/Navbar';
 import { API_URL } from '@/lib/config';
+import Avatar from '@/components/visuals/Avatar';
 
 interface Country {
     name: string;
@@ -29,6 +30,7 @@ export default function ForwarderRegisterPage() {
         country: '',
         phone: '',
         tax_id: '',
+        website: '',
         document_url: '',
         password: '', // In a real app, we'd hash and store this properly via /auth/register
         logo_url: 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200'
@@ -50,12 +52,13 @@ export default function ForwarderRegisterPage() {
 
         setUploadingField(field);
 
-        // 🧠 SOVEREIGN SIMULATION: Mocking an ultra-secure upload to the Grid
-        setTimeout(() => {
-            const mockUrl = `https://storage.omego.online/partner/${field}/${file.name.replace(/\s+/g, '_')}`;
-            setFormData(prev => ({ ...prev, [field]: mockUrl }));
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const result = reader.result as string;
+            setFormData(prev => ({ ...prev, [field]: result }));
             setUploadingField(null);
-        }, 1500);
+        };
+        reader.readAsDataURL(file);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -391,6 +394,17 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-400">Company Website</label>
+                            <input
+                                name="website"
+                                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/30"
+                                placeholder="e.g. www.global-logistics.com"
+                                value={formData.website}
+                                onChange={handleChange}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-400">Business License (PDF/Image)</label>
                             <div
                                 onClick={() => document.getElementById('license-upload')?.click()}
@@ -442,17 +456,15 @@ export default function ForwarderRegisterPage() {
                                 accept="image/*"
                             />
                             <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex items-center justify-center border border-white/10">
-                                    {uploadingField === 'logo_url' ? (
-                                        <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-                                    ) : formData.logo_url ? (
-                                        <img src={formData.logo_url} className="w-full h-full object-cover" alt="Logo" />
-                                    ) : (
-                                        <Building2 className="w-5 h-5 text-white/20" />
-                                    )}
-                                </div>
+                                <Avatar
+                                    src={formData.logo_url}
+                                    name={formData.company_name}
+                                    size="md"
+                                    shape="square"
+                                    className="border-white/10"
+                                />
                                 <span className="text-sm font-medium text-white/70">
-                                    {uploadingField === 'logo_url' ? 'Uploading...' : formData.logo_url ? 'Change Logo' : 'Select Logo File'}
+                                    {uploadingField === 'logo_url' ? 'Uploading...' : formData.logo_url ? 'Upload Company Logo' : 'Select Logo File'}
                                 </span>
                             </div>
                             <Upload className="w-4 h-4 text-white/40" />

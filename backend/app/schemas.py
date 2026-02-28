@@ -74,6 +74,7 @@ class Token(BaseModel):
     onboarding_completed: bool = False
     sovereign_id: str
     avatar_url: Optional[str] = None
+    website: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: str
@@ -82,6 +83,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str] = None
     company_name: Optional[str] = None
     company_email: Optional[str] = None
+    website: Optional[str] = None
     phone_number: Optional[str] = None
     avatar_url: Optional[str] = None
     preferences: Optional[str] = None

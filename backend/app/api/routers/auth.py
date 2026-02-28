@@ -152,7 +152,8 @@ async def social_sync(
             "user_id": user.id, 
             "name": user.full_name or "User",
             "sovereign_id": user.sovereign_id,
-            "role": user.role # ADDED: Role Visibility
+            "role": user.role, # ADDED: Role Visibility
+            "website": user.website # ADDED: Website Visibility
         },
         expires_delta=access_token_expires
     )
@@ -169,7 +170,8 @@ async def social_sync(
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
         "role": user.role, # ADDED: Role Visibility
-        "avatar_url": user.avatar_url
+        "avatar_url": user.avatar_url,
+        "website": user.website
     }
 
 async def create_default_tasks(db: AsyncSession, user_id: str):
@@ -248,7 +250,8 @@ async def login_for_access_token(
             "sub": user.email, 
             "user_id": user.id, 
             "name": user.full_name or "User",
-            "role": user.role # ADDED: Role Visibility
+            "role": user.role, # ADDED: Role Visibility
+            "website": user.website # ADDED: Website Visibility
         },
         expires_delta=access_token_expires
     )
@@ -275,7 +278,8 @@ async def login_for_access_token(
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
         "role": user.role, # ADDED: Role Visibility
         "onboarding_completed": user.onboarding_completed or False,
-        "avatar_url": user.avatar_url
+        "avatar_url": user.avatar_url,
+        "website": user.website
     }
 
 @router.post("/refresh", response_model=Token)

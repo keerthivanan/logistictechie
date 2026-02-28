@@ -7,20 +7,26 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import Avatar from '@/components/visuals/Avatar';
+import PartnerModal from '@/components/modals/PartnerModal';
 import { API_URL } from '@/lib/config';
 
 interface Forwarder {
     id: string;
+    forwarder_id?: string;
     company_name: string;
     email: string;
     country: string;
     logo_url: string;
+    website?: string;
 }
 
 export default function ForwarderDirectoryPage() {
     const [forwarders, setForwarders] = useState<Forwarder[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
+    const [selectedPartner, setSelectedPartner] = useState<Forwarder | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchForwarders = async () => {
@@ -29,8 +35,10 @@ export default function ForwarderDirectoryPage() {
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setForwarders(data);
+                    console.log('Active Forwarders (Array):', data);
                 } else if (data.forwarders) {
                     setForwarders(data.forwarders);
+                    console.log('Active Forwarders (Object):', data.forwarders);
                 }
             } catch (error) {
                 console.error("Failed to load forwarders:", error);
@@ -46,6 +54,11 @@ export default function ForwarderDirectoryPage() {
         f.company_name.toLowerCase().includes(filter.toLowerCase()) ||
         f.country.toLowerCase().includes(filter.toLowerCase())
     );
+
+    const handleOpenModal = (partner: Forwarder) => {
+        setSelectedPartner(partner);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pb-20">
@@ -84,45 +97,78 @@ export default function ForwarderDirectoryPage() {
                             {filteredForwarders.map((forwarder, i) => (
                                 <motion.div
                                     key={forwarder.id}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
+                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="bg-zinc-900/50 border border-white/10 rounded-2xl p-6 group hover:border-white/30 transition-all hover:bg-zinc-900"
+                                    onClick={() => handleOpenModal(forwarder)}
+                                    className="bg-black border border-white/10 rounded-2xl p-6 group hover:border-white/30 transition-all hover:bg-zinc-950 relative overflow-hidden shadow-2xl cursor-pointer"
                                 >
-                                    <div className="flex items-start justify-between mb-6">
-                                        <div className="w-16 h-16 rounded-xl bg-white p-2 flex items-center justify-center overflow-hidden">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={forwarder.logo_url || 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200'}
-                                                alt={forwarder.company_name}
-                                                className="object-contain w-full h-full"
-                                                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1586528116311-ad86d7c49988?auto=format&fit=crop&q=80&w=200' }}
-                                            />
+                                    {/* Holographic Subtle Glow */}
+                                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 blur-[50px] pointer-events-none group-hover:bg-emerald-500/20 transition-colors" />
+
+                                    <div className="relative z-10">
+                                        <div className="flex items-start justify-between mb-8">
+                                            <div className="relative group/logo">
+                                                <Avatar
+                                                    src={forwarder.logo_url || undefined}
+                                                    name={forwarder.company_name}
+                                                    size="lg"
+                                                    shape="square"
+                                                    className="border-white/10 group-hover:border-white/20 transition-all shadow-inner bg-white/[0.03]"
+                                                />
+                                                <div className="absolute -top-1 -left-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black animate-pulse" />
+                                            </div>
+
+                                            <div className="flex flex-col items-end gap-2">
+                                                <div className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                                                    <ShieldCheck className="w-3.5 h-3.5" />
+                                                    <span className="text-[9px] font-black uppercase tracking-widest font-outfit">Verified</span>
+                                                </div>
+                                                <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Node ID: {forwarder.forwarder_id || 'TBD'}</span>
+                                            </div>
                                         </div>
-                                        <div className="bg-green-500/10 text-green-400 p-2 rounded-full">
-                                            <ShieldCheck className="w-5 h-5" />
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h3 className="text-xl font-black mb-1 group-hover:text-emerald-400 transition-colors font-outfit uppercase tracking-tighter">
+                                                    {forwarder.company_name}
+                                                </h3>
+                                                <div className="flex items-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest font-inter">
+                                                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-emerald-500/50" />
+                                                    {forwarder.country} Registry
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-3 pt-6 border-t border-white/5 relative">
+                                                <div className="flex items-center justify-between group/info">
+                                                    <div className="flex items-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-inter">
+                                                        <Globe className="w-4 h-4 mr-3 text-emerald-500" />
+                                                        Sovereign Network
+                                                    </div>
+                                                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
+                                                </div>
+
+                                                {forwarder.website && (
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-inter">
+                                                            <ExternalLink className="w-4 h-4 mr-3 text-zinc-600" />
+                                                            Public Node
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors cursor-pointer truncate max-w-[120px]">
+                                                            {forwarder.website.replace(/^https?:\/\//, '')}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <button className="w-full mt-6 bg-white/[0.03] border border-white/10 group-hover:bg-white text-zinc-400 group-hover:text-black py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] transition-all font-inter active:scale-[0.98]">
+                                                Initiate Connection
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">
-                                        {forwarder.company_name}
-                                    </h3>
-
-                                    <div className="flex items-center text-gray-400 text-sm mb-6">
-                                        <MapPin className="w-4 h-4 mr-1.5" />
-                                        {forwarder.country}
-                                    </div>
-
-                                    <div className="space-y-3 pt-6 border-t border-white/5">
-                                        <div className="flex items-center text-sm text-gray-500">
-                                            <Mail className="w-4 h-4 mr-3" />
-                                            <span className="truncate">{forwarder.email}</span>
-                                        </div>
-                                        <div className="flex items-center text-sm text-gray-500">
-                                            <Globe className="w-4 h-4 mr-3" />
-                                            <span className="truncate">Verified Partner</span>
-                                        </div>
-                                    </div>
+                                    {/* Scanline Effect */}
+                                    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.01),rgba(0,255,0,0.005),rgba(0,0,255,0.01))] bg-[length:100%_2px,3px_100%] opacity-20" />
                                 </motion.div>
                             ))}
                         </AnimatePresence>
@@ -137,6 +183,12 @@ export default function ForwarderDirectoryPage() {
 
             </div>
             <Footer />
+
+            <PartnerModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                partner={selectedPartner}
+            />
         </div>
     );
 }

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle } from 'lucide-react'
+import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react'
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
@@ -212,65 +212,82 @@ function ResultsContent() {
             {/* Quotes List */}
             <div className="flex-1 space-y-6">
               {filteredQuotes.length > 0 ? filteredQuotes.map((quote, idx) => (
-                <div key={idx} className="bg-black/50 border border-white/10 rounded-xl overflow-hidden hover:border-white/40 transition-all group relative">
+                <div key={idx} className="bg-black border border-white/10 rounded-2xl overflow-hidden hover:border-white/30 transition-all group relative shadow-2xl">
+                  {/* Holographic Signal */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/[0.03] blur-[40px] pointer-events-none group-hover:bg-emerald-500/[0.07] transition-colors" />
+
                   {/* Wisdom Badge */}
                   {quote.wisdom && quote.wisdom.includes("PROPHETIC") && (
-                    <div className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 animate-pulse">
-                      SOVEREIGN CHOICE
+                    <div className="absolute top-0 right-0 bg-white text-black text-[8px] font-black px-4 py-1.5 rounded-bl-xl z-20 uppercase tracking-widest shadow-xl">
+                      Sovereign Prime Choice
                     </div>
                   )}
 
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="p-8 relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                       <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-10 h-10 bg-white rounded flex items-center justify-center">
-                            <Ship className="w-6 h-6 text-black" />
+                        <div className="flex items-center gap-5 mb-8">
+                          <div className="w-12 h-12 bg-white/[0.02] border border-white/10 rounded-xl flex items-center justify-center shadow-inner group-hover:border-white/20 transition-colors">
+                            <Ship className="w-6 h-6 text-emerald-500" />
                           </div>
                           <div>
-                            <div className="font-bold text-lg">{quote.carrier_name}</div>
-                            <div className="flex items-center text-xs text-gray-400">
-                              <Star className="w-3 h-3 text-white fill-white mr-1" />
-                              <span className="text-white mr-1">4.9</span>
-                              <span>(Verified Partner)</span>
+                            <div className="font-black text-xl font-outfit uppercase tracking-tighter text-white">{quote.carrier_name}</div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <div className="flex items-center text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                <ShieldCheck className="w-3 h-3 mr-1" />
+                                Verified Node
+                              </div>
+                              <div className="flex items-center text-[9px] font-black text-white/40 uppercase tracking-widest">
+                                <Star className="w-2.5 h-2.5 text-white/20 fill-white/20 mr-1" />
+                                Tier 1 Reliability
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-6 mb-4">
+                        <div className="flex items-center gap-8 mb-8">
                           <div className="flex flex-col">
-                            <span className="text-xl font-bold font-mono">{origin}</span>
+                            <span className="text-2xl font-black font-mono text-white tracking-tighter">{origin}</span>
+                            <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">Origin Port</span>
                           </div>
                           <div className="flex-1 flex flex-col items-center px-4">
-                            <div className="text-xs text-gray-400 mb-1">{quote.transit_time_days || quote.transit_time} Days</div>
-                            <div className="w-full h-px bg-white/20 relative">
-                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full"></div>
+                            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 font-inter">{quote.transit_time_days || quote.transit_time} Days</div>
+                            <div className="w-full h-0.5 bg-white/5 relative overflow-hidden rounded-full">
+                              <div className="absolute inset-y-0 left-0 bg-emerald-500 w-1/3 group-hover:w-full transition-all duration-1000" />
                             </div>
-                            <span className="text-[10px] text-gray-500 mt-1">Direct</span>
+                            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mt-2">Direct Transit Protocol</span>
                           </div>
                           <div className="flex flex-col text-right">
-                            <span className="text-xl font-bold font-mono">{destination}</span>
+                            <span className="text-2xl font-black font-mono text-white tracking-tighter">{destination}</span>
+                            <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">Destination Node</span>
                           </div>
                         </div>
 
                         {/* Wisdom Display */}
-                        <div className="text-xs text-gray-400 italic bg-white/5 p-2 rounded border-l-2 border-purple-500">
-                          {quote.wisdom}
-                        </div>
+                        {quote.wisdom && (
+                          <div className="text-[10px] font-bold text-zinc-400 italic bg-white/[0.02] p-4 rounded-xl border-l-[3px] border-emerald-500/30 font-inter leading-relaxed">
+                            {quote.wisdom}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="text-right border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 min-w-[180px]">
-                        <div className="text-3xl font-bold mb-1">${quote.price.toLocaleString()}</div>
-                        <div className="text-xs text-gray-500 mb-4 font-mono">ID: {quote.id?.slice(0, 8)}</div>
+                      <div className="text-right border-t md:border-t-0 md:border-l border-white/5 pt-6 md:pt-0 md:pl-10 min-w-[220px]">
+                        <div className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-2 font-inter">Locked Rate</div>
+                        <div className="text-5xl font-black font-outfit text-white mb-2 tracking-tighter leading-none">${quote.price.toLocaleString()}</div>
+                        <div className="text-[9px] font-black text-emerald-500/50 uppercase tracking-widest mb-8 font-mono">TRANSACTION-ID: {quote.id?.slice(0, 12)}</div>
+
                         <button
                           onClick={() => handleSelectQuote(quote)}
-                          className="w-full bg-white text-black py-3 rounded-lg font-bold hover:bg-gray-200 transition-all flex items-center justify-center group-hover:scale-[1.02]"
+                          className="w-full bg-white text-black py-4 rounded-xl font-black uppercase tracking-[0.3em] text-[10px] hover:bg-zinc-200 transition-all font-inter active:scale-[0.98] shadow-[0_10px_30px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2"
                         >
-                          Book Now <ArrowRight className="w-4 h-4 ml-2" />
+                          Initiate Booking <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                   </div>
+
+                  {/* Scanline Effect */}
+                  <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.05)_50%),linear-gradient(90deg,rgba(255,0,0,0.005),rgba(0,255,0,0.003),rgba(0,0,255,0.005))] bg-[length:100%_2px,3px_100%] opacity-20" />
                 </div>
               )) : (
                 <div className="py-20 text-center bg-black rounded-3xl border border-dashed border-white/10">

@@ -17,6 +17,7 @@ class User(Base):
     full_name = Column(String)
     company_name = Column(String)
     company_email = Column(String)
+    website = Column(String)
     phone_number = Column(String)
     avatar_url = Column(String) 
     preferences = Column(String) 

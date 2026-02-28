@@ -41,27 +41,39 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
         : '?';
 
     return (
-        <div className={`relative flex-shrink-0 overflow-hidden bg-black border border-white/10 ${sizeClasses[size]} ${shapeClasses[shape]} ${className}`}>
+        <div className={`relative flex-shrink-0 overflow-hidden bg-black border border-white/10 shadow-2xl ${sizeClasses[size]} ${shapeClasses[shape]} ${className}`}>
             {/* Fallback / Initial State */}
-            <div className="absolute inset-0 flex items-center justify-center font-black text-white bg-gradient-to-br from-zinc-800 to-black">
-                {name ? initials : <User className="w-1/2 h-1/2 opacity-20" />}
+            <div className="absolute inset-0 flex items-center justify-center font-black text-white bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08)_0%,rgba(24,24,27,1)_100%)] shadow-inner">
+                {name ? (
+                    <span className="drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{initials}</span>
+                ) : (
+                    <User className="w-1/2 h-1/2 opacity-20" />
+                )}
             </div>
 
             {/* Image Layer */}
             {src && status !== 'error' && (
                 <img
                     src={src}
-                    alt={name || 'User Avatar'}
-                    onLoad={() => setStatus('loaded')}
-                    onError={() => setStatus('error')}
-                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'
+                    alt={name}
+                    onLoad={() => {
+                        console.log(`Avatar Loaded: ${src.slice(0, 50)}...`);
+                        setStatus('loaded');
+                    }}
+                    onError={(e) => {
+                        console.error(`Avatar Error: ${src.slice(0, 50)}...`);
+                        setStatus('error');
+                    }}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                         }`}
                 />
             )}
 
-            {/* Loading Pulse */}
+            {/* Loading / Glossy Overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/0 via-white/[0.02] to-white/0" />
+
             {status === 'loading' && (
-                <div className="absolute inset-0 bg-white/5 animate-pulse" />
+                <div className="absolute inset-0 bg-black/40 animate-pulse" />
             )}
         </div>
     );
