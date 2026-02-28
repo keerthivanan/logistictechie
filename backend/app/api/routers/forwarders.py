@@ -227,6 +227,7 @@ async def promote_user_to_partner(
     user.role = "forwarder"
     user.company_name = f_in.company_name
     user.company_email = f_in.company_email
+    user.website = f_in.website
     user.phone_number = f_in.phone
     user.avatar_url = f_in.logo_url
     user.email = f_in.email
