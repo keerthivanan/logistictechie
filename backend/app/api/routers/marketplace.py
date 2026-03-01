@@ -328,45 +328,56 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
     WF1 calls this to push the newly created request into Postgres.
     This ensures the dashboard is populated immediately.
     """
-    stmt = pg_insert(MarketplaceRequest).values(
-        request_id=sync_in.request_id,
-        user_sovereign_id=sync_in.user_sovereign_id,
-        user_email=sync_in.user_email,
-        user_phone=sync_in.user_phone,
-        user_name=sync_in.user_name,
-        origin=sync_in.origin,
-        origin_type=sync_in.origin_type,
-        destination=sync_in.destination,
-        destination_type=sync_in.destination_type,
-        cargo_type=sync_in.cargo_type,
-        commodity=sync_in.commodity,
-        packing_type=sync_in.packing_type,
-        quantity=sync_in.quantity,
-        weight_kg=sync_in.weight_kg,
-        dimensions=sync_in.dimensions,
-        is_stackable=sync_in.is_stackable,
-        is_hazardous=sync_in.is_hazardous,
-        needs_insurance=sync_in.needs_insurance,
-        special_requirements=sync_in.special_requirements,
-        incoterms=sync_in.incoterms,
-        currency=sync_in.currency,
-        status=sync_in.status,
-        submitted_at=datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")) if sync_in.submitted_at else datetime.utcnow()
-    )
-    
-    # Conflict resolution: update status if it already exists
-    stmt = stmt.on_conflict_do_update(
-        index_elements=[MarketplaceRequest.request_id],
-        set_={
-            "status": stmt.excluded.status,
-            "quotation_count": MarketplaceRequest.quotation_count # Preserve existing count
+    from decimal import Decimal
+    try:
+        print(f"[*] REQUEST SYNC ATTEMPT: {sync_in.request_id}")
+        
+        # 1. Prepare values dict for the insert
+        data_values = {
+            "request_id": sync_in.request_id,
+            "user_sovereign_id": sync_in.user_sovereign_id,
+            "user_email": sync_in.user_email,
+            "user_phone": sync_in.user_phone,
+            "user_name": sync_in.user_name,
+            "origin": sync_in.origin,
+            "origin_type": sync_in.origin_type,
+            "destination": sync_in.destination,
+            "destination_type": sync_in.destination_type,
+            "cargo_type": sync_in.cargo_type,
+            "commodity": sync_in.commodity,
+            "packing_type": sync_in.packing_type,
+            "quantity": sync_in.quantity,
+            "weight_kg": Decimal(str(sync_in.weight_kg)),
+            "dimensions": sync_in.dimensions,
+            "is_stackable": sync_in.is_stackable,
+            "is_hazardous": sync_in.is_hazardous,
+            "needs_insurance": sync_in.needs_insurance,
+            "special_requirements": sync_in.special_requirements,
+            "incoterms": sync_in.incoterms,
+            "currency": sync_in.currency,
+            "status": sync_in.status,
+            "submitted_at": datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.submitted_at else datetime.utcnow()
         }
-    )
-    
-    await db.execute(stmt)
-    await db.commit()
-    
-    return {"success": True, "request_id": sync_in.request_id}
+        
+        # 2. Build Insert with Upsert
+        stmt = pg_insert(MarketplaceRequest).values(**data_values)
+        
+        # Conflict resolution: update status if it already exists
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["request_id"],
+            set_={"status": stmt.excluded.status}
+        )
+        
+        await db.execute(stmt)
+        await db.commit()
+        print(f"[+] REQUEST SYNC SUCCESS: {sync_in.request_id}")
+        return {"success": True, "request_id": sync_in.request_id}
+    except Exception as e:
+        import traceback
+        print(f"[-] REQUEST SYNC ERROR: {str(e)}")
+        traceback.print_exc()
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Sovereign Mirror Error: {str(e)}")
 
 class N8nStatusUpdate(BaseModel):
     request_id: str
@@ -386,7 +397,7 @@ async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depend
     
     if req:
         req.status = sync_in.status
-        req.closed_at = datetime.fromisoformat(sync_in.closed_at.replace("Z", "+00:00")) if sync_in.closed_at else datetime.utcnow()
+        req.closed_at = datetime.fromisoformat(sync_in.closed_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.closed_at else datetime.utcnow()
         req.closed_reason = sync_in.closed_reason
         await db.commit()
     else:
@@ -449,7 +460,7 @@ async def n8n_quote_sync(
         raw_email=sync_in.raw_email,
         ai_summary=sync_in.ai_summary,
         status=sync_in.status,
-        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")) if sync_in.received_at else datetime.utcnow()
+        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.received_at else datetime.utcnow()
     )
     
     stmt = stmt.on_conflict_do_update(
@@ -501,8 +512,8 @@ async def n8n_bid_status_sync(sync_in: N8nBidStatusSync, db: AsyncSession = Depe
         forwarder_id=sync_in.forwarder_id,
         status=sync_in.status,
         quoted_price=sync_in.price,
-        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")) if sync_in.attempted_at else datetime.utcnow(),
-        quoted_at=datetime.fromisoformat(sync_in.quoted_at.replace("Z", "+00:00")) if sync_in.quoted_at else None
+        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.attempted_at else datetime.utcnow(),
+        quoted_at=datetime.fromisoformat(sync_in.quoted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.quoted_at else None
     )
     
     stmt = stmt.on_conflict_do_update(

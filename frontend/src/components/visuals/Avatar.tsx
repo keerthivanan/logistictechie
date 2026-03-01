@@ -12,16 +12,25 @@ interface AvatarProps {
 }
 
 export default function Avatar({ src, name, size = 'md', shape = 'circle', className = '' }: AvatarProps) {
-    const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(src ? 'loading' : 'error');
+    // 💡 SOVEREIGN LOGIC: Handle relative OMEGO storage paths
+    const getFullSrc = (url?: string) => {
+        if (!url) return undefined;
+        if (url.startsWith('http') || url.startsWith('data:')) return url;
+        // Prepend OMEGO Storage base if it's a relative path
+        return `https://ge.omego.online/${url}`;
+    };
 
-    // Reset status when src changes
+    const finalSrc = getFullSrc(src);
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(finalSrc ? 'loading' : 'error');
+
+    // Reset status when finalSrc changes
     useEffect(() => {
-        if (src) {
+        if (finalSrc) {
             setStatus('loading');
         } else {
             setStatus('error');
         }
-    }, [src]);
+    }, [finalSrc]);
 
     const sizeClasses = {
         sm: 'w-8 h-8 text-[10px]',
@@ -52,16 +61,16 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
             </div>
 
             {/* Image Layer */}
-            {src && status !== 'error' && (
+            {finalSrc && status !== 'error' && (
                 <img
-                    src={src}
+                    src={finalSrc}
                     alt={name}
                     onLoad={() => {
-                        console.log(`Avatar Loaded: ${src.slice(0, 50)}...`);
+                        console.log(`Avatar Loaded: ${finalSrc.slice(0, 50)}...`);
                         setStatus('loaded');
                     }}
                     onError={(e) => {
-                        console.error(`Avatar Error: ${src.slice(0, 50)}...`);
+                        console.error(`Avatar Error: ${finalSrc.slice(0, 50)}...`);
                         setStatus('error');
                     }}
                     className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'

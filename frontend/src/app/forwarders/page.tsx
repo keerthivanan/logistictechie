@@ -6,7 +6,6 @@ import { Search, MapPin, ShieldCheck, Truck, Plane, Globe, Mail, Phone, External
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import Avatar from '@/components/visuals/Avatar';
 import PartnerModal from '@/components/modals/PartnerModal';
 import { API_URL } from '@/lib/config';
@@ -182,7 +181,6 @@ export default function ForwarderDirectoryPage() {
                 )}
 
             </div>
-            <Footer />
 
             <PartnerModal
                 isOpen={isModalOpen}
