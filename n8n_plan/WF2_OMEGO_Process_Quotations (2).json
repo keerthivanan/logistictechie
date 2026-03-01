@@ -12,9 +12,7 @@
         },
         "simple": false,
         "filters": {
-          "labelIds": [
-            "INBOX"
-          ],
+          "labelIds": ["INBOX"],
           "includeSpamTrash": false
         },
         "options": {
@@ -26,10 +24,7 @@
       "name": "Gmail Trigger - Monitor Inbox",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1,
-      "position": [
-        240,
-        400
-      ],
+      "position": [240, 400],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -45,10 +40,7 @@
       "name": "Code - Extract Request ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        460,
-        400
-      ],
+      "position": [460, 400],
       "onError": "continueErrorOutput"
     },
     {
@@ -61,10 +53,7 @@
       "name": "PostgreSQL - Verify Forwarder",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        680,
-        400
-      ],
+      "position": [680, 400],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -88,10 +77,7 @@
       "name": "Forwarder Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        900,
-        400
-      ]
+      "position": [900, 400]
     },
     {
       "parameters": {
@@ -103,10 +89,7 @@
       "name": "PostgreSQL - Check Request Status",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        1120,
-        300
-      ],
+      "position": [1120, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -130,10 +113,7 @@
       "name": "Request is OPEN?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        1340,
-        300
-      ]
+      "position": [1340, 300]
     },
     {
       "parameters": {
@@ -145,10 +125,7 @@
       "name": "PostgreSQL - Count Existing Quotes",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        1560,
-        200
-      ],
+      "position": [1560, 200],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -172,10 +149,7 @@
       "name": "Less than 3 Quotes?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        1780,
-        200
-      ]
+      "position": [1780, 200]
     },
     {
       "parameters": {
@@ -187,10 +161,7 @@
       "name": "PostgreSQL - Check Duplicate",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2000,
-        100
-      ],
+      "position": [2000, 100],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -214,10 +185,7 @@
       "name": "Not Duplicate?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        2220,
-        100
-      ]
+      "position": [2220, 100]
     },
     {
       "parameters": {
@@ -246,10 +214,7 @@
       "name": "OpenAI GPT-4 - Extract Quotation",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        2440,
-        0
-      ],
+      "position": [2440, 0],
       "credentials": {
         "openAiApi": {
           "id": "5",
@@ -265,10 +230,7 @@
       "name": "Code - Validate AI Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        2660,
-        0
-      ],
+      "position": [2660, 0],
       "onError": "continueErrorOutput"
     },
     {
@@ -283,10 +245,7 @@
       "name": "PostgreSQL - Save Quotation",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2880,
-        0
-      ],
+      "position": [2880, 0],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -304,10 +263,7 @@
       "name": "PostgreSQL - Update Quote Count",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        3100,
-        0
-      ],
+      "position": [3100, 0],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -327,10 +283,7 @@
       "name": "PostgreSQL - Update Forwarder Status",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        3320,
-        0
-      ],
+      "position": [3320, 0],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -348,10 +301,7 @@
       "name": "PostgreSQL - Get Updated Count",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        3540,
-        0
-      ],
+      "position": [3540, 0],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -375,10 +325,7 @@
       "name": "Reached 3 Quotes?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        3760,
-        0
-      ]
+      "position": [3760, 0]
     },
     {
       "parameters": {
@@ -391,10 +338,7 @@
       "name": "Execute Workflow - Trigger WF3",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [
-        3980,
-        -100
-      ]
+      "position": [3980, -100]
     },
     {
       "parameters": {
@@ -406,10 +350,7 @@
       "name": "PostgreSQL - Get User Email",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        3980,
-        100
-      ],
+      "position": [3980, 100],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -429,10 +370,7 @@
       "name": "Gmail - Notify User",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        4200,
-        100
-      ],
+      "position": [4200, 100],
       "credentials": {
         "gmailOAuth2": {
           "id": "4",
@@ -452,10 +390,7 @@
       "name": "Gmail - Confirm to Forwarder",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        4200,
-        200
-      ],
+      "position": [4200, 200],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -475,10 +410,7 @@
       "name": "PostgreSQL - Log Quote Event",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        4420,
-        150
-      ],
+      "position": [4420, 150],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -498,10 +430,7 @@
       "name": "Gmail - Send DECLINED Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        2000,
-        300
-      ],
+      "position": [2000, 300],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -521,10 +450,7 @@
       "name": "PostgreSQL - Log DECLINED Status",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2220,
-        300
-      ],
+      "position": [2220, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -544,10 +470,7 @@
       "name": "PostgreSQL - Log Rejected Attempt",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2440,
-        300
-      ],
+      "position": [2440, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -566,10 +489,7 @@
       "name": "Gmail - Send Request CLOSED Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        1560,
-        400
-      ],
+      "position": [1560, 400],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -588,10 +508,7 @@
       "name": "Gmail - Unknown Sender Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        1120,
-        500
-      ],
+      "position": [1120, 500],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",

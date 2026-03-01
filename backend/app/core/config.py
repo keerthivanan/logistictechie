@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 hours
     
     # N8N SECURE HANDSHAKE KEY
-    OMEGO_API_SECRET: str = "OMEGO_SUPER_SECRET_KEY_2026"
+    OMEGO_API_SECRET: str = "3670f2a318c486004bd9250b80e2277dfbe1e022896bdabd5162c792df897ce6"
 
     # CORS & RATE LIMITING
     # We load the raw string and then parse it via property

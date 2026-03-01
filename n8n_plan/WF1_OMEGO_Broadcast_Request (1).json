@@ -12,26 +12,20 @@
       "name": "Webhook - Trigger from Backend",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [
-        240,
-        300
-      ],
+      "position": [240, 300],
       "webhookId": "omego-broadcast-webhook"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM requests WHERE request_id = '{{ $json.request_id }}'",
+        "query": "SELECT * FROM requests WHERE request_id = '{{ $json.body.request_id }}'",
         "options": {}
       },
       "id": "read-request",
       "name": "PostgreSQL - Read Request",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        460,
-        300
-      ],
+      "position": [460, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -42,17 +36,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT full_name, email FROM users WHERE sovereign_id = '{{ $json.sovereign_id }}'",
+        "query": "SELECT full_name, email FROM users WHERE sovereign_id = '{{ $json.user_sovereign_id }}'",
         "options": {}
       },
       "id": "read-user",
       "name": "PostgreSQL - Read User",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        680,
-        300
-      ],
+      "position": [680, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -70,10 +61,7 @@
       "name": "PostgreSQL - Read Active Forwarders",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        900,
-        300
-      ],
+      "position": [900, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -89,10 +77,7 @@
       "name": "Code - Filter by Specialization",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1120,
-        300
-      ]
+      "position": [1120, 300]
     },
     {
       "parameters": {
@@ -103,10 +88,7 @@
       "name": "Split Into Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [
-        1340,
-        300
-      ]
+      "position": [1340, 300]
     },
     {
       "parameters": {
@@ -116,10 +98,7 @@
       "name": "Code - Build Email Content",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1560,
-        300
-      ]
+      "position": [1560, 300]
     },
     {
       "parameters": {
@@ -135,10 +114,7 @@
       "name": "Gmail - Send to Forwarder",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        1780,
-        300
-      ],
+      "position": [1780, 300],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -159,10 +135,7 @@
       "name": "PostgreSQL - Log Broadcast",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2000,
-        300
-      ],
+      "position": [2000, 300],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -186,10 +159,7 @@
       "name": "All Batches Complete?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [
-        2220,
-        300
-      ]
+      "position": [2220, 300]
     },
     {
       "parameters": {
@@ -199,10 +169,7 @@
       "name": "Code - Create Summary",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        2440,
-        200
-      ]
+      "position": [2440, 200]
     },
     {
       "parameters": {
@@ -216,10 +183,7 @@
       "name": "Gmail - Send User Confirmation",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        2660,
-        200
-      ],
+      "position": [2660, 200],
       "credentials": {
         "gmailOAuth2": {
           "id": "4",
@@ -239,10 +203,7 @@
       "name": "PostgreSQL - Log Event",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [
-        2880,
-        200
-      ],
+      "position": [2880, 200],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -260,10 +221,7 @@
       "name": "Webhook Response",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [
-        3100,
-        200
-      ]
+      "position": [3100, 200]
     }
   ],
   "connections": {
