@@ -76,9 +76,9 @@ full_tree.txt
 
 # --- Vercel & Deployment Metadata ---
 .vercel/
-frontend/.vercel/
-frontend/.vercelignore
-frontend/vercel.json
+!frontend/.vercel/
+!frontend/.vercelignore
+!frontend/vercel.json
 
 # --- Temporary ---
 handshake*.txt
