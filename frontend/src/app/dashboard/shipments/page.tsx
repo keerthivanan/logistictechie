@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, Filter, Loader2, Link2, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { API_URL } from '@/lib/config'
@@ -13,17 +13,7 @@ export default function ShipmentsPage() {
     const [shipments, setShipments] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (authLoading) return; // Wait until auth is resolved
-
-        if (!user) {
-            router.push('/login')
-        } else {
-            fetchShipments()
-        }
-    }, [user, authLoading, router])
-
-    const fetchShipments = async () => {
+    const fetchShipments = useCallback(async () => {
         try {
             const token = localStorage.getItem('token')
             const res = await fetch(`${API_URL}/api/marketplace/my-requests`, {
@@ -42,7 +32,17 @@ export default function ShipmentsPage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [logout, setShipments, setLoading]);
+
+    useEffect(() => {
+        if (authLoading) return; // Wait until auth is resolved
+
+        if (!user) {
+            router.push('/login')
+        } else {
+            fetchShipments()
+        }
+    }, [user, authLoading, router, fetchShipments])
 
     return (
         <div className="max-w-6xl mx-auto space-y-12 py-6">

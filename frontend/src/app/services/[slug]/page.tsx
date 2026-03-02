@@ -3,6 +3,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import {
     Ship, Plane, Warehouse, Anchor, BarChart, ShieldCheck,
     ArrowRight, CheckCircle, Clock, Zap, Globe, TrendingUp,
@@ -222,7 +223,7 @@ export default function ServicePage() {
                             </p>
                         </div>
                         <div className="relative aspect-video bg-zinc-900 rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-                            <img src={service.image} className="w-full h-full object-cover" alt="Feature Visual" />
+                            <NextImage src={service.image} fill className="object-cover" alt="Feature Visual" />
                         </div>
                     </div>
 

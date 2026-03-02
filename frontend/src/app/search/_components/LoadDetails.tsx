@@ -35,10 +35,10 @@ export default function LoadDetails({ load, setLoad }: { load: Load, setLoad: (l
                                         onChange={(e) => setLoad({ ...load, containerType: e.target.value as any })}
                                         className="bg-transparent text-xl font-black text-white focus:outline-none w-full tracking-tighter uppercase"
                                     >
-                                        <option value="20FT" className="bg-zinc-900">20' Standard</option>
-                                        <option value="40FT" className="bg-zinc-900">40' Standard</option>
-                                        <option value="40HC" className="bg-zinc-900">40' High-Cube</option>
-                                        <option value="45HC" className="bg-zinc-900">45' High-Cube</option>
+                                        <option value="20FT" className="bg-zinc-900">20&apos; Standard</option>
+                                        <option value="40FT" className="bg-zinc-900">40&apos; Standard</option>
+                                        <option value="40HC" className="bg-zinc-900">40&apos; High-Cube</option>
+                                        <option value="45HC" className="bg-zinc-900">45&apos; High-Cube</option>
                                     </select>
                                 </div>
                             </div>

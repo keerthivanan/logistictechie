@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import NextImage from 'next/image';
 import { User } from 'lucide-react';
 
 interface AvatarProps {
@@ -62,14 +63,16 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
 
             {/* Image Layer */}
             {finalSrc && status !== 'error' && (
-                <img
+                <NextImage
                     src={finalSrc}
-                    alt={name}
+                    alt={name || 'Avatar'}
+                    fill
+                    unoptimized // Profiles/External images often need this if not known at build time
                     onLoad={() => {
                         console.log(`Avatar Loaded: ${finalSrc.slice(0, 50)}...`);
                         setStatus('loaded');
                     }}
-                    onError={(e) => {
+                    onError={() => {
                         console.error(`Avatar Error: ${finalSrc.slice(0, 50)}...`);
                         setStatus('error');
                     }}

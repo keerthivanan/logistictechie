@@ -3,6 +3,7 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { Mail, MapPin, Phone } from 'lucide-react'
+import NextImage from 'next/image'
 
 export default function ContactPage() {
     return (
@@ -12,10 +13,11 @@ export default function ContactPage() {
             <main className="pt-24 pb-12">
                 {/* Hero Background */}
                 <div className="relative h-[400px] overflow-hidden mb-12">
-                    <img
+                    <NextImage
                         src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=2072&auto=format&fit=crop"
                         alt="Customer Support"
-                        className="w-full h-full object-cover opacity-40"
+                        fill
+                        className="object-cover opacity-40"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
                     <div className="absolute inset-0 flex items-center justify-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
     ShieldCheck, ArrowRight, Loader2, Anchor, Package,
@@ -23,22 +23,23 @@ export default function ForwarderPortal() {
     // Dashboard data state
     const [dashboardData, setDashboardData] = useState<any>(null);
 
-    // Auto-authenticate if global session is forwarder
-    useEffect(() => {
-        if (user && user.role === 'forwarder' && user.sovereign_id?.startsWith('REG-')) {
-            setIsAuthenticated(true);
-            fetchDashboardData(user.sovereign_id);
-        } else {
-            // Check localStorage fallbacks for standalone usage if needed
-            const storedId = localStorage.getItem('omego_fwd_id');
-            const storedEmail = localStorage.getItem('omego_fwd_email');
-            if (storedId && storedEmail) {
-                handleAuth(storedId, storedEmail);
+    const fetchDashboardData = useCallback(async (id: string | null) => {
+        if (!id) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/api/forwarders/dashboard/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setDashboardData(data);
             }
+        } catch (err) {
+            console.error('Failed to fetch dashboard data', err);
         }
-    }, [user]);
+    }, [setDashboardData]);
 
-    const handleAuth = async (id: string, mail: string) => {
+    const handleAuth = useCallback(async (id: string, mail: string) => {
         setLoading(true);
         setError('');
         try {
@@ -64,23 +65,22 @@ export default function ForwarderPortal() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetchDashboardData, setIsAuthenticated, setLoading, setError]);
 
-    const fetchDashboardData = async (id: string | null) => {
-        if (!id) return;
-        try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/forwarders/dashboard/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setDashboardData(data);
+    // Auto-authenticate if global session is forwarder
+    useEffect(() => {
+        if (user && user.role === 'forwarder' && user.sovereign_id?.startsWith('REG-')) {
+            setIsAuthenticated(true);
+            fetchDashboardData(user.sovereign_id);
+        } else {
+            // Check localStorage fallbacks for standalone usage if needed
+            const storedId = localStorage.getItem('omego_fwd_id');
+            const storedEmail = localStorage.getItem('omego_fwd_email');
+            if (storedId && storedEmail) {
+                handleAuth(storedId, storedEmail);
             }
-        } catch (err) {
-            console.error('Failed to fetch dashboard data', err);
         }
-    };
+    }, [user, fetchDashboardData, handleAuth]);
 
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();

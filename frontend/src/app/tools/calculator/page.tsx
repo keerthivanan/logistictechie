@@ -103,9 +103,9 @@ export default function CalculatorPage() {
                                         onChange={(e) => setContainer(e.target.value)}
                                         className="w-full bg-black border border-white/10 p-3 rounded-xl text-sm mb-4"
                                     >
-                                        <option value="20FT">20' Dry Container</option>
-                                        <option value="40FT">40' Dry Container</option>
-                                        <option value="40HC">40' High Cube</option>
+                                        <option value="20FT">20&apos; Dry Container</option>
+                                        <option value="40FT">40&apos; Dry Container</option>
+                                        <option value="40HC">40&apos; High Cube</option>
                                     </select>
                                     <select
                                         value={commodity}
