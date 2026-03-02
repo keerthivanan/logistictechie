@@ -2,6 +2,7 @@
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import Image from 'next/image'
 import { Rocket, Shield, Globe, Cpu, History, Target, Zap } from 'lucide-react'
 
 export default function AboutPage() {
@@ -12,10 +13,12 @@ export default function AboutPage() {
                 {/* Hero */}
                 <section className="relative pt-32 pb-32 overflow-hidden">
                     <div className="absolute inset-0">
-                        <img
+                        <Image
                             src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
                             alt="Global Connectivity"
-                            className="w-full h-full object-cover opacity-30 animate-pulse-slow"
+                            fill
+                            className="object-cover opacity-30 animate-pulse-slow"
+                            priority
                         />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-zinc-950"></div>
                     </div>

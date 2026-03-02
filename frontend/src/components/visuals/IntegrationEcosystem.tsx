@@ -14,7 +14,7 @@ export default function IntegrationEcosystem() {
                         </div>
                         <h2 className="text-4xl font-bold mb-6">Your Stack, Supercharged.</h2>
                         <p className="text-gray-400 text-lg mb-8">
-                            Sovereign isn't just another tool; it's the connective tissue of your logistics operations.
+                            Sovereign isn&apos;t just another tool; it&apos;s the connective tissue of your logistics operations.
                             We integrate natively with your existing ERPs, WMS, and TMS platforms.
                         </p>
 

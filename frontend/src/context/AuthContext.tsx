@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '@/lib/config';
 
@@ -41,6 +41,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    const handleLogout = useCallback(() => {
+        console.log("[AUTH] Terminating Citizen Session.");
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_name');
+        localStorage.removeItem('avatar_url');
+        localStorage.removeItem('sovereign_id');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('onboarding_completed');
+        document.cookie = "token=; path=/; max-age=0";
+        setUser(null);
+        router.push('/');
+    }, [router, setUser]);
+
+    const fetchProfile = useCallback(async (token: string) => {
+        try {
+            const res = await fetch(`${API_URL}/api/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                console.log("[AUTH] Profile Refreshed for:", data.full_name);
+                setUser({
+                    id: data.id,
+                    sovereign_id: data.sovereign_id,
+                    name: data.full_name || data.email,
+                    email: data.email,
+                    role: data.role || 'user',
+                    phone_number: data.phone_number,
+                    company_name: data.company_name,
+                    company_email: data.company_email,
+                    website: data.website,
+                    avatar_url: data.avatar_url,
+                    onboarding_completed: data.onboarding_completed
+                });
+            } else {
+                console.warn("[AUTH] Session Invalid. Triggering Clean Logout.");
+                handleLogout();
+            }
+        } catch (e) {
+            console.error("[AUTH] Sync Failure:", e);
+        } finally {
+            setLoading(false);
+        }
+    }, [setUser, handleLogout]);
+
     useEffect(() => {
         // Hydrate from localStorage
         const token = localStorage.getItem('token');
@@ -73,39 +118,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
             setLoading(false);
         }
-    }, []);
-
-    const fetchProfile = async (token: string) => {
-        try {
-            const res = await fetch(`${API_URL}/api/auth/me`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                console.log("[AUTH] Profile Refreshed for:", data.full_name);
-                setUser({
-                    id: data.id,
-                    sovereign_id: data.sovereign_id,
-                    name: data.full_name || data.email,
-                    email: data.email,
-                    role: data.role || 'user',
-                    phone_number: data.phone_number,
-                    company_name: data.company_name,
-                    company_email: data.company_email,
-                    website: data.website,
-                    avatar_url: data.avatar_url,
-                    onboarding_completed: data.onboarding_completed
-                });
-            } else {
-                console.warn("[AUTH] Session Invalid. Triggering Clean Logout.");
-                logout(); // Invalid token
-            }
-        } catch (e) {
-            console.error("[AUTH] Sync Failure:", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [fetchProfile]);
 
     const refreshProfile = async () => {
         const token = localStorage.getItem('token');

@@ -292,8 +292,8 @@ export default function SearchPage() {
           ) : query ? (
             <div className="text-center py-6 text-gray-500 text-sm">
               <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
-              No results for <span className="text-white">"{query}"</span>.
-              <div className="mt-2 text-xs text-blue-400">Action: Try searching for a major port hub like "Shanghai", "Jebel Ali", or "Los Angeles" to verify network sync.</div>
+              No results for <span className="text-white">&quot;{query}&quot;</span>.
+              <div className="mt-2 text-xs text-blue-400">Action: Try searching for a major port hub like &quot;Shanghai&quot;, &quot;Jebel Ali&quot;, or &quot;Los Angeles&quot; to verify network sync.</div>
             </div>
           ) : <div className="text-center text-gray-500 text-sm">Enter a location (City, Country, or UNLOCODE)</div>}
         </div>
@@ -343,7 +343,7 @@ export default function SearchPage() {
             <div className="text-center py-6 text-gray-500 text-sm">
               <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
               Not found.
-              <div className="mt-2 text-xs text-blue-400">Action: Use general terms like "Electronics", "Furniture", or HS codes like "8517".</div>
+              <div className="mt-2 text-xs text-blue-400">Action: Use general terms like &quot;Electronics&quot;, &quot;Furniture&quot;, or HS codes like &quot;8517&quot;.</div>
             </div>
           ) : <div className="text-center text-gray-500 text-sm">Search for HS Codes or Commodities</div>}
         </div>

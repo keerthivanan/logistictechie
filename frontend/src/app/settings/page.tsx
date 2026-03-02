@@ -40,7 +40,7 @@ export default function RebuiltSettingsPage() {
             setName(authUser.name)
             setAvatarUrl(authUser.avatar_url || '')
         }
-    }, [authUser, authLoading])
+    }, [authUser, authLoading, router])
 
     const handleUpdateIdentity = async () => {
         setIsUpdating(true)

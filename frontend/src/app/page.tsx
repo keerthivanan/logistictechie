@@ -178,11 +178,11 @@ export default function Home() {
             <div>
               <h2 className="text-4xl font-bold tracking-tight mb-6">The logistics landscape has shifted.</h2>
               <p className="text-lg text-gray-400 mb-6">
-                Containers aren't just moving physical goods; they are generating massive streams of data.
+                Containers aren&apos;t just moving physical goods; they are generating massive streams of data.
                 Legacy tools approximate this data to save costs.
               </p>
               <p className="text-lg text-white font-medium">
-                "More than 90% of supply chain disruptions are predictable with the right intelligence."
+                &quot;More than 90% of supply chain disruptions are predictable with the right intelligence.&quot;
               </p>
             </div>
             <div className="relative">

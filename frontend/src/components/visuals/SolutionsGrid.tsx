@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import NextImage from 'next/image';
 import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const solutions = [
@@ -64,7 +65,12 @@ export default function SolutionsGrid() {
                         <Link href={item.href} key={i} className="group h-[400px] relative rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] block">
                             {/* Background Image */}
                             <div className="absolute inset-0">
-                                <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-50" />
+                                <NextImage
+                                    src={item.image}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-50"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
                             </div>
 

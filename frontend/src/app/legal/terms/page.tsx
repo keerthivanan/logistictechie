@@ -31,7 +31,7 @@ export default function TermsPage() {
 
                         <section>
                             <h2 className="text-2xl font-bold text-white mb-4">4. Liability</h2>
-                            <p>Sovereign acts as an intermediary. We are not liable for cargo loss or damage, which is subject to the carrier's terms and applicable international conventions.</p>
+                            <p>Sovereign acts as an intermediary. We are not liable for cargo loss or damage, which is subject to the carrier&apos;s terms and applicable international conventions.</p>
                         </section>
                     </div>
                 </div>

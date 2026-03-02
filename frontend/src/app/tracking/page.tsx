@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
@@ -13,13 +13,7 @@ function TrackingContent() {
     const [tracking, setTracking] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        if (id) {
-            fetchTracking()
-        }
-    }, [id])
-
-    const fetchTracking = async () => {
+    const fetchTracking = useCallback(async () => {
         try {
             setLoading(true)
             const res = await fetch(`${API_URL}/api/tracking/${id}`)
@@ -30,7 +24,13 @@ function TrackingContent() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [id])
+
+    useEffect(() => {
+        if (id) {
+            fetchTracking()
+        }
+    }, [id, fetchTracking])
 
     if (!id) return (
         <div className="max-w-7xl mx-auto px-4 py-20 text-center">
