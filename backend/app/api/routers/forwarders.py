@@ -237,7 +237,7 @@ async def promote_user_to_partner(
     forwarder_record = Forwarder(
         forwarder_id=new_id,
         company_name=f_in.company_name,
-        contact_person=user.full_name,
+        contact_person=f_in.contact_person or user.full_name,
         email=user.email,
         phone=f_in.phone,
         whatsapp=f_in.whatsapp,
