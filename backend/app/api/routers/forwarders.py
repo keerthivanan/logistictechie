@@ -250,10 +250,10 @@ async def promote_user_to_partner(
         logo_url=f_in.logo_url,
         status="ACTIVE",
         is_verified=True,
-        is_paid=True, # Free trial auto-paid status
+        is_paid=False, # Free trial active, payment not yet required
         registered_at=datetime.utcnow(),
         activated_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=90) # 90-day extended startup trial
+        expires_at=datetime.utcnow() + timedelta(days=90) # 90-day free startup trial
     )
     
     db.add(forwarder_record)
