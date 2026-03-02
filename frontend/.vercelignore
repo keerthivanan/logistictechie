@@ -1,0 +1,9 @@
+backend/
+n8n_plan/
+venv/
+.vscode/
+*.py
+*.md
+audit.py
+generate_tree.py
+full_tree.txt
