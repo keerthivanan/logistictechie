@@ -54,10 +54,33 @@ backend/venv/
 venv/
 .venv/
 
-# --- Temporary ---
+# --- N8N & Automation ---
+n8n_plan/
+*.json
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/tsconfig.json
+
+# --- Scripts & Deployment ---
+backend/scripts/
+scripts/
+audit.py
+generate_tree.py
+full_tree.txt
 *.log
 *.tmp
 *.bak
+*.txt
+!README.md
+!frontend/*.txt
+
+# --- Vercel & Deployment Metadata ---
+.vercel/
+frontend/.vercel/
+frontend/.vercelignore
+frontend/vercel.json
+
+# --- Temporary ---
 handshake*.txt
 test_out.txt
 test_results.txt
