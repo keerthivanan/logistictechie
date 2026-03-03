@@ -25,6 +25,7 @@ class MarketplaceRequest(Base):
     destination_type = Column(String) # Port, Airport, Terminal
     cargo_type = Column(String, index=True) # Column G (Mode)
     commodity = Column(String) # Specific item
+    cargo_specification = Column(String, nullable=True) # Handling / Container Spec
     packing_type = Column(String) # Pallets, Crates, etc.
     quantity = Column(Integer) # Number of units
     weight_kg = Column(Numeric(10, 2)) # Column H - Precise Decimal
@@ -33,6 +34,7 @@ class MarketplaceRequest(Base):
     is_hazardous = Column(Boolean, default=False)
     needs_insurance = Column(Boolean, default=False)
     target_date = Column(DateTime) # Planned shipping date
+    vessel = Column(String, nullable=True) # Preferred Vessel (IMO or Name)
     special_requirements = Column(String) # Column J
     incoterms = Column(String, index=True) # Column K
     currency = Column(String, default="USD") # Column L

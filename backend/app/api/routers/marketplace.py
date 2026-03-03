@@ -28,6 +28,7 @@ class MarketplaceSubmit(BaseModel):
     destination_type: str = "PORT"
     cargo_type: str
     commodity: str = ""
+    cargo_specification: str = ""
     packing_type: str = "PALLETS"
     quantity: int = 1
     weight: float
@@ -38,6 +39,7 @@ class MarketplaceSubmit(BaseModel):
     is_hazardous: bool = False
     needs_insurance: bool = False
     target_date: Optional[str] = None
+    vessel: str = ""
     special_requirements: str = ""
     incoterms: str = "FOB"
     currency: str = "USD"
@@ -105,6 +107,7 @@ async def submit_request(
         "destination_type": request_in.destination_type,
         "cargo_type": request_in.cargo_type,
         "commodity": request_in.commodity,
+        "cargo_specification": request_in.cargo_specification,
         "packing_type": request_in.packing_type,
         "quantity": request_in.quantity,
         "weight": weight_kg,
@@ -116,6 +119,7 @@ async def submit_request(
         "is_hazardous": request_in.is_hazardous,
         "needs_insurance": request_in.needs_insurance,
         "target_date": request_in.target_date,
+        "vessel": request_in.vessel,
         "special_requirements": request_in.special_requirements,
         "incoterms": request_in.incoterms,
         "currency": request_in.currency
@@ -134,6 +138,7 @@ async def submit_request(
         destination_type=request_in.destination_type,
         cargo_type=request_in.cargo_type,
         commodity=request_in.commodity,
+        cargo_specification=request_in.cargo_specification,
         packing_type=request_in.packing_type,
         quantity=request_in.quantity,
         weight_kg=weight_kg,
@@ -142,6 +147,7 @@ async def submit_request(
         is_hazardous=request_in.is_hazardous,
         needs_insurance=request_in.needs_insurance,
         target_date=datetime.fromisoformat(request_in.target_date.replace("Z", "+00:00")) if request_in.target_date else None,
+        vessel=request_in.vessel,
         special_requirements=request_in.special_requirements,
         incoterms=request_in.incoterms,
         currency=request_in.currency,
@@ -216,6 +222,7 @@ async def get_my_requests(
             "destination": r.destination,
             "cargo_type": r.cargo_type,
             "commodity": r.commodity,
+            "cargo_specification": r.cargo_specification,
             "quantity": r.quantity,
             "is_hazardous": r.is_hazardous,
             "needs_insurance": r.needs_insurance,
@@ -309,6 +316,7 @@ class N8nRequestSync(BaseModel):
     destination_type: str = "PORT"
     cargo_type: str
     commodity: str = ""
+    cargo_specification: str = ""
     packing_type: str = "PALLETS"
     quantity: int = 1
     weight_kg: float
@@ -316,6 +324,8 @@ class N8nRequestSync(BaseModel):
     is_stackable: bool = True
     is_hazardous: bool = False
     needs_insurance: bool = False
+    target_date: Optional[str] = None
+    vessel: str = ""
     special_requirements: str = ""
     incoterms: str = "FOB"
     currency: str = "USD"
@@ -345,6 +355,7 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
             "destination_type": sync_in.destination_type,
             "cargo_type": sync_in.cargo_type,
             "commodity": sync_in.commodity,
+            "cargo_specification": sync_in.cargo_specification,
             "packing_type": sync_in.packing_type,
             "quantity": sync_in.quantity,
             "weight_kg": Decimal(str(sync_in.weight_kg)),
@@ -352,6 +363,8 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
             "is_stackable": sync_in.is_stackable,
             "is_hazardous": sync_in.is_hazardous,
             "needs_insurance": sync_in.needs_insurance,
+            "target_date": datetime.fromisoformat(sync_in.target_date.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.target_date else None,
+            "vessel": sync_in.vessel,
             "special_requirements": sync_in.special_requirements,
             "incoterms": sync_in.incoterms,
             "currency": sync_in.currency,
@@ -467,6 +480,8 @@ async def n8n_quote_sync(
         index_elements=[MarketplaceBid.quotation_id],
         set_={
             "total_price": stmt.excluded.total_price,
+            "carrier": stmt.excluded.carrier,
+            "ai_summary": stmt.excluded.ai_summary,
             "status": stmt.excluded.status
         }
     )

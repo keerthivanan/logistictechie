@@ -177,7 +177,7 @@ export default function DashboardLayout({
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 group-focus-within:text-white transition-colors" />
                             <input
                                 type="text"
-                                placeholder="Search shipments, vessels, or forwarders..."
+                                placeholder="Search shipments, commodities, or forwarders..."
                                 className="w-full bg-white/5 border border-white/5 rounded-full py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
                             />
                         </div>

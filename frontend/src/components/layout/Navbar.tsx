@@ -39,10 +39,8 @@ export default function Navbar() {
             label: "Ecosystem",
             children: [
                 { label: "Sovereign Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
-                { label: "Partner Directory", href: "/forwarders", desc: "Verified Partner Network" },
                 { label: "Carrier Registration", href: "/forwarders/register", desc: "Join the Sovereign Network" },
                 { label: "Shipper Portal", href: "/shippers", desc: "Tactical Cargo Orchestration" },
-                { label: "Live Telemetry", href: "/vessels", desc: "Global Asset Tracking" },
             ]
         },
         {

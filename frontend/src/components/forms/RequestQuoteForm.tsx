@@ -11,6 +11,9 @@ import {
 import { countries } from '@/lib/countries';
 import { API_URL } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
+import PortAutocomplete from '@/components/forms/PortAutocomplete';
+import CommodityAutocomplete from '@/components/forms/CommodityAutocomplete';
+import VesselAutocomplete from '@/components/forms/VesselAutocomplete';
 
 interface Country {
     name: string;
@@ -54,11 +57,12 @@ export default function RequestQuoteForm() {
         // Timing & Product
         process_date: '', // "Select arrival date"
         commodity: '', // "What is the cargo?"
+        cargo_specification: 'General Cargo', // "Cargo Handling/Container Spec"
 
         // Specs
         packing_type: 'Pallets', // "How is your cargo packed"
         incoterms: 'FOB',
-        quantity: '',
+        quantity: '1',
 
         // Weight
         weight: '',
@@ -71,12 +75,17 @@ export default function RequestQuoteForm() {
         dim_unit: 'CM',
 
         // Options
-        is_stackable: false,
+        is_stackable: true,
         is_hazardous: false,
         needs_insurance: false,
 
-        notes: ''
+        notes: '',
+        vessel: ''
     });
+
+    const handleAutocompleteChange = (name: string, value: string) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -117,6 +126,7 @@ export default function RequestQuoteForm() {
                 },
                 specs: {
                     commodity: formData.commodity,
+                    cargo_specification: formData.cargo_specification,
                     packing: formData.packing_type,
                     incoterms: formData.incoterms,
                     quantity: formData.quantity,
@@ -132,18 +142,22 @@ export default function RequestQuoteForm() {
                 notes: formData.notes
             };
 
+            const selectedOriginCountry = countries.find((c: Country) => c.code === formData.origin_country);
+            const dialCode = selectedOriginCountry ? selectedOriginCountry.dial_code : '';
+
             const payload = {
                 user_id: user.id,
                 sovereign_id: user.sovereign_id || '',
                 name: user.name || user.email || 'Client',
                 email: user.email,
-                phone: formData.phone || '', // Critical Identity Sync
+                phone: `${dialCode} ${formData.phone}`.trim(), // Critical Identity Sync
                 origin: `${formData.origin_district || ''} ${formData.origin_country}`.trim(),
                 origin_type: formData.origin_type.toUpperCase(),
                 destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
                 destination_type: formData.dest_type.toUpperCase(),
                 cargo_type: formData.mode,
                 commodity: formData.commodity,
+                cargo_specification: formData.cargo_specification,
                 packing_type: formData.packing_type.toUpperCase(),
                 quantity: parseInt(formData.quantity) || 1,
                 weight: parseFloat(formData.weight) || 0,
@@ -155,6 +169,7 @@ export default function RequestQuoteForm() {
                 needs_insurance: formData.needs_insurance,
                 target_date: formData.process_date,
                 special_requirements: formData.notes,
+                vessel: formData.vessel,
                 incoterms: formData.incoterms || 'FOB',
                 currency: 'USD'
             };
@@ -181,6 +196,36 @@ export default function RequestQuoteForm() {
         }
     };
 
+    const selectedOriginCountryUI = countries.find((c: Country) => c.code === formData.origin_country);
+    const uiDialCode = selectedOriginCountryUI ? selectedOriginCountryUI.dial_code : '';
+
+    // Mode-specific Cargo Options
+    const getCargoOptions = () => {
+        switch (formData.mode) {
+            case 'Ocean':
+                return [
+                    "General Cargo", "Dry Bulk", "Liquid Bulk", "Reefer (Perishable)",
+                    "Hazardous (DG)", "Oversized / Project Cargo", "Ro-Ro",
+                    "20ft Standard", "40ft Standard", "40ft High Cube",
+                    "20ft Reefer", "40ft Reefer", "20ft Open Top", "40ft Open Top",
+                    "20ft Flat Rack", "40ft Flat Rack", "20ft Tank"
+                ];
+            case 'Air':
+                return [
+                    "General Cargo", "Valuable (VAL)", "Vulnerable (VUN)",
+                    "Perishable (PER)", "Cold-chain (COL)", "Live Animals (AVI)",
+                    "Dangerous Goods (DGR)"
+                ];
+            case 'Truck':
+                return [
+                    "General Cargo", "Full Truck Load (FTL)", "Less than Truck Load (LTL)",
+                    "Hazardous", "Oversized", "Refrigerated Truck"
+                ];
+            default:
+                return ["General Cargo"];
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
@@ -200,7 +245,7 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     onSubmit={handleSubmit}
-                    className="bg-zinc-950 border border-white/5 rounded-[32px] p-8 md:p-12 shadow-2xl space-y-10"
+                    className="bg-white/[0.01] border border-white/5 rounded-2xl p-6 md:p-8 space-y-10"
                 >
                     {/* 1. Mode Selection */}
                     <div className="space-y-4">
@@ -211,7 +256,7 @@ export default function RequestQuoteForm() {
                                 name="mode"
                                 value={formData.mode}
                                 onChange={handleChange}
-                                className="w-full bg-black border border-white/5 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white appearance-none focus:border-white/20 outline-none transition-all font-inter"
+                                className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-3 py-2.5 text-[10px] font-bold text-white appearance-none focus:border-white/20 outline-none transition-all font-inter"
                             >
                                 <option value="Ocean">Ocean Freight (FCL/LCL)</option>
                                 <option value="Air">Air Freight</option>
@@ -226,55 +271,80 @@ export default function RequestQuoteForm() {
                     <div className="grid md:grid-cols-2 gap-12">
                         {/* Origin */}
                         <div className="space-y-6">
-                            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin Node
                             </h3>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control</label>
                                         <select
                                             name="origin_country"
                                             value={formData.origin_country}
                                             onChange={handleChange}
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                            className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                         >
                                             {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                         </select>
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Contact Number</label>
-                                        <input
-                                            name="phone"
-                                            type="tel"
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                            placeholder="+1 (555) 000-0000"
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                        />
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Contact Number</label>
+                                        <div className="flex bg-black border border-white/5 rounded-lg focus-within:border-white/20 overflow-hidden transition-colors">
+                                            <div className="flex items-center justify-center pl-3 pr-2 py-2.5 text-[10px] font-bold text-zinc-400 font-inter bg-white/5 border-r border-white/5 whitespace-nowrap select-none">
+                                                {uiDialCode}
+                                            </div>
+                                            <input
+                                                name="phone"
+                                                type="tel"
+                                                value={formData.phone}
+                                                onChange={(e) => {
+                                                    let val = e.target.value.replace(/\D/g, ''); // numbers only
+                                                    if (formData.origin_country === 'IN') {
+                                                        val = val.slice(0, 10);
+                                                    } else {
+                                                        val = val.slice(0, 15);
+                                                    }
+                                                    setFormData(prev => ({ ...prev, phone: val }));
+                                                }}
+                                                placeholder={formData.origin_country === 'IN' ? "10-digit number" : "Phone number"}
+                                                className="w-full bg-transparent px-3 py-2.5 text-[10px] font-bold text-white outline-none font-inter"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
-                                        <input
-                                            name="origin_district"
-                                            value={formData.origin_district}
-                                            onChange={handleChange}
-                                            placeholder="Shanghai"
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                        />
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
+                                        {['Port', 'CFS'].includes(formData.origin_type) ? (
+                                            <PortAutocomplete
+                                                name="origin_district"
+                                                value={formData.origin_district}
+                                                onChange={handleAutocompleteChange}
+                                                placeholder="Search Port / Terminal..."
+                                                countryCode={formData.origin_country}
+                                                termType={formData.origin_type}
+                                            />
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                name="origin_district"
+                                                value={formData.origin_district}
+                                                onChange={handleChange}
+                                                placeholder="Enter full address/zip"
+                                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                                            />
+                                        )}
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
                                         <select
                                             name="origin_type"
                                             value={formData.origin_type}
                                             onChange={handleChange}
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                            className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                         >
                                             <option value="Port" className="bg-zinc-900">Port / Airport</option>
-                                            <option value="Door" className="bg-zinc-900">Factory / Door</option>
+                                            <option value="Door" className="bg-zinc-900">Door / Warehouse</option>
                                             <option value="CFS" className="bg-zinc-900">Container Station</option>
                                         </select>
                                     </div>
@@ -284,39 +354,51 @@ export default function RequestQuoteForm() {
 
                         {/* Destination */}
                         <div className="space-y-6">
-                            <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Destination Node
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory</label>
+                                    <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory</label>
                                     <select
                                         name="dest_country"
                                         value={formData.dest_country}
                                         onChange={handleChange}
-                                        className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                        className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                     >
                                         {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
-                                        <input
-                                            name="dest_district"
-                                            value={formData.dest_district}
-                                            onChange={handleChange}
-                                            placeholder="Los Angeles"
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                        />
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
+                                        {['Port', 'CFS'].includes(formData.dest_type) ? (
+                                            <PortAutocomplete
+                                                name="dest_district"
+                                                value={formData.dest_district}
+                                                onChange={handleAutocompleteChange}
+                                                placeholder="Search Port / Terminal..."
+                                                countryCode={formData.dest_country}
+                                                termType={formData.dest_type}
+                                            />
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                name="dest_district"
+                                                value={formData.dest_district}
+                                                onChange={handleChange}
+                                                placeholder="Enter full address/zip"
+                                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                                            />
+                                        )}
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="block text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Terminal Type</label>
                                         <select
                                             name="dest_type"
                                             value={formData.dest_type}
                                             onChange={handleChange}
-                                            className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                            className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
                                         >
                                             <option value="Door" className="bg-zinc-900">Door / Warehouse</option>
                                             <option value="Port" className="bg-zinc-900">Port / Airport</option>
@@ -333,7 +415,7 @@ export default function RequestQuoteForm() {
                     {/* 3. Shipment Specs */}
                     <div className="grid md:grid-cols-2 gap-12">
                         <div className="space-y-4">
-                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date) *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date) *</label>
                             <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                 <input
@@ -341,111 +423,136 @@ export default function RequestQuoteForm() {
                                     name="process_date"
                                     value={formData.process_date}
                                     onChange={handleChange}
-                                    className="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
+                                    style={{ colorScheme: 'dark' }}
+                                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
                                 />
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Specification *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Commodity / Product *</label>
+                            <CommodityAutocomplete
+                                name="commodity"
+                                value={formData.commodity}
+                                onChange={handleAutocompleteChange}
+                                placeholder="e.g. Lithium-Ion Modules"
+                            />
+                        </div>
+
+                        {/* New Cargo Specification Field */}
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Specification / Handling *</label>
                             <div className="relative">
                                 <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                <input
-                                    type="text"
-                                    name="commodity"
-                                    value={formData.commodity}
+                                <select
+                                    name="cargo_specification"
+                                    value={formData.cargo_specification}
                                     onChange={handleChange}
-                                    placeholder="e.g. Lithium-Ion Modules"
-                                    className="w-full bg-black border border-white/5 rounded-xl pl-12 pr-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                />
+                                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-3 py-2.5 text-[10px] font-bold text-white appearance-none focus:border-white/20 outline-none transition-all font-inter"
+                                >
+                                    {getCargoOptions().map(opt => (
+                                        <option key={opt} value={opt} className="bg-zinc-900">{opt}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Packaging Unit</label>
-                                <select
-                                    name="packing_type"
-                                    value={formData.packing_type}
-                                    onChange={handleChange}
-                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
-                                >
-                                    <option value="Pallets" className="bg-zinc-900">Pallets</option>
-                                    <option value="Boxes" className="bg-zinc-900">Boxes / Cartons</option>
-                                    <option value="Crates" className="bg-zinc-900">Crates</option>
-                                    <option value="Loose" className="bg-zinc-900">Loose / Bulk</option>
-                                </select>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Quantity</label>
-                                <input
-                                    type="number"
-                                    name="quantity"
-                                    value={formData.quantity}
-                                    onChange={handleChange}
-                                    placeholder="100"
-                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                />
-                            </div>
+                        {/* Vessel Selection */}
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Preferred Vessel (Optional)</label>
+                            <VesselAutocomplete
+                                name="vessel"
+                                value={formData.vessel}
+                                onChange={handleAutocompleteChange}
+                                placeholder="Search IMO or Ship Name..."
+                            />
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy</label>
-                                <select
-                                    name="incoterms"
-                                    value={formData.incoterms}
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Packaging Unit</label>
+                            <select
+                                name="packing_type"
+                                value={formData.packing_type}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                            >
+                                <option value="Pallets" className="bg-zinc-900">Pallets</option>
+                                <option value="Boxes" className="bg-zinc-900">Boxes / Cartons</option>
+                                <option value="Crates" className="bg-zinc-900">Crates</option>
+                                <option value="Loose" className="bg-zinc-900">Loose / Bulk</option>
+                            </select>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Quantity</label>
+                            <input
+                                type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
+                                name="quantity"
+                                value={formData.quantity}
+                                onChange={handleChange}
+                                placeholder="100"
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy</label>
+                            <select
+                                name="incoterms"
+                                value={formData.incoterms}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                            >
+                                <option value="FOB" className="bg-zinc-900">FOB</option>
+                                <option value="EXW" className="bg-zinc-900">EXW</option>
+                                <option value="CIF" className="bg-zinc-900">CIF</option>
+                                <option value="DDP" className="bg-zinc-900">DDP</option>
+                            </select>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation</label>
+                            <div className="flex">
+                                <input
+                                    type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
+                                    name="weight"
+                                    value={formData.weight}
                                     onChange={handleChange}
-                                    className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                                    placeholder="500"
+                                    className="w-full bg-black border border-white/5 border-r-0 rounded-l-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                                />
+                                <select
+                                    name="weight_unit"
+                                    value={formData.weight_unit}
+                                    onChange={handleChange}
+                                    className="bg-zinc-900 border border-white/5 border-l-0 rounded-r-lg px-3 text-[10px] font-bold text-zinc-500 focus:outline-none font-inter"
                                 >
-                                    <option value="FOB" className="bg-zinc-900">FOB</option>
-                                    <option value="EXW" className="bg-zinc-900">EXW</option>
-                                    <option value="CIF" className="bg-zinc-900">CIF</option>
-                                    <option value="DDP" className="bg-zinc-900">DDP</option>
+                                    <option value="KGM">KG</option>
+                                    <option value="LBS">LB</option>
                                 </select>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation</label>
-                                <div className="flex">
-                                    <input
-                                        type="number"
-                                        name="weight"
-                                        value={formData.weight}
-                                        onChange={handleChange}
-                                        placeholder="500"
-                                        className="w-full bg-black border border-white/5 border-r-0 rounded-l-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none font-inter"
-                                    />
-                                    <select
-                                        name="weight_unit"
-                                        value={formData.weight_unit}
-                                        onChange={handleChange}
-                                        className="bg-zinc-900 border border-white/5 border-l-0 rounded-r-xl px-3 text-[10px] font-bold text-zinc-500 focus:outline-none font-inter"
-                                    >
-                                        <option value="KGM">KG</option>
-                                        <option value="LBS">LB</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* 4. Measurements */}
                     <div className="space-y-4">
-                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Volumetric Protocol (L x W x H)</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Volumetric Protocol (L x W x H)</label>
                         <div className="flex gap-4">
                             <input
-                                type="number" name="length" placeholder="L"
+                                type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()} name="length" placeholder="L"
                                 value={formData.length} onChange={handleChange}
-                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none text-center font-inter"
                             />
                             <input
-                                type="number" name="width" placeholder="W"
+                                type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()} name="width" placeholder="W"
                                 value={formData.width} onChange={handleChange}
-                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none text-center font-inter"
                             />
                             <input
-                                type="number" name="height" placeholder="H"
+                                type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()} name="height" placeholder="H"
                                 value={formData.height} onChange={handleChange}
-                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-3 text-xs font-bold text-white focus:border-white/20 outline-none text-center font-inter"
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none text-center font-inter"
                             />
                             <select
                                 name="dim_unit"
@@ -461,7 +568,7 @@ export default function RequestQuoteForm() {
 
                     {/* 5. Options (Checkboxes) */}
                     <div className="space-y-4">
-                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Additional Telemetry</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Additional Telemetry</label>
                         <div className="grid md:grid-cols-3 gap-4">
                             <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all group">
                                 <input
@@ -498,15 +605,15 @@ export default function RequestQuoteForm() {
 
                     {/* 6. Notes */}
                     <div className="space-y-4">
-                        <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Strategic Handling Notes</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Strategic Handling Notes</label>
                         <textarea
                             name="notes"
                             value={formData.notes}
                             onChange={handleChange}
                             placeholder="Add specific operational instructions..."
-                            className="w-full bg-black border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:border-white/20 outline-none min-h-[120px] font-inter"
+                            className="w-full bg-black border border-white/5 rounded-lg px-4 py-3 text-[10px] font-bold text-white focus:border-white/20 outline-none min-h-[100px] font-inter"
                         />
-                        <p className="text-[8px] text-zinc-700 font-bold uppercase tracking-widest flex items-center gap-2">
+                        <p className="text-[10px] text-zinc-700 font-bold uppercase tracking-widest flex items-center gap-2">
                             <Info className="w-3 h-3 text-emerald-500" /> Identity signals will be automatically appended to the request packet.
                         </p>
                     </div>
@@ -515,7 +622,7 @@ export default function RequestQuoteForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-white text-black font-bold h-16 rounded-2xl hover:bg-zinc-200 transition-all flex items-center justify-center text-xs tracking-[0.2em] font-inter uppercase disabled:opacity-50 shadow-xl active:scale-[0.98]"
+                        className="w-full bg-white text-black font-bold py-3.5 rounded-lg hover:bg-zinc-200 transition-all flex items-center justify-center text-[10px] tracking-[0.2em] font-inter uppercase disabled:opacity-50 shadow-xl active:scale-[0.98]"
                     >
                         {loading ? (
                             <>
@@ -530,7 +637,7 @@ export default function RequestQuoteForm() {
                     </button>
 
                 </motion.form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
