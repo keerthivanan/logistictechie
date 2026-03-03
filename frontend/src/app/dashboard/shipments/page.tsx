@@ -163,7 +163,7 @@ export default function ShipmentsPage() {
                                             <td className="pr-10 py-8 text-right">
                                                 <div className="flex items-center justify-end gap-3">
                                                     <Link
-                                                        href={`/dashboard/request/${s.request_id}`}
+                                                        href={`/marketplace/${s.request_id}`}
                                                         className="w-9 h-9 flex items-center justify-center rounded-full border border-white/5 bg-white/[0.01] text-zinc-700 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all shadow-sm group-hover:scale-110"
                                                     >
                                                         <ArrowUpRight className="w-4 h-4" />

@@ -3,57 +3,57 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, ShieldCheck, Zap } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import { API_URL } from '@/lib/config';
 
 interface Quote {
-    id: string;
-    price: number;
+    quotation_id: string;
+    total_price: number;
     currency: string;
-    transit_days: number;
-    mode: string;
-    company_name: string;
-    logo_url: string;
-    country: string;
-    position: number; // 1, 2, or 3
+    transit_days: number | null;
+    forwarder_company: string;
+    ai_summary: string | null;
+    carrier: string;
+    service_type: string;
+    received_at: string;
 }
 
 export default function MarketplaceLiveDashboard() {
     const params = useParams();
-    const uniqueId = params.id as string;
+    const requestId = params.id as string;
 
     const [loading, setLoading] = useState(true);
     const [quotes, setQuotes] = useState<Quote[]>([]);
-    const [status, setStatus] = useState('OPEN'); // OPEN, CLOSED
-    const [progress, setProgress] = useState(0); // 0 to 3
+    const [status, setStatus] = useState('OPEN');
+    const [progress, setProgress] = useState(0);
+    const [shipmentInfo, setShipmentInfo] = useState<any>(null);
 
     // POLLING LOGIC
     useEffect(() => {
         const fetchQuotes = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/marketplace/quotes/${uniqueId}`);
+                const res = await fetch(`${API_URL}/api/marketplace/request/${requestId}`);
+                if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
 
-                if (data.quotes) {
-                    setQuotes(data.quotes);
-                    setProgress(data.quotes.length);
-                    // Only close if backend says so (which happens after 3 bids)
-                    if (data.status === 'CLOSED') {
-                        setStatus('CLOSED');
-                    }
+                if (data.quotations) {
+                    setQuotes(data.quotations);
+                    setProgress(data.quotations.length);
+                }
+                if (data.request) {
+                    setShipmentInfo(data.request);
+                    setStatus(data.request.status);
                 }
             } catch (error) {
-                console.error("Polling error:", error);
+                console.error("Sovereign Link Error:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        // Initial fetch
         fetchQuotes();
 
-        // Poll every 5 seconds if not closed
         const interval = setInterval(() => {
             if (status !== 'CLOSED') {
                 fetchQuotes();
@@ -61,111 +61,138 @@ export default function MarketplaceLiveDashboard() {
         }, 5000);
 
         return () => clearInterval(interval);
-    }, [uniqueId, status]);
+    }, [requestId, status]);
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-inter">
             <Navbar />
 
-            <div className="max-w-4xl mx-auto px-4 py-32">
+            <div className="max-w-5xl mx-auto px-6 py-32 mb-20">
 
-                {/* Status Hero */}
-                <div className="mb-16 text-center">
+                {/* Tactical Status */}
+                <div className="mb-20 text-center">
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="inline-block"
                     >
                         {status === 'CLOSED' ? (
-                            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase font-inter mb-6 inline-flex items-center">
-                                <CheckCircle className="w-3.5 h-3.5 mr-2" /> Analysis Protocol Complete
+                            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center shadow-lg shadow-emerald-500/5">
+                                <ShieldCheck className="w-4 h-4 mr-3" /> Analysis Protocol Finalized
                             </div>
                         ) : (
-                            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase font-inter mb-6 inline-flex items-center">
-                                <Clock className="w-3.5 h-3.5 mr-2 animate-pulse" /> Scanning Global Carrier Mesh
+                            <div className="bg-white/5 text-zinc-400 border border-white/10 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center">
+                                <BrainCircuit className="w-4 h-4 mr-3 animate-pulse text-emerald-500" /> Intercepting Carrier Quotations...
                             </div>
                         )}
-                        <h1 className="text-4xl font-bold mb-4 tracking-tight font-outfit uppercase">Market Intelligence</h1>
-                        <p className="text-zinc-500 font-medium font-inter max-w-lg mx-auto">Verified spot rates and strategic broker analysis for your operational requirements.</p>
+                        <h1 className="text-5xl font-black mb-6 tracking-tighter font-outfit uppercase bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+                            Live Intelligence <span className="text-white">Grid</span>
+                        </h1>
+                        <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm leading-relaxed">
+                            Request: <span className="text-zinc-200 font-mono tracking-widest">{requestId}</span>
+                            <br />
+                            Real-time spot rate synthesis for {shipmentInfo?.origin} ➔ {shipmentInfo?.destination}
+                        </p>
                     </motion.div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-2 bg-white/[0.02] rounded-full h-1 overflow-hidden relative max-w-md mx-auto border border-white/5">
-                    <motion.div
-                        className="absolute left-0 top-0 bottom-0 bg-emerald-500"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(progress / 3) * 100}%` }}
-                        transition={{ duration: 0.5 }}
-                    />
-                </div>
-                <div className="text-center mb-20 text-[8px] font-black text-zinc-700 uppercase tracking-[0.3em]">
-                    Tactical Priority: Only First 3 Quotations Accepted
+                {/* Matrix Progress */}
+                <div className="max-w-lg mx-auto mb-20 relative">
+                    <div className="bg-white/[0.03] rounded-full h-1.5 overflow-hidden border border-white/5">
+                        <motion.div
+                            className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(progress / 3) * 100}%` }}
+                        />
+                    </div>
+                    <div className="mt-4 flex justify-between items-center text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em]">
+                        <span>Scanning Hubs</span>
+                        <span className={progress >= 3 ? "text-emerald-500" : "animate-pulse"}>
+                            {progress}/3 Vectors Found
+                        </span>
+                    </div>
                 </div>
 
-                {/* Quotes List */}
-                <div className="space-y-4">
+                {/* Analysis Cards */}
+                <div className="grid gap-6">
                     <AnimatePresence>
                         {quotes.map((quote, index) => (
                             <motion.div
-                                key={quote.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.98 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="bg-zinc-950 border border-white/5 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 group hover:border-white/20 transition-all"
+                                key={quote.quotation_id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.15 }}
+                                className="group relative"
                             >
-                                {/* Position Badge */}
-                                <div className="flex-shrink-0">
-                                    <div className="w-10 h-10 rounded-xl bg-white text-black font-bold text-base flex items-center justify-center font-outfit shadow-xl">
-                                        0{quote.position}
+                                <div className="bg-[#050505] border border-white/5 rounded-[2rem] p-10 flex flex-col lg:flex-row items-center gap-10 hover:border-white/20 transition-all shadow-2xl">
+                                    {/* Intelligence Rank */}
+                                    <div className="flex-shrink-0">
+                                        <div className="w-14 h-14 rounded-2xl bg-white text-black font-black text-xl flex items-center justify-center font-outfit">
+                                            0{index + 1}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Company Info */}
-                                <div className="flex-1 text-center md:text-left">
-                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                        <h3 className="font-bold text-lg font-outfit uppercase tracking-tight">{quote.company_name}</h3>
-                                        <span className="text-[10px] font-bold bg-white/5 px-2 py-0.5 rounded text-zinc-500 font-inter tracking-widest">{quote.country}</span>
-                                    </div>
-                                    <div className="flex items-center justify-center md:justify-start gap-4 text-[11px] text-zinc-600 font-bold font-inter tracking-wide">
-                                        <span className="flex items-center uppercase">
-                                            {quote.mode === 'Air' ? <Plane className="w-3.5 h-3.5 mr-2 opacity-50" /> : <Ship className="w-3.5 h-3.5 mr-2 opacity-50" />}
-                                            {quote.mode || 'Freight'}
-                                        </span>
-                                        <span className="opacity-20">•</span>
-                                        <span className="uppercase text-emerald-500/70">{quote.transit_days} Transit Days</span>
-                                    </div>
-                                </div>
+                                    {/* Strategic Core */}
+                                    <div className="flex-1 text-center lg:text-left space-y-4">
+                                        <div className="flex flex-col md:flex-row items-center gap-4">
+                                            <h3 className="font-black text-2xl font-outfit uppercase tracking-tight text-white">{quote.forwarder_company}</h3>
+                                            <div className="flex gap-2">
+                                                <span className="text-[10px] font-black bg-white/5 px-3 py-1 rounded-lg text-zinc-500 uppercase tracking-widest border border-white/5">
+                                                    {quote.carrier}
+                                                </span>
+                                                <span className="text-[10px] font-black bg-emerald-500/10 px-3 py-1 rounded-lg text-emerald-500 uppercase tracking-widest border border-emerald-500/10">
+                                                    {quote.transit_days || 'TBD'} DAYS
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                {/* Price */}
-                                <div className="text-center md:text-right">
-                                    <div className="text-2xl font-bold text-white mb-0.5 font-outfit">
-                                        ${Number(quote.price).toLocaleString()}
+                                        {/* AI INSIGHT - The Value Add */}
+                                        <div className="bg-white/[0.02] border border-white/5 p-4 rounded-xl flex items-start gap-3">
+                                            <Zap className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                                            <p className="text-zinc-400 text-xs font-medium leading-relaxed italic">
+                                                {quote.ai_summary || "Analyzing carrier performance metrics and logistics compatibility..."}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="text-[10px] text-zinc-700 font-bold uppercase tracking-[0.2em] font-inter">Verified Spot Rate</div>
-                                </div>
 
-                                {/* Action */}
-                                <div>
-                                    <button className="bg-white text-black py-2.5 px-6 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-2">
-                                        Execute <ArrowRight className="w-3.5 h-3.5" />
-                                    </button>
+                                    {/* Financial Commitment */}
+                                    <div className="text-center lg:text-right px-6">
+                                        <div className="text-4xl font-black text-white mb-2 font-outfit tracking-tighter">
+                                            {quote.currency} {Number(quote.total_price).toLocaleString()}
+                                        </div>
+                                        <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">Verified Spot Protocol</div>
+                                    </div>
+
+                                    {/* Action Vector */}
+                                    <div className="flex-shrink-0">
+                                        <button className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3">
+                                            Commit <ArrowRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}
                     </AnimatePresence>
 
-                    {quotes.length === 0 && !loading && (
-                        <div className="text-center py-20 bg-zinc-950 rounded-[32px] border border-white/5 border-dashed">
-                            <div className="w-12 h-12 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <Loader2 className="w-5 h-5 animate-spin text-zinc-600" />
+                    {/* Pending State */}
+                    {quotes.length < 3 && !loading && (
+                        <div className="mt-10 p-20 bg-[#020202] rounded-[3rem] border border-white/5 border-dashed flex flex-col items-center justify-center text-center">
+                            <div className="w-16 h-16 bg-white/[0.03] rounded-3xl flex items-center justify-center mb-8 border border-white/10">
+                                <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
                             </div>
-                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em] font-inter">Intercepting Operational Intelligence...</p>
+                            <h4 className="text-lg font-bold text-zinc-400 mb-2 font-outfit uppercase">Grid Synchronization in Progress</h4>
+                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.3em] max-w-xs leading-loose">
+                                Waiting for remaining carrier vectors. Target: 3 Quotations.
+                            </p>
                         </div>
                     )}
+                </div>
+
+                <div className="mt-32 pt-20 border-t border-white/5 text-center opacity-20">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.8em]">Sovereign Market Intelligence End of Node</p>
                 </div>
             </div>
         </div>
     );
 }
+

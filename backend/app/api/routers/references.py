@@ -1,55 +1,142 @@
+import os
 from fastapi import APIRouter
 from typing import List, Dict, Any
 from datetime import datetime
+import httpx
 
 router = APIRouter()
 
-# SOVEREIGN LOGISTICS NODES (Static "No-Fake" Reference Data)
-MAJOR_PORTS = [
-    {"code": "SAJED", "name": "Jeddah", "country": "Saudi Arabia", "country_code": "SA", "type": "port"},
-    {"code": "SADMM", "name": "Dammam", "country": "Saudi Arabia", "country_code": "SA", "type": "port"},
-    {"code": "SARYP", "name": "Riyadh", "country": "Saudi Arabia", "country_code": "SA", "type": "city"},
-    {"code": "AEJEA", "name": "Jebel Ali", "country": "UAE", "country_code": "AE", "type": "port"},
-    {"code": "CNSHA", "name": "Shanghai", "country": "China", "country_code": "CN", "type": "port"},
-    {"code": "CNSZX", "name": "Shenzhen", "country": "China", "country_code": "CN", "type": "port"},
-    {"code": "USLAX", "name": "Los Angeles", "country": "USA", "country_code": "US", "type": "port"},
-    {"code": "USNYC", "name": "New York", "country": "USA", "country_code": "US", "type": "port"},
-    {"code": "GBFXT", "name": "Felixstowe", "country": "United Kingdom", "country_code": "GB", "type": "port"},
-    {"code": "INMAA", "name": "Chennai", "country": "India", "country_code": "IN", "type": "port"},
-]
-
 @router.get("/ports/search", response_model=Dict[str, Any])
-async def search_ports(q: str):
+async def search_ports(q: str = "", country: str = "", term_type: str = ""):
     """
-    Minimalist Port Search. Returns major logistics hubs from the OMEGO Core.
+    Live Maersk Locations API Integration. Strictly No Fallback.
     """
-    query = q.lower().strip()
-    results = [p for p in MAJOR_PORTS if query in p["name"].lower() or query in p["country"].lower() or query in p["code"].lower()]
-    return {"results": results[:10]}
+    consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
+    if consumer_key:
+        try:
+            url = f"https://api.maersk.com/reference-data/locations?cityName={q.strip()}|contains&limit=30"
+            if country:
+                url += f"&countryCode={country.strip()}"
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
+                
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Filter payload based on terminal type requested by frontend
+                is_cfs = term_type.lower() == "cfs"
+                
+                def get_priority(item):
+                    t = str(item.get("locationType", "")).lower()
+                    if is_cfs:
+                        if t in ["facility", "terminal", "depot", "container freight station"]: return 1
+                        if t == "port": return 2
+                        if t == "city": return 3
+                        return 4
+                    else:
+                        if t in ["port", "airport", "rail terminal"]: return 1
+                        if t == "city": return 2
+                        return 3
+                    
+                sorted_data = sorted(data, key=get_priority)
+                results = []
+                seen_composite = set()
+                
+                for item in sorted_data:
+                    code = item.get("UNLocationCode", "")
+                    name = item.get("cityName", "")
+                    loc_type = str(item.get("locationType", "")).lower()
+                    
+                    if loc_type in ["city", "country", "region"]: 
+                        continue
+                    
+                    if code and name:
+                        comp_key = f"{code}_{name.upper()}_{loc_type}"
+                        if comp_key not in seen_composite:
+                            seen_composite.add(comp_key)
+                            results.append({
+                                "name": name,
+                                "code": code,
+                                "country": item.get("countryName", ""),
+                                "country_code": item.get("countryCode", ""),
+                                "type": loc_type
+                            })
+                return {"results": results[:20], "source": "Global Live"}
+        except Exception:
+            pass
+
+    return {"results": [], "source": "Global Live API (No Match Found)"}
 
 @router.get("/commodities/search", response_model=Dict[str, Any])
 async def search_commodities(q: str = ""):
     """
-    Minimalist Commodity Reference.
+    Live Commodity Search Pipeline strictly passing through to Maersk.
     """
-    COMMODITIES = ["General Cargo", "Electronics", "Textiles", "Machinery", "Automotive", "Foodstuffs", "Chemicals (Non-Haz)"]
-    query = q.lower().strip()
-    results = [{"id": c.lower(), "name": c} for c in COMMODITIES if query in c.lower()]
-    return {"results": results}
+    consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
+    results = []
+    
+    if consumer_key:
+        try:
+            # According to spec: /commodity-classifications?commodityName=[name]
+            url = "https://api.maersk.com/reference-data/commodity-classifications?limit=100"
+            if q.strip():
+                url = f"https://api.maersk.com/reference-data/commodity-classifications?commodityName={q.strip()}&limit=100"
+                
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
+                
+            if response.status_code == 200:
+                data = response.json()
+                # The response structure is {"commodities": [...]}
+                commodities = data.get("commodities", []) if isinstance(data, dict) else data
+                results = [
+                    {
+                        "id": r.get('commodityCode'), 
+                        "name": r.get('commodityName'),
+                        "type": r.get('cargoTypes', ['DRY'])[0] if r.get('cargoTypes') else 'DRY'
+                    } 
+                    for r in commodities if r.get('commodityName')
+                ]
+        except Exception as e:
+            print(f"Commodity Search Error: {e}")
+            pass
 
-@router.get("/vessels/active", response_model=Dict[str, Any])
-async def get_active_vessels():
+    return {"results": results[:50], "source": "Global Commodity Database"}
+
+@router.get("/vessels/search", response_model=Dict[str, Any])
+async def search_vessels(q: str = ""):
     """
-    # SOVEREIGN FLEET POOL
-    Returns a static list of the world's most reliable vessels for Phase 1.
+    Search for active vessels using Global Reference Data.
     """
-    SOVEREIGN_FLEET = [
-        {"name": "OMEGO PIONEER", "imo": "9842102", "flag": "KSA", "operator": "Maersk"},
-        {"name": "MSC AMELIA", "imo": "9842061", "flag": "LBR", "operator": "MSC"},
-        {"name": "CMA CGM ANTOINE", "imo": "9839179", "flag": "FRA", "operator": "CMA CGM"},
-        {"name": "MAERSK SHANGHAI", "imo": "9728083", "flag": "HKG", "operator": "Maersk"},
-    ]
-    return {"vessels": SOVEREIGN_FLEET, "count": len(SOVEREIGN_FLEET), "source": "OMEGO Core"}
+    consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
+    results = []
+    
+    if consumer_key:
+        try:
+            # According to spec: /vessels?vesselNames=[name]
+            url = f"https://api.maersk.com/reference-data/vessels?vesselNames={q.strip()}&limit=20"
+            if not q.strip():
+                url = "https://api.maersk.com/reference-data/vessels?limit=10"
+                
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
+                
+            if response.status_code == 200:
+                data = response.json()
+                results = [
+                    {
+                        "name": r.get("vesselLongName") or r.get("vesselShortName"),
+                        "imo": r.get("vesselIMONumber"),
+                        "flag": r.get("vesselFlagCode"),
+                        "capacity": r.get("vesselCapacityTEU")
+                    } 
+                    for r in data if r.get("vesselLongName") or r.get("vesselShortName")
+                ]
+        except Exception:
+            pass
+
+    return {"results": results[:20], "source": "Global Vessel Database"}
 
 @router.get("/market/indices", response_model=Dict[str, Any])
 async def get_market_indices():
@@ -78,8 +165,8 @@ async def get_sailing_schedules(origin: str = "Shanghai", destination: str = "Je
         depart_date = today + timedelta(days=5*i)
         arrive_date = depart_date + timedelta(days=18)
         formatted.append({
-            "carrier": "Maersk (Sovereign)",
-            "vessel": f"MAERSK {origin.upper()[:3]} PIONEER",
+            "carrier": "Sovereign Carrier",
+            "vessel": f"SOVEREIGN {origin.upper()[:3]} PIONEER",
             "voyage": f"{depart_date.strftime('%y')}{i}W",
             "departure": depart_date.isoformat(),
             "arrival": arrive_date.isoformat(),

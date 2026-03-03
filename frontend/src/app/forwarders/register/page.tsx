@@ -186,37 +186,42 @@ export default function ForwarderRegisterPage() {
                 {/* Left Column: Value Prop */}
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="space-y-8 relative z-10">
                     <div>
-                        <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-6 border border-blue-500/20">
-                            <ShieldCheck className="w-4 h-4" /><span>Verified Partners Only</span>
+                        <div className="inline-flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] mb-6 border border-emerald-500/20 uppercase font-inter">
+                            <ShieldCheck className="w-3.5 h-3.5" /><span>Verified Forwarders Only</span>
                         </div>
-                        <h1 className="text-5xl font-black mb-6 tracking-tight leading-tight text-white">
-                            Join the World&apos;s Best <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Logistics Network.</span>
+                        <h1 className="text-4xl lg:text-5xl font-black mb-4 tracking-tighter leading-[1.1] text-white font-outfit uppercase">
+                            Access Global <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Shipping Leads.</span>
                         </h1>
-                        <p className="text-xl text-white/90 font-medium leading-relaxed">
-                            Stop chasing leads. Get hyper-targeted shipment requests delivered straight to your inbox.
+                        <p className="text-sm text-zinc-400 font-medium leading-relaxed font-inter uppercase tracking-wide max-w-md">
+                            Stop chasing unqualified RFQs. Register your forwarding business to automatically receive verified, high-volume shipping requests directly in your company inbox.
                         </p>
                     </div>
                     <div className="space-y-4">
-                        {['Receive 50+ localized leads monthly', 'Smart Country Targeting', 'Instant One-Click Quoting', 'Verified Shippers & Real Cargo', 'Sovereign Verification Protocol'].map((item, i) => (
-                            <div key={i} className="flex items-center space-x-3 text-lg text-white">
-                                <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                    <Check className="w-4 h-4 text-blue-400" />
+                        {[
+                            'Instant Email Alerts for New Cargo Requests',
+                            'Quote Instantly via Direct Email Reply',
+                            'Automated Filtering by Your Specialization',
+                            '100% KYC-Verified Shippers (No Fake Leads)',
+                            'Partner Dashboard to Track Active Bids'
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center space-x-4 text-sm text-zinc-300 font-inter">
+                                <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                    <Check className="w-3.5 h-3.5 text-emerald-400" />
                                 </div>
-                                <span className="font-bold">{item}</span>
+                                <span className="font-bold tracking-wide uppercase text-[10px]">{item}</span>
                             </div>
                         ))}
                     </div>
-                    <div className="p-6 bg-black border border-white/20 rounded-2xl">
+                    <div className="p-6 bg-white/[0.01] border border-white/5 rounded-2xl max-w-sm">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs text-white/60 uppercase tracking-widest font-black">Network Access</p>
-                                <div className="flex items-baseline mt-2">
-                                    <span className="text-4xl font-black text-white tracking-tighter">INVITE</span>
-                                    <span className="text-white/40 ml-2 font-bold">ONLY</span>
+                                <p className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-bold font-inter">Marketplace Access</p>
+                                <div className="flex items-baseline mt-1">
+                                    <span className="text-2xl font-black text-white tracking-widest font-outfit uppercase">Invite Only</span>
                                 </div>
                             </div>
-                            <CreditCard className="w-10 h-10 text-white/20" />
+                            <CreditCard className="w-8 h-8 text-white/10" />
                         </div>
                     </div>
                 </motion.div>
@@ -225,41 +230,41 @@ export default function ForwarderRegisterPage() {
                 <motion.form
                     initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
                     onSubmit={handleRegister}
-                    className="bg-zinc-950 border border-white/5 rounded-[32px] p-10 space-y-6 relative z-10"
+                    className="bg-white/[0.01] border border-white/5 rounded-2xl p-6 md:p-8 space-y-8 relative z-10"
                 >
                     <div>
-                        <h2 className="text-2xl font-bold mb-2">Partner Registration</h2>
-                        <p className="text-gray-500 text-sm">Elevate your node to Sovereign Partner status.</p>
+                        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-white mb-1">Partner Registration</h2>
+                        <p className="text-[9px] text-zinc-500 font-medium font-inter tracking-tight">Elevate your node to Sovereign Partner status.</p>
                     </div>
 
                     {/* Company Name */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Building2 className="w-4 h-4 mr-2" /> Company Name</label>
-                        <input name="company_name" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="Global Logistics Co." required value={formData.company_name} onChange={handleChange} />
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Building2 className="w-4 h-4 mr-2" /> Company Name</label>
+                        <input name="company_name" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none transition-colors font-inter" placeholder="Global Logistics Co." required value={formData.company_name} onChange={handleChange} />
                     </div>
 
                     {/* Contact Person */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Mail className="w-4 h-4 mr-2" /> Contact Person Name</label>
-                        <input name="contact_person" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="John Doe" required value={formData.contact_person} onChange={handleChange} />
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Mail className="w-4 h-4 mr-2" /> Contact Person Name</label>
+                        <input name="contact_person" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none transition-colors font-inter" placeholder="John Doe" required value={formData.contact_person} onChange={handleChange} />
                     </div>
 
                     {/* Emails */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 flex items-center"><Mail className="w-4 h-4 mr-2" /> Personal Email</label>
-                            <input name="email" type="email" className="w-full bg-zinc-900 border border-white/5 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed focus:outline-none" value={formData.email} readOnly />
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Mail className="w-4 h-4 mr-2" /> Personal Email</label>
+                            <input name="email" type="email" className="w-full bg-zinc-900 border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-zinc-500 cursor-not-allowed outline-none font-inter" value={formData.email} readOnly />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 flex items-center"><Globe className="w-4 h-4 mr-2" /> Company Email</label>
-                            <input name="company_email" type="email" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="ops@company.com" required value={formData.company_email} onChange={handleChange} />
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Globe className="w-4 h-4 mr-2" /> Company Email</label>
+                            <input name="company_email" type="email" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none transition-colors font-inter" placeholder="ops@company.com" required value={formData.company_email} onChange={handleChange} />
                         </div>
                     </div>
 
                     {/* Country */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Globe className="w-4 h-4 mr-2" /> Operating Country</label>
-                        <select name="country" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none" required value={formData.country} onChange={handleChange}>
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Globe className="w-4 h-4 mr-2" /> Operating Country</label>
+                        <select name="country" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none font-inter" required value={formData.country} onChange={handleChange}>
                             <option value="">Select Country...</option>
                             {countries.map((c: Country) => (<option key={c.code} value={c.code}>{c.name} ({c.dial_code})</option>))}
                         </select>
@@ -267,58 +272,58 @@ export default function ForwarderRegisterPage() {
 
                     {/* Phone */}
                     <div className="space-y-2 relative">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Phone className="w-4 h-4 mr-2" /> Phone</label>
-                        <input name="phone" type="tel" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none" placeholder="+1 555 000 0000" value={formData.phone} onChange={handleChange} />
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Phone className="w-4 h-4 mr-2" /> Phone</label>
+                        <input name="phone" type="tel" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none font-inter" placeholder="+1 555 000 0000" value={formData.phone} onChange={handleChange} />
                         {isPhoneValid && <div className="absolute right-3 top-10"><Check className="w-4 h-4 text-green-400" /></div>}
-                        {phoneError && <p className="text-xs text-red-400 mt-1">⚠️ {phoneError}</p>}
+                        {phoneError && <p className="text-[9px] text-red-500 font-bold uppercase tracking-widest font-inter mt-1 absolute -bottom-4 mt-1">⚠️ {phoneError}</p>}
                     </div>
 
                     {/* Specializations — CRITICAL for WF1 */}
                     <div className="space-y-3 border-t border-white/10 pt-4">
-                        <h3 className="text-sm font-bold text-blue-400 flex items-center"><Globe className="w-4 h-4 mr-2" /> Cargo Specializations *</h3>
-                        <p className="text-xs text-gray-500">Select all cargo types you handle. This determines which freight requests you receive.</p>
+                        <h3 className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em] flex items-center font-outfit"><Globe className="w-4 h-4 mr-2" /> Cargo Specializations *</h3>
+                        <p className="text-[9px] text-zinc-500 font-inter mb-3">Select all cargo types you handle. This determines which freight requests you receive.</p>
                         <div className="grid grid-cols-3 gap-3">
                             {SPECIALIZATION_OPTIONS.map(spec => {
                                 const sel = formData.specializations.includes(spec);
                                 return (
                                     <button key={spec} type="button" onClick={() => toggleSpec(spec)}
-                                        className={`px-4 py-3 rounded-xl text-sm font-bold border transition-all ${sel ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' : 'bg-black border-white/10 text-white/60 hover:border-white/30'}`}>
+                                        className={`px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border transition-all font-inter ${sel ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-black border-white/5 text-zinc-500 hover:border-white/20'}`}>
                                         {sel && <Check className="w-3 h-3 inline mr-1" />}{spec}
                                     </button>
                                 );
                             })}
                         </div>
-                        {formData.specializations.length === 0 && <p className="text-xs text-amber-400">⚠️ Select at least one specialization to receive freight requests.</p>}
+                        {formData.specializations.length === 0 && <p className="text-[9px] text-amber-500 font-bold uppercase tracking-widest font-inter mt-3 block">⚠️ Select at least one specialization to receive freight requests.</p>}
                     </div>
 
                     {/* Routes */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Globe className="w-4 h-4 mr-2" /> Trade Lanes / Routes</label>
-                        <input name="routes" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors" placeholder="e.g. Asia-Europe, Trans-Pacific" value={formData.routes} onChange={handleChange} />
-                        <p className="text-xs text-gray-500">Enter your primary operating routes (comma-separated).</p>
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Globe className="w-4 h-4 mr-2" /> Trade Lanes / Routes</label>
+                        <input name="routes" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none transition-colors font-inter" placeholder="e.g. Asia-Europe, Trans-Pacific" value={formData.routes} onChange={handleChange} />
+                        <p className="text-[9px] text-zinc-500 font-inter mb-3">Enter your primary operating routes (comma-separated).</p>
                     </div>
 
                     {/* Verification */}
                     <div className="space-y-4 border-t border-white/10 pt-4">
-                        <h3 className="text-sm font-bold text-blue-400 flex items-center"><ShieldCheck className="w-4 h-4 mr-2" /> Government Verification</h3>
+                        <h3 className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em] flex items-center font-outfit"><ShieldCheck className="w-4 h-4 mr-2" /> Government Verification</h3>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400">Tax ID / Business Reg Number</label>
-                            <input name="tax_id" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none" placeholder="e.g. VAT-123456" required value={formData.tax_id} onChange={handleChange} />
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5">Tax ID / Business Reg Number</label>
+                            <input name="tax_id" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none font-inter" placeholder="e.g. VAT-123456" required value={formData.tax_id} onChange={handleChange} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400">Company Website</label>
-                            <input name="website" className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none" placeholder="e.g. www.global-logistics.com" value={formData.website} onChange={handleChange} />
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5">Company Website</label>
+                            <input name="website" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none font-inter" placeholder="e.g. www.global-logistics.com" value={formData.website} onChange={handleChange} />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400">Business License (PDF/Image)</label>
-                            <div onClick={() => document.getElementById('license-upload')?.click()} className="w-full bg-black border border-dashed border-white/20 rounded-xl px-4 py-6 text-center cursor-pointer hover:border-blue-500/50 transition-all">
+                            <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5">Business License (PDF/Image)</label>
+                            <div onClick={() => document.getElementById('license-upload')?.click()} className="w-full bg-black border border-dashed border-white/10 rounded-lg px-4 py-6 text-center cursor-pointer hover:border-emerald-500/50 transition-all">
                                 <input id="license-upload" type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'document_url')} accept=".pdf,image/*" />
                                 {uploadingField === 'document_url' ? (
                                     <div className="flex flex-col items-center space-y-2"><Loader2 className="w-6 h-6 animate-spin text-blue-400" /><span className="text-xs text-blue-400">Uploading...</span></div>
                                 ) : formData.document_url ? (
                                     <div className="flex flex-col items-center space-y-1"><Check className="w-6 h-6 text-green-400" /><span className="text-xs text-green-400">Uploaded</span></div>
                                 ) : (
-                                    <div className="flex flex-col items-center space-y-2"><Upload className="w-6 h-6 text-white/40" /><span className="text-sm text-white/60">Select from Computer</span></div>
+                                    <div className="flex flex-col items-center space-y-2"><Upload className="w-6 h-6 text-white/40" /><span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 font-inter mt-2 block">Select from Computer</span></div>
                                 )}
                             </div>
                         </div>
@@ -326,12 +331,12 @@ export default function ForwarderRegisterPage() {
 
                     {/* Logo */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400 flex items-center"><Upload className="w-4 h-4 mr-2" /> Company Logo</label>
-                        <div onClick={() => document.getElementById('logo-upload')?.click()} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.05] transition-all">
+                        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5 flex items-center"><Upload className="w-4 h-4 mr-2" /> Company Logo</label>
+                        <div onClick={() => document.getElementById('logo-upload')?.click()} className="w-full bg-black border border-white/5 rounded-lg px-3 py-2 flex items-center justify-between cursor-pointer hover:bg-white/[0.05] transition-all">
                             <input id="logo-upload" type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'logo_url')} accept="image/*" />
                             <div className="flex items-center space-x-3">
                                 <Avatar src={formData.logo_url} name={formData.company_name} size="md" shape="square" className="border-white/10" />
-                                <span className="text-sm font-medium text-white/70">{uploadingField === 'logo_url' ? 'Uploading...' : 'Upload Company Logo'}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-inter">{uploadingField === 'logo_url' ? 'Uploading...' : 'Upload Company Logo'}</span>
                             </div>
                             <Upload className="w-4 h-4 text-white/40" />
                         </div>
@@ -340,10 +345,10 @@ export default function ForwarderRegisterPage() {
                     {/* Submit */}
                     <div className="pt-4">
                         <button type="submit" disabled={loading || !!phoneError || formData.specializations.length === 0}
-                            className="w-full bg-white text-black font-bold h-14 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="w-full bg-white text-black py-3 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all font-inter active:scale-95 disabled:opacity-50 mt-4 flex items-center justify-center">
                             {loading ? <Loader2 className="animate-spin" /> : 'Register & Join Network'}
                         </button>
-                        <p className="text-center text-xs text-gray-500 mt-4">By joining, you agree to our Code of Conduct.</p>
+                        <p className="text-center text-[9px] text-zinc-500 font-inter mb-3 mt-4">By joining, you agree to our Code of Conduct.</p>
                     </div>
                 </motion.form>
             </div>

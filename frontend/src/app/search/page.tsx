@@ -59,7 +59,7 @@ export default function SearchPage() {
   }, [user, authLoading, router])
 
   // --- State ---
-  const [activePopup, setActivePopup] = useState<'origin' | 'destination' | 'load' | 'goods' | 'vessels' | 'locations' | 'commodities' | 'offices' | 'deadlines' | null>(null)
+  const [activePopup, setActivePopup] = useState<'origin' | 'destination' | 'load' | 'goods' | 'locations' | 'commodities' | 'offices' | 'deadlines' | null>(null)
 
   const [origin, setOrigin] = useState<Location>({
     type: 'Factory/Warehouse',
@@ -215,40 +215,6 @@ export default function SearchPage() {
       </motion.div>
     </div>
   )
-
-  const VesselList = () => {
-    const [vessels, setVessels] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-      fetch(`${API_URL}/api/vessels/active`)
-        .then(res => res.json())
-        .then(data => {
-          setVessels(data.vessels || [])
-          setLoading(false)
-        })
-        .catch(() => setLoading(false))
-    }, [])
-
-    if (loading) return <div className="text-center py-10 text-gray-400">Syncing with Global AIS Network...</div>
-
-    return (
-      <div className="space-y-3">
-        {vessels.map((v, i) => (
-          <div key={i} className="flex justify-between items-center bg-black/50 p-4 rounded-lg border border-white/5">
-            <div className="flex items-center space-x-3">
-              <Truck className="w-5 h-5 text-blue-500" />
-              <div>
-                <div className="font-bold text-white">{v.name}</div>
-                <div className="text-xs text-gray-500">IMO: {v.imo} | Flag: {v.flag}</div>
-              </div>
-            </div>
-            <div className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded font-bold">ACTIVE</div>
-          </div>
-        ))}
-      </div>
-    )
-  }
 
   const LocationSearch = () => {
     const [query, setQuery] = useState('')
@@ -939,14 +905,6 @@ export default function SearchPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {/* 1. VESSEL TRACKER */}
-            <IntelligenceToolCard
-              title="Active Fleet"
-              desc="Real-time position of 17,990+ Vessels."
-              icon={<Truck className="w-6 h-6 text-blue-400" />}
-              onClick={() => setActivePopup('vessels')}
-            />
-
             {/* 2. LOCATION FINDER */}
             <IntelligenceToolCard
               title="Port Lookup"
@@ -984,11 +942,6 @@ export default function SearchPage() {
 
       {/* MODALS FOR TOOLS */}
       <AnimatePresence>
-        {activePopup === 'vessels' && (
-          <ToolModal title="Global Active Fleet" onClose={() => setActivePopup(null)}>
-            <VesselList />
-          </ToolModal>
-        )}
         {activePopup === 'locations' && (
           <ToolModal title="Global Port Search" onClose={() => setActivePopup(null)}>
             <LocationSearch />

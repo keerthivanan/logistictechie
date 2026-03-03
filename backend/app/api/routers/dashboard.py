@@ -64,7 +64,8 @@ async def get_dashboard_stats(
                 "id": r["request_id"],
                 "company": current_user.full_name or "Client",
                 "desc": f"{r['cargo_type']} ({r['origin']} ➔ {r['destination']})",
-                "date": r["submitted_at"].strftime("%d %b") if r["submitted_at"] else "Now",
+                "date": (r["target_date"].strftime("%d %b") if r["target_date"] else 
+                         r["submitted_at"].strftime("%d %b") if r["submitted_at"] else "Now"),
                 "comments": r["quotation_count"],
                 "views": 1,
                 "status": kanban_status,
