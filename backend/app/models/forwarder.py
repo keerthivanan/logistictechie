@@ -1,7 +1,10 @@
 from sqlalchemy import Column, String, JSON, Boolean, DateTime, Float
 from app.db.session import Base
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 class Forwarder(Base):
     """
@@ -23,7 +26,7 @@ class Forwarder(Base):
     specializations = Column(String, nullable=True) # Column H
     routes = Column(String, nullable=True) # Column I
     status = Column(String, default="PENDING") # Column J (PENDING, APPROVED, ACTIVE)
-    registered_at = Column(DateTime, default=datetime.utcnow) # Column K
+    registered_at = Column(DateTime, default=_utcnow) # Column K
     activated_at = Column(DateTime, nullable=True) # Column L
     
     # Extended System Fields (Not in n8n Sheet but useful for UI)
@@ -38,5 +41,5 @@ class Forwarder(Base):
     reliability_score = Column(Float, default=4.9)
     total_shipments = Column(Float, default=0)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
     expires_at = Column(DateTime, nullable=True) # 30-day active window
