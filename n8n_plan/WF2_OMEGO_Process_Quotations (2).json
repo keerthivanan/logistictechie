@@ -39,7 +39,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract request_id from email subject\nconst subject = $json.subject || '';\nconst from = $json.from || '';\nconst body = $json.textPlain || $json.textHtml || '';\n\n// Regex to find OMEGO-XXXX-REQ-XX pattern\nconst regex = /OMEGO-\\d{4}-REQ-\\d{2}/;\nconst match = subject.match(regex);\n\nif (!match) {\n  throw new Error('Request ID not found in subject');\n}\n\nconst requestId = match[0];\n\n// Extract sender email\nconst emailRegex = /<(.+?)>|([\\w.-]+@[\\w.-]+\\.\\w+)/;\nconst emailMatch = from.match(emailRegex);\nconst senderEmail = emailMatch ? (emailMatch[1] || emailMatch[2]) : from;\n\nreturn {\n  json: {\n    request_id: requestId,\n    sender_email: senderEmail.toLowerCase().trim(),\n    email_subject: subject,\n    email_body: body,\n    received_at: new Date().toISOString()\n  }\n};"
+        "jsCode": "// Extract request_id from email subject\nconst subject = $json.subject || '';\nconst from = $json.from || '';\nconst body = $json.textPlain || $json.textHtml || '';\n\n// Regex to find OMEGO-XXXX-REQ-XX pattern\nconst regex = /OMEGO-\\d{3,6}-REQ-\\d{1,4}/i;\nconst match = subject.match(regex);\n\nif (!match) {\n  throw new Error('Request ID not found in subject');\n}\n\nconst requestId = match[0];\n\n// Extract sender email\nconst emailRegex = /<(.+?)>|([\\w.-]+@[\\w.-]+\\.\\w+)/;\nconst emailMatch = from.match(emailRegex);\nconst senderEmail = emailMatch ? (emailMatch[1] || emailMatch[2]) : from;\n\nreturn {\n  json: {\n    request_id: requestId,\n    sender_email: senderEmail.toLowerCase().trim(),\n    email_subject: subject,\n    email_body: body,\n    received_at: new Date().toISOString()\n  }\n};"
       },
       "id": "extract-request-id",
       "name": "Code - Extract Request ID",
@@ -75,11 +75,10 @@
     {
       "parameters": {
         "conditions": {
-          "number": [
+          "string": [
             {
-              "value1": "={{ $json.length }}",
-              "operation": "larger",
-              "value2": 0
+              "value1": "={{ $json.forwarder_id }}",
+              "operation": "isNotEmpty"
             }
           ]
         }
@@ -259,7 +258,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse and validate OpenAI response\nconst openaiResponse = $json;\n\n// OpenAI returns: { choices: [{ message: { content: '{...}' } }] }\nlet aiResponseText = '';\n\nif (openaiResponse.choices && openaiResponse.choices[0] && openaiResponse.choices[0].message) {\n  aiResponseText = openaiResponse.choices[0].message.content;\n} else if (openaiResponse.response) {\n  aiResponseText = openaiResponse.response;\n} else if (openaiResponse.text) {\n  aiResponseText = openaiResponse.text;\n} else {\n  throw new Error('Could not find AI response in OpenAI output: ' + JSON.stringify(openaiResponse));\n}\n\nlet extractedData;\ntry {\n  // Remove markdown code blocks if present\n  let cleanedResponse = aiResponseText.replace(/```json\\n|```/g, '').trim();\n  extractedData = JSON.parse(cleanedResponse);\n} catch (e) {\n  throw new Error('AI response is not valid JSON: ' + aiResponseText);\n}\n\n// Validate required fields\nif (!extractedData.total_price || !extractedData.currency) {\n  throw new Error('Missing required fields: total_price or currency');\n}\n\n// Get data from previous nodes\nconst requestData = $('Code - Extract Request ID').item.json;\nconst forwarderData = $('PostgreSQL - Verify Forwarder').item.json;\nconst existingCount = $('PostgreSQL - Count Existing Quotes').item.json.existing_count;\n\n// Generate quotation_id\nconst quotationNumber = existingCount + 1;\nconst quotationId = `${requestData.request_id}-Q${quotationNumber}`;\n\n// Create AI summary\nconst aiSummary = `${forwarderData.company_name} offers ${extractedData.currency} ${extractedData.total_price} for ${extractedData.transit_days || 'N/A'} days transit via ${extractedData.carrier || 'carrier TBD'}.`;\n\nreturn {\n  json: {\n    quotation_id: quotationId,\n    request_id: requestData.request_id,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_company: forwarderData.company_name,\n    total_price: extractedData.total_price,\n    currency: extractedData.currency,\n    transit_days: extractedData.transit_days || null,\n    validity_days: extractedData.validity_days || 7,\n    carrier: extractedData.carrier || 'Not specified',\n    service_type: extractedData.service_type || 'Not specified',\n    surcharges: extractedData.surcharges || null,\n    is_hazardous: extractedData.is_hazardous || false,\n    is_stackable: extractedData.is_stackable !== false,\n    needs_insurance: extractedData.needs_insurance || false,\n    notes: extractedData.notes || '',\n    ai_summary: aiSummary,\n    raw_email: requestData.email_body,\n    status: 'ACTIVE',\n    received_at: requestData.received_at,\n    expires_at: new Date(Date.now() + (extractedData.validity_days || 7) * 24 * 60 * 60 * 1000).toISOString(),\n    bid_status: 'ANSWERED'\n  }\n};"
+        "jsCode": "// Parse and validate OpenAI response\nconst openaiResponse = $json;\n\n// OpenAI returns: { choices: [{ message: { content: '{...}' } }] }\nlet aiResponseText = '';\n\nif (openaiResponse.choices && openaiResponse.choices[0] && openaiResponse.choices[0].message) {\n  aiResponseText = openaiResponse.choices[0].message.content;\n} else if (openaiResponse.response) {\n  aiResponseText = openaiResponse.response;\n} else if (openaiResponse.text) {\n  aiResponseText = openaiResponse.text;\n} else {\n  throw new Error('Could not find AI response in OpenAI output: ' + JSON.stringify(openaiResponse));\n}\n\nlet extractedData;\ntry {\n  // Remove markdown code blocks if present\n  let cleanedResponse = aiResponseText.replace(/```json\\n|```/g, '').trim();\n  extractedData = JSON.parse(cleanedResponse);\n} catch (e) {\n  throw new Error('AI response is not valid JSON: ' + aiResponseText);\n}\n\n// Validate required fields\nif (!extractedData.total_price || !extractedData.currency) {\n  throw new Error('Missing required fields: total_price or currency');\n}\n\n// Get data from previous nodes\nconst requestData = $('Code - Extract Request ID').item.json;\nconst forwarderData = $('PostgreSQL - Verify Forwarder').item.json;\nconst existingCount = $('PostgreSQL - Count Existing Quotes').item.json.existing_count;\n\n// Generate quotation_id\nconst quotationNumber = existingCount + 1;\nconst quotationId = `${requestData.request_id}-Q${quotationNumber}`;\n\n// Create AI summary\nconst aiSummary = `${forwarderData.company_name} offers ${extractedData.currency} ${extractedData.total_price} for ${extractedData.transit_days || 'N/A'} days transit via ${extractedData.carrier || 'carrier TBD'}.`;\n\nreturn {\n  json: {\n    quotation_id: quotationId, // e.g. REQ-Q1\n    request_id: requestData.request_id,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_email: forwarderData.email,\n    forwarder_company: forwarderData.company_name,\n    total_price: extractedData.total_price,\n    currency: extractedData.currency,\n    transit_days: extractedData.transit_days || null,\n    validity_days: extractedData.validity_days || 7,\n    carrier: extractedData.carrier || 'Not specified',\n    service_type: extractedData.service_type || 'Not specified',\n    surcharges: extractedData.surcharges || null,\n    is_hazardous: extractedData.is_hazardous || false,\n    is_stackable: extractedData.is_stackable !== false,\n    needs_insurance: extractedData.needs_insurance || false,\n    notes: extractedData.notes || '',\n    ai_summary: aiSummary,\n    raw_email: requestData.email_body,\n    status: 'ACTIVE',\n    received_at: requestData.received_at,\n    expires_at: new Date(Date.now() + (extractedData.validity_days || 7) * 24 * 60 * 60 * 1000).toISOString(),\n    bid_status: 'ANSWERED'\n  }\n};"
       },
       "id": "validate-ai-output",
       "name": "Code - Validate AI Output",
@@ -276,7 +275,7 @@
         "operation": "insert",
         "schema": "public",
         "table": "quotations",
-        "columns": "quotation_id,request_id,forwarder_id,forwarder_email,forwarder_company,total_price,currency,transit_days,validity_days,carrier,service_type,surcharges,is_hazardous,is_stackable,needs_insurance,notes,ai_summary,raw_email,status,received_at,expires_at",
+        "columns": "quotation_id,request_id,forwarder_id,forwarder_company,forwarder_email,total_price,currency,transit_days,validity_days,carrier,service_type,surcharges,is_hazardous,is_stackable,needs_insurance,notes,ai_summary,raw_email,status,received_at,expires_at",
         "additionalFields": {}
       },
       "id": "save-quotation",
@@ -317,11 +316,9 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": "public",
-        "table": "forwarder_bid_status",
-        "columns": "forwarder_id,request_id,status,quoted_price,quoted_at",
-        "additionalFields": {}
+        "operation": "executeQuery",
+        "query": "UPDATE forwarder_bid_status \nSET status = 'ANSWERED', \n    quoted_at = '{{ $('Code - Validate AI Output').item.json.received_at }}', \n    quoted_price = {{ $('Code - Validate AI Output').item.json.total_price }} \nWHERE request_id = '{{ $('Code - Validate AI Output').item.json.request_id }}' \nAND forwarder_id = '{{ $('Code - Validate AI Output').item.json.forwarder_id }}'",
+        "options": {}
       },
       "id": "update-forwarder-status",
       "name": "PostgreSQL - Update Forwarder Status",
@@ -341,7 +338,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT quotation_count FROM requests WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
+        "query": "SELECT request_id, quotation_count FROM requests WHERE request_id = '{{ $('Code - Extract Request ID').item.json.request_id }}'",
         "options": {}
       },
       "id": "get-updated-count",
@@ -511,11 +508,9 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": "public",
-        "table": "forwarder_bid_status",
-        "columns": "forwarder_id,request_id,status,attempted_at",
-        "additionalFields": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO forwarder_bid_status (request_id, forwarder_id, status, attempted_at) \nVALUES ('{{ $('Code - Extract Request ID').item.json.request_id }}', '{{ $('PostgreSQL - Verify Forwarder').item.json.forwarder_id }}', 'DECLINED_LATE', NOW())\nON CONFLICT (request_id, forwarder_id) \nDO UPDATE SET \n    status = EXCLUDED.status, \n    attempted_at = EXCLUDED.attempted_at;",
+        "options": {}
       },
       "id": "log-declined-status",
       "name": "PostgreSQL - Log DECLINED Status",
@@ -574,6 +569,27 @@
         "gmailOAuth2": {
           "id": "3",
           "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO forwarder_bid_status (request_id, forwarder_id, status, attempted_at) \nVALUES ('{{ $('Code - Extract Request ID').item.json.request_id }}', '{{ $('PostgreSQL - Verify Forwarder').item.json.forwarder_id }}', 'DUPLICATE', NOW())\nON CONFLICT (request_id, forwarder_id) \nDO UPDATE SET \n    status = EXCLUDED.status, \n    attempted_at = EXCLUDED.attempted_at;",
+        "options": {}
+      },
+      "id": "log-duplicate-status",
+      "name": "PostgreSQL - Log DUPLICATE Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [
+        2220,
+        100
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "OMEGO PostgreSQL"
         }
       }
     },
@@ -726,6 +742,24 @@
         [
           {
             "node": "OpenAI GPT-4 - Extract Quotation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostgreSQL - Log DUPLICATE Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL - Log DUPLICATE Status": {
+      "main": [
+        [
+          {
+            "node": "PostgreSQL - Log Rejected Attempt",
             "type": "main",
             "index": 0
           }

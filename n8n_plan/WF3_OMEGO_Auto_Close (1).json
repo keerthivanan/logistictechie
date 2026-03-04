@@ -135,11 +135,10 @@
     {
       "parameters": {
         "conditions": {
-          "number": [
+          "string": [
             {
-              "value1": "={{ $json.length }}",
-              "operation": "larger",
-              "value2": 0
+              "value1": "={{ $json.email }}",
+              "operation": "isNotEmpty"
             }
           ]
         }
@@ -213,7 +212,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE forwarder_bid_status SET status = 'COMPLETED' WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' AND status = 'ANSWERED'; UPDATE forwarder_bid_status SET status = 'EXPIRED' WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' AND status IS NULL;",
+        "query": "UPDATE forwarder_bid_status SET status = 'COMPLETED' WHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' AND status = 'ANSWERED'; UPDATE forwarder_bid_status SET status = 'EXPIRED' \nWHERE request_id = '{{ $('Execute Workflow Trigger').item.json.request_id }}' \nAND (status = 'PENDING' OR status IS NULL);",
         "options": {}
       },
       "id": "update-forwarder-statuses",
