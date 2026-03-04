@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const avatar_url = localStorage.getItem('avatar_url');
         const sovereign_id = localStorage.getItem('sovereign_id');
         const role = localStorage.getItem('user_role') || 'user';
-        const onboarding_completed = true; // HARD-WIRED FOR PERMANENT ACCESS
+        const onboarding_completed = localStorage.getItem('onboarding_completed') === 'true';
 
         if (token && name) {
             console.log("[AUTH] Hydrating Citizen Session:", name);
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('user_name', name);
         localStorage.setItem('sovereign_id', sovereign_id);
         localStorage.setItem('user_role', role);
-        localStorage.setItem('onboarding_completed', 'true');
+        localStorage.setItem('onboarding_completed', String(onboarding_completed));
         if (avatar_url) localStorage.setItem('avatar_url', avatar_url);
 
         document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;

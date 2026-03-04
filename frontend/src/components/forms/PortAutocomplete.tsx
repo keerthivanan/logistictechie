@@ -135,7 +135,7 @@ export default function PortAutocomplete({ name, value, onChange, placeholder, c
 
                     {!isSearching && query.length >= 2 && suggestions.length === 0 && (
                         <div className="p-4 text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                            No ports or terminals found for "{query}"
+                            No ports or terminals found for &quot;{query}&quot;
                         </div>
                     )}
                 </div>

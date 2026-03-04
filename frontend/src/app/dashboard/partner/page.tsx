@@ -135,9 +135,10 @@ export default function PartnerDashboard() {
                                 <div className="space-y-1.5 font-inter">
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] font-mono text-zinc-600 uppercase font-bold tracking-tighter">REQ-{bid.request_id}</span>
-                                        <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${bid.bid_status === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                            bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
+                                        <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${['ACCEPTED', 'COMPLETED'].includes(bid.bid_status) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                    bid.bid_status === 'EXPIRED' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' :
+                                                        'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
                                             }`}>
                                             {bid.bid_status}
                                         </div>

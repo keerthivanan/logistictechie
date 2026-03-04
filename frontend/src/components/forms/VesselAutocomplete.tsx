@@ -126,7 +126,7 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
                         ))
                     ) : !isSearching && query.length >= 2 && (
                         <div className="p-4 text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                            No vessels found for "{query}"
+                            No vessels found for &quot;{query}&quot;
                         </div>
                     )}
                     {query.length < 2 && !isSearching && (

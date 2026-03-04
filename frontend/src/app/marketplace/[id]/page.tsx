@@ -22,7 +22,6 @@ interface Quote {
 export default function MarketplaceLiveDashboard() {
     const params = useParams();
     const requestId = params.id as string;
-
     const [loading, setLoading] = useState(true);
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [status, setStatus] = useState('OPEN');
@@ -33,7 +32,10 @@ export default function MarketplaceLiveDashboard() {
     useEffect(() => {
         const fetchQuotes = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/marketplace/request/${requestId}`);
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${API_URL}/api/marketplace/request/${requestId}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                });
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
 
@@ -112,6 +114,60 @@ export default function MarketplaceLiveDashboard() {
                         </span>
                     </div>
                 </div>
+
+                {/* Shipment Details (1000% Perfection Grid) */}
+                {shipmentInfo && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-20 grid grid-cols-2 md:grid-cols-4 gap-4"
+                    >
+                        <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Commodity</p>
+                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.commodity || 'General Cargo'}</p>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Cargo Spec</p>
+                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.cargo_specification || 'Standard'}</p>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Mass/Vol Tally</p>
+                            <p className="text-xs font-black text-white uppercase">
+                                {shipmentInfo.weight_kg}KG {shipmentInfo.total_volume_cbm ? `| ${shipmentInfo.total_volume_cbm}CBM` : ''}
+                            </p>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Operational Ready</p>
+                            <p className="text-xs font-black text-white uppercase">
+                                {shipmentInfo.pickup_ready_date ? new Date(shipmentInfo.pickup_ready_date).toLocaleDateString() : 'IMMEDIATE'}
+                            </p>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Target Vessel</p>
+                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.vessel || 'Any Ready'}</p>
+                        </div>
+
+                        {/* Secondary Details Row */}
+                        <div className="col-span-2 md:col-span-4 bg-white/[0.01] border border-dashed border-white/5 p-4 rounded-xl flex flex-col gap-4">
+                            <div className="flex flex-wrap gap-6 items-center justify-between">
+                                <div className="flex gap-4">
+                                    {shipmentInfo.is_hazardous && <span className="text-[8px] font-black bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-widest">Hazardous</span>}
+                                    {shipmentInfo.is_stackable && <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Stackable</span>}
+                                    {shipmentInfo.needs_insurance && <span className="text-[8px] font-black bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 uppercase tracking-widest">Insured</span>}
+                                </div>
+                                <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                                    Protocol: <span className="text-zinc-300 ml-1">{shipmentInfo.cargo_type} · {shipmentInfo.incoterms}</span>
+                                </div>
+                            </div>
+                            {shipmentInfo.special_requirements && (
+                                <div className="pt-2 border-t border-white/5">
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Special Directives</p>
+                                    <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">{shipmentInfo.special_requirements}</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Analysis Cards */}
                 <div className="grid gap-6">
