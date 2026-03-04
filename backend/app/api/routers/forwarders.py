@@ -28,7 +28,7 @@ class ForwarderSave(BaseModel):
     document_url: str = ""
     logo_url: str = ""
     forwarder_id: str = ""  # n8n can pass this, or we auto-generate
-    status: str = "PENDING"
+    status: str = "ACTIVE"
     is_verified: bool = False
     is_paid: bool = False
 

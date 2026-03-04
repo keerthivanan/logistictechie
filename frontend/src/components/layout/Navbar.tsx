@@ -39,8 +39,9 @@ export default function Navbar() {
             label: "Ecosystem",
             children: [
                 { label: "Sovereign Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
-                { label: "Carrier Registration", href: "/forwarders/register", desc: "Join the Sovereign Network" },
-                { label: "Shipper Portal", href: "/shippers", desc: "Tactical Cargo Orchestration" },
+                { label: "Partner Directory", href: "/forwarders", desc: "Global Logistics Network" },
+                { label: "Carrier Registration", href: "/forwarders/register", desc: "Join binary Protocol" },
+                { label: "Shipper Tools", href: "/search", desc: "Tactical Cargo Orchestration" },
             ]
         },
         {
@@ -130,41 +131,73 @@ export default function Navbar() {
                         </Link>
                     )}
 
+                    {/* 2. Ecosystem Dropdown */}
+                    <div
+                        className="relative group h-full flex items-center"
+                        onMouseEnter={() => setActiveDropdown('Ecosystem')}
+                        onMouseLeave={() => setActiveDropdown(null)}
+                    >
+                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                            Ecosystem <ChevronDown className="w-3 h-3 opacity-50" />
+                        </button>
+                        <AnimatePresence>
+                            {activeDropdown === 'Ecosystem' && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
+                                >
+                                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
+                                        {navItems[1].children.map(child => (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
+                                            >
+                                                <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
+                                                <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     {/* HIDE TOOLS FOR FORWARDERS */}
-                    {user?.role !== 'forwarder' && (
-                        <div
-                            className="relative group h-full flex items-center"
-                            onMouseEnter={() => setActiveDropdown('Tools')}
-                            onMouseLeave={() => setActiveDropdown(null)}
-                        >
-                            <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                                Tools <ChevronDown className="w-3 h-3 opacity-50" />
-                            </button>
-                            <AnimatePresence>
-                                {activeDropdown === 'Tools' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
-                                    >
-                                        <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
-                                            {navItems[1].children.map(child => (
-                                                <Link
-                                                    key={child.label}
-                                                    href={child.href}
-                                                    className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
-                                                >
-                                                    <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
-                                                    <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    )}
+                    <div
+                        className="relative group h-full flex items-center"
+                        onMouseEnter={() => setActiveDropdown('Tools')}
+                        onMouseLeave={() => setActiveDropdown(null)}
+                    >
+                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                            Tools <ChevronDown className="w-3 h-3 opacity-50" />
+                        </button>
+                        <AnimatePresence>
+                            {activeDropdown === 'Tools' && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="absolute top-full left-1/2 -translate-x-1/2 pt-6 w-64"
+                                >
+                                    <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl p-2 overflow-hidden">
+                                        {navItems[2].children.map(child => (
+                                            <Link
+                                                key={child.label}
+                                                href={child.href}
+                                                className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
+                                            >
+                                                <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
+                                                <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* Right Side Actions */}
