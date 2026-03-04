@@ -4,9 +4,9 @@ from app.db.session import get_db
 from app.models.forwarder import Forwarder
 from app.models.user import User
 from app.models.marketplace import MarketplaceBid, MarketplaceRequest, ForwarderBidStatus
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy import select, func
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
 from app.services.activity import activity_service
 import os
@@ -33,7 +33,7 @@ class ForwarderSave(BaseModel):
     is_paid: bool = False
 
 @router.post("/save")
-async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)):
+async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db), _: None = Depends(verify_n8n_webhook)):
     """
     Secure endpoint for n8n Cloud to save a verified partner.
     Called after partner verification succeeds.
@@ -60,6 +60,10 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
         count_result = await db.execute(select(func.count()).select_from(Forwarder))
         count = count_result.scalar() or 0
         fwd_id = f"F{str(count + 1).zfill(3)}"
+        # Collision guard — if ID exists, offset by 1
+        existing_check = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == fwd_id))
+        if existing_check.scalars().first():
+            fwd_id = f"F{str(count + 2).zfill(3)}"
         
     new_f = Forwarder(
         forwarder_id=fwd_id,
@@ -78,10 +82,10 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
         status=f_in.status,
         is_verified=f_in.is_verified,
         is_paid=f_in.is_paid,
-        registered_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=30)
+        registered_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30)
     )
-    
+
     db.add(new_f)
     
     # ROLE SYNC PROTOCOL: Update User role to forwarder
@@ -102,11 +106,11 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
     }
 
 @router.put("/activate/{f_id}")
-async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db)):
+async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db), _: None = Depends(verify_n8n_webhook)):
     """
     Activates a forwarder after verification confirmation.
     """
-    stmt = select(Forwarder).where(Forwarder.id == f_id)
+    stmt = select(Forwarder).where(Forwarder.forwarder_id == f_id)
     result = await db.execute(stmt)
     f = result.scalars().first()
     
@@ -116,7 +120,7 @@ async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db)):
     f.status = "ACTIVE"
     f.is_verified = True
     f.is_paid = True
-    f.expires_at = datetime.utcnow() + timedelta(days=30)
+    f.expires_at = datetime.now(timezone.utc) + timedelta(days=30)
     
     await db.commit()
     return {"success": True, "message": "Partner Activated."}
@@ -230,7 +234,7 @@ async def promote_user_to_partner(
     user.website = f_in.website
     user.phone_number = f_in.phone
     user.avatar_url = f_in.logo_url
-    user.email = f_in.email
+    # Do NOT overwrite user.email — it's the auth identity tied to their JWT/Google account
     
     # 4. Create the Forwarder Profile Record
     # This allows them to appear in the active bidder list (WF1 matching)
@@ -238,7 +242,7 @@ async def promote_user_to_partner(
         forwarder_id=new_id,
         company_name=f_in.company_name,
         contact_person=f_in.contact_person or user.full_name,
-        email=user.email,
+        email=user.email,  # Always use verified auth email, never body email
         phone=f_in.phone,
         whatsapp=f_in.whatsapp,
         country=f_in.country,
@@ -250,10 +254,10 @@ async def promote_user_to_partner(
         logo_url=f_in.logo_url,
         status="ACTIVE",
         is_verified=True,
-        is_paid=False, # Free trial active, payment not yet required
-        registered_at=datetime.utcnow(),
-        activated_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=90) # 90-day free startup trial
+        is_paid=False,  # Free trial active, payment not yet required
+        registered_at=datetime.now(timezone.utc),
+        activated_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=90)  # 90-day free startup trial
     )
     
     db.add(forwarder_record)
@@ -388,7 +392,7 @@ async def get_forwarder_dashboard(
             "cargo_type": req.cargo_type,
             "your_price": float(bid_status.quoted_price) if bid_status.quoted_price else 0,
             "status": req.status,
-            "your_position": 1 # Placeholder for logic
+            "your_position": None  # Position ranking requires comparing all bids; shown as N/A until request closes
         })
 
     return {
