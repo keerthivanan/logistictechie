@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 hours
     
-    # N8N SECURE HANDSHAKE KEY
-    OMEGO_API_SECRET: str = "3670f2a318c486004bd9250b80e2277dfbe1e022896bdabd5162c792df897ce6"
+    # N8N SECURE HANDSHAKE KEY (must be set in .env)
+    OMEGO_API_SECRET: str
 
     # CORS & RATE LIMITING
     # We load the raw string and then parse it via property
@@ -47,6 +47,7 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ALLOWED_ORIGINS_RAW.split(",") if o.strip()]
 
     RATE_LIMIT_PER_MINUTE: int = 60
+    DEBUG: bool = False
     AI_PERSONA: str = "Logistics Oracle"
 
     # Pydantic V2 Config

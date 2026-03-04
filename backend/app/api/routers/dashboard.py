@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.db.session import get_db
 from app import crud
 from typing import Dict
@@ -28,25 +28,44 @@ async def get_dashboard_stats(
             f_bids_res = await get_forwarder_bids(db, current_user)
             f_bids = f_bids_res.get("bids", [])
             
+            from app.models.task import Task
+            fwd_task_count_res = await db.execute(
+                select(func.count(Task.id))
+                .filter(Task.user_id == str(current_user.id), Task.status == "PENDING")
+            )
+            fwd_pending_tasks = fwd_task_count_res.scalar() or 0
+
+            fwd_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=10)
+            fwd_activity_list = [
+                {
+                    "id": act.id,
+                    "action": act.action,
+                    "entity": f"{act.entity_type} #{act.entity_id}" if act.entity_id else "System",
+                    "timestamp": act.created_at.isoformat(),
+                    "url": "/dashboard",
+                }
+                for act in fwd_activities
+            ]
+
             return {
                 "active_shipments": len([b for b in f_bids if b["request_status"] == "OPEN"]),
                 "total_shipments": len(f_bids),
                 "delivered_shipments": len([b for b in f_bids if b["bid_status"] == "COMPLETED"]),
-                "pending_tasks_count": 0,
+                "pending_tasks_count": fwd_pending_tasks,
                 "kanban_shipments": [
                     {
                         "id": b["request_id"],
                         "company": "Shipper",
                         "desc": f"{b['cargo_type']} ({b['origin']} ➔ {b['destination']})",
                         "date": b["attempted_at"].strftime("%d %b") if b["attempted_at"] else "Now",
-                        "comments": b["bid_status"], # Show bid status in comments
+                        "comments": b["bid_status"],
                         "views": 1,
                         "status": "processing" if b["request_status"] == "OPEN" else "delivered",
                         "mode": b["cargo_type"],
                         "highlight": b["bid_status"] == "ANSWERED"
                     } for b in f_bids
                 ],
-                "recent_activity": [] 
+                "recent_activity": fwd_activity_list,
             }
 
         # SHIPPER LOGIC: Enhanced with Nested Quotes
@@ -82,7 +101,6 @@ async def get_dashboard_stats(
         
         # 2. Add Pending Tasks Count (Strategic Synchronization)
         from app.models.task import Task
-        from sqlalchemy import func
         task_count_result = await db.execute(
             select(func.count(Task.id))
             .filter(Task.user_id == str(current_user.id), Task.status == "PENDING")

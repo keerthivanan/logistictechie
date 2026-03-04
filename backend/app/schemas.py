@@ -75,6 +75,7 @@ class Token(BaseModel):
     sovereign_id: str
     avatar_url: Optional[str] = None
     website: Optional[str] = None
+    role: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: str

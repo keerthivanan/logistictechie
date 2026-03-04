@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
+from app.api.deps import reusable_oauth2
 from app.models.user import User
 from app.schemas import Token, UserLogin, UserResponse
 from app.core import security
@@ -57,10 +58,6 @@ async def social_sync(
         
     # UserInfo endpoint implies token validity and ownership.
     # We trust Google to return the correct user for the valid token.
-    
-    email = google_data.get("email")
-    name = google_data.get("name")
-    picture = google_data.get("picture")
     
     email = google_data.get("email")
     name = google_data.get("name")
@@ -137,7 +134,8 @@ async def social_sync(
         commit=False
     )
     
-    if needs_commit or True: # Always commit at end to capture activity log and user changes
+    needs_commit = True  # Always commit to capture activity log
+    if needs_commit:
         await db.commit()
         if user.id: # Refresh only if we have an ID
             await db.refresh(user)
@@ -299,12 +297,19 @@ async def refresh_access_token(
             raise HTTPException(status_code=401, detail="User not found or inactive")
 
         access_token = security.create_access_token(
-            data={"sub": user.email, "user_id": user.id, "name": user.full_name or "User"}
+            data={
+                "sub": user.email,
+                "user_id": user.id,
+                "name": user.full_name or "User",
+                "role": user.role,
+                "website": user.website,
+                "sovereign_id": user.sovereign_id,
+            }
         )
         new_refresh_token = security.create_refresh_token(
             data={"sub": user.email, "user_id": user.id}
         )
-        
+
         return {
             "access_token": access_token,
             "refresh_token": new_refresh_token,
@@ -313,7 +318,9 @@ async def refresh_access_token(
             "user_name": user.full_name or "User",
             "sovereign_id": user.sovereign_id,
             "onboarding_completed": user.onboarding_completed or False,
-            "avatar_url": user.avatar_url
+            "avatar_url": user.avatar_url,
+            "role": user.role,
+            "website": user.website,
         }
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
@@ -384,7 +391,7 @@ async def register_user(
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(
-    token: str = Depends(OAuth2PasswordBearer(tokenUrl="api/auth/login")),
+    token: str = Depends(reusable_oauth2),
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Get current user profile."""
@@ -421,7 +428,7 @@ class ProfileUpdate(BaseModel):
 @router.put("/update-profile", response_model=UserResponse)
 async def update_profile(
     update_data: ProfileUpdate,
-    token: str = Depends(OAuth2PasswordBearer(tokenUrl="api/auth/login")),
+    token: str = Depends(reusable_oauth2),
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Update current user profile."""
@@ -456,7 +463,7 @@ class PasswordChange(BaseModel):
 @router.post("/change-password")
 async def change_password(
     data: PasswordChange,
-    token: str = Depends(OAuth2PasswordBearer(tokenUrl="api/auth/login")),
+    token: str = Depends(reusable_oauth2),
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Change user password."""

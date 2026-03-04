@@ -2,6 +2,7 @@ import os
 from fastapi import APIRouter
 from typing import List, Dict, Any
 from datetime import datetime
+from urllib.parse import quote
 import httpx
 
 router = APIRouter()
@@ -14,9 +15,9 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
     consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
     if consumer_key:
         try:
-            url = f"https://api.maersk.com/reference-data/locations?cityName={q.strip()}|contains&limit=30"
+            url = f"https://api.maersk.com/reference-data/locations?cityName={quote(q.strip())}|contains&limit=30"
             if country:
-                url += f"&countryCode={country.strip()}"
+                url += f"&countryCode={quote(country.strip())}"
             
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
@@ -81,7 +82,7 @@ async def search_commodities(q: str = ""):
             # According to spec: /commodity-classifications?commodityName=[name]
             url = "https://api.maersk.com/reference-data/commodity-classifications?limit=100"
             if q.strip():
-                url = f"https://api.maersk.com/reference-data/commodity-classifications?commodityName={q.strip()}&limit=100"
+                url = f"https://api.maersk.com/reference-data/commodity-classifications?commodityName={quote(q.strip())}&limit=100"
                 
             async with httpx.AsyncClient() as client:
                 response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
@@ -115,7 +116,7 @@ async def search_vessels(q: str = ""):
     if consumer_key:
         try:
             # According to spec: /vessels?vesselNames=[name]
-            url = f"https://api.maersk.com/reference-data/vessels?vesselNames={q.strip()}&limit=20"
+            url = f"https://api.maersk.com/reference-data/vessels?vesselNames={quote(q.strip())}&limit=20"
             if not q.strip():
                 url = "https://api.maersk.com/reference-data/vessels?limit=10"
                 
