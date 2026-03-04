@@ -1,3 +1,4 @@
+import hmac
 from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -49,7 +50,6 @@ async def get_current_user_optional(
     request: Request = None
 ) -> Optional[User]:
     """Optional token authentication. Doesn't raise if token is missing/invalid."""
-    from fastapi import Request
     if not request:
         return None
     
@@ -84,20 +84,26 @@ def verify_n8n_webhook(
     can push data into the Sovereign Database.
     """
     valid_key = settings.OMEGO_API_SECRET
-    
+
+    def _match(token: str) -> bool:
+        try:
+            return hmac.compare_digest(token, valid_key)
+        except TypeError:
+            return False
+
     if auth_header and auth_header.startswith("Bearer "):
-        token = auth_header.replace("Bearer ", "")
-        if token == valid_key:
+        if _match(auth_header.replace("Bearer ", "")):
             return True
-    elif auth_header and auth_header == f"OMEGO {valid_key}":
+    elif auth_header and auth_header.startswith("OMEGO "):
+        if _match(auth_header.replace("OMEGO ", "")):
+            return True
+
+    if x_header and _match(x_header):
         return True
-            
-    if x_header and x_header == valid_key:
+
+    if omego_header and _match(omego_header):
         return True
-        
-    if omego_header and omego_header == valid_key:
-        return True
-        
+
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Sovereign Access Denied. Invalid or missing Webhook API Key."
