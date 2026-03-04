@@ -4,7 +4,7 @@ from app.db.session import get_db
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid, ForwarderBidStatus
 from app.models.forwarder import Forwarder
 from sqlalchemy import select, func
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid, asyncio
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
@@ -39,6 +39,12 @@ class MarketplaceSubmit(BaseModel):
     is_hazardous: bool = False
     needs_insurance: bool = False
     target_date: Optional[str] = None
+    pickup_ready_date: Optional[str] = None
+    total_weight_kg: Optional[float] = None
+    total_volume_cbm: Optional[float] = None
+    container_count: Optional[int] = None
+    container_type: Optional[str] = ""
+    surcharge_details: Optional[Dict[str, Any]] = None
     vessel: str = ""
     special_requirements: str = ""
     incoterms: str = "FOB"
@@ -119,6 +125,12 @@ async def submit_request(
         "is_hazardous": request_in.is_hazardous,
         "needs_insurance": request_in.needs_insurance,
         "target_date": request_in.target_date,
+        "pickup_ready_date": request_in.pickup_ready_date,
+        "total_weight_kg": request_in.total_weight_kg or weight_kg,
+        "total_volume_cbm": request_in.total_volume_cbm,
+        "container_count": request_in.container_count,
+        "container_type": request_in.container_type,
+        "surcharge_details": request_in.surcharge_details,
         "vessel": request_in.vessel,
         "special_requirements": request_in.special_requirements,
         "incoterms": request_in.incoterms,
@@ -147,6 +159,12 @@ async def submit_request(
         is_hazardous=request_in.is_hazardous,
         needs_insurance=request_in.needs_insurance,
         target_date=datetime.fromisoformat(request_in.target_date.replace("Z", "+00:00")) if request_in.target_date else None,
+        pickup_ready_date=datetime.fromisoformat(request_in.pickup_ready_date.replace("Z", "+00:00")) if request_in.pickup_ready_date else None,
+        total_weight_kg=request_in.total_weight_kg or weight_kg,
+        total_volume_cbm=request_in.total_volume_cbm,
+        container_count=request_in.container_count,
+        container_type=request_in.container_type,
+        surcharge_details=request_in.surcharge_details,
         vessel=request_in.vessel,
         special_requirements=request_in.special_requirements,
         incoterms=request_in.incoterms,
@@ -247,15 +265,25 @@ async def get_my_requests(
     }
 
 @router.get("/user/{email}/requests")
-async def legacy_get_user_requests(email: str, db: AsyncSession = Depends(get_db)):
-    """Legacy bridge for email-based lookup."""
+async def legacy_get_user_requests(
+    email: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Legacy bridge for email-based lookup. Auth required; users can only see their own requests."""
+    if current_user.email != email and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Access denied.")
     stmt = select(MarketplaceRequest).where(MarketplaceRequest.user_email == email).order_by(MarketplaceRequest.submitted_at.desc())
     result = await db.execute(stmt)
     requests = result.scalars().all()
     return [{"request_id": r.request_id, "status": r.status} for r in requests]
 
 @router.get("/request/{request_id}")
-async def get_request_details(request_id: str, db: AsyncSession = Depends(get_db)):
+async def get_request_details(
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """
     Sovereign Detail: Fetches full request data and all associated quotations.
     """
@@ -279,9 +307,29 @@ async def get_request_details(request_id: str, db: AsyncSession = Depends(get_db
             "request_id": req.request_id,
             "user_name": req.user_name,
             "origin": req.origin,
+            "origin_type": req.origin_type,
             "destination": req.destination,
+            "destination_type": req.destination_type,
             "cargo_type": req.cargo_type,
+            "commodity": req.commodity,
+            "cargo_specification": req.cargo_specification,
+            "packing_type": req.packing_type,
+            "quantity": req.quantity,
             "weight_kg": req.weight_kg,
+            "total_weight_kg": req.total_weight_kg,
+            "total_volume_cbm": req.total_volume_cbm,
+            "container_count": req.container_count,
+            "container_type": req.container_type,
+            "dimensions": req.dimensions,
+            "is_stackable": req.is_stackable,
+            "is_hazardous": req.is_hazardous,
+            "needs_insurance": req.needs_insurance,
+            "target_date": req.target_date,
+            "pickup_ready_date": req.pickup_ready_date,
+            "vessel": req.vessel,
+            "special_requirements": req.special_requirements,
+            "incoterms": req.incoterms,
+            "currency": req.currency,
             "status": req.status,
             "quotation_count": req.quotation_count,
             "submitted_at": req.submitted_at
@@ -300,9 +348,13 @@ async def get_request_details(request_id: str, db: AsyncSession = Depends(get_db
     }
 
 @router.get("/quotes/{request_id}")
-async def legacy_get_quotes(request_id: str, db: AsyncSession = Depends(get_db)):
+async def legacy_get_quotes(
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Legacy bridge for existing frontend components."""
-    return await get_request_details(request_id, db)
+    return await get_request_details(request_id, db, current_user)
 # n8n Synchronization Protocol Models
 class N8nRequestSync(BaseModel):
     request_id: str
@@ -325,6 +377,11 @@ class N8nRequestSync(BaseModel):
     is_hazardous: bool = False
     needs_insurance: bool = False
     target_date: Optional[str] = None
+    pickup_ready_date: Optional[str] = None
+    total_weight_kg: Optional[float] = None
+    total_volume_cbm: Optional[float] = None
+    container_count: Optional[int] = None
+    container_type: Optional[str] = ""
     vessel: str = ""
     special_requirements: str = ""
     incoterms: str = "FOB"
@@ -364,12 +421,17 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
             "is_hazardous": sync_in.is_hazardous,
             "needs_insurance": sync_in.needs_insurance,
             "target_date": datetime.fromisoformat(sync_in.target_date.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.target_date else None,
+            "pickup_ready_date": datetime.fromisoformat(sync_in.pickup_ready_date.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.pickup_ready_date else None,
+            "total_weight_kg": Decimal(str(sync_in.total_weight_kg)) if sync_in.total_weight_kg is not None else Decimal(str(sync_in.weight_kg)),
+            "total_volume_cbm": Decimal(str(sync_in.total_volume_cbm)) if sync_in.total_volume_cbm is not None else None,
+            "container_count": sync_in.container_count,
+            "container_type": sync_in.container_type,
             "vessel": sync_in.vessel,
             "special_requirements": sync_in.special_requirements,
             "incoterms": sync_in.incoterms,
             "currency": sync_in.currency,
             "status": sync_in.status,
-            "submitted_at": datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.submitted_at else datetime.utcnow()
+            "submitted_at": datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.submitted_at else datetime.now(timezone.utc)
         }
         
         # 2. Build Insert with Upsert
@@ -410,7 +472,7 @@ async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depend
     
     if req:
         req.status = sync_in.status
-        req.closed_at = datetime.fromisoformat(sync_in.closed_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.closed_at else datetime.utcnow()
+        req.closed_at = datetime.fromisoformat(sync_in.closed_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.closed_at else datetime.now(timezone.utc)
         req.closed_reason = sync_in.closed_reason
         await db.commit()
     else:
@@ -481,7 +543,7 @@ async def n8n_quote_sync(
         raw_email=sync_in.raw_email,
         ai_summary=sync_in.ai_summary,
         status=sync_in.status,
-        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.received_at else datetime.utcnow()
+        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.received_at else datetime.now(timezone.utc)
     )
     
     stmt = stmt.on_conflict_do_update(
@@ -539,7 +601,7 @@ async def n8n_bid_status_sync(sync_in: N8nBidStatusSync, db: AsyncSession = Depe
         forwarder_id=sync_in.forwarder_id,
         status=sync_in.status,
         quoted_price=sync_in.price,
-        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.attempted_at else datetime.utcnow(),
+        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.attempted_at else datetime.now(timezone.utc),
         quoted_at=datetime.fromisoformat(sync_in.quoted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.quoted_at else None
     )
     
