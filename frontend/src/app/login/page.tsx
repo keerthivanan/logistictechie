@@ -30,10 +30,13 @@ function LoginContent() {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.avatar_url, data.user_id);
+                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role, data.avatar_url, data.user_id);
 
                     if (returnUrl) {
-                        router.push(decodeURIComponent(returnUrl));
+                        const decoded = decodeURIComponent(returnUrl);
+                        // Validate to prevent open redirect — only allow relative paths
+                        const safeUrl = decoded.startsWith('/') && !decoded.startsWith('//') ? decoded : '/';
+                        router.push(safeUrl);
                     } else {
                         router.push('/');
                     }

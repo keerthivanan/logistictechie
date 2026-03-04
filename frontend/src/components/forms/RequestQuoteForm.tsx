@@ -55,7 +55,8 @@ export default function RequestQuoteForm() {
         dest_type: 'Door', // Porte, Door, CFS
 
         // Timing & Product
-        process_date: '', // "Select arrival date"
+        process_date: '', // "Select arrival window"
+        pickup_ready_date: '', // Optional pickup date
         commodity: '', // "What is the cargo?"
         cargo_specification: 'General Cargo', // "Cargo Handling/Container Spec"
 
@@ -63,10 +64,16 @@ export default function RequestQuoteForm() {
         packing_type: 'Pallets', // "How is your cargo packed"
         incoterms: 'FOB',
         quantity: '1',
+        container_count: '',
+        container_type: '',
 
         // Weight
         weight: '',
         weight_unit: 'KGM',
+        total_weight_kg: '',
+
+        // Volume
+        total_volume_cbm: '',
 
         // Dims
         length: '',
@@ -162,21 +169,30 @@ export default function RequestQuoteForm() {
                 quantity: parseInt(formData.quantity) || 1,
                 weight: parseFloat(formData.weight) || 0,
                 weight_unit: formData.weight_unit || 'KGM',
+                total_weight_kg: parseFloat(formData.total_weight_kg) || null,
+                total_volume_cbm: parseFloat(formData.total_volume_cbm) || null,
+                container_count: parseInt(formData.container_count) || null,
+                container_type: formData.container_type || "",
                 dimensions: `${formData.length}x${formData.width}x${formData.height}`, // Structured Dims
                 dim_unit: formData.dim_unit || 'CM',
                 is_stackable: formData.is_stackable,
                 is_hazardous: formData.is_hazardous,
                 needs_insurance: formData.needs_insurance,
                 target_date: formData.process_date,
+                pickup_ready_date: formData.pickup_ready_date || null,
                 special_requirements: formData.notes,
                 vessel: formData.vessel,
                 incoterms: formData.incoterms || 'FOB',
                 currency: 'USD'
             };
 
+            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/api/marketplace/submit`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                },
                 body: JSON.stringify(payload),
             });
 
@@ -277,7 +293,7 @@ export default function RequestQuoteForm() {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control *</label>
                                         <select
                                             name="origin_country"
                                             value={formData.origin_country}
@@ -314,7 +330,7 @@ export default function RequestQuoteForm() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District *</label>
                                         {['Port', 'CFS'].includes(formData.origin_type) ? (
                                             <PortAutocomplete
                                                 name="origin_district"
@@ -359,7 +375,7 @@ export default function RequestQuoteForm() {
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory</label>
+                                    <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory *</label>
                                     <select
                                         name="dest_country"
                                         value={formData.dest_country}
@@ -371,7 +387,7 @@ export default function RequestQuoteForm() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">District *</label>
                                         {['Port', 'CFS'].includes(formData.dest_type) ? (
                                             <PortAutocomplete
                                                 name="dest_district"
@@ -415,7 +431,7 @@ export default function RequestQuoteForm() {
                     {/* 3. Shipment Specs */}
                     <div className="grid md:grid-cols-2 gap-12">
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date) *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date)</label>
                             <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                 <input
@@ -429,7 +445,21 @@ export default function RequestQuoteForm() {
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Commodity / Product *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Pickup Ready Date</label>
+                            <div className="relative">
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <input
+                                    type="date"
+                                    name="pickup_ready_date"
+                                    value={formData.pickup_ready_date}
+                                    onChange={handleChange}
+                                    style={{ colorScheme: 'dark' }}
+                                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Commodity / Product</label>
                             <CommodityAutocomplete
                                 name="commodity"
                                 value={formData.commodity}
@@ -440,7 +470,7 @@ export default function RequestQuoteForm() {
 
                         {/* New Cargo Specification Field */}
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Specification / Handling *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Specification / Handling</label>
                             <div className="relative">
                                 <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                 <select
@@ -498,7 +528,7 @@ export default function RequestQuoteForm() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy *</label>
                             <select
                                 name="incoterms"
                                 value={formData.incoterms}
@@ -512,7 +542,7 @@ export default function RequestQuoteForm() {
                             </select>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation *</label>
                             <div className="flex">
                                 <input
                                     type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
@@ -532,6 +562,52 @@ export default function RequestQuoteForm() {
                                     <option value="LBS">LB</option>
                                 </select>
                             </div>
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Total Volume (CBM)</label>
+                            <div className="relative">
+                                <Layers className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <input
+                                    type="number" step="0.01" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
+                                    name="total_volume_cbm"
+                                    value={formData.total_volume_cbm}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 15.5"
+                                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Container Count</label>
+                            <input
+                                type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
+                                name="container_count"
+                                value={formData.container_count}
+                                onChange={handleChange}
+                                placeholder="1"
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter"
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Container Type</label>
+                            <select
+                                name="container_type"
+                                value={formData.container_type}
+                                onChange={handleChange}
+                                className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-white/20 appearance-none cursor-pointer outline-none font-inter"
+                            >
+                                <option value="" className="bg-zinc-900">N/A / Select Type</option>
+                                <option value="20GP" className="bg-zinc-900">20&apos; Dry Standard</option>
+                                <option value="40GP" className="bg-zinc-900">40&apos; Dry Standard</option>
+                                <option value="40HC" className="bg-zinc-900">40&apos; High Cube</option>
+                                <option value="20RF" className="bg-zinc-900">20&apos; Reefer</option>
+                                <option value="40RF" className="bg-zinc-900">40&apos; Reefer</option>
+                                <option value="OpenTop" className="bg-zinc-900">Open Top</option>
+                                <option value="FlatRack" className="bg-zinc-900">Flat Rack</option>
+                            </select>
                         </div>
                     </div>
 

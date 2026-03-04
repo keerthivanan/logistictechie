@@ -9,7 +9,9 @@ const PROTECTED_ROUTES = [
     '/marketplace',
     '/shipments',
     '/profile',
-    '/settings'
+    '/settings',
+    '/booking',
+    '/results'
 ]
 
 const AUTH_ROUTES = [
@@ -71,6 +73,8 @@ export const config = {
         '/shipments/:path*',
         '/profile/:path*',
         '/settings/:path*',
+        '/booking/:path*',
+        '/results/:path*',
         '/login',
         '/signup'
     ]

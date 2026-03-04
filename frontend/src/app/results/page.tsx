@@ -79,7 +79,7 @@ function ResultsContent() {
     if (origin && destination) {
       fetchQuotes()
     }
-  }, [origin, destination, container])
+  }, [origin, destination, container, isHazardous, readyDate, value])
 
   // Apply filters whenever selectedCarriers, maxTransitTime, or quotes change
   useEffect(() => {
