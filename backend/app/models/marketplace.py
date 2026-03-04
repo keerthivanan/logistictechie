@@ -1,7 +1,10 @@
 from sqlalchemy import Column, String, JSON, Boolean, DateTime, Numeric, Integer, ForeignKey, UniqueConstraint, Index
 from app.db.session import Base
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 class MarketplaceRequest(Base):
     """
@@ -33,20 +36,26 @@ class MarketplaceRequest(Base):
     is_stackable = Column(Boolean, default=True)
     is_hazardous = Column(Boolean, default=False)
     needs_insurance = Column(Boolean, default=False)
-    target_date = Column(DateTime) # Planned shipping date
+    target_date = Column(DateTime) # Planned shipping date (Arrival window)
+    pickup_ready_date = Column(DateTime, nullable=True)
+    total_weight_kg = Column(Numeric(12, 2), nullable=True)
+    total_volume_cbm = Column(Numeric(12, 2), nullable=True)
+    container_count = Column(Integer, nullable=True)
+    container_type = Column(String, nullable=True)
     vessel = Column(String, nullable=True) # Preferred Vessel (IMO or Name)
     special_requirements = Column(String) # Column J
     incoterms = Column(String, index=True) # Column K
     currency = Column(String, default="USD") # Column L
+    surcharge_details = Column(JSON, nullable=True)
     status = Column(String, default="OPEN", index=True) # Column M
     quotation_count = Column(Integer, default=0) # Column N
-    submitted_at = Column(DateTime, default=datetime.utcnow, index=True) # Column O
+    submitted_at = Column(DateTime, default=_utcnow, index=True) # Column O
     closed_at = Column(DateTime, nullable=True) # Column P
     closed_reason = Column(String, nullable=True) # Column Q
     
     # Timestamps for dashboard logic
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     # Indices for Sovereign Dashboard Performance
     __table_args__ = (
@@ -84,11 +93,11 @@ class MarketplaceBid(Base):
     ai_summary = Column(String, nullable=True) # Column N
     raw_email = Column(String, nullable=True) # Column O
     status = Column(String, default="ACTIVE", index=True) # Column P
-    received_at = Column(DateTime, default=datetime.utcnow, index=True) # Column Q
+    received_at = Column(DateTime, default=_utcnow, index=True) # Column Q
     expires_at = Column(DateTime, nullable=True) # Column R
     
     # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
 class ForwarderBidStatus(Base):
     """
@@ -106,11 +115,11 @@ class ForwarderBidStatus(Base):
     
     # Optional metadata from extraction
     quoted_price = Column(Numeric(12, 2), nullable=True)
-    attempted_at = Column(DateTime, default=datetime.utcnow)
+    attempted_at = Column(DateTime, default=_utcnow)
     quoted_at = Column(DateTime, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
+    updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     # Enforce one status entry per partner-request pair
     __table_args__ = (
@@ -124,7 +133,7 @@ class N8nEventLog(Base):
     event_type = Column(String, index=True)
     request_id = Column(String, index=True, nullable=True)
     description = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
 class N8nBroadcastLog(Base):
     """Audit: Logs broadcast attempts sent to forwarders."""
@@ -135,7 +144,7 @@ class N8nBroadcastLog(Base):
     forwarder_company = Column(String)
     email_sent = Column(Boolean, default=True)
     whatsapp_sent = Column(Boolean, default=False)
-    sent_at = Column(DateTime, default=datetime.utcnow)
+    sent_at = Column(DateTime, default=_utcnow)
 
 class RejectedAttempt(Base):
     """Audit: Logs failed or blocked bid attempts for forensic analysis."""
@@ -146,8 +155,8 @@ class RejectedAttempt(Base):
     error_type = Column(String, index=True)
     error_message = Column(String)
     # n8n expects 'timestamp', we use 'created_at' as default but can support both
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=_utcnow)
+    created_at = Column(DateTime, default=_utcnow)
 
 class N8nAnalytics(Base):
     """Metrics: Daily tally of closed requests and quotes."""
