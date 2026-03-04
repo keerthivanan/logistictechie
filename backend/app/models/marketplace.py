@@ -77,6 +77,9 @@ class MarketplaceBid(Base):
     carrier = Column(String, index=True) # Column I
     service_type = Column(String) # Column J
     surcharges = Column(JSON, nullable=True) # Column K
+    is_hazardous = Column(Boolean, default=False)
+    is_stackable = Column(Boolean, default=True)
+    needs_insurance = Column(Boolean, default=False)
     notes = Column(String, nullable=True) # Column M
     ai_summary = Column(String, nullable=True) # Column N
     raw_email = Column(String, nullable=True) # Column O

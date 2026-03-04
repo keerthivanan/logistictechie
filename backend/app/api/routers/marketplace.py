@@ -435,6 +435,10 @@ class N8nQuoteSync(BaseModel):
     validity_days: int = 7
     carrier: str = ""
     service_type: str = ""
+    surcharges: Optional[Dict[str, Any]] = None
+    is_hazardous: bool = False
+    is_stackable: bool = True
+    needs_insurance: bool = False
     raw_email: str = ""
     ai_summary: str = Field("", alias="summary")
     status: Optional[str] = "ACTIVE" # Optional to allow for just counts
@@ -470,6 +474,10 @@ async def n8n_quote_sync(
         validity_days=sync_in.validity_days,
         carrier=sync_in.carrier,
         service_type=sync_in.service_type,
+        surcharges=sync_in.surcharges,
+        is_hazardous=sync_in.is_hazardous,
+        is_stackable=sync_in.is_stackable,
+        needs_insurance=sync_in.needs_insurance,
         raw_email=sync_in.raw_email,
         ai_summary=sync_in.ai_summary,
         status=sync_in.status,
@@ -482,6 +490,10 @@ async def n8n_quote_sync(
             "total_price": stmt.excluded.total_price,
             "carrier": stmt.excluded.carrier,
             "ai_summary": stmt.excluded.ai_summary,
+            "surcharges": stmt.excluded.surcharges,
+            "is_hazardous": stmt.excluded.is_hazardous,
+            "is_stackable": stmt.excluded.is_stackable,
+            "needs_insurance": stmt.excluded.needs_insurance,
             "status": stmt.excluded.status
         }
     )
