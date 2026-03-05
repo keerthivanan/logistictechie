@@ -181,6 +181,7 @@ export default function ForwarderRegisterPage() {
     return (
         <div className="min-h-screen bg-black text-white font-sans relative overflow-hidden">
             <Navbar />
+
             <div className="max-w-6xl mx-auto px-4 pt-40 pb-16 grid lg:grid-cols-2 gap-16">
 
                 {/* Left Column: Value Prop */}

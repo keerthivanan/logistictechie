@@ -9,9 +9,10 @@ from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
 from app.services.activity import activity_service
-import os
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class ForwarderSave(BaseModel):
     company_name: str
@@ -95,7 +96,7 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
     if user:
         user.role = "forwarder"
         if not user.sovereign_id.startswith("REG-"):
-             user.sovereign_id = f"REG-{user.sovereign_id}"
+            user.sovereign_id = f"REG-{user.sovereign_id}"
     
     await db.commit()
     
@@ -152,6 +153,87 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
             "expires_at": str(f.expires_at) if f.expires_at else None
         } for f in forwarders
     ]
+
+class ForwarderPromote(BaseModel):
+    company_name: str
+    contact_person: str = ""
+    company_email: str = ""
+    phone: str = ""
+    whatsapp: str = ""
+    country: str = ""
+    specializations: str = ""
+    routes: str = ""
+    tax_id: str = ""
+    website: str = ""
+    document_url: str = ""
+    logo_url: str = ""
+
+@router.post("/promote")
+async def promote_to_forwarder(
+    f_in: ForwarderPromote,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Authenticated endpoint for users to self-register as forwarders.
+    Called directly from the frontend registration form.
+    """
+    email = current_user.email
+
+    # Idempotent — if profile already exists, sync role and return
+    existing = await db.execute(select(Forwarder).where(Forwarder.email == email))
+    if existing.scalars().first():
+        if current_user.role != "forwarder":
+            current_user.role = "forwarder"
+            if not current_user.sovereign_id.startswith("REG-"):
+                current_user.sovereign_id = f"REG-{current_user.sovereign_id}"
+            await db.commit()
+        return {"success": True, "message": "Forwarder profile already exists. Role synchronized."}
+
+    # Auto-generate forwarder_id
+    count_result = await db.execute(select(func.count()).select_from(Forwarder))
+    count = count_result.scalar() or 0
+    fwd_id = f"F{str(count + 1).zfill(3)}"
+    existing_check = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == fwd_id))
+    if existing_check.scalars().first():
+        fwd_id = f"F{str(count + 2).zfill(3)}"
+
+    new_f = Forwarder(
+        forwarder_id=fwd_id,
+        company_name=f_in.company_name,
+        contact_person=f_in.contact_person,
+        email=email,
+        company_email=f_in.company_email or None,
+        phone=f_in.phone,
+        whatsapp=f_in.whatsapp or f_in.phone,
+        website=f_in.website,
+        country=f_in.country,
+        specializations=f_in.specializations,
+        routes=f_in.routes,
+        tax_id=f_in.tax_id,
+        document_url=f_in.document_url,
+        logo_url=f_in.logo_url,
+        status="ACTIVE",
+        is_verified=False,
+        is_paid=False,
+        registered_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+    )
+    db.add(new_f)
+
+    # Promote user role
+    current_user.role = "forwarder"
+    if not current_user.sovereign_id.startswith("REG-"):
+        current_user.sovereign_id = f"REG-{current_user.sovereign_id}"
+
+    await db.commit()
+
+    return {
+        "success": True,
+        "forwarder_id": fwd_id,
+        "message": f"Partner {f_in.company_name} registered. ID: {fwd_id}",
+    }
+
 
 class LoginRequest(BaseModel):
     forwarder_id: str

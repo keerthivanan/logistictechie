@@ -5,7 +5,7 @@ from app.models.marketplace import MarketplaceRequest, MarketplaceBid, Forwarder
 from app.models.forwarder import Forwarder
 from sqlalchemy import select, func
 from datetime import datetime, timezone
-import uuid, asyncio
+import asyncio
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from app.services.webhook import webhook_service
@@ -13,8 +13,10 @@ from app.models.user import User
 from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.services.activity import activity_service
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class MarketplaceSubmit(BaseModel):
     user_id: str
@@ -72,24 +74,27 @@ async def submit_request(
             detail="Registered Partners cannot post shipment requests. Please use a Client account for shipping."
         )
 
-    # Logic: [SOVEREIGN_ID]-REQ-[COUNT+1] with collision safety
+    # Logic: [SOVEREIGN_ID]-REQ-[COUNT+1] with collision safety (max 50 attempts)
     generated_req_id = None
     offset = 0
-    while not generated_req_id:
+    max_attempts = 50
+    while not generated_req_id and offset < max_attempts:
         count_stmt = select(func.count(MarketplaceRequest.id)).where(
             MarketplaceRequest.user_sovereign_id == current_user.sovereign_id
         )
         count_res = await db.execute(count_stmt)
         total_existing = count_res.scalar() or 0
         candidate_id = f"{current_user.sovereign_id}-REQ-{total_existing + 1 + offset:02d}"
-        
+
         # Check if candidate exists (prevents race condition collisions)
         check_stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == candidate_id)
         check_res = await db.execute(check_stmt)
         if not check_res.scalars().first():
             generated_req_id = candidate_id
         else:
-            offset += 1 # Collision detected, increment and try again
+            offset += 1  # Collision detected, increment and try again
+    if not generated_req_id:
+        raise HTTPException(status_code=500, detail="Unable to generate unique request ID. Please try again.")
 
     # 2. Backend prepares the payload.
     # 3. Backend fires the webhook to n8n (Intake).
@@ -397,7 +402,7 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
     """
     from decimal import Decimal
     try:
-        print(f"[*] REQUEST SYNC ATTEMPT: {sync_in.request_id}")
+        logger.info(f"[*] REQUEST SYNC ATTEMPT: {sync_in.request_id}")
         
         # 1. Prepare values dict for the insert
         data_values = {
@@ -445,11 +450,11 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
         
         await db.execute(stmt)
         await db.commit()
-        print(f"[+] REQUEST SYNC SUCCESS: {sync_in.request_id}")
+        logger.info(f"[+] REQUEST SYNC SUCCESS: {sync_in.request_id}")
         return {"success": True, "request_id": sync_in.request_id}
     except Exception as e:
         import traceback
-        print(f"[-] REQUEST SYNC ERROR: {str(e)}")
+        logger.error(f"[-] REQUEST SYNC ERROR: {str(e)}")
         traceback.print_exc()
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Sovereign Mirror Error: {str(e)}")
@@ -478,7 +483,7 @@ async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depend
     else:
         # Fallback: if request not found, it might be a sync delay.
         # However, for 'Best of All Time', we should log this.
-        print(f"[RECOVERY] Close requested for non-existent ReqID: {sync_in.request_id}")
+        logger.warning(f"[RECOVERY] Close requested for non-existent ReqID: {sync_in.request_id}")
         
     return {
         "success": True, 

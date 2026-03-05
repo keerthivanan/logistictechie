@@ -232,11 +232,9 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": "public",
-        "table": "n8n_events_logs",
-        "columns": "event_type,request_id,description",
-        "additionalFields": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_events_logs (event_type, request_id, description) VALUES ('REQUEST_CLOSED', '{{ $('Execute Workflow Trigger').item.json.request_id }}', 'Auto-closed after 3 quotes received') ON CONFLICT DO NOTHING",
+        "options": {}
       },
       "id": "log-closure",
       "name": "PostgreSQL - Log Closure Event",

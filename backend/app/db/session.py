@@ -6,7 +6,6 @@ from app.core.config import settings
 # This requires DATABASE_URL to be set in .env
 # Example: postgresql+asyncpg://user:password@localhost/logistics_db
 
-import json
 DATABASE_URL = settings.DATABASE_URL
 
 engine = create_async_engine(DATABASE_URL, echo=settings.DEBUG)

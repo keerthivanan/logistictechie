@@ -3,7 +3,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
 from typing import List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 class CRUDMarketplace:
     async def get_dashboard_stats(self, db: AsyncSession, user_id: str) -> dict:
@@ -39,7 +39,7 @@ class CRUDMarketplace:
         
         # 4. Timeline Data (Daily Request Volume)
         chart_data = []
-        today = datetime.utcnow()
+        today = datetime.now(timezone.utc)
         for i in range(6, -1, -1):
             day_target = today - timedelta(days=i)
             count = 0
