@@ -271,7 +271,11 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task, onToggle: (id: s
                             </span>
                         </div>
                     </div>
-                    <button className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors font-inter">
+                    <button
+                        onClick={() => onToggle(task.id)}
+                        disabled={isToggling}
+                        className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40"
+                    >
                         Commit <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>

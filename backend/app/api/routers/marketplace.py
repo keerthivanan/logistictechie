@@ -190,7 +190,7 @@ async def submit_request(
     # LOG ACTIVITY: Track the submission for the Sovereign Dashboard
     await activity_service.log(
         db,
-        user_id=request_in.user_id,
+        user_id=str(current_user.id),
         action="MARKETPLACE_SUBMIT",
         entity_type="REQUEST",
         entity_id=request_id,

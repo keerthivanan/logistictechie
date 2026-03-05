@@ -136,7 +136,7 @@ async def get_dashboard_stats(
             elif act.action == "PROFILE_UPDATE" or act.action == "SECURITY_UPDATE":
                 resume_url = "/dashboard/settings"
             elif act.action == "MARKETPLACE_SUBMIT":
-                resume_url = f"/marketplace/quotes/{act.entity_id}"
+                resume_url = f"/marketplace/{act.entity_id}"
                 
             activity_list.append({
                 "id": act.id,
@@ -184,7 +184,7 @@ async def get_full_activity_history(
             elif "PROFILE" in act.action or "SECURITY" in act.action:
                 resume_url = "/dashboard/settings"
             elif act.action == "MARKETPLACE_SUBMIT":
-                resume_url = f"/marketplace/quotes/{act.entity_id}"
+                resume_url = f"/marketplace/{act.entity_id}"
                 
             activity_list.append({
                 "id": act.id,

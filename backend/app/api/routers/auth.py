@@ -242,11 +242,12 @@ async def login_for_access_token(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={
-            "sub": user.email, 
-            "user_id": user.id, 
+            "sub": user.email,
+            "user_id": user.id,
             "name": user.full_name or "User",
-            "role": user.role, # ADDED: Role Visibility
-            "website": user.website # ADDED: Website Visibility
+            "role": user.role,
+            "website": user.website,
+            "sovereign_id": user.sovereign_id,
         },
         expires_delta=access_token_expires
     )
@@ -265,13 +266,14 @@ async def login_for_access_token(
     )
 
     return {
-        "access_token": access_token, 
+        "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
+        "user_email": user.email,
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
-        "role": user.role, # ADDED: Role Visibility
+        "role": user.role,
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url,
         "website": user.website
@@ -355,6 +357,7 @@ async def register_user(
         full_name=form_data.full_name,
         company_name=form_data.company_name
     )
+    user.onboarding_completed = True
     
     # SOVEREIGN ID ASSIGNMENT (same logic as social-sync)
     user_count_res = await db.execute(select(func.count(User.id)))
@@ -449,8 +452,24 @@ async def update_profile(
     return updated_user
 
 @router.post("/logout")
-async def logout():
+async def logout(
+    token: str = Depends(reusable_oauth2),
+    db: AsyncSession = Depends(deps.get_db)
+):
     """Logout endpoint (client side handles token removal, this is for audit)."""
+    try:
+        payload = security.decode_token(token)
+        user_id = payload.get("user_id")
+        if user_id:
+            await activity_service.log(
+                db,
+                user_id=str(user_id),
+                action="LOGOUT",
+                entity_type="USER",
+                entity_id=str(user_id)
+            )
+    except Exception:
+        pass  # Never block logout due to logging failure
     return {"success": True, "message": "Logged out successfully"}
 
 class PasswordChange(BaseModel):

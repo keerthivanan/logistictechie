@@ -115,7 +115,7 @@ export default function PartnerDashboard() {
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.4em]">Active Bid Log</h2>
-                    <Link href="/forwarders/my-bids" className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">View History</Link>
+                    <Link href="/forwarders/portal" className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">Full Portal</Link>
                 </div>
 
                 <div className="grid gap-4">
@@ -157,9 +157,12 @@ export default function PartnerDashboard() {
                                         <p className="text-xl font-mono font-bold text-emerald-400">${bid.quoted_price?.toLocaleString() || '---'}</p>
                                     </div>
                                     <div className="w-px h-10 bg-white/5 hidden md:block" />
-                                    <button className="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl transition-all">
+                                    <Link
+                                        href={`/marketplace/${bid.request_id}`}
+                                        className="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl transition-all"
+                                    >
                                         <ArrowUpRight className="w-5 h-5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                                    </button>
+                                    </Link>
                                 </div>
                             </motion.div>
                         ))

@@ -44,9 +44,11 @@ function BookingContent() {
   const surcharges = breakdown.surcharges || price * 0.3
 
   const handleConfirm = () => {
-    // 🛡️ SOVEREIGN PROTOCOL: DIRECT CONFIRMATION (NO PAYMENT)
-    alert('Booking Confirmed! Our Sovereign Logistics AI is now finalizing your shipment details. Redirecting to your dashboard...');
-    router.push('/dashboard')
+    const params = new URLSearchParams({
+      carrier, price: priceStr, origin, destination,
+      container, transit, vessel, quoteId
+    }).toString()
+    router.push(`/booking/confirmation?${params}`)
   }
 
   return (

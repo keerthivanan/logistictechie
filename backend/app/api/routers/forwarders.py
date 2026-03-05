@@ -180,6 +180,9 @@ async def promote_to_forwarder(
     """
     email = current_user.email
 
+    if not current_user.sovereign_id:
+        raise HTTPException(status_code=400, detail="Account has no Sovereign ID. Please contact support.")
+
     # Idempotent — if profile already exists, sync role and return
     existing = await db.execute(select(Forwarder).where(Forwarder.email == email))
     if existing.scalars().first():
@@ -190,13 +193,9 @@ async def promote_to_forwarder(
             await db.commit()
         return {"success": True, "message": "Forwarder profile already exists. Role synchronized."}
 
-    # Auto-generate forwarder_id
-    count_result = await db.execute(select(func.count()).select_from(Forwarder))
-    count = count_result.scalar() or 0
-    fwd_id = f"F{str(count + 1).zfill(3)}"
-    existing_check = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == fwd_id))
-    if existing_check.scalars().first():
-        fwd_id = f"F{str(count + 2).zfill(3)}"
+    # forwarder_id must match the new sovereign_id so bid queries align
+    old_sovereign_id = current_user.sovereign_id
+    fwd_id = f"REG-{old_sovereign_id}"
 
     new_f = Forwarder(
         forwarder_id=fwd_id,
@@ -221,12 +220,24 @@ async def promote_to_forwarder(
     )
     db.add(new_f)
 
-    # Promote user role
+    # Promote user role and assign matching sovereign_id
     current_user.role = "forwarder"
-    if not current_user.sovereign_id.startswith("REG-"):
-        current_user.sovereign_id = f"REG-{current_user.sovereign_id}"
+    current_user.sovereign_id = fwd_id
 
     await db.commit()
+
+    # Log PARTNER_REGISTERED activity
+    try:
+        await activity_service.log(
+            db,
+            user_id=str(current_user.id),
+            action="PARTNER_REGISTERED",
+            entity_type="FORWARDER",
+            entity_id=fwd_id,
+            metadata={"company_name": f_in.company_name, "forwarder_id": fwd_id}
+        )
+    except Exception:
+        pass  # Never block registration due to activity logging failure
 
     return {
         "success": True,
@@ -264,119 +275,6 @@ async def forwarder_auth(req: LoginRequest, db: AsyncSession = Depends(get_db)):
         }
     }
 
-
-@router.post("/promote")
-async def promote_user_to_partner(
-    f_in: ForwarderSave,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    SOVEREIGN PROMOTION PROTOCOL (FREE TRIAL PHASE)
-    Upgrades a normal user to a Registered Forwarder (REG-OMEGO).
-    No payment required during the startup phase.
-    """
-    # 1. Fetch the user to be promoted
-    stmt = select(User).where(User.id == current_user.id)
-    result = await db.execute(stmt)
-    user = result.scalars().first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    # 2. Check if already promoted in User table
-    if user.role == "forwarder" or user.sovereign_id.startswith("REG-"):
-        # Even if user says they are forwarder, ensure they have a record in Forwarder table
-        f_stmt = select(Forwarder).where(Forwarder.email == user.email)
-        f_res = await db.execute(f_stmt)
-        if f_res.scalars().first():
-            return {"success": True, "message": "User is already an active partner.", "id": user.sovereign_id}
-
-    # 2b. Check if email already exists in Forwarder table (Idempotency)
-    f_stmt = select(Forwarder).where(Forwarder.email == user.email)
-    f_res = await db.execute(f_stmt)
-    existing_f = f_res.scalars().first()
-    
-    if existing_f:
-        # Just update the User role and ID sync if forwarder record exists
-        user.role = "forwarder"
-        if not user.sovereign_id.startswith("REG-"):
-            user.sovereign_id = f"REG-{user.sovereign_id}"
-        await db.commit()
-        return {"success": True, "message": "Partner profile re-linked.", "id": user.sovereign_id}
-
-    # 3. Perform the Transformation
-    old_id = user.sovereign_id
-    new_id = f"REG-{old_id}"
-    
-    user.sovereign_id = new_id
-    user.role = "forwarder"
-    user.company_name = f_in.company_name
-    user.company_email = f_in.company_email
-    user.website = f_in.website
-    user.phone_number = f_in.phone
-    user.avatar_url = f_in.logo_url
-    # Do NOT overwrite user.email — it's the auth identity tied to their JWT/Google account
-    
-    # 4. Create the Forwarder Profile Record
-    # This allows them to appear in the active bidder list (WF1 matching)
-    forwarder_record = Forwarder(
-        forwarder_id=new_id,
-        company_name=f_in.company_name,
-        contact_person=f_in.contact_person or user.full_name,
-        email=user.email,  # Always use verified auth email, never body email
-        phone=f_in.phone,
-        whatsapp=f_in.whatsapp,
-        country=f_in.country,
-        specializations=f_in.specializations,
-        routes=f_in.routes,
-        tax_id=f_in.tax_id,
-        company_email=f_in.company_email,
-        document_url=f_in.document_url,
-        logo_url=f_in.logo_url,
-        status="ACTIVE",
-        is_verified=True,
-        is_paid=False,  # Free trial active, payment not yet required
-        registered_at=datetime.now(timezone.utc),
-        activated_at=datetime.now(timezone.utc),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=90)  # 90-day free startup trial
-    )
-    
-    db.add(forwarder_record)
-    
-    # 5. Log the Promotion
-    await activity_service.log(
-        db,
-        user_id=str(user.id),
-        action="PARTNER_PROMOTION",
-        entity_type="USER",
-        entity_id=str(user.id),
-        metadata={"detail": f"Upgraded {old_id} to {new_id} (Startup Trial)"},
-        commit=False
-    )
-    
-    # 6. TRIGGER THE BRAIN (n8n Sync)
-    # This ensures the Google Sheet (USERS and REGISTERED_FORWARDERS) is updated.
-    from app.services.webhook import webhook_service
-    await webhook_service.trigger_registration_webhook({
-        "event": "PARTNER_PROMOTION",
-        "user_id": str(user.id),
-        "old_sovereign_id": old_id,
-        "new_sovereign_id": new_id,
-        "email": user.email,
-        "company_name": f_in.company_name,
-        "phone": f_in.phone,
-        "country": f_in.country
-    })
-    
-    await db.commit()
-    await db.refresh(user)
-    
-    return {
-        "success": True,
-        "new_id": new_id,
-        "message": f"Sovereign Handshake Complete. You are now a Registered Partner."
-    }
 
 @router.get("/my-bids")
 async def get_forwarder_bids(
@@ -450,11 +348,19 @@ async def get_forwarder_dashboard(
     if not fwd:
         raise HTTPException(status_code=404, detail="Partner node not found.")
 
-    # 3. Fetch Metrics (Mocked for now, will connect to real bid history)
+    # 3. Fetch Metrics
     # Total Bids
     bid_count_stmt = select(func.count(ForwarderBidStatus.id)).where(ForwarderBidStatus.forwarder_id == f_id)
     bid_count_res = await db.execute(bid_count_stmt)
     total_bids = bid_count_res.scalar() or 0
+
+    # Won Bids (ACCEPTED or COMPLETED status)
+    won_bids_stmt = select(func.count(ForwarderBidStatus.id)).where(
+        ForwarderBidStatus.forwarder_id == f_id,
+        ForwarderBidStatus.status.in_(["ACCEPTED", "COMPLETED"])
+    )
+    won_bids_res = await db.execute(won_bids_stmt)
+    won_bids = won_bids_res.scalar() or 0
 
     # Recent Bids
     recent_bids_stmt = (
@@ -481,8 +387,8 @@ async def get_forwarder_dashboard(
         "company_name": fwd.company_name,
         "metrics": {
             "total_quotes_submitted": total_bids,
-            "active_bids": total_bids, # Placeholder
-            "won_bids": 0, # Placeholder
+            "active_bids": total_bids,
+            "won_bids": won_bids,
             "reliability_score": fwd.reliability_score
         },
         "quotes": bids

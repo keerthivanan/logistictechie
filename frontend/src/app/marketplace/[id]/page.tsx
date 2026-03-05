@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, ShieldCheck, Zap } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
@@ -21,6 +21,7 @@ interface Quote {
 
 export default function MarketplaceLiveDashboard() {
     const params = useParams();
+    const router = useRouter();
     const requestId = params.id as string;
     const [loading, setLoading] = useState(true);
     const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -221,7 +222,22 @@ export default function MarketplaceLiveDashboard() {
 
                                     {/* Action Vector */}
                                     <div className="flex-shrink-0">
-                                        <button className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3">
+                                        <button
+                                            onClick={() => {
+                                                const query = new URLSearchParams({
+                                                    quoteId: quote.quotation_id,
+                                                    carrier: quote.forwarder_company,
+                                                    price: String(quote.total_price),
+                                                    origin: shipmentInfo?.origin || '',
+                                                    destination: shipmentInfo?.destination || '',
+                                                    container: shipmentInfo?.cargo_type || '40FT',
+                                                    transit: String(quote.transit_days || 30),
+                                                    vessel: quote.carrier || 'TBD',
+                                                }).toString()
+                                                router.push(`/booking?${query}`)
+                                            }}
+                                            className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3"
+                                        >
                                             Commit <ArrowRight className="w-4 h-4" />
                                         </button>
                                     </div>

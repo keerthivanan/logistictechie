@@ -12,6 +12,7 @@ function TrackingContent() {
     const id = searchParams.get('id')
     const [tracking, setTracking] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [inputId, setInputId] = useState('')
 
     const fetchTracking = useCallback(async () => {
         try {
@@ -39,15 +40,20 @@ function TrackingContent() {
             <div className="max-w-md mx-auto flex gap-2">
                 <input
                     type="text"
+                    value={inputId}
+                    onChange={(e) => setInputId(e.target.value)}
                     placeholder="BK-XXXXXXXX or MRKU1234567"
                     className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-white transition-all"
                     onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                            window.location.href = `/tracking?id=${(e.target as HTMLInputElement).value}`
+                        if (e.key === 'Enter' && inputId.trim()) {
+                            window.location.href = `/tracking?id=${encodeURIComponent(inputId.trim())}`
                         }
                     }}
                 />
-                <button className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all">
+                <button
+                    onClick={() => { if (inputId.trim()) window.location.href = `/tracking?id=${encodeURIComponent(inputId.trim())}` }}
+                    className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                >
                     Track
                 </button>
             </div>
@@ -181,12 +187,18 @@ function TrackingContent() {
 
                     <div className="bg-white text-black rounded-3xl p-6">
                         <h3 className="font-bold mb-4">Actions</h3>
-                        <button className="w-full bg-black text-white py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 transition-all mb-3">
+                        <button
+                            onClick={() => window.print()}
+                            className="w-full bg-black text-white py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 transition-all mb-3"
+                        >
                             Request Inspection Report
                         </button>
-                        <button className="w-full border border-black/10 text-black py-3 rounded-xl font-bold text-sm hover:bg-black/5 transition-all">
+                        <a
+                            href={`mailto:support@omego.io?subject=Tracking Inquiry: ${id || 'N/A'}`}
+                            className="w-full border border-black/10 text-black py-3 rounded-xl font-bold text-sm hover:bg-black/5 transition-all flex items-center justify-center"
+                        >
                             Contact Agent
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

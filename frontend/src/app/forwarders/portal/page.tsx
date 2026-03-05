@@ -122,7 +122,7 @@ export default function ForwarderPortal() {
                         <div className="space-y-3">
                             <label className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter ml-1">Sovereign Node ID</label>
                             <input
-                                type="text" placeholder="ID-0000"
+                                type="text" placeholder="REG-OMEGO-0001"
                                 value={forwarderId} onChange={(e) => setForwarderId(e.target.value)}
                                 className="w-full bg-black border border-white/10 rounded-2xl px-5 py-5 text-sm font-black text-white focus:border-white/30 transition-all outline-none font-mono uppercase placeholder:text-zinc-800"
                                 required
