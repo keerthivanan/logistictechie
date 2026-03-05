@@ -73,6 +73,9 @@ Thumbs.db
 *.tmp
 *.bak
 
+# === N8N AUTOMATION (CONFIDENTIAL — NEVER PUSH) ===
+n8n_plan/
+
 # === BACKEND GENERATED / ONE-OFF SCRIPTS ===
 backend/alembic/versions/
 backend/data/
