@@ -20,7 +20,7 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string) => void;
+    login: (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string, email?: string) => void;
     logout: () => void;
     loading: boolean;
     refreshProfile: () => Promise<void>;
@@ -28,7 +28,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
-    login: (token, name, onboarding, sovereign, role, avatar, id) => { },
+    login: (token, name, onboarding, sovereign, role, avatar, id, email) => { },
     logout: () => { },
     loading: true,
     refreshProfile: async () => { },
@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
 
     const handleLogout = useCallback(() => {
-        console.log("[AUTH] Terminating Citizen Session.");
         localStorage.removeItem('token');
         localStorage.removeItem('user_name');
         localStorage.removeItem('avatar_url');
@@ -61,7 +60,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                console.log("[AUTH] Profile Refreshed for:", data.full_name);
                 setUser({
                     id: data.id,
                     sovereign_id: data.sovereign_id,
@@ -76,11 +74,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     onboarding_completed: data.onboarding_completed
                 });
             } else {
-                console.warn("[AUTH] Session Invalid. Triggering Clean Logout.");
                 handleLogout();
             }
         } catch (e) {
-            console.error("[AUTH] Sync Failure:", e);
         } finally {
             setLoading(false);
         }
@@ -96,7 +92,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const onboarding_completed = localStorage.getItem('onboarding_completed') === 'true';
 
         if (token && name) {
-            console.log("[AUTH] Hydrating Citizen Session:", name);
             // Ensure cookie is in sync with localStorage for Middleware
             document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
 
@@ -113,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
             // If no localStorage but cookie exists, clear the cookie to prevent middleware loops
             if (document.cookie.includes('token=')) {
-                console.log("[AUTH] Stale Cookie Detected. Purging for sync.");
                 document.cookie = "token=; path=/; max-age=0";
             }
             setLoading(false);
@@ -125,8 +119,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (token) await fetchProfile(token);
     };
 
-    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string) => {
-        console.log("[AUTH] Initializing Secure Link for:", name);
+    const login = (token: string, name: string, onboarding_completed: boolean, sovereign_id: string, role: string, avatar_url?: string, user_id?: string, email?: string) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user_name', name);
         localStorage.setItem('sovereign_id', sovereign_id);
@@ -140,7 +133,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             id: user_id || '',
             sovereign_id,
             name,
-            email: '',
+            email: email || '',
             role,
             onboarding_completed,
             avatar_url
@@ -151,7 +144,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
-        console.log("[AUTH] Terminating Citizen Session.");
         localStorage.removeItem('token');
         localStorage.removeItem('user_name');
         localStorage.removeItem('avatar_url');

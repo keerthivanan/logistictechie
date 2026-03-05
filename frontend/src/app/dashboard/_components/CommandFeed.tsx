@@ -21,7 +21,7 @@ export default function CommandFeed({ activities, title = "Command Feed" }: { ac
                             className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/[0.04] border border-transparent hover:border-white/10 transition-all group/act bg-white/[0.01]"
                         >
                             <div className="flex-shrink-0">
-                                {act.action === 'SEARCH' ? <Search className="w- 3.5 h-3.5 text-blue-400" /> :
+                                {act.action === 'SEARCH' ? <Search className="w-3.5 h-3.5 text-blue-400" /> :
                                     act.action === 'BOOKING_CREATED' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> :
                                         <History className="w-3.5 h-3.5 text-zinc-500" />}
                             </div>

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
@@ -15,6 +14,8 @@ from pydantic import BaseModel
 from app.services.activity import activity_service
 import logging
 import httpx
+import random
+import string
 
 logger = logging.getLogger(__name__)
 
@@ -70,19 +71,16 @@ async def social_sync(
     
     needs_commit = False
     if not user:
-        import random
-        import string
-        
         user_count_res = await db.execute(select(func.count(User.id)))
         user_count = user_count_res.scalar() or 0
         new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
-        
+
         # DOUBLE-CHECK UNIQUENESS
         check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
         if check_existing.scalars().first():
             entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
             new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
-        
+
         user = User(
             email=email,
             sovereign_id=new_sovereign_id,
@@ -95,27 +93,25 @@ async def social_sync(
         await db.flush()       # Send INSERT so DB assigns user.id
         await db.refresh(user) # Populate user.id from the DB
         needs_commit = True
-        print(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
+        logger.info(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
         
         # OMEGO PROTOCOL: Create Initial Mission Set
         await create_default_tasks(db, str(user.id))
     else:
         # SELF-HEALING: Legacy Data Fix
         if not user.sovereign_id:
-            import random
-            import string
             user_count_res = await db.execute(select(func.count(User.id)))
             user_count = user_count_res.scalar() or 0
             new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
-            
+
             check_existing = await db.execute(select(User).filter(User.sovereign_id == new_sovereign_id))
             if check_existing.scalars().first():
                 entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
                 new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
-            
+
             user.sovereign_id = new_sovereign_id
             needs_commit = True
-            print(f"[SELF-HEALING] Assigned Sovereign ID {new_sovereign_id} to {email}")
+            logger.info(f"[SELF-HEALING] Assigned Sovereign ID {new_sovereign_id} to {email}")
 
         # Update avatar if missing or changed
         if picture and (not user.avatar_url or user.avatar_url != picture):
@@ -165,9 +161,10 @@ async def social_sync(
         "token_type": "bearer",
         "user_id": str(user.id),
         "user_name": user.full_name or "User",
+        "user_email": user.email,
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
-        "role": user.role, # ADDED: Role Visibility
+        "role": user.role,
         "avatar_url": user.avatar_url,
         "website": user.website
     }
@@ -322,7 +319,8 @@ async def refresh_access_token(
             "role": user.role,
             "website": user.website,
         }
-    except Exception:
+    except Exception as e:
+        logger.warning(f"[REFRESH] Token validation failed: {e}")
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
 @router.post("/register")
@@ -359,7 +357,6 @@ async def register_user(
     )
     
     # SOVEREIGN ID ASSIGNMENT (same logic as social-sync)
-    import random, string
     user_count_res = await db.execute(select(func.count(User.id)))
     user_count = user_count_res.scalar() or 0
     new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"

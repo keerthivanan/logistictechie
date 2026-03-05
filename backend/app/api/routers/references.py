@@ -1,11 +1,13 @@
 import os
+import logging
 from fastapi import APIRouter
-from typing import List, Dict, Any
+from typing import Dict, Any
 from datetime import datetime
 from urllib.parse import quote
 import httpx
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/ports/search", response_model=Dict[str, Any])
 async def search_ports(q: str = "", country: str = "", term_type: str = ""):
@@ -64,8 +66,8 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
                                 "type": loc_type
                             })
                 return {"results": results[:20], "source": "Global Live"}
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Port Search Error: {e}")
 
     return {"results": [], "source": "Global Live API (No Match Found)"}
 
@@ -100,8 +102,7 @@ async def search_commodities(q: str = ""):
                     for r in commodities if r.get('commodityName')
                 ]
         except Exception as e:
-            print(f"Commodity Search Error: {e}")
-            pass
+            logger.error(f"Commodity Search Error: {e}")
 
     return {"results": results[:50], "source": "Global Commodity Database"}
 
@@ -134,8 +135,8 @@ async def search_vessels(q: str = ""):
                     } 
                     for r in data if r.get("vesselLongName") or r.get("vesselShortName")
                 ]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Vessel Search Error: {e}")
 
     return {"results": results[:20], "source": "Global Vessel Database"}
 

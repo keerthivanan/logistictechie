@@ -379,7 +379,7 @@
     },
     {
       "parameters": {
-        "workflowId": "={{ $env.WF3_AUTO_CLOSE_WORKFLOW_ID }}",
+        "workflowId": "e4bSDlkhoAth9rX7",
         "options": {
           "waitForSubWorkflow": false
         }
@@ -462,11 +462,9 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": "public",
-        "table": "n8n_events_logs",
-        "columns": "event_type,request_id,description",
-        "additionalFields": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_events_logs (event_type, request_id, description) VALUES ('QUOTE_RECEIVED', '{{ $('Code - Extract Request ID').item.json.request_id }}', 'Quote received from {{ $('Code - Validate AI Output').item.json.forwarder_company }}') ON CONFLICT DO NOTHING",
+        "options": {}
       },
       "id": "log-quote-received",
       "name": "PostgreSQL - Log Quote Event",
@@ -529,11 +527,9 @@
     },
     {
       "parameters": {
-        "operation": "insert",
-        "schema": "public",
-        "table": "rejected_attempts",
-        "columns": "timestamp,sender_email,request_id,error_type,error_message",
-        "additionalFields": {}
+        "operation": "executeQuery",
+        "query": "INSERT INTO rejected_attempts (timestamp, sender_email, request_id, error_type, error_message) VALUES (NOW(), '{{ $('Code - Extract Request ID').item.json.sender_email }}', '{{ $('Code - Extract Request ID').item.json.request_id }}', 'REJECTED', 'Quote rejected - duplicate or declined') ON CONFLICT DO NOTHING",
+        "options": {}
       },
       "id": "log-rejected",
       "name": "PostgreSQL - Log Rejected Attempt",

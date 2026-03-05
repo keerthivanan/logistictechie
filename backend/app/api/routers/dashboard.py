@@ -4,14 +4,14 @@ from sqlalchemy import select, func
 from app.db.session import get_db
 from app import crud
 from typing import Dict
-
 from pydantic import BaseModel
-
-router = APIRouter()
-
 from app.api import deps
 from app.models.user import User
 import json
+import logging
+
+router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/stats/me", response_model=Dict)
 async def get_dashboard_stats(
@@ -118,7 +118,7 @@ async def get_dashboard_stats(
             if act.extra_data:
                 try:
                     metadata = json.loads(act.extra_data)
-                except:
+                except Exception:
                     metadata = {}
             
             # Smart URL Construction for "Resume" Feature
@@ -172,7 +172,7 @@ async def get_full_activity_history(
             metadata = {}
             if act.extra_data:
                 try: metadata = json.loads(act.extra_data)
-                except: metadata = {}
+                except Exception: metadata = {}
                 
             resume_url = "/dashboard"
             if act.action == "SEARCH":
@@ -212,7 +212,7 @@ async def create_lead(lead: LeadCreate):
     # SOVEREIGN LEAD CAPTURE
     Public endpoint for 'Book Demo' and 'Start Trial'.
     """
-    print(f"[LEAD CAPTURE] New Interest: {lead.email} ({lead.company}) - {lead.interest}")
+    logger.info(f"[LEAD CAPTURE] New Interest: {lead.email} ({lead.company}) - {lead.interest}")
     # In a real scenario, this would save to DB or CRM.
     # For 'Best of All Time' demo, we log and return success.
     return {"success": True, "message": "Oracle has received your request. Dispatching sales team."}

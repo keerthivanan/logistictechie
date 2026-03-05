@@ -1,18 +1,21 @@
-# --- Python ---
+# ============================================================
+# OMEGO LOGISTICS OS — .gitignore
+# ============================================================
+
+# === PYTHON ===
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-/lib/
-/lib64/
+lib/
+lib64/
 parts/
 sdist/
 var/
@@ -21,7 +24,13 @@ wheels/
 .installed.cfg
 *.egg
 
-# --- Node ---
+# === VIRTUAL ENVIRONMENTS ===
+venv/
+.venv/
+env/
+backend/venv/
+
+# === NODE / NEXT.JS ===
 node_modules/
 .next/
 out/
@@ -30,59 +39,57 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# --- IDE & OS ---
-.vscode/
+# === ENVIRONMENT & SECRETS — NEVER COMMIT ===
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+*.env
+
+# === SENSITIVE CREDENTIAL FILES — NEVER COMMIT ===
+google-credentials.json
+*credentials*.json
+*-credentials.json
+*service-account*.json
+*service_account*.json
+
+# === CLAUDE CODE (AI ASSISTANT INTERNALS) ===
+.claude/
+
+# === IDE & OS ===
 .idea/
 *.swp
 *.swo
 .DS_Store
 Thumbs.db
 
-# --- Environment & Secret ---
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env*
+# === LOGS & TEMP FILES ===
+*.log
+*.tmp
+*.bak
 
-# --- Backend Specific ---
-backend/alembic/
+# === BACKEND GENERATED / ONE-OFF SCRIPTS ===
+backend/alembic/versions/
 backend/data/
-backend/app/__pycache__/
-backend/venv/
-venv/
-.venv/
-
-# --- N8N & Automation ---
-n8n_plan/
-*.json
-!frontend/package.json
-!frontend/package-lock.json
-!frontend/tsconfig.json
-
-# --- Scripts & Deployment ---
 backend/scripts/
 scripts/
 audit.py
 generate_tree.py
 full_tree.txt
-*.log
-*.tmp
-*.bak
-*.txt
-!README.md
-!frontend/*.txt
+verify_maersk.py
+verify_platform.py
+definitive_schema_audit.json
+handshake*.txt
+test_out.txt
+test_results.txt
 
-# --- Vercel & Deployment Metadata ---
+# === VERCEL DEPLOYMENT ===
 .vercel/
 !frontend/.vercel/
 !frontend/.vercelignore
 !frontend/vercel.json
-
-# --- Temporary ---
-handshake*.txt
-test_out.txt
-test_results.txt
-verify_maersk.py
-verify_platform.py

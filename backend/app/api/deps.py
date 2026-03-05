@@ -64,7 +64,7 @@ async def get_current_user_optional(
         if not email:
             return None
         return await crud.user.get_by_email(db, email=email)
-    except:
+    except Exception:
         return None
 
 from fastapi import Security
