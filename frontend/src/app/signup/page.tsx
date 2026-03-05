@@ -30,7 +30,7 @@ function SignupContent() {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.avatar_url, data.user_id);
+                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role || 'user', data.avatar_url, data.user_id, '');
 
                     if (returnUrl) {
                         router.push(decodeURIComponent(returnUrl));

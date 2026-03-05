@@ -5,7 +5,7 @@ from app.db.session import get_db
 from app.api import deps
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks
+from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from app.models.user import User
@@ -85,6 +85,7 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"]
 app.include_router(marketplace.router, prefix="/api/marketplace", tags=["Marketplace Bidding"])
 app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarder Network"])
 app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
+app.include_router(quotes.router, prefix="/api/quotes", tags=["Instant Quote Engine"])
 
 # GLOBAL BRIDGE: Headless n8n Aliases (Matches COMPLETE_SETUP_GUIDE hardcoded URLs)
 # All 4 routes are protected by verify_n8n_webhook

@@ -16,6 +16,7 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Avatar from '@/components/visuals/Avatar'
+import { API_URL } from '@/lib/config'
 
 export default function RebuiltSettingsPage() {
     const { user: authUser, loading: authLoading } = useAuth()
@@ -45,12 +46,16 @@ export default function RebuiltSettingsPage() {
     const handleUpdateIdentity = async () => {
         setIsUpdating(true)
         try {
-            // Local state first for instant UX
+            const token = localStorage.getItem('token')
+            const res = await fetch(`${API_URL}/api/auth/update-profile`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ full_name: name, avatar_url: avatarUrl })
+            })
+            if (!res.ok) throw new Error('Update failed')
+            // Sync locally after confirmed backend update
             localStorage.setItem('user_name', name)
             localStorage.setItem('avatar_url', avatarUrl)
-
-            // In a real app, we'd call the backend /api/auth/update-profile here
-            // For now, we refresh the page to force the AuthContext to re-hydrate from localStorage
             window.location.reload()
         } catch (err) {
             console.error("Identity Sync Failure:", err)

@@ -144,6 +144,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const logout = () => {
+        const token = localStorage.getItem('token');
+        // Fire-and-forget: log LOGOUT activity on backend (don't block UI)
+        if (token) {
+            fetch(`${API_URL}/api/auth/logout`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            }).catch(() => { /* ignore network errors on logout */ });
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('user_name');
         localStorage.removeItem('avatar_url');
