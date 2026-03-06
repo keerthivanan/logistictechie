@@ -204,7 +204,7 @@ export default function HSCodesPage() {
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to clear customs faster?</h2>
                     <p className="text-xl text-zinc-400 mb-10">
-                        Join 2,000+ shippers using Sovereign's AI customs engine for zero-friction border crossings.
+                        Join 2,000+ shippers using Sovereign&apos;s AI customs engine for zero-friction border crossings.
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 transition-all">
