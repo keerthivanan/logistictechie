@@ -91,6 +91,9 @@ handshake*.txt
 test_out.txt
 test_results.txt
 
+# === MAERSK / THIRD-PARTY API SPECS ===
+maersk/
+
 # === VERCEL DEPLOYMENT ===
 .vercel/
 !frontend/.vercel/
