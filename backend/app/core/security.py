@@ -40,17 +40,22 @@ def create_refresh_token(data: dict) -> str:
 
 def validate_password_strength(password: str) -> bool:
     """
-    Validate password strength:
-    - At least 8 characters
+    Validate password strength (2026 standard):
+    - At least 10 characters
+    - At least one uppercase letter
     - At least one lowercase letter
     - At least one number
+    - At least one special character
     """
-    if len(password) < 8:
+    if len(password) < 10:
+        return False
+    if not re.search(r"[A-Z]", password):
         return False
     if not re.search(r"[a-z]", password):
         return False
-    # Uppercase made optional for enterprise flexibility
     if not re.search(r"[0-9]", password):
+        return False
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?`~]", password):
         return False
     return True
 

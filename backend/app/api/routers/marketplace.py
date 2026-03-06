@@ -19,38 +19,38 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 class MarketplaceSubmit(BaseModel):
-    user_id: str
-    sovereign_id: str = ""
-    name: str = "Client"
-    email: str = ""
-    phone: str = ""
-    origin: str
-    origin_type: str = "PORT"
-    destination: str
-    destination_type: str = "PORT"
-    cargo_type: str
-    commodity: str = ""
-    cargo_specification: str = ""
-    packing_type: str = "PALLETS"
-    quantity: int = 1
-    weight: float
-    weight_unit: str = "KGM"
-    dimensions: str = ""
-    dim_unit: str = "CM"
+    user_id: str = Field(..., min_length=1, max_length=100)
+    sovereign_id: str = Field("", max_length=50)
+    name: str = Field("Client", max_length=200)
+    email: str = Field("", max_length=254)
+    phone: str = Field("", max_length=30)
+    origin: str = Field(..., min_length=1, max_length=200)
+    origin_type: str = Field("PORT", max_length=20)
+    destination: str = Field(..., min_length=1, max_length=200)
+    destination_type: str = Field("PORT", max_length=20)
+    cargo_type: str = Field(..., min_length=1, max_length=50)
+    commodity: str = Field("", max_length=200)
+    cargo_specification: str = Field("", max_length=500)
+    packing_type: str = Field("PALLETS", max_length=50)
+    quantity: int = Field(1, gt=0, le=50000)
+    weight: float = Field(..., gt=0, le=500000)  # max 500 metric tons
+    weight_unit: str = Field("KGM", max_length=10)
+    dimensions: str = Field("", max_length=100)
+    dim_unit: str = Field("CM", max_length=10)
     is_stackable: bool = True
     is_hazardous: bool = False
     needs_insurance: bool = False
     target_date: Optional[str] = None
     pickup_ready_date: Optional[str] = None
-    total_weight_kg: Optional[float] = None
-    total_volume_cbm: Optional[float] = None
-    container_count: Optional[int] = None
-    container_type: Optional[str] = ""
+    total_weight_kg: Optional[float] = Field(None, gt=0, le=500000)
+    total_volume_cbm: Optional[float] = Field(None, gt=0, le=10000)
+    container_count: Optional[int] = Field(None, gt=0, le=500)
+    container_type: Optional[str] = Field("", max_length=20)
     surcharge_details: Optional[Dict[str, Any]] = None
-    vessel: str = ""
-    special_requirements: str = ""
-    incoterms: str = "FOB"
-    currency: str = "USD"
+    vessel: str = Field("", max_length=100)
+    special_requirements: str = Field("", max_length=1000)
+    incoterms: str = Field("FOB", max_length=10)
+    currency: str = Field("USD", min_length=3, max_length=3)
 
 def _fire_webhook(payload: dict):
     """Fire-and-forget webhook in a background thread."""
@@ -453,11 +453,9 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
         logger.info(f"[+] REQUEST SYNC SUCCESS: {sync_in.request_id}")
         return {"success": True, "request_id": sync_in.request_id}
     except Exception as e:
-        import traceback
-        logger.error(f"[-] REQUEST SYNC ERROR: {str(e)}")
-        traceback.print_exc()
+        logger.error(f"[-] REQUEST SYNC ERROR: {str(e)}", exc_info=True)
         await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Sovereign Mirror Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Request sync failed. Please try again or contact support.")
 
 class N8nStatusUpdate(BaseModel):
     request_id: str

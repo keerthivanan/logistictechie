@@ -231,7 +231,7 @@ async def login_for_access_token(
         
         raise HTTPException(
             status_code=401,
-            detail=f"Incorrect email or password. {5 - new_attempts} attempts remaining." if new_attempts < 5 else "Account locked.",
+            detail="Incorrect email or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
