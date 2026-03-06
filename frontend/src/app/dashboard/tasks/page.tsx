@@ -3,30 +3,26 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-    ClipboardList,
     CheckCircle2,
     Circle,
-    Clock,
-    AlertCircle,
-    ArrowRight,
     Loader2,
     Calendar,
+    ArrowRight,
     ChevronRight,
-    Search
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { API_URL } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
-    id: string;
-    title: string;
-    description?: string;
-    task_type?: string;
-    status: 'PENDING' | 'COMPLETED' | 'ARCHIVED';
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    due_date?: string;
-    created_at: string;
+    id: string
+    title: string
+    description?: string
+    task_type?: string
+    status: 'PENDING' | 'COMPLETED' | 'ARCHIVED'
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+    due_date?: string
+    created_at: string
 }
 
 export default function TasksPage() {
@@ -55,7 +51,7 @@ export default function TasksPage() {
                     setTasks(data)
                 }
             } catch (err) {
-                console.error("Failed to fetch tasks", err)
+                console.error('Failed to fetch tasks', err)
             } finally {
                 setLoading(false)
             }
@@ -77,7 +73,7 @@ export default function TasksPage() {
                 setTasks(tasks.map(t => t.id === taskId ? updatedTask : t))
             }
         } catch (err) {
-            console.error("Failed to toggle task", err)
+            console.error('Failed to toggle task', err)
         } finally {
             setTogglingId(null)
         }
@@ -85,197 +81,151 @@ export default function TasksPage() {
 
     if (loading || authLoading) {
         return (
-            <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
                 <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Optimizing Task View</p>
             </div>
         )
     }
 
-    // Apply Sorting and Filtering
-    const sortedAndFilteredTasks = tasks
+    const priorityMap: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 }
+
+    const sorted = tasks
         .filter(t => filterPriority === 'ALL' || t.priority === filterPriority)
         .sort((a, b) => {
-            if (sortOrder === 'PRIORITY') {
-                const priorityMap = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 }
-                return (priorityMap[b.priority] || 0) - (priorityMap[a.priority] || 0)
-            }
+            if (sortOrder === 'PRIORITY') return (priorityMap[b.priority] || 0) - (priorityMap[a.priority] || 0)
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         })
 
-    const pendingTasks = sortedAndFilteredTasks.filter(t => t.status === 'PENDING')
-    const completedTasks = sortedAndFilteredTasks.filter(t => t.status === 'COMPLETED')
+    const pendingTasks = sorted.filter(t => t.status === 'PENDING')
+    const completedTasks = sorted.filter(t => t.status === 'COMPLETED')
 
     return (
-        <div className="max-w-6xl mx-auto space-y-12 py-6">
-            {/* Header section with strategic overview - Realigned to Dashboard Pattern */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-xl font-bold tracking-tight text-white uppercase font-outfit">
+        <div className="h-full flex flex-col gap-4 overflow-hidden">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-4">
+                        <h1 className="text-lg font-bold tracking-tight text-white uppercase font-outfit">
                             Mission <span className="text-zinc-600">Control</span>
                         </h1>
-                        <div className="h-4 w-px bg-white/10" />
-                        <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-[0.2em] font-inter">
-                            Protocol: Operational Sync
-                        </p>
+                        <div className="h-3 w-px bg-white/10" />
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] font-inter">Protocol: Operational Sync</p>
                     </div>
-                    <p className="text-zinc-500 font-medium font-inter max-w-md text-xs leading-relaxed">Executive actions required for cargo synchronization and multi-modal stability.</p>
+                    <p className="text-zinc-600 font-medium font-inter text-xs">Executive actions required for cargo synchronization.</p>
                 </div>
-
-                <div className="flex items-center gap-4">
-                    <div className="bg-white/[0.02] border border-white/5 px-6 py-4 rounded-2xl flex flex-col items-center group cursor-default shadow-sm transition-all hover:border-white/10">
-                        <span className="text-xl font-bold font-inter text-white">{tasks.filter(t => t.status === 'PENDING').length}</span>
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mt-1 font-inter">Active Vectors</span>
+                <div className="flex items-center gap-3">
+                    <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
+                        <span className="text-lg font-bold font-inter text-white">{tasks.filter(t => t.status === 'PENDING').length}</span>
+                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest font-inter">Active</span>
                     </div>
-                    <div className="bg-white/[0.02] border border-white/5 px-6 py-4 rounded-2xl flex flex-col items-center group cursor-default shadow-sm transition-all hover:border-white/10">
-                        <span className="text-xl font-bold font-inter text-zinc-500">{tasks.filter(t => t.status === 'COMPLETED').length}</span>
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mt-1 font-inter">Resolved</span>
+                    <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
+                        <span className="text-lg font-bold font-inter text-zinc-500">{tasks.filter(t => t.status === 'COMPLETED').length}</span>
+                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest font-inter">Done</span>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-12">
-                {/* Active Tasks Section */}
-                <section className="space-y-6">
-                    <div className="flex items-center justify-between px-2">
-                        <div className="flex items-center gap-3">
-                            <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Active Duty</h3>
-                        </div>
-                        <div className="flex items-center gap-6">
-                            <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
-                                <button
-                                    onClick={() => setSortOrder('NEWEST')}
-                                    className={`text-[8px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all ${sortOrder === 'NEWEST' ? 'bg-white text-black shadow-lg shadow-white/5' : 'text-zinc-500 hover:text-white'}`}
-                                >
-                                    Newest
-                                </button>
-                                <button
-                                    onClick={() => setSortOrder('PRIORITY')}
-                                    className={`text-[8px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all ${sortOrder === 'PRIORITY' ? 'bg-white text-black shadow-lg shadow-white/5' : 'text-zinc-500 hover:text-white'}`}
-                                >
-                                    Priority
-                                </button>
-                            </div>
-                            <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
-                                {(['ALL', 'HIGH', 'CRITICAL'] as const).map((p) => (
-                                    <button
-                                        key={p}
-                                        onClick={() => setFilterPriority(p)}
-                                        className={`text-[8px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-all ${filterPriority === p ? 'bg-white text-black shadow-lg shadow-white/5' : 'text-zinc-500 hover:text-white'}`}
-                                    >
-                                        {p}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+            {/* Controls */}
+            <div className="flex items-center justify-between flex-shrink-0">
+                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Active Duty</h3>
+                <div className="flex items-center gap-3">
+                    <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
+                        {(['NEWEST', 'PRIORITY'] as const).map(o => (
+                            <button key={o} onClick={() => setSortOrder(o)}
+                                className={`text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                {o}
+                            </button>
+                        ))}
                     </div>
+                    <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
+                        {(['ALL', 'HIGH', 'CRITICAL'] as const).map(p => (
+                            <button key={p} onClick={() => setFilterPriority(p)}
+                                className={`text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                {p}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Content: pending grid | completed list */}
+            <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-3 gap-4 overflow-hidden">
+                {/* Pending tasks */}
+                <div className="xl:col-span-2 overflow-y-auto custom-scrollbar pr-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <AnimatePresence>
-                            {pendingTasks.length > 0 ? (
-                                pendingTasks.map((task) => (
-                                    <TaskCard key={task.id} task={task} onToggle={handleToggle} isToggling={togglingId === task.id} />
-                                ))
-                            ) : (
-                                <div className="col-span-full py-20 border border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center opacity-20">
-                                    <CheckCircle2 className="w-10 h-10 mb-4" />
+                            {pendingTasks.length > 0 ? pendingTasks.map(task => (
+                                <TaskCard key={task.id} task={task} onToggle={handleToggle} isToggling={togglingId === task.id} />
+                            )) : (
+                                <div className="col-span-full py-16 border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-20">
+                                    <CheckCircle2 className="w-8 h-8 mb-3" />
                                     <p className="text-xs font-black uppercase tracking-[0.2em]">Operational Equilibrium Achieved</p>
                                 </div>
                             )}
                         </AnimatePresence>
                     </div>
-                </section>
+                </div>
 
-                {/* Recently Resolved Section */}
+                {/* Completed tasks */}
                 {completedTasks.length > 0 && (
-                    <section className="space-y-6 pt-12 border-t border-white/5">
-                        <h2 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter px-2">Archived Protocol</h2>
-                        <div className="space-y-3 max-w-3xl">
-                            {completedTasks.map((task) => (
-                                <motion.div
-                                    layout
-                                    key={task.id}
-                                    className="flex items-center justify-between p-4 bg-white/[0.01] border border-white/5 rounded-2xl group hover:bg-white/[0.04] hover:border-white/10 transition-all"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <button
-                                            onClick={() => handleToggle(task.id)}
-                                            className="w-6 h-6 rounded-full border border-emerald-500/30 flex items-center justify-center text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-black transition-all"
-                                        >
-                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                    <div className="xl:col-span-1 overflow-y-auto custom-scrollbar pr-1">
+                        <h2 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter mb-3">Archived Protocol</h2>
+                        <div className="space-y-2">
+                            {completedTasks.map(task => (
+                                <motion.div layout key={task.id}
+                                    className="flex items-center justify-between p-3 bg-white/[0.01] border border-white/5 rounded-2xl group hover:bg-white/[0.04] hover:border-white/10 transition-all">
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <button onClick={() => handleToggle(task.id)}
+                                            className="w-5 h-5 rounded-full border border-emerald-500/30 flex items-center justify-center text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-black transition-all flex-shrink-0">
+                                            <CheckCircle2 className="w-3 h-3" />
                                         </button>
-                                        <div>
-                                            <p className="text-[11px] font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors tracking-tight line-through decoration-zinc-800">{task.title}</p>
-                                            <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-0.5">Resolved {new Date(task.created_at).toLocaleDateString()}</p>
+                                        <div className="overflow-hidden">
+                                            <p className="text-[10px] font-bold text-zinc-400 tracking-tight line-through decoration-zinc-800 truncate">{task.title}</p>
+                                            <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-0.5">
+                                                Resolved {new Date(task.created_at).toLocaleDateString()}
+                                            </p>
                                         </div>
                                     </div>
-                                    <ChevronRight className="w-3 h-3 text-zinc-800 group-hover:text-zinc-600 transition-colors" />
+                                    <ChevronRight className="w-3 h-3 text-zinc-800 flex-shrink-0" />
                                 </motion.div>
                             ))}
                         </div>
-                    </section>
+                    </div>
                 )}
-            </div>
-            <div className="flex items-center justify-center pt-12 pb-20 opacity-20">
-                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.5em]">Command Termination Point</p>
             </div>
         </div>
     )
 }
 
-function TaskCard({ task, onToggle, isToggling }: { task: Task, onToggle: (id: string) => void, isToggling: boolean }) {
-    const priorityColors = {
-        CRITICAL: 'text-red-500 bg-red-500/10 border-red-500/20',
-        HIGH: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
-        MEDIUM: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
-        LOW: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
-    }
-
+function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: string) => void; isToggling: boolean }) {
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="group relative bg-[#0a0a0a] border border-white/5 rounded-[2rem] p-6 hover:border-white/20 transition-all shadow-2xl overflow-hidden"
-        >
-            <div className="relative space-y-6">
+        <motion.div layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+            className="group relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-5 hover:border-white/20 transition-all overflow-hidden">
+            <div className="space-y-4">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${task.priority === 'CRITICAL' ? 'bg-red-500 animate-pulse' : 'bg-zinc-600'}`}></div>
-                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest font-inter">
-                            {task.priority} Vector
-                        </span>
+                        <div className={`w-1.5 h-1.5 rounded-full ${task.priority === 'CRITICAL' ? 'bg-red-500 animate-pulse' : task.priority === 'HIGH' ? 'bg-orange-500' : 'bg-zinc-600'}`} />
+                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest font-inter">{task.priority} Vector</span>
                     </div>
-                    <button
-                        onClick={() => onToggle(task.id)}
-                        disabled={isToggling}
-                        className="w-7 h-7 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center hover:bg-white hover:text-black transition-all group/check disabled:opacity-50 shadow-sm"
-                    >
-                        {isToggling ? <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" /> : <Circle className="w-3.5 h-3.5 group-hover/check:scale-125 transition-transform" />}
+                    <button onClick={() => onToggle(task.id)} disabled={isToggling}
+                        className="w-6 h-6 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center hover:bg-white hover:text-black transition-all flex-shrink-0 disabled:opacity-50">
+                        {isToggling ? <Loader2 className="w-3 h-3 animate-spin text-zinc-500" /> : <Circle className="w-3 h-3" />}
                     </button>
                 </div>
-
-                <div className="space-y-2">
-                    <h3 className="text-[13px] font-bold text-white font-outfit tracking-tight group-hover:text-emerald-400 transition-colors uppercase leading-tight">{task.title}</h3>
-                    <p className="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed font-inter font-medium opacity-80">{task.description}</p>
+                <div className="space-y-1">
+                    <h3 className="text-[12px] font-bold text-white font-outfit tracking-tight group-hover:text-emerald-400 transition-colors uppercase leading-tight">{task.title}</h3>
+                    <p className="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed font-inter">{task.description}</p>
                 </div>
-
-                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 text-zinc-600">
-                            <Calendar className="w-3 h-3" />
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] font-inter">
-                                {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Limit'}
-                            </span>
-                        </div>
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-zinc-600">
+                        <Calendar className="w-3 h-3" />
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] font-inter">
+                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Limit'}
+                        </span>
                     </div>
-                    <button
-                        onClick={() => onToggle(task.id)}
-                        disabled={isToggling}
-                        className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40"
-                    >
+                    <button onClick={() => onToggle(task.id)} disabled={isToggling}
+                        className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40">
                         Commit <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>

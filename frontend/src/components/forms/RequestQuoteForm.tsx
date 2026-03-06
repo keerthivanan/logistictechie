@@ -252,8 +252,8 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-12"
                 >
-                    <h1 className="text-3xl font-bold mb-2 tracking-tight font-outfit uppercase">Operational Request</h1>
-                    <p className="text-zinc-500 font-medium font-inter">Index a new quote request into the Sovereign Logistics Network.</p>
+                    <h1 className="text-4xl font-bold mb-3 tracking-tight font-outfit uppercase">Operational Request</h1>
+                    <p className="text-zinc-400 font-medium font-inter">Index a new quote request into the Sovereign Logistics Network.</p>
                 </motion.div>
 
                 <motion.form
@@ -261,7 +261,7 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
                     onSubmit={handleSubmit}
-                    className="bg-white/[0.01] border border-white/5 rounded-2xl p-6 md:p-8 space-y-10"
+                    className="bg-zinc-950/80 backdrop-blur-xl border border-white/8 rounded-3xl p-6 md:p-10 space-y-10 shadow-2xl"
                 >
                     {/* 1. Mode Selection */}
                     <div className="space-y-4">

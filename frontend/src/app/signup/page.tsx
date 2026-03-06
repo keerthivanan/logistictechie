@@ -13,106 +13,218 @@ function SignupContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const returnUrl = searchParams.get('returnUrl')
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
+    const [signupName, setSignupName] = useState('')
+    const [signupEmail, setSignupEmail] = useState('')
+    const [signupPassword, setSignupPassword] = useState('')
+    const [signupConfirm, setSignupConfirm] = useState('')
+
+    const handleRedirect = () => {
+        if (returnUrl) {
+            const decoded = decodeURIComponent(returnUrl)
+            const safeUrl = decoded.startsWith('/') && !decoded.startsWith('//') ? decoded : '/'
+            router.push(safeUrl)
+        } else {
+            router.push('/login')
+        }
+    }
+
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
-            setIsLoading(true);
+            setIsLoading(true)
+            setError('')
             try {
                 const res = await fetch(`${API_URL}/api/auth/social-sync`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        access_token: tokenResponse.access_token,
-                        provider: "google"
-                    })
-                });
-                const data = await res.json();
+                    body: JSON.stringify({ access_token: tokenResponse.access_token, provider: 'google' })
+                })
+                const data = await res.json()
                 if (res.ok) {
-                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role || 'user', data.avatar_url, data.user_id, '');
-
-                    if (returnUrl) {
-                        router.push(decodeURIComponent(returnUrl));
-                    } else {
-                        router.push('/');
-                    }
+                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role || 'user', data.avatar_url, data.user_id, data.user_email)
+                    handleRedirect()
                 } else {
-                    throw new Error(data.detail || "Google Sign-In failed");
+                    throw new Error(data.detail || 'Google Sign-In failed')
                 }
             } catch (e: any) {
-                setError(e.message);
+                if (e.message === 'Failed to fetch' || e.name === 'TypeError') {
+                    setError('Unable to connect. Please check your connection and try again.')
+                } else {
+                    setError(e.message)
+                }
             } finally {
-                setIsLoading(false);
+                setIsLoading(false)
             }
         },
-        onError: () => {
-            setError('Google Sign-In Failed');
-        }
-    });
+        onError: () => setError('Google Sign-In failed. Try again.'),
+    })
 
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+        if (!signupName.trim()) { setError('Full name is required.'); return }
+        if (!signupEmail.trim()) { setError('Email is required.'); return }
+        if (signupPassword.length < 8) { setError('Password must be at least 8 characters.'); return }
+        if (!/[A-Z]/.test(signupPassword) || !/[a-z]/.test(signupPassword) || !/[0-9]/.test(signupPassword)) {
+            setError('Password must contain uppercase, lowercase, and a number.'); return
+        }
+        if (signupPassword !== signupConfirm) { setError('Passwords do not match.'); return }
+
+        setIsLoading(true)
+        try {
+            const res = await fetch(`${API_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name: signupName.trim(),
+                    email: signupEmail.trim().toLowerCase(),
+                    password: signupPassword,
+                    confirm_password: signupConfirm,
+                })
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                const msg: string = data.detail || 'Registration failed'
+                if (msg.toLowerCase().includes('already')) {
+                    throw new Error('That email is already registered. Please sign in instead.')
+                }
+                throw new Error(msg)
+            }
+            router.push('/login')
+        } catch (e: any) {
+            if (e.message === 'Failed to fetch' || e.name === 'TypeError') {
+                setError('Unable to connect. Please check your connection and try again.')
+            } else {
+                setError(e.message)
+            }
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute inset-0 z-0 opacity-100 mix-blend-screen pointer-events-none">
+        <div className="h-screen overflow-hidden bg-black text-white flex items-center justify-center relative">
+            {/* Background */}
+            <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
                 <Prism />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-zinc-950 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none" />
 
-            <div className="w-full max-w-md p-8 relative z-10">
-                <div className="text-center mb-10">
-                    <Link href="/" className="inline-flex items-center space-x-2 group mb-8">
+            <div className="w-full max-w-sm px-6 relative z-10">
+                {/* Logo + Title */}
+                <div className="text-center mb-6">
+                    <Link href="/" className="inline-flex items-center space-x-2 mb-4">
                         <div className="flex items-center space-x-1">
-                            <div className="w-2 h-4 bg-white rounded-sm"></div>
-                            <div className="w-2 h-4 bg-white/70 rounded-sm"></div>
-                            <div className="w-2 h-4 bg-white/40 rounded-sm"></div>
+                            <div className="w-1.5 h-4 bg-white rounded-sm" />
+                            <div className="w-1.5 h-4 bg-white/70 rounded-sm" />
+                            <div className="w-1.5 h-4 bg-white/40 rounded-sm" />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight text-white">SOVEREIGN</span>
+                        <span className="text-xl font-bold tracking-tight text-white font-outfit uppercase">Omego</span>
                     </Link>
-                    <h1 className="text-3xl font-bold mb-2">Create an account</h1>
-                    <p className="text-gray-400">Join the Sovereign Logistics Network.</p>
+                    <h1 className="text-2xl font-bold font-outfit uppercase tracking-tight">Create Account</h1>
+                    <p className="text-zinc-500 text-xs font-inter mt-1.5">Join the sovereign logistics platform.</p>
                 </div>
 
-                <div className="bg-zinc-900 border border-white/10 p-10 rounded-2xl shadow-2xl backdrop-blur-xl">
-                    <div className="space-y-8 text-center">
-                        <div className="flex flex-col items-center space-y-6">
-                            <div className="w-full flex justify-center">
-                                <button
-                                    onClick={() => googleLogin()}
-                                    disabled={isLoading}
-                                    className="relative group w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-black border border-white/20 rounded-lg hover:bg-white/5 hover:border-white/40 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {/* Google G Logo SVG */}
-                                    <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
-                                        <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238510)">
-                                            <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                                            <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                                            <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.734 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
-                                            <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
-                                        </g>
-                                    </svg>
-                                    <span className="font-medium text-white group-hover:text-white transition-colors text-sm">
-                                        {isLoading ? 'Connecting...' : 'Continue with Google'}
-                                    </span>
-                                </button>
-                            </div>
+                {/* Card */}
+                <div className="bg-zinc-950 border border-white/5 rounded-3xl shadow-2xl p-7">
+                    {/* Error */}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-500/5 border border-red-500/10 text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl text-center font-inter">
+                            {error}
                         </div>
+                    )}
 
-                        <div className="pt-4 flex items-center justify-center space-x-2">
-                            <span className="text-zinc-600 text-[11px] font-bold uppercase tracking-tighter">Already a citizen?</span>
-                            <Link href="/login" className="text-white text-[11px] font-black uppercase tracking-tighter hover:underline">Sign In</Link>
-                        </div>
+                    {/* Google Button */}
+                    <button
+                        onClick={() => googleLogin()}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-white text-black rounded-2xl hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 mb-5"
+                    >
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                        </svg>
+                        <span className="font-bold text-black text-xs uppercase tracking-[0.15em] font-inter">
+                            {isLoading ? 'Connecting...' : 'Continue with Google'}
+                        </span>
+                    </button>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="flex-1 h-px bg-white/5" />
+                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">or</span>
+                        <div className="flex-1 h-px bg-white/5" />
                     </div>
-                </div >
-            </div >
-        </div >
+
+                    {/* Signup Form */}
+                    <form onSubmit={handleSignup} className="space-y-3">
+                        <input
+                            type="text"
+                            placeholder="Full name"
+                            value={signupName}
+                            onChange={e => setSignupName(e.target.value)}
+                            required
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition font-inter"
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email address"
+                            value={signupEmail}
+                            onChange={e => setSignupEmail(e.target.value)}
+                            required
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition font-inter"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password (min 8 chars, A-Z, a-z, 0-9)"
+                            value={signupPassword}
+                            onChange={e => setSignupPassword(e.target.value)}
+                            required
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition font-inter"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Confirm password"
+                            value={signupConfirm}
+                            onChange={e => setSignupConfirm(e.target.value)}
+                            required
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition font-inter"
+                        />
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-3.5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.15em] font-inter hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                        >
+                            {isLoading ? 'Creating Account...' : 'Create Account'}
+                        </button>
+                    </form>
+
+                    {/* Footer links */}
+                    <div className="mt-5 flex items-center justify-between">
+                        <p className="text-zinc-600 text-[10px] font-inter">
+                            Already have an account?{' '}
+                            <Link href="/login" className="text-zinc-300 hover:text-white font-bold underline decoration-white/10">
+                                Sign in
+                            </Link>
+                        </p>
+                        <Link href="/legal/terms" className="text-zinc-700 text-[9px] font-inter hover:text-zinc-500 transition-colors">
+                            Terms
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }
 
 export default function SignupPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Initializing Secure Link...</div>}>
+        <Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-white text-xs font-inter uppercase tracking-widest">Initializing...</div>}>
             <SignupContent />
         </Suspense>
     )

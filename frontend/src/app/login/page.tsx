@@ -289,9 +289,9 @@ function LoginContent() {
                         {mode === 'login' ? (
                             <p className="text-zinc-600 text-[10px] font-inter">
                                 No account?{' '}
-                                <button onClick={() => switchMode('signup')} className="text-zinc-300 hover:text-white transition-colors font-bold underline decoration-white/10">
+                                <Link href="/signup" className="text-zinc-300 hover:text-white transition-colors font-bold underline decoration-white/10">
                                     Create one
-                                </button>
+                                </Link>
                             </p>
                         ) : (
                             <p className="text-zinc-600 text-[10px] font-inter">
