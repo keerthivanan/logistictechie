@@ -115,29 +115,29 @@ function ResultsContent() {
   return (
     <>
       {/* Search Header Info - Dynamic now */}
-      <div className="bg-black border-b border-white/10 pt-20">
+      <div className="bg-black border-b border-white/5 pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 text-sm">
-              <span className="text-gray-400">Route:</span>
-              <span className="text-white font-bold">{origin}</span>
-              <span className="text-gray-600">→</span>
-              <span className="text-white font-bold">{destination}</span>
+            <div className="flex items-center space-x-4">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-inter">Route:</span>
+              <span className="text-white font-black font-mono tracking-tight">{origin}</span>
+              <span className="text-zinc-600">→</span>
+              <span className="text-white font-black font-mono tracking-tight">{destination}</span>
             </div>
-            <div className="flex items-center space-x-4 text-sm">
+            <div className="flex items-center space-x-4">
               <div className="flex items-center">
-                <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center font-bold text-xs">✓</div>
-                <span className="ml-2 font-medium text-gray-300">Search</span>
+                <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center font-black text-[10px]">✓</div>
+                <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 font-inter">Search</span>
               </div>
-              <div className="h-px w-12 bg-white/20"></div>
+              <div className="h-px w-12 bg-white/10"></div>
               <div className="flex items-center">
-                <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center font-bold text-xs">2</div>
-                <span className="ml-2 font-medium text-white">Results</span>
+                <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center font-black text-[10px]">2</div>
+                <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-white font-inter">Results</span>
               </div>
-              <div className="h-px w-12 bg-white/20"></div>
+              <div className="h-px w-12 bg-white/10"></div>
               <div className="flex items-center">
-                <div className="w-6 h-6 bg-zinc-800 text-gray-500 rounded-full flex items-center justify-center font-bold text-xs">3</div>
-                <span className="ml-2 font-medium text-gray-600">Booking</span>
+                <div className="w-6 h-6 bg-zinc-900 text-zinc-600 rounded-full flex items-center justify-center font-black text-[10px] border border-white/5">3</div>
+                <span className="ml-2 text-[10px] font-bold uppercase tracking-widest text-zinc-600 font-inter">Booking</span>
               </div>
             </div>
           </div>
@@ -147,26 +147,26 @@ function ResultsContent() {
       {loading ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white mb-8"></div>
-          <h2 className="text-2xl font-bold mb-2">Analyzing Global Sovereign Routes...</h2>
-          <p className="text-gray-400">Connecting with Sovereign Carrier Matrix Real-time Nodes.</p>
+          <h2 className="text-2xl font-bold mb-2 font-outfit uppercase tracking-tight">Analyzing Global Sovereign Routes...</h2>
+          <p className="text-zinc-400 font-inter text-sm">Connecting with Sovereign Carrier Matrix Real-time Nodes.</p>
         </div>
       ) : error ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold">System Alert</h3>
-          <p className="text-gray-400">{error}</p>
-          <button onClick={() => window.location.reload()} className="mt-4 text-white underline">Retry</button>
+          <h3 className="text-xl font-bold font-outfit uppercase tracking-tight">System Alert</h3>
+          <p className="text-zinc-400 font-inter text-sm mt-2">{error}</p>
+          <button onClick={() => window.location.reload()} className="mt-4 text-[10px] font-bold uppercase tracking-widest text-white underline font-inter">Retry</button>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sidebar Filters */}
             <div className="w-full lg:w-80 flex-shrink-0 hidden lg:block">
-              <div className="bg-black rounded-xl p-6 border border-white/10 sticky top-24 shadow-2xl">
-                <h3 className="text-lg font-bold mb-6">Live Filters</h3>
+              <div className="bg-zinc-950 rounded-2xl p-6 border border-white/5 sticky top-24 shadow-2xl">
+                <h3 className="text-[10px] font-bold uppercase tracking-widest font-inter text-zinc-400 mb-6">Live Filters</h3>
                 <div className="space-y-6">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-4 block">Carrier Priority</label>
+                    <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4 block">Carrier Priority</label>
                     <div className="space-y-2">
                       {['Sovereign Prime', 'Direct Network', 'Global Alliance', 'Executive Tier', 'Priority Node'].map(c => (
                         <label key={c} className="flex items-center gap-3 cursor-pointer group">
@@ -182,14 +182,14 @@ function ResultsContent() {
                             }}
                             className="w-4 h-4 rounded border-white/10 bg-black checked:bg-white focus:ring-0 cursor-pointer"
                           />
-                          <span className={`text-sm transition-colors ${selectedCarriers.includes(c) ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>{c}</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wide font-inter transition-colors ${selectedCarriers.includes(c) ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`}>{c}</span>
                         </label>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase mb-4 block">Transit Speed (Max {maxTransitTime} Days)</label>
+                    <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4 block">Transit Speed (Max {maxTransitTime} Days)</label>
                     <input
                       type="range"
                       min="15"
@@ -198,15 +198,15 @@ function ResultsContent() {
                       onChange={(e) => setMaxTransitTime(parseInt(e.target.value))}
                       className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
                     />
-                    <div className="flex justify-between text-[10px] text-gray-500 mt-2">
+                    <div className="flex justify-between text-[10px] font-bold text-zinc-600 mt-2 font-inter">
                       <span>15 Days</span>
                       <span>45 Days</span>
                     </div>
                   </div>
 
                   <div className="pt-6 border-t border-white/5">
-                    <p className="text-[10px] text-gray-500 leading-relaxed italic">
-                      The Sovereign Engine has pre-filtered these results based on {origin} port congestion and current vessel drafting.
+                    <p className="text-[10px] font-bold text-zinc-600 leading-relaxed font-inter uppercase tracking-widest">
+                      Pre-filtered by {origin} port congestion and vessel drafting.
                     </p>
                   </div>
                 </div>
@@ -294,15 +294,15 @@ function ResultsContent() {
                   <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.05)_50%),linear-gradient(90deg,rgba(255,0,0,0.005),rgba(0,255,0,0.003),rgba(0,0,255,0.005))] bg-[length:100%_2px,3px_100%] opacity-20" />
                 </div>
               )) : (
-                <div className="py-20 text-center bg-black rounded-3xl border border-dashed border-white/10">
-                  <AlertCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400 mb-4">No matching sovereign routes found for current filters.</p>
+                <div className="py-20 text-center bg-zinc-950 rounded-3xl border border-dashed border-white/5">
+                  <AlertCircle className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
+                  <p className="text-zinc-400 font-inter text-sm mb-4">No matching sovereign routes found for current filters.</p>
                   <button
                     onClick={() => {
                       setSelectedCarriers([])
                       setMaxTransitTime(45)
                     }}
-                    className="text-white font-bold underline"
+                    className="text-[10px] font-bold uppercase tracking-widest text-white underline font-inter"
                   >
                     Clear all filters
                   </button>
@@ -318,7 +318,7 @@ function ResultsContent() {
 
 export default function ResultsPage() {
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
       <Navbar />
 
       <Suspense fallback={<div className="text-center py-20 pt-40">Loading Interface...</div>}>

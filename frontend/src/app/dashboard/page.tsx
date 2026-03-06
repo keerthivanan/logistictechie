@@ -6,7 +6,6 @@ import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { API_URL } from '@/lib/config'
 
-// Professional Command Center Components
 import DashboardHeader from './_components/DashboardHeader'
 import MetricCards from './_components/MetricCards'
 import CommandFeed from './_components/CommandFeed'
@@ -54,14 +53,12 @@ export default function DashboardPage() {
             }
         }
 
-        if (user) {
-            fetchDashboardData()
-        }
+        if (user) fetchDashboardData()
     }, [user, authLoading, router, logout])
 
     if (loading || authLoading) {
         return (
-            <div className="h-[40vh] flex flex-col items-center justify-center space-y-4">
+            <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
                 <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Node Link</p>
             </div>
@@ -70,7 +67,7 @@ export default function DashboardPage() {
 
     if (error) {
         return (
-            <div className="h-[40vh] flex flex-col items-center justify-center space-y-4 max-w-xs mx-auto text-center">
+            <div className="h-full flex flex-col items-center justify-center space-y-4 max-w-xs mx-auto text-center">
                 <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
@@ -85,9 +82,9 @@ export default function DashboardPage() {
     const isForwarder = user?.role === 'forwarder'
 
     return (
-        <div className="space-y-12 max-w-7xl mx-auto py-6">
-            {/* Minimalist Identity & Performance Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pt-4">
+        <div className="h-full flex flex-col gap-6 overflow-hidden">
+            {/* Identity & Metrics Row */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 flex-shrink-0">
                 <DashboardHeader
                     userName={isForwarder ? `Partner: ${user?.name}` : user?.name}
                 />
@@ -95,21 +92,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Strategic Layout: Activity & Flow */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-12">
-                {/* Unified Activity Core */}
-                <div className="xl:col-span-1">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1 min-h-0">
+                <div className="xl:col-span-1 min-h-0 overflow-hidden">
                     <CommandFeed
                         activities={stats?.recent_activity || []}
-                        title={isForwarder ? "Partner Log" : "Command Feed"}
+                        title={isForwarder ? 'Partner Log' : 'Command Feed'}
                     />
                 </div>
-
-                {/* Tactical Execution Core */}
-                <div className="xl:col-span-3">
+                <div className="xl:col-span-3 min-h-0 overflow-hidden">
                     <SovereignFlow
                         shipments={stats?.kanban_shipments || []}
                         activeCount={stats?.active_shipments || 0}
-                        title={isForwarder ? "Live Market Bids" : "Operational Flow"}
+                        title={isForwarder ? 'Live Market Bids' : 'Operational Flow'}
                     />
                 </div>
             </div>
