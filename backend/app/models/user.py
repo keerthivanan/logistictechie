@@ -24,7 +24,7 @@ class User(Base):
     role = Column(String, default="user") 
     
     # Onboarding Logic
-    onboarding_completed = Column(Boolean, default=True)
+    onboarding_completed = Column(Boolean, default=False)
     survey_responses = Column(String) # JSON of quiz/onboarding data
     
     is_active = Column(Boolean, default=True)

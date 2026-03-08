@@ -1,3 +1,14 @@
+import asyncio
+import sys
+
+# Critical fix for Windows: asyncpg + Neon SSL handshake
+if sys.platform == "win32":
+    try:
+        from asyncio import WindowsSelectorEventLoopPolicy
+        asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+    except ImportError:
+        pass
+
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,23 +22,20 @@ from contextlib import asynccontextmanager
 from app.models.user import User
 from app.api.deps import get_current_user
 import redis.asyncio as aioredis
-import asyncio
-
-redis_client: aioredis.Redis = None
+from app.core import redis as redis_mod
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global redis_client
     try:
-        redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+        redis_mod.redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
         print(f"[SYSTEM] OMEGO LOGISTICS OS Backend Initialized.")
         print(f"[SYSTEM] CORS WHITELIST: {settings.ALLOWED_ORIGINS}")
         yield
     except asyncio.CancelledError:
         print(f"[SYSTEM] OMEGO LOGISTICS OS: Shutdown Signal Received.")
     finally:
-        if redis_client:
-            await redis_client.aclose()
+        if redis_mod.redis_client:
+            await redis_mod.redis_client.aclose()
         print(f"[SYSTEM] OMEGO LOGISTICS OS: Securely Offline.")
 
 app = FastAPI(
@@ -43,10 +51,10 @@ async def security_and_rate_limit(request: Request, call_next):
     client_ip = request.client.host if request.client else "127.0.0.1"
 
     # 1. Rate Limit Check via Redis ZSET (Bypass for Localhost)
-    if client_ip not in ["127.0.0.1", "::1"] and redis_client is not None:
+    if client_ip not in ["127.0.0.1", "::1"] and redis_mod.redis_client is not None:
         now = time.time()
         key = f"rate:{client_ip}"
-        pipe = redis_client.pipeline()
+        pipe = redis_mod.redis_client.pipeline()
         pipe.zremrangebyscore(key, 0, now - 60)
         pipe.zadd(key, {str(now): now})
         pipe.zcard(key)

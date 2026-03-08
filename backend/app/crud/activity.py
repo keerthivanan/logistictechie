@@ -3,6 +3,7 @@ from sqlalchemy.future import select
 from app.models.activity import UserActivity
 from typing import List, Optional
 from sqlalchemy import desc
+import json
 
 class CRUDActivity:
     async def get_multi_by_user(
@@ -28,7 +29,6 @@ class CRUDActivity:
         entity_id: Optional[str] = None, 
         extra_data: Optional[dict] = None
     ) -> UserActivity:
-        import json
         db_obj = UserActivity(
             user_id=user_id,
             action=action,

@@ -79,17 +79,18 @@ async def get_dashboard_stats(
             if r["status"] == "OPEN": kanban_status = "processing"
             elif r["status"] == "CLOSED": kanban_status = "delivered"
             
+            q_count = r.get("quotation_count") or 0
+            sub_at = r.get("submitted_at")
             formatted_shipments.append({
                 "id": r["request_id"],
                 "company": current_user.full_name or "Client",
                 "desc": f"{r['cargo_type']} ({r['origin']} ➔ {r['destination']})",
-                "date": (r["target_date"].strftime("%d %b") if r["target_date"] else 
-                         r["submitted_at"].strftime("%d %b") if r["submitted_at"] else "Now"),
-                "comments": r["quotation_count"],
+                "date": sub_at.strftime("%d %b") if sub_at else "Now",
+                "comments": q_count,
                 "views": 1,
                 "status": kanban_status,
                 "mode": r["cargo_type"],
-                "highlight": r["quotation_count"] > 0
+                "highlight": q_count > 0
             })
         
         stats = {
@@ -151,7 +152,8 @@ async def get_dashboard_stats(
         
         return stats
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
+        logger.error(f"[DASHBOARD] stats/me error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to load dashboard. Please try again.")
 
 @router.get("/activity/full", response_model=Dict)
 async def get_full_activity_history(
@@ -197,7 +199,8 @@ async def get_full_activity_history(
             
         return {"activities": activity_list, "total": len(activity_list)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch activity history: {str(e)}")
+        logger.error(f"[DASHBOARD] activity/full error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to load activity history. Please try again.")
 
 
 class LeadCreate(BaseModel):

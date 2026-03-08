@@ -1,10 +1,10 @@
-from sqlalchemy import Column, String, JSON, Boolean, DateTime, Float
+from sqlalchemy import Column, String, JSON, Boolean, DateTime, Float, Integer
 from app.db.session import Base
 from datetime import datetime, timezone
 import uuid
 
 def _utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class Forwarder(Base):
     """
@@ -43,3 +43,7 @@ class Forwarder(Base):
     
     created_at = Column(DateTime, default=_utcnow)
     expires_at = Column(DateTime, nullable=True) # 30-day active window
+
+    # Brute-force protection for /auth endpoint
+    failed_auth_attempts = Column(Integer, default=0, nullable=False)
+    auth_locked_until = Column(DateTime, nullable=True)

@@ -16,6 +16,8 @@ class WebhookService:
     def __init__(self):
         self.forwarder_webhook = os.getenv("N8N_FORWARDER_REGISTER_WEBHOOK")
         self.marketplace_webhook = os.getenv("N8N_MARKETPLACE_SUBMIT_WEBHOOK")
+        if not os.getenv("OMEGO_API_SECRET", ""):
+            logger.warning("[CRITICAL] OMEGO_API_SECRET is empty. Webhook authentication is bypassed!")
 
     async def _trigger(self, url: str, payload: Dict[str, Any], event_name: str):
         if not url:

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     MAERSK_INTEGRATION_ID: str = ""
     
     # DATABASE CONFIG
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:2003@localhost:5432/logistics_db"
+    DATABASE_URL: str = "postgresql+psycopg://postgres:2003@localhost:5432/logistics_db"
     
     # AI & KNOWLEDGE
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     
     # GOOGLE ENTERPRISE
     GOOGLE_CLOUD_PROJECT: str = "OMEGO-logistics-2026"
-    GOOGLE_CLIENT_ID: str = "852578606600-um6nsb17r0qm2hs5m7jmfhohtdcb9o27.apps.googleusercontent.com" # OMEGO Production Client
+    GOOGLE_CLIENT_ID: str = ""  # Must be set in .env — never hardcode credentials
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_API_KEY: str = ""
 

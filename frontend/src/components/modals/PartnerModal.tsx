@@ -1,7 +1,27 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, Globe, ShieldCheck, ExternalLink, Ship, Package, Calendar } from 'lucide-react';
+import {
+    motion,
+    AnimatePresence
+} from 'framer-motion';
+import {
+    X,
+    MapPin,
+    Globe,
+    ExternalLink,
+    Ship,
+    Package,
+    Calendar,
+    Zap,
+    TrendingUp,
+    Box,
+    MessageSquare,
+    Clock,
+    CheckCircle2,
+    AlertCircle,
+    ArrowUpRight,
+    Terminal
+} from 'lucide-react';
 import Avatar from '@/components/visuals/Avatar';
 
 interface PartnerModalProps {
@@ -18,7 +38,11 @@ interface PartnerModalProps {
     } | null;
 }
 
-export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalProps) {
+export default function PartnerModal({
+    isOpen,
+    onClose,
+    partner
+}: PartnerModalProps) {
     if (!partner) return null;
 
     return (
@@ -63,8 +87,8 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
                                     size="2xl"
                                     className="border-white/10 shadow-2xl relative z-10"
                                 />
-                                <div className="absolute -bottom-2 -right-2 bg-black border border-white/20 p-2 rounded-full shadow-xl">
-                                    <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                                <div className="absolute -bottom-2 -right-2 bg-emerald-500 border border-emerald-400 p-1.5 rounded-lg shadow-xl">
+                                    <span className="text-[7px] font-black text-black uppercase tracking-widest">PORTAL</span>
                                 </div>
                             </div>
 

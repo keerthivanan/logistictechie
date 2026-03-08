@@ -201,7 +201,7 @@ async def submit_request(
         "success": True, 
         "uniqueId": request_id, 
         "request_id": request_id,
-        "sovereign_id": request_in.sovereign_id, # Echo back for safety
+        "sovereign_id": current_user.sovereign_id,
         "status": "SENT_TO_COMMAND_CENTER",
         "normalized_weight_kg": round(weight_kg, 2)
     }
@@ -247,10 +247,12 @@ async def get_my_requests(
             "commodity": r.commodity,
             "cargo_specification": r.cargo_specification,
             "quantity": r.quantity,
+            "weight_kg": float(r.weight_kg) if r.weight_kg else None,
             "is_hazardous": r.is_hazardous,
             "needs_insurance": r.needs_insurance,
+            "target_date": r.target_date,
             "status": r.status,
-            "quotation_count": r.quotation_count,
+            "quotation_count": r.quotation_count or 0,
             "submitted_at": r.submitted_at,
             "quotations": [{
                 "quotation_id": q.quotation_id,
@@ -299,6 +301,9 @@ async def get_request_details(
     
     if not req:
         raise HTTPException(status_code=404, detail="Request not found in Mirror.")
+        
+    if req.user_sovereign_id != current_user.sovereign_id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not authorized to view this request.")
     
     # 2. Get Quotations
     bid_stmt = select(MarketplaceBid).where(

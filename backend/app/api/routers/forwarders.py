@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.forwarder import Forwarder
@@ -60,11 +60,17 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
     if not fwd_id:
         count_result = await db.execute(select(func.count()).select_from(Forwarder))
         count = count_result.scalar() or 0
-        fwd_id = f"F{str(count + 1).zfill(3)}"
-        # Collision guard — if ID exists, offset by 1
-        existing_check = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == fwd_id))
-        if existing_check.scalars().first():
-            fwd_id = f"F{str(count + 2).zfill(3)}"
+        # Loop until a unique ID is found (handles gaps/deletions)
+        offset = 0
+        while True:
+            candidate = f"F{str(count + 1 + offset).zfill(3)}"
+            existing_check = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == candidate))
+            if not existing_check.scalars().first():
+                fwd_id = candidate
+                break
+            offset += 1
+            if offset > 100:
+                raise HTTPException(status_code=500, detail="Unable to generate unique forwarder ID.")
         
     new_f = Forwarder(
         forwarder_id=fwd_id,
@@ -83,12 +89,12 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
         status=f_in.status,
         is_verified=f_in.is_verified,
         is_paid=f_in.is_paid,
-        registered_at=datetime.now(timezone.utc),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=30)
+        registered_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        expires_at=(datetime.now(timezone.utc) + timedelta(days=30)).replace(tzinfo=None)
     )
 
     db.add(new_f)
-    
+
     # ROLE SYNC PROTOCOL: Update User role to forwarder
     user_stmt = select(User).where(User.email == f_in.email)
     user_res = await db.execute(user_stmt)
@@ -121,7 +127,7 @@ async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db), _: N
     f.status = "ACTIVE"
     f.is_verified = True
     f.is_paid = True
-    f.expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+    f.expires_at = (datetime.now(timezone.utc) + timedelta(days=30)).replace(tzinfo=None)
     
     await db.commit()
     return {"success": True, "message": "Partner Activated."}
@@ -194,8 +200,9 @@ async def promote_to_forwarder(
         return {"success": True, "message": "Forwarder profile already exists. Role synchronized."}
 
     # forwarder_id must match the new sovereign_id so bid queries align
+    # Guard: never double-prefix if sovereign_id already has REG- (e.g. retry after partial failure)
     old_sovereign_id = current_user.sovereign_id
-    fwd_id = f"REG-{old_sovereign_id}"
+    fwd_id = old_sovereign_id if old_sovereign_id.startswith("REG-") else f"REG-{old_sovereign_id}"
 
     new_f = Forwarder(
         forwarder_id=fwd_id,
@@ -215,8 +222,8 @@ async def promote_to_forwarder(
         status="ACTIVE",
         is_verified=False,
         is_paid=False,
-        registered_at=datetime.now(timezone.utc),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=30),
+        registered_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        expires_at=(datetime.now(timezone.utc) + timedelta(days=30)).replace(tzinfo=None),
     )
     db.add(new_f)
 
@@ -251,21 +258,47 @@ class LoginRequest(BaseModel):
     email: str
 
 @router.post("/auth")
-async def forwarder_auth(req: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def forwarder_auth(req: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """
     Secure passwordless login for forwarders using their assigned ID + Email combo.
+    Rate-limited: 5 failed attempts locks the forwarder account for 15 minutes.
     """
-    stmt = select(Forwarder).where(
-        Forwarder.forwarder_id == req.forwarder_id,
-        Forwarder.email == req.email,
-        Forwarder.status == "ACTIVE"
-    )
+    import time
+    from fastapi import Request as FastAPIRequest
+
+    # Brute-force guard: check failed attempt count on forwarder record
+    stmt = select(Forwarder).where(Forwarder.forwarder_id == req.forwarder_id)
     result = await db.execute(stmt)
     f = result.scalars().first()
-    
+
+    # Always return the same error whether ID exists or not (no enumeration)
+    AUTH_FAIL = HTTPException(status_code=401, detail="Invalid Forwarder ID or Email.")
+
     if not f:
-        raise HTTPException(status_code=401, detail="Invalid Forwarder ID or Email")
-        
+        raise AUTH_FAIL
+
+    # Lockout check
+    failed = int(f.failed_auth_attempts or 0) if hasattr(f, 'failed_auth_attempts') else 0
+    locked_until = getattr(f, 'auth_locked_until', None)
+    if locked_until and locked_until > datetime.now(timezone.utc).replace(tzinfo=None):
+        raise AUTH_FAIL
+
+    if f.email != req.email or f.status != "ACTIVE":
+        # Increment fail counter
+        if hasattr(f, 'failed_auth_attempts'):
+            f.failed_auth_attempts = failed + 1
+            if f.failed_auth_attempts >= 5 and hasattr(f, 'auth_locked_until'):
+                f.auth_locked_until = (datetime.now(timezone.utc) + timedelta(minutes=15)).replace(tzinfo=None)
+            await db.commit()
+        raise AUTH_FAIL
+
+    # Success — reset counter
+    if hasattr(f, 'failed_auth_attempts') and failed > 0:
+        f.failed_auth_attempts = 0
+        if hasattr(f, 'auth_locked_until'):
+            f.auth_locked_until = None
+        await db.commit()
+
     return {
         "success": True,
         "forwarder": {
