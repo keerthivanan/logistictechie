@@ -87,8 +87,8 @@ export default function PartnerModal({
                                     size="2xl"
                                     className="border-white/10 shadow-2xl relative z-10"
                                 />
-                                <div className="absolute -bottom-2 -right-2 bg-emerald-500 border border-emerald-400 p-1.5 rounded-lg shadow-xl">
-                                    <span className="text-[7px] font-black text-black uppercase tracking-widest">PORTAL</span>
+                                <div className="absolute -bottom-2 -right-2 bg-emerald-500 border border-emerald-400 p-1.5 rounded-lg shadow-xl flex items-center justify-center">
+                                    <span className="text-[10px] font-black text-black uppercase tracking-[0.2em]">PORTAL</span>
                                 </div>
                             </div>
 

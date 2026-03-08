@@ -126,7 +126,7 @@ export default function Navbar() {
                     )}
 
                     {user?.role === 'forwarder' && (
-                        <Link href="/forwarders/portal" className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[7px] font-black text-emerald-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all">
+                        <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
                             PORTAL
                         </Link>
                     )}
@@ -236,15 +236,15 @@ export default function Navbar() {
                                         >
                                             <div className="p-4 border-b border-white/5 mb-1">
                                                 {user?.sovereign_id?.startsWith('REG-') ? (
-                                                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1">PORTAL: Sovereign Partner</p>
+                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-1">PORTAL: Sovereign Partner</p>
                                                 ) : (
-                                                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">Authenticated Citizen</p>
+                                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">Authenticated Citizen</p>
                                                 )}
                                                 <p className="text-xs font-bold text-white truncate">{user.name}</p>
                                             </div>
                                             {user?.sovereign_id?.startsWith('REG-') && (
                                                 <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all group/item">
-                                                    <span className="text-[8px] font-black opacity-70 group-hover/item:opacity-100">PORTAL</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 group-hover/item:opacity-100">PORTAL</span>
                                                     <span className="text-[10px] font-black uppercase tracking-widest">Partner Terminal</span>
                                                 </Link>
                                             )}

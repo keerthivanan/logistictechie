@@ -14,12 +14,12 @@ import { API_URL } from '@/lib/config';
 const PortalNavbar = () => (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-xl border-b border-white/5 z-[100] px-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-            <div className="px-2 py-1 rounded-md bg-emerald-500 flex items-center justify-center text-black">
-                <span className="text-[7px] font-black tracking-widest uppercase">PORTAL</span>
+            <div className="flex items-center justify-center text-emerald-500">
+                <span className="text-[10px] font-black tracking-[0.2em] uppercase">PORTAL</span>
             </div>
             <div className="flex flex-col">
                 <span className="text-[10px] font-black font-outfit uppercase tracking-[0.3em] leading-none text-white">OMEGO</span>
-                <span className="text-[7px] font-black text-emerald-500 uppercase tracking-[0.5em] mt-1">PARTNER PORTAL</span>
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">PARTNER PORTAL</span>
             </div>
         </div>
         <div className="flex items-center gap-6">
@@ -144,8 +144,8 @@ export default function ForwarderPortal() {
                 <PortalNavbar />
                 <div className="max-w-xs mx-auto px-4 pt-48">
                     <div className="text-center mb-6">
-                        <div className="px-3 py-1.5 rounded-lg bg-emerald-500 text-black flex items-center justify-center mx-auto mb-4 border border-emerald-400/50 shadow-[0_0_20px_rgba(16,185,129,0.2)] w-fit">
-                            <span className="text-[8px] font-black tracking-[0.3em] uppercase">PORTAL</span>
+                        <div className="mb-4">
+                            <span className="text-[10px] font-black tracking-[0.2em] uppercase text-emerald-500">PORTAL</span>
                         </div>
                         <h1 className="text-lg font-black font-outfit uppercase tracking-tighter mb-1">Partner Portal Access</h1>
                         <p className="text-zinc-600 font-medium text-[6px] uppercase tracking-[0.4em]">Secure Access Required</p>
