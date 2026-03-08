@@ -120,8 +120,7 @@ export default function ForwarderDirectoryPage() {
 
                                             <div className="flex flex-col items-end gap-2">
                                                 <div className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                                                    <ShieldCheck className="w-3.5 h-3.5" />
-                                                    <span className="text-[9px] font-black uppercase tracking-widest font-outfit">Verified</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest font-outfit">VERIFIED PORTAL</span>
                                                 </div>
                                                 <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Node ID: {forwarder.forwarder_id || 'TBD'}</span>
                                             </div>

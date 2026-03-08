@@ -71,11 +71,13 @@ class Token(BaseModel):
     token_type: str
     user_id: str
     user_name: str
+    user_email: Optional[str] = None
     onboarding_completed: bool = False
     sovereign_id: str
     avatar_url: Optional[str] = None
     website: Optional[str] = None
     role: Optional[str] = None
+    forwarder_id: Optional[str] = None  # Set when role == "forwarder", equals sovereign_id
 
 class UserResponse(BaseModel):
     id: str

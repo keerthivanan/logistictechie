@@ -33,7 +33,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com",
-              "connect-src 'self' https://api.omegoonline.com https://*.neon.tech https://accounts.google.com",
+              "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 ws://127.0.0.1:8000 ws://localhost:8000 https://api.omegoonline.com https://*.neon.tech https://accounts.google.com",
               "frame-src https://accounts.google.com",
               "frame-ancestors 'none'",
             ].join('; '),

@@ -150,17 +150,20 @@ export default function RequestQuoteForm() {
             };
 
             const selectedOriginCountry = countries.find((c: Country) => c.code === formData.origin_country);
+            const selectedDestCountry = countries.find((c: Country) => c.code === formData.dest_country);
             const dialCode = selectedOriginCountry ? selectedOriginCountry.dial_code : '';
+            const originCountryName = selectedOriginCountry ? selectedOriginCountry.name : formData.origin_country;
+            const destCountryName = selectedDestCountry ? selectedDestCountry.name : formData.dest_country;
 
             const payload = {
                 user_id: user.id,
                 sovereign_id: user.sovereign_id || '',
                 name: user.name || user.email || 'Client',
                 email: user.email,
-                phone: `${dialCode} ${formData.phone}`.trim(), // Critical Identity Sync
-                origin: `${formData.origin_district || ''} ${formData.origin_country}`.trim(),
+                phone: `${dialCode} ${formData.phone}`.trim(),
+                origin: formData.origin_district ? `${formData.origin_district}, ${originCountryName}` : originCountryName,
                 origin_type: formData.origin_type.toUpperCase(),
-                destination: `${formData.dest_district || ''} ${formData.dest_country}`.trim(),
+                destination: formData.dest_district ? `${formData.dest_district}, ${destCountryName}` : destCountryName,
                 destination_type: formData.dest_type.toUpperCase(),
                 cargo_type: formData.mode,
                 commodity: formData.commodity,

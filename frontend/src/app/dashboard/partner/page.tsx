@@ -5,7 +5,10 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { API_URL } from '@/lib/config'
 import {
-    ShieldCheck,
+    X,
+    MapPin,
+    Globe,
+    ExternalLink,
     Zap,
     TrendingUp,
     Box,
@@ -13,7 +16,11 @@ import {
     Clock,
     CheckCircle2,
     AlertCircle,
-    ArrowUpRight
+    ArrowUpRight,
+    Terminal,
+    Ship,
+    Package,
+    Calendar
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -75,7 +82,7 @@ export default function PartnerDashboard() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold tracking-widest uppercase">
-                        <ShieldCheck className="w-3.5 h-3.5" /> Verified Partner Mode
+                        PORTAL: Verified Partner Mode
                     </div>
                     <h1 className="text-4xl font-bold tracking-tight uppercase font-outfit">Partner Center</h1>
                     <p className="text-zinc-500 text-sm font-medium tracking-tight">
@@ -95,7 +102,7 @@ export default function PartnerDashboard() {
                     { label: 'Total Bids', value: bids.length, icon: Box, color: 'text-blue-400' },
                     { label: 'Active Quotes', value: pendingBids, icon: Zap, color: 'text-yellow-400' },
                     { label: 'Contracts Won', value: wonBids, icon: TrendingUp, color: 'text-emerald-400' },
-                    { label: 'Network Rank', value: '#12', icon: ShieldCheck, color: 'text-purple-400' },
+                    { label: 'Security Grade', value: 'A+', icon: Terminal, color: 'text-purple-400' },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -125,9 +132,9 @@ export default function PartnerDashboard() {
                             <p className="text-zinc-500 text-sm font-medium">No active bids detected in your node.</p>
                         </div>
                     ) : (
-                        bids.map((bid, i) => (
+                        bids.map((bid) => (
                             <motion.div
-                                key={i}
+                                key={bid.request_id}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 className="bg-zinc-950 border border-white/5 p-6 rounded-[24px] hover:bg-white/[0.02] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
@@ -136,9 +143,9 @@ export default function PartnerDashboard() {
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] font-mono text-zinc-600 uppercase font-bold tracking-tighter">REQ-{bid.request_id}</span>
                                         <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${['ACCEPTED', 'COMPLETED'].includes(bid.bid_status) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                    bid.bid_status === 'EXPIRED' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' :
-                                                        'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
+                                            bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                                bid.bid_status === 'EXPIRED' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' :
+                                                    'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
                                             }`}>
                                             {bid.bid_status}
                                         </div>

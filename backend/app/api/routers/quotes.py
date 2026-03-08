@@ -109,14 +109,21 @@ async def _ai_quotes(origin: str, destination: str, container: str,
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
         value_str = f"${goods_value:,.0f} USD" if goods_value else "not specified"
+        # Sanitize inputs to prevent simple prompt injection via newlines or quotes
+        s_origin = origin.replace("\n", " ").replace("\"", "'")
+        s_dest = destination.replace("\n", " ").replace("\"", "'")
+        s_container = container.replace("\n", " ").replace("\"", "'")
+        s_commodity = commodity.replace("\n", " ").replace("\"", "'")
+        s_ready_date = ready_date.replace("\n", " ").replace("\"", "'")
+
         prompt = f"""You are a freight rate prediction engine for OMEGO, a global logistics marketplace. Current date: March 2026.
 
 Generate 3 realistic freight rate quotes for:
-- Route: {origin} → {destination}
-- Container: {container} FCL
-- Commodity: {commodity}
+- Route: {s_origin} → {s_dest}
+- Container: {s_container} FCL
+- Commodity: {s_commodity}
 - Cargo value: {value_str}
-- Ready date: {ready_date}
+- Ready date: {s_ready_date}
 
 Current market context (March 2026):
 - Red Sea/Suez Canal: Most carriers still routing via Cape of Good Hope for Asia-Europe/Middle East routes (+$600-900 surcharge, +10-14 days)

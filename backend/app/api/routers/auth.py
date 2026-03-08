@@ -10,7 +10,7 @@ from app import crud
 from datetime import timedelta
 from app.core.config import settings
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from app.services.activity import activity_service
 import logging
 import httpx
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class RegisterRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
     confirm_password: str
     full_name: Optional[str] = None
@@ -165,6 +165,7 @@ async def social_sync(
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
         "role": user.role,
+        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
         "avatar_url": user.avatar_url,
         "website": user.website
     }
@@ -274,6 +275,7 @@ async def login_for_access_token(
         "user_email": user.email,
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
         "role": user.role,
+        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url,
         "website": user.website
@@ -319,6 +321,7 @@ async def refresh_access_token(
             "onboarding_completed": user.onboarding_completed or False,
             "avatar_url": user.avatar_url,
             "role": user.role,
+            "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
             "website": user.website,
         }
     except Exception as e:
@@ -340,7 +343,7 @@ async def register_user(
     if not security.validate_password_strength(form_data.password):
         raise HTTPException(
             status_code=400,
-            detail="Password too weak. Must be 8+ chars and contain uppercase, lowercase, and numbers."
+            detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character."
         )
 
     existing_user = await crud.user.get_by_email(db, email=form_data.email)
@@ -412,10 +415,12 @@ async def read_users_me(
         "company_name": user.company_name,
         "company_email": user.company_email,
         "phone_number": user.phone_number,
+        "website": user.website,
         "sovereign_id": user.sovereign_id,
         "onboarding_completed": user.onboarding_completed,
         "avatar_url": user.avatar_url,
-        "role": user.role
+        "role": user.role,
+        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
     }
 
 class ProfileUpdate(BaseModel):
@@ -451,15 +456,28 @@ async def update_profile(
     
     return updated_user
 
+from app.core.redis import redis_client
+
 @router.post("/logout")
 async def logout(
     token: str = Depends(reusable_oauth2),
     db: AsyncSession = Depends(deps.get_db)
 ):
-    """Logout endpoint (client side handles token removal, this is for audit)."""
+    """Logout endpoint. Adds token to blacklist and logs the event."""
     try:
         payload = security.decode_token(token)
         user_id = payload.get("user_id")
+        
+        # Blacklist the token in Redis
+        if redis_client:
+            # Token expiration time could be extracted from payload ('exp'), else default to ACCESS_TOKEN_EXPIRE_MINUTES
+            exp = payload.get("exp")
+            import time
+            current_time = int(time.time())
+            ttl = exp - current_time if exp else settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            if ttl > 0:
+                await redis_client.setex(f"blacklist:{token}", ttl, "true")
+        
         if user_id:
             await activity_service.log(
                 db,
@@ -468,8 +486,8 @@ async def logout(
                 entity_type="USER",
                 entity_id=str(user_id)
             )
-    except Exception:
-        pass  # Never block logout due to logging failure
+    except Exception as e:
+        logger.warning(f"[LOGOUT] Failed to blacklist token or log event: {e}")
     return {"success": True, "message": "Logged out successfully"}
 
 class PasswordChange(BaseModel):
@@ -490,8 +508,8 @@ async def change_password(
     if not user or not security.verify_password(data.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid current password")
     
-    if len(data.new_password) < 8:
-        raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
+    if not security.validate_password_strength(data.new_password):
+        raise HTTPException(status_code=400, detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character.")
         
     await crud.user.update(db, user_id=user_id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
     

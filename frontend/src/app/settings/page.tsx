@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Avatar from '@/components/visuals/Avatar'
 import { API_URL } from '@/lib/config'
+import Navbar from '@/components/layout/Navbar'
 
 export default function RebuiltSettingsPage() {
     const { user: authUser, loading: authLoading } = useAuth()
@@ -71,8 +72,9 @@ export default function RebuiltSettingsPage() {
     )
 
     return (
-        <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 overflow-hidden">
-            <div className="max-w-4xl w-full">
+        <div className="min-h-screen bg-black text-white p-4 overflow-x-hidden">
+            <Navbar />
+            <div className="max-w-4xl mx-auto pt-32 pb-20">
                 {/* 1. Precise Navigation */}
                 <div className="mb-6">
                     <Link

@@ -67,8 +67,8 @@ export default function SmartDashboardPreview() {
                             { label: 'Active Loads', value: '0' },
                             { label: 'On-Time', value: '100.0%', icon: true },
                             { label: 'Teu Volume', value: '0' }
-                        ].map((metric, i) => (
-                            <div key={i} className="px-6 py-4 bg-zinc-900/40 rounded-2xl border border-white/5 flex flex-col items-center justify-center min-w-[120px]">
+                        ].map((metric) => (
+                            <div key={metric.label} className="px-6 py-4 bg-zinc-900/40 rounded-2xl border border-white/5 flex flex-col items-center justify-center min-w-[120px]">
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-lg font-bold text-white">{metric.value}</span>
                                 </div>
@@ -125,8 +125,8 @@ export default function SmartDashboardPreview() {
                                 { label: 'In Transit', color: 'bg-emerald-500' },
                                 { label: 'Customs', color: 'bg-amber-500' },
                                 { label: 'Delivered', color: 'bg-purple-500' }
-                            ].map((step, i) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-4 relative">
+                            ].map((step) => (
+                                <div key={step.label} className="flex-1 flex flex-col items-center gap-4 relative">
                                     <div className="flex items-center gap-2">
                                         <div className={`w-1.5 h-1.5 rounded-full ${step.color}`}></div>
                                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{step.label}</span>

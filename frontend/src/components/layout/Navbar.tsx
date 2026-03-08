@@ -126,8 +126,8 @@ export default function Navbar() {
                     )}
 
                     {user?.role === 'forwarder' && (
-                        <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 hover:text-white transition-colors flex items-center gap-1.5">
-                            <ShieldCheck className="w-3 h-3" />
+                        <Link href="/forwarders/portal" className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-[7px] font-black text-emerald-400 uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all">
+                            PORTAL
                         </Link>
                     )}
 
@@ -236,7 +236,7 @@ export default function Navbar() {
                                         >
                                             <div className="p-4 border-b border-white/5 mb-1">
                                                 {user?.sovereign_id?.startsWith('REG-') ? (
-                                                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Sovereign Partner</p>
+                                                    <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1 flex items-center gap-1">PORTAL: Sovereign Partner</p>
                                                 ) : (
                                                     <p className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-1">Authenticated Citizen</p>
                                                 )}
@@ -244,8 +244,8 @@ export default function Navbar() {
                                             </div>
                                             {user?.sovereign_id?.startsWith('REG-') && (
                                                 <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all group/item">
-                                                    <ShieldCheck className="w-4 h-4 opacity-70 group-hover/item:opacity-100" />
-                                                    <span className="text-[10px] font-black uppercase tracking-widest">Partner Portal</span>
+                                                    <span className="text-[8px] font-black opacity-70 group-hover/item:opacity-100">PORTAL</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">Partner Terminal</span>
                                                 </Link>
                                             )}
                                             <Link href="/profile" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group/item">

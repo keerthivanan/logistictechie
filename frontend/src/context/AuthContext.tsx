@@ -60,6 +60,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
             if (res.ok) {
                 const data = await res.json();
+                // Always sync localStorage so page-reload reflects latest role/sovereign_id
+                // (critical after forwarder promotion: OMEGO-XXXX → REG-OMEGO-XXXX)
+                localStorage.setItem('sovereign_id', data.sovereign_id);
+                localStorage.setItem('user_role', data.role || 'user');
+                if (data.full_name) localStorage.setItem('user_name', data.full_name);
                 setUser({
                     id: data.id,
                     sovereign_id: data.sovereign_id,
@@ -93,7 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (token && name) {
             // Ensure cookie is in sync with localStorage for Middleware
-            document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax; Secure`;
 
             setUser({
                 id: '', // Will be refreshed by fetchProfile
@@ -127,7 +132,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('onboarding_completed', String(onboarding_completed));
         if (avatar_url) localStorage.setItem('avatar_url', avatar_url);
 
-        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax; Secure`;
 
         setUser({
             id: user_id || '',

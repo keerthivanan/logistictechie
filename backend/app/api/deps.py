@@ -22,10 +22,17 @@ async def get_db() -> Generator:
     finally:
         await db.close()
 
+from app.core.redis import redis_client
+
 async def get_current_user(
     db: AsyncSession = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:
     try:
+        if redis_client:
+            is_blacklisted = await redis_client.get(f"blacklist:{token}")
+            if is_blacklisted:
+                raise HTTPException(status_code=401, detail="Token has been revoked/logged out")
+                
         payload = security.decode_token(token)
         token_data = payload.get("sub")
     except (JWTError, ValidationError):
@@ -84,6 +91,12 @@ def verify_n8n_webhook(
     can push data into the Sovereign Database.
     """
     valid_key = settings.OMEGO_API_SECRET
+    
+    if not valid_key:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: OMEGO_API_SECRET is not set."
+        )
 
     def _match(token: str) -> bool:
         try:

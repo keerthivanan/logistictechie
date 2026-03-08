@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import uuid
 
 def _utcnow():
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 class MarketplaceRequest(Base):
     """
