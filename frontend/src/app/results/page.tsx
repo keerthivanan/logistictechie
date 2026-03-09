@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react'
+import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
@@ -238,7 +238,7 @@ function ResultsContent() {
                             <div className="font-black text-xl font-outfit uppercase tracking-tighter text-white">{quote.carrier_name}</div>
                             <div className="flex items-center gap-3 mt-1">
                               <div className="flex items-center text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                                <ShieldCheck className="w-3 h-3 mr-1" />
+                                <CheckCircle className="w-3 h-3 mr-1" />
                                 Verified Node
                               </div>
                               <div className="flex items-center text-[9px] font-black text-white/40 uppercase tracking-widest">

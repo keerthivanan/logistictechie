@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon, ShieldCheck } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from '@/components/visuals/Avatar';
 

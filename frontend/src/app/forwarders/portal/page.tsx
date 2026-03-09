@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-    ShieldCheck, ArrowRight, Loader2, Anchor, Package,
+    ArrowRight, Loader2, Anchor, Package,
     TrendingUp, LogOut, CheckCircle, Clock, Zap, Target,
     Globe, Radio, Activity, LayoutGrid, Terminal,
     DollarSign, BarChart3, Truck, Ship, Info, AlertCircle,

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import NextImage from 'next/image';
 import {
-    Ship, Plane, Warehouse, Anchor, BarChart, ShieldCheck,
+    Ship, Plane, Warehouse, Anchor, BarChart,
     ArrowRight, CheckCircle, Clock, Zap, Globe, TrendingUp,
     FileCheck, Truck, Package, Activity
 } from 'lucide-react';
@@ -27,7 +27,7 @@ const services: Record<string, any> = {
         ],
         features: [
             { title: 'AIS Satellite Tracking', desc: 'Real-time visibility down to the container level, powered by localized satellite telemetry.', icon: Globe },
-            { title: 'Guaranteed Allocation', desc: 'Secure space during peak season with our locked-in block space agreements.', icon: ShieldCheck },
+            { title: 'Guaranteed Allocation', desc: 'Secure space during peak season with our locked-in block space agreements.', icon: CheckCircle },
             { title: 'Green Channels', desc: 'Carbon-neutral shipping options to meet your ESG sustainability targets.', icon: FileCheck }
         ],
         workflow: ['Quote', 'Book', 'Gate-In', 'Sail', 'Release'],
@@ -57,7 +57,7 @@ const services: Record<string, any> = {
     'customs-compliance': {
         title: 'AI Customs Clearance',
         subtitle: 'Zero-friction border crossings powered by generative AI.',
-        icon: ShieldCheck,
+        icon: CheckCircle,
         image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
         desc: 'Stop letting paperwork delay your supply chain. Our AI engine classifies HS codes with 99.9% accuracy and auto-files entry documents with CBP, FDA, and global customs authorities.',
         stats: [
@@ -68,7 +68,7 @@ const services: Record<string, any> = {
         features: [
             { title: 'Auto-Classification', desc: 'AI automatically detects the correct HS Code for your products.', icon: FileCheck },
             { title: 'Duty Drawback', desc: 'Recover overpaid duties with our automated audit and refund engine.', icon: TrendingUp },
-            { title: 'Risk Shield', desc: 'Proactive alerts for regulatory changes and trade restriction updates.', icon: ShieldCheck }
+            { title: 'Risk Shield', desc: 'Proactive alerts for regulatory changes and trade restriction updates.', icon: CheckCircle }
         ],
         workflow: ['Upload', 'Analyze', 'Classify', 'File', 'Release'],
         cta: 'Find HS Codes',

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, CreditCard, Building2, Globe, Mail, Phone, Upload, Check, Loader2 } from 'lucide-react';
+import { CreditCard, Building2, Globe, Mail, Phone, Upload, Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { countries } from '@/lib/countries';
@@ -146,8 +146,8 @@ export default function ForwarderRegisterPage() {
                 <Navbar />
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                     className="max-w-md w-full bg-[#0a0a0a] border border-white/10 p-12 rounded-3xl text-center">
-                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8">
-                        <ShieldCheck className="w-10 h-10" />
+                    <div className="w-24 h-24 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                        <span className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.2em]">PORTAL</span>
                     </div>
                     <h2 className="text-3xl font-outfit font-bold mb-4">Partner Active</h2>
                     <p className="text-white/60 mb-8">You are already registered. ID: <span className="text-white font-mono">{user?.sovereign_id}</span>.</p>
@@ -188,7 +188,7 @@ export default function ForwarderRegisterPage() {
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="space-y-8 relative z-10">
                     <div>
                         <div className="inline-flex items-center space-x-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] mb-6 border border-emerald-500/20 uppercase font-inter">
-                            <ShieldCheck className="w-3.5 h-3.5" /><span>Verified Forwarders Only</span>
+                            <span className="text-[10px] font-black tracking-[0.2em]">PORTAL</span><span>: Verified Access Only</span>
                         </div>
                         <h1 className="text-4xl lg:text-5xl font-black mb-4 tracking-tighter leading-[1.1] text-white font-outfit uppercase">
                             Access Global <br />
@@ -306,7 +306,7 @@ export default function ForwarderRegisterPage() {
 
                     {/* Verification */}
                     <div className="space-y-4 border-t border-white/10 pt-4">
-                        <h3 className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em] flex items-center font-outfit"><ShieldCheck className="w-4 h-4 mr-2" /> Government Verification</h3>
+                        <h3 className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em] flex items-center font-outfit">PORTAL: Government Verification</h3>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1.5">Tax ID / Business Reg Number</label>
                             <input name="tax_id" className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-[10px] font-bold text-white focus:border-emerald-500/50 outline-none font-inter" placeholder="e.g. VAT-123456" required value={formData.tax_id} onChange={handleChange} />

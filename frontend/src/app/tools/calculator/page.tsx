@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import { API_URL } from '@/lib/config'
 import {
     Calculator, MapPin, ArrowRight, ChevronDown,
-    RefreshCw, TrendingUp, Clock, ShieldCheck,
+    RefreshCw, TrendingUp, Clock,
     AlertTriangle, XCircle, Info, ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'

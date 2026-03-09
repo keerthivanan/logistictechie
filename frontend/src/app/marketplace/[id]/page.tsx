@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, ShieldCheck, Zap } from 'lucide-react';
+import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, Activity, Zap } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import { API_URL } from '@/lib/config';
 
@@ -81,7 +81,7 @@ export default function MarketplaceLiveDashboard() {
                     >
                         {status === 'CLOSED' ? (
                             <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center shadow-lg shadow-emerald-500/5">
-                                <ShieldCheck className="w-4 h-4 mr-3" /> Analysis Protocol Finalized
+                                <Activity className="w-4 h-4 mr-3" /> Analysis Protocol Finalized
                             </div>
                         ) : (
                             <div className="bg-white/5 text-zinc-400 border border-white/10 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center">

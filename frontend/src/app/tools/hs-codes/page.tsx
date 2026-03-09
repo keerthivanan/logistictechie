@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
-import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp, ShieldCheck } from 'lucide-react'
+import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { API_URL } from '@/lib/config'
 
@@ -188,7 +188,7 @@ export default function HSCodesPage() {
                         {[
                             { icon: FileCheck, title: 'Auto-Classification', desc: 'AI keyword scoring across 38 product categories instantly surfaces the most relevant 6-digit HS code with a confidence percentage.' },
                             { icon: TrendingUp, title: 'Duty Drawback', desc: 'Correct classification unlocks duty drawback opportunities — recover overpaid import duties with an automated audit trail.' },
-                            { icon: ShieldCheck, title: 'Risk Shield', desc: 'Misclassification triggers audits, penalties, and shipment holds. Accurate codes protect you from CBP and customs authority action.' },
+                            { icon: FileCheck, title: 'Risk Shield', desc: 'Misclassification triggers audits, penalties, and shipment holds. Accurate codes protect you from CBP and customs authority action.' },
                         ].map((f) => (
                             <div key={f.title} className="group space-y-4">
                                 <h3 className="text-xl font-bold text-white">{f.title}</h3>
