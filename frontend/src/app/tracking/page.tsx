@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Ship, MapPin, Package, Clock, Shield, Search, Globe, ChevronRight, Loader2, Anchor, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { Ship, MapPin, Package, Clock, Shield, Search, Globe, ChevronRight, Loader2, Anchor, CheckCircle, AlertTriangle } from 'lucide-react'
 import { API_URL } from '@/lib/config'
 
 function TrackingContent() {
@@ -160,7 +160,7 @@ function TrackingContent() {
                 <div className="space-y-6">
                     <div className="bg-zinc-900 border border-white/10 rounded-3xl p-6">
                         <h3 className="font-bold flex items-center gap-2 mb-4">
-                            <ShieldCheck className="w-5 h-5 text-green-500" />
+                            <CheckCircle className="w-5 h-5 text-green-500" />
                             Sentinel Health Scan
                         </h3>
                         <div className="space-y-4">

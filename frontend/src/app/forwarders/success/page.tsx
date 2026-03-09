@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
-import { CheckCircle, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import { API_URL } from '@/lib/config';
 
@@ -72,8 +72,8 @@ function SuccessContent() {
                         <CheckCircle className="w-12 h-12 text-emerald-500" />
                     </div>
 
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold font-inter tracking-widest uppercase mb-6">
-                        <ShieldCheck className="w-4 h-4" /> Partner Network Active
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black font-inter tracking-[0.2em] uppercase mb-6">
+                        <span className="opacity-70">PORTAL</span>: Partner Network Active
                     </div>
 
                     <h1 className="text-4xl font-bold font-outfit uppercase tracking-tight mb-4">Welcome to the Network</h1>
@@ -99,7 +99,7 @@ function SuccessContent() {
             {status === 'error' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
                     <div className="w-24 h-24 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8">
-                        <ShieldCheck className="w-12 h-12 text-red-500" />
+                        <span className="text-[12px] font-black text-red-500 uppercase tracking-[0.2em]">ERROR</span>
                     </div>
                     <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Verification Error</h1>
                     <p className="text-zinc-400 font-inter mb-8">We could not verify your session. If you have already paid, please contact support.</p>

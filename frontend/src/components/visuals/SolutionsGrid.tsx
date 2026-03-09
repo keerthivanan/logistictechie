@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import NextImage from 'next/image';
-import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, FileCheck, ArrowRight } from 'lucide-react';
 
 const solutions = [
     {
@@ -20,7 +20,7 @@ const solutions = [
         href: '/services/air-freight'
     },
     {
-        icon: ShieldCheck,
+        icon: FileCheck,
         title: 'Customs Compliance',
         desc: 'AI-powered clearance reduces documentation errors by 99%. Automated HS code classification and duty optimization.',
         image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
