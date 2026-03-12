@@ -62,7 +62,7 @@ function SuccessContent() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
                     <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
                     <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Upgrading Clearance</h1>
-                    <p className="text-zinc-400 font-inter">Securely elevating your Sovereign ID to Partner Status...</p>
+                    <p className="text-zinc-400 font-inter">Securely activating your CargoLink Partner account...</p>
                 </motion.div>
             )}
 
@@ -83,7 +83,7 @@ function SuccessContent() {
                         <p className="text-2xl font-mono text-emerald-400 font-bold">{user?.sovereign_id?.startsWith('REG-') ? user.sovereign_id : `REG-${user?.sovereign_id}`}</p>
                         <div className="h-px bg-white/5 my-4" />
                         <p className="text-zinc-400 font-inter text-sm leading-relaxed">
-                            Your partner verification is complete and your company profile is now being processed by our system. You will receive an email shortly with your private <strong className="text-white">Partner ID (REG-OMEGO-XXXX)</strong> and instructions on how to access the Secure Portal.
+                            Your partner verification is complete and your company profile is now being processed by our system. You will receive an email shortly with your private <strong className="text-white">Partner ID (REG-CL-XXXX)</strong> and instructions on how to access the CargoLink Partner Portal.
                         </p>
                     </div>
 

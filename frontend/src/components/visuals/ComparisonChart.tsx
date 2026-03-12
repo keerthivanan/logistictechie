@@ -33,13 +33,13 @@ export default function ComparisonChart() {
                             transition={{ delay: 0.1 }}
                             className="text-zinc-500 font-medium"
                         >
-                            SOVEREIGN <span className="text-zinc-700 mx-2">vs</span> Legacy Freight
+                            CARGOLINK <span className="text-zinc-700 mx-2">vs</span> Legacy Freight
                         </motion.p>
                     </div>
                     <div className="flex gap-8">
                         <div className="flex items-center gap-3">
                             <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></div>
-                            <span className="text-xs font-black tracking-widest uppercase">SOVEREIGN</span>
+                            <span className="text-xs font-black tracking-widest uppercase">CARGOLINK</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="w-2.5 h-2.5 rounded-full bg-zinc-800"></div>

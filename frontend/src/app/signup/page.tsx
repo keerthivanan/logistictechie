@@ -122,10 +122,10 @@ function SignupContent() {
                             <div className="w-1.5 h-4 bg-white/70 rounded-sm" />
                             <div className="w-1.5 h-4 bg-white/40 rounded-sm" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white font-outfit uppercase">Omego</span>
+                        <span className="text-xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
                     </Link>
                     <h1 className="text-2xl font-bold font-outfit uppercase tracking-tight">Create Account</h1>
-                    <p className="text-zinc-500 text-xs font-inter mt-1.5">Join the sovereign logistics platform.</p>
+                    <p className="text-zinc-500 text-xs font-inter mt-1.5">Join the CargoLink freight network.</p>
                 </div>
 
                 {/* Card */}

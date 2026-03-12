@@ -141,7 +141,7 @@ export default function ForwarderDirectoryPage() {
                                                 <div className="flex items-center justify-between group/info">
                                                     <div className="flex items-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-inter">
                                                         <Globe className="w-4 h-4 mr-3 text-emerald-500" />
-                                                        Sovereign Network
+                                                        CargoLink Network
                                                     </div>
                                                     <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
                                                 </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Github, Twitter, Linkedin, ChevronRight, Mail, Globe } from 'lucide-react'
+import { Mail, Globe } from 'lucide-react'
 
 export default function Footer() {
     return (
@@ -10,23 +10,22 @@ export default function Footer() {
                         <div className="w-3 h-6 bg-white rounded-sm"></div>
                         <div className="w-3 h-6 bg-white/70 rounded-sm"></div>
                         <div className="w-3 h-6 bg-white/40 rounded-sm"></div>
-                        <span className="text-2xl font-bold tracking-tight text-white ml-2">SOVEREIGN</span>
+                        <span className="text-2xl font-bold tracking-tight text-white ml-2">CARGOLINK</span>
                     </div>
                     <p className="text-gray-500 max-w-xl">
-                        The evolved Supply Chain & AI performance tracker for the fastest-growing teams. Scale without limits and dominate global trade.
+                        The intelligent freight marketplace connecting shippers and forwarders globally. Move cargo smarter, faster, and with full transparency.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-20">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-20">
                     <div>
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/shippers" className="hover:text-white transition-colors">Shipper Portal</Link></li>
+                            <li><Link href="/search" className="hover:text-white transition-colors">Shipper Portal</Link></li>
                             <li><Link href="/forwarders" className="hover:text-white transition-colors">AI Quoting</Link></li>
-                            <li><Link href="/carriers" className="hover:text-white transition-colors">Yield Agent</Link></li>
+                            <li><Link href="/carriers" className="hover:text-white transition-colors">Carrier Partners</Link></li>
                             <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Enterprise</Link></li>
-                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Pricing</Link></li>
-                            <li><Link href="/demo" className="hover:text-white transition-colors">Tactical Simulation</Link></li>
+                            <li><Link href="/demo" className="hover:text-white transition-colors">Live Demo</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -36,7 +35,7 @@ export default function Footer() {
                             <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
                             <li><Link href="/tools/calculator" className="hover:text-white transition-colors">Calculator</Link></li>
                             <li><Link href="/tools/hs-codes" className="hover:text-white transition-colors">HS Codes</Link></li>
-                            <li><Link href="/vessels" className="hover:text-white transition-colors">Vessel Tracker</Link></li>
+                            <li><Link href="/tracking" className="hover:text-white transition-colors">Shipment Tracking</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -44,6 +43,7 @@ export default function Footer() {
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
                             <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                            <li><Link href="/carriers" className="hover:text-white transition-colors">Carriers</Link></li>
                         </ul>
                     </div>
                     <div>
@@ -51,30 +51,24 @@ export default function Footer() {
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
                             <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">API Docs</Link></li>
+                            <li><Link href="/forwarders/register" className="hover:text-white transition-colors">Become a Partner</Link></li>
                         </ul>
                     </div>
-
                     <div>
                         <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Legal</h3>
                         <ul className="space-y-4 text-sm text-gray-500">
                             <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
                             <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms</Link></li>
-                            <li><Link href="/legal/security" className="hover:text-white transition-colors">Security</Link></li>
+                            <li><Link href="/legal/cookies" className="hover:text-white transition-colors">Cookies</Link></li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10">
-                    <p className="text-gray-600 text-sm">© 2011-2026 Sovereign Intelligence. All rights reserved.</p>
+                    <p className="text-gray-600 text-sm">© 2024-2026 CargoLink. All rights reserved.</p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
-                        {/* Social Signals Node */}
-                        <div className="flex space-x-6">
-                            <a href="#" className="text-gray-400 hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
-                            <a href="#" className="text-gray-400 hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
-                        </div>
-                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
-                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
-                        <div className="w-5 h-5 bg-white/10 rounded-full hover:bg-white/20 transition-colors"></div>
+                        <a href="#" className="text-gray-400 hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
+                        <a href="mailto:support@cargolink.io" className="text-gray-400 hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
                     </div>
                 </div>
             </div>

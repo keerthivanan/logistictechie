@@ -18,7 +18,7 @@ const PortalNavbar = () => (
                 <span className="text-[10px] font-black tracking-[0.2em] uppercase">PORTAL</span>
             </div>
             <div className="flex flex-col">
-                <span className="text-[10px] font-black font-outfit uppercase tracking-[0.3em] leading-none text-white">OMEGO</span>
+                <span className="text-[10px] font-black font-outfit uppercase tracking-[0.3em] leading-none text-white">CARGOLINK</span>
                 <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">PARTNER PORTAL</span>
             </div>
         </div>
@@ -50,9 +50,19 @@ export default function ForwarderPortal() {
         if (!id) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/forwarders/dashboard/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            let url: string;
+            let headers: Record<string, string> = {};
+
+            if (token && token !== 'null') {
+                url = `${API_URL}/api/forwarders/dashboard/${id}`;
+                headers = { 'Authorization': `Bearer ${token}` };
+            } else {
+                const storedEmail = localStorage.getItem('cl_fwd_email');
+                if (!storedEmail) return;
+                url = `${API_URL}/api/forwarders/portal-dashboard/${id}?email=${encodeURIComponent(storedEmail)}`;
+            }
+
+            const res = await fetch(url, { headers });
             if (res.ok) {
                 const data = await res.json();
                 setDashboardData(data);
@@ -74,14 +84,14 @@ export default function ForwarderPortal() {
             const data = await res.json();
 
             if (res.ok && data.success) {
-                localStorage.setItem('omego_fwd_id', id);
-                localStorage.setItem('omego_fwd_email', mail);
+                localStorage.setItem('cl_fwd_id', id);
+                localStorage.setItem('cl_fwd_email', mail);
                 setIsAuthenticated(true);
                 fetchDashboardData(id);
             } else {
                 setError(data.detail || 'Invalid credentials.');
-                localStorage.removeItem('omego_fwd_id');
-                localStorage.removeItem('omego_fwd_email');
+                localStorage.removeItem('cl_fwd_id');
+                localStorage.removeItem('cl_fwd_email');
             }
         } catch (err) {
             setError('Network error.');
@@ -95,8 +105,8 @@ export default function ForwarderPortal() {
             setIsAuthenticated(true);
             fetchDashboardData(user.sovereign_id);
         } else {
-            const storedId = localStorage.getItem('omego_fwd_id');
-            const storedEmail = localStorage.getItem('omego_fwd_email');
+            const storedId = localStorage.getItem('cl_fwd_id');
+            const storedEmail = localStorage.getItem('cl_fwd_email');
             if (storedId && storedEmail) {
                 handleAuth(storedId, storedEmail);
             }
@@ -109,8 +119,8 @@ export default function ForwarderPortal() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('omego_fwd_id');
-        localStorage.removeItem('omego_fwd_email');
+        localStorage.removeItem('cl_fwd_id');
+        localStorage.removeItem('cl_fwd_email');
         setIsAuthenticated(false);
         setDashboardData(null);
     };
@@ -119,12 +129,13 @@ export default function ForwarderPortal() {
         if (!selectedRequest || !bidPrice) return;
         setSubmittingBid(true);
         try {
-            const res = await fetch(`${API_URL}/api/bid-status-sync`, {
+            const res = await fetch(`${API_URL}/api/forwarders/portal-bid`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-OMEGO-Key': 'OMEGO_INTERNAL_KEY' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     request_id: selectedRequest.request_id,
-                    forwarder_id: localStorage.getItem('omego_fwd_id'),
+                    forwarder_id: localStorage.getItem('cl_fwd_id'),
+                    email: localStorage.getItem('cl_fwd_email'),
                     status: 'ANSWERED',
                     price: parseFloat(bidPrice)
                 })
@@ -132,7 +143,7 @@ export default function ForwarderPortal() {
             if (res.ok) {
                 setSelectedRequest(null);
                 setBidPrice('');
-                fetchDashboardData(localStorage.getItem('omego_fwd_id'));
+                fetchDashboardData(localStorage.getItem('cl_fwd_id'));
             }
         } catch (err) { console.error('Bid failed', err); }
         finally { setSubmittingBid(false); }
@@ -163,7 +174,7 @@ export default function ForwarderPortal() {
                         <div className="space-y-2">
                             <label className="text-[6px] font-black text-zinc-700 uppercase tracking-[0.4em] ml-0.5">Node ID</label>
                             <input
-                                type="text" placeholder="REG-OMEGO-XXXX"
+                                type="text" placeholder="REG-CL-XXXX"
                                 value={forwarderId} onChange={(e) => setForwarderId(e.target.value)}
                                 className="w-full bg-black border border-white/5 rounded-lg px-4 py-3 text-[9px] font-bold text-white focus:border-white/10 outline-none uppercase font-mono placeholder:text-zinc-900"
                                 required
@@ -211,7 +222,7 @@ export default function ForwarderPortal() {
                         <div className="flex items-center gap-10">
                             <div className="text-right">
                                 <p className="text-[6px] font-black text-zinc-800 uppercase tracking-[0.4em] mb-1">Partner Signature</p>
-                                <p className="text-[10px] font-mono font-black text-zinc-400 uppercase">{dashboardData?.company_name || '...'} // {localStorage.getItem('omego_fwd_id')}</p>
+                                <p className="text-[10px] font-mono font-black text-zinc-400 uppercase">{dashboardData?.company_name || '...'} // {localStorage.getItem('cl_fwd_id')}</p>
                             </div>
                             <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.02] border border-white/5 rounded-xl">
                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />

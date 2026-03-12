@@ -83,8 +83,8 @@ export default function DashboardLayout({
                 {/* Logo Section */}
                 <div className="flex items-center h-20 px-8">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black rounded-lg group-hover:bg-blue-500 transition-colors">S</div>
-                        <span className="text-xl font-black tracking-tighter text-white">SOVEREIGN</span>
+                        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black rounded-lg group-hover:bg-blue-500 transition-colors">C</div>
+                        <span className="text-xl font-black tracking-tighter text-white">CARGOLINK</span>
                     </Link>
                 </div>
 
@@ -280,7 +280,7 @@ export default function DashboardLayout({
                                             className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-2xl z-[60]"
                                         >
                                             <div className="flex items-center justify-between mb-6">
-                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-outfit">Sovereign Alerts</h3>
+                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-outfit">CargoLink Alerts</h3>
                                                 <button className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest">Clear All</button>
                                             </div>
                                             <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">

@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     # MISSION CRITICAL: Pydantic Settings automatically loads from .env 
     # if fields are defined without hardcoded defaults in the constructor logic.
     
-    PROJECT_NAME: str = "Logistics OS (OMEGO)"
+    PROJECT_NAME: str = "CargoLink Logistics OS"
     VERSION: str = "2.0.0"
     API_V1_STR: str = "/api"
     
@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     
     # GOOGLE ENTERPRISE
-    GOOGLE_CLOUD_PROJECT: str = "OMEGO-logistics-2026"
+    GOOGLE_CLOUD_PROJECT: str = "cargolink-logistics-2026"
     GOOGLE_CLIENT_ID: str = ""  # Must be set in .env — never hardcode credentials
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_API_KEY: str = ""

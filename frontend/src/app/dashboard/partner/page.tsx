@@ -59,7 +59,7 @@ export default function PartnerDashboard() {
                 <div className="space-y-2">
                     <h2 className="text-xl font-bold uppercase tracking-tight">Access Restricted</h2>
                     <p className="text-zinc-500 text-sm max-w-md mx-auto">
-                        This terminal is reserved for Registered OMEGO Partners.
+                        This terminal is reserved for Registered CargoLink Partners.
                         Please complete your registration to unlock the Partner Center.
                     </p>
                 </div>

@@ -8,7 +8,7 @@ def _utcnow():
 
 class Forwarder(Base):
     """
-    Represents a logistics company (forwarder) registered on the OMEGO network.
+    Represents a logistics company (forwarder) registered on the CargoLink network.
     """
     __tablename__ = "forwarders"
 

@@ -13,12 +13,10 @@ interface AvatarProps {
 }
 
 export default function Avatar({ src, name, size = 'md', shape = 'circle', className = '' }: AvatarProps) {
-    // 💡 SOVEREIGN LOGIC: Handle relative OMEGO storage paths
     const getFullSrc = (url?: string) => {
         if (!url) return undefined;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
-        // Prepend OMEGO Storage base if it's a relative path
-        return `https://ge.omego.online/${url}`;
+        return `https://api.cargolink.io/static/${url}`;
     };
 
     const finalSrc = getFullSrc(src);

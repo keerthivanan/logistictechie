@@ -163,13 +163,13 @@ function LoginContent() {
                             <div className="w-1.5 h-4 bg-white/70 rounded-sm" />
                             <div className="w-1.5 h-4 bg-white/40 rounded-sm" />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight text-white font-outfit uppercase">Omego</span>
+                        <span className="text-2xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
                     </Link>
                     <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">
                         {mode === 'login' ? 'Sign In' : 'Create Account'}
                     </h1>
                     <p className="text-zinc-500 font-medium font-inter text-xs">
-                        {mode === 'login' ? 'Access the global freight network.' : 'Join the sovereign logistics platform.'}
+                        {mode === 'login' ? 'Access the global freight network.' : 'Join the CargoLink platform.'}
                     </p>
                 </div>
 

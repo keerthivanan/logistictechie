@@ -38,9 +38,9 @@ export default function Navbar() {
         {
             label: "Ecosystem",
             children: [
-                { label: "Sovereign Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
+                { label: "CargoLink Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
                 { label: "Partner Directory", href: "/forwarders", desc: "Global Logistics Network" },
-                { label: "Carrier Registration", href: "/forwarders/register", desc: "Join binary Protocol" },
+                { label: "Carrier Registration", href: "/forwarders/register", desc: "Join the CargoLink Network" },
                 { label: "Shipper Tools", href: "/search", desc: "Tactical Cargo Orchestration" },
             ]
         },
@@ -69,9 +69,9 @@ export default function Navbar() {
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3 group shrink-0">
                     <div className="h-7 w-7 bg-white text-black flex items-center justify-center font-bold text-lg rounded-full group-hover:bg-blue-500 group-hover:text-white transition-all transform group-hover:rotate-12">
-                        S
+                        C
                     </div>
-                    <span className="text-sm font-black tracking-widest text-white font-outfit">SOVEREIGN</span>
+                    <span className="text-sm font-black tracking-widest text-white font-outfit">CARGOLINK</span>
                 </Link>
 
                 {/* Desktop Navigation */}
@@ -236,9 +236,9 @@ export default function Navbar() {
                                         >
                                             <div className="p-4 border-b border-white/5 mb-1">
                                                 {user?.sovereign_id?.startsWith('REG-') ? (
-                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-1">PORTAL: Sovereign Partner</p>
+                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-1">PORTAL: CargoLink Partner</p>
                                                 ) : (
-                                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">Authenticated Citizen</p>
+                                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">CargoLink Member</p>
                                                 )}
                                                 <p className="text-xs font-bold text-white truncate">{user.name}</p>
                                             </div>
@@ -321,7 +321,7 @@ export default function Navbar() {
                             {/* Mobile Auth */}
                             {user ? (
                                 <div className="space-y-4">
-                                    <div className="text-center text-gray-800 font-black tracking-widest text-[10px] uppercase mb-4">CITIZEN PROTOCOL: ACTIVE</div>
+                                    <div className="text-center text-gray-800 font-black tracking-widest text-[10px] uppercase mb-4">CARGOLINK: ACTIVE</div>
                                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl text-sm">
                                         Profile
                                     </Link>

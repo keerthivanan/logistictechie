@@ -76,6 +76,20 @@ Thumbs.db
 # === N8N AUTOMATION (CONFIDENTIAL — NEVER PUSH) ===
 n8n_plan/
 
+# === PROJECT PLANS & AGENT METADATA (CONFIDENTIAL) ===
+plan/
+tmp/
+.agent/
+.gemini/
+*.md
+!README.md
+!backend/README.md
+!frontend/README.md
+parse_wf1.py
+parse_wf1b.py
+pydantic_tables_v2.py
+v1_schema.sql
+
 # === BACKEND GENERATED / ONE-OFF SCRIPTS ===
 backend/alembic/versions/
 backend/data/

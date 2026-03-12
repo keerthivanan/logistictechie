@@ -169,7 +169,7 @@ export default function ForwarderRegisterPage() {
                         <Check className="w-12 h-12 text-black" />
                     </div>
                     <h2 className="text-4xl font-outfit font-bold mb-6">Welcome Partner</h2>
-                    <p className="text-white/60 mb-8">You are now a <span className="text-white">Registered Forwarder</span> in the OMEGO Network.</p>
+                    <p className="text-white/60 mb-8">You are now a <span className="text-white">Registered Forwarder</span> in the CargoLink Network.</p>
                     <Link href="/dashboard/partner" className="inline-block w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-white/90 transition-all">
                         Enter Partner Dashboard
                     </Link>
@@ -235,7 +235,7 @@ export default function ForwarderRegisterPage() {
                 >
                     <div>
                         <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] font-outfit text-white mb-1">Partner Registration</h2>
-                        <p className="text-[9px] text-zinc-500 font-medium font-inter tracking-tight">Elevate your node to Sovereign Partner status.</p>
+                        <p className="text-[9px] text-zinc-500 font-medium font-inter tracking-tight">Become a verified CargoLink Partner.</p>
                     </div>
 
                     {/* Company Name */}

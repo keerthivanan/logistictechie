@@ -116,7 +116,7 @@ async def _ai_quotes(origin: str, destination: str, container: str,
         s_commodity = commodity.replace("\n", " ").replace("\"", "'")
         s_ready_date = ready_date.replace("\n", " ").replace("\"", "'")
 
-        prompt = f"""You are a freight rate prediction engine for OMEGO, a global logistics marketplace. Current date: March 2026.
+        prompt = f"""You are a freight rate prediction engine for CargoLink, a global logistics marketplace. Current date: March 2026.
 
 Generate 3 realistic freight rate quotes for:
 - Route: {s_origin} → {s_dest}

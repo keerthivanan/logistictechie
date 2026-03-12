@@ -176,4 +176,4 @@ async def get_sailing_schedules(origin: str = "Shanghai", destination: str = "Je
             "service": "Direct",
             "is_estimate": True
         })
-    return {"schedules": formatted, "success": True, "count": len(formatted), "source": "OMEGO Core"}
+    return {"schedules": formatted, "success": True, "count": len(formatted), "source": "CargoLink Core"}
