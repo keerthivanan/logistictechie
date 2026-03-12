@@ -81,20 +81,21 @@ plan/
 tmp/
 .agent/
 .gemini/
-*.md
+# Shielding internal agent logs/tasks, but allowing project docs
+.agent/logs/
+.agent/tasks/
+# Specific confidential markdown files
+plan/*.md
+n8n_plan/*.md
 !README.md
 !backend/README.md
 !frontend/README.md
+
+# === SCRATCH SCRIPTS (IGNORE) ===
 parse_wf1.py
 parse_wf1b.py
 pydantic_tables_v2.py
 v1_schema.sql
-
-# === BACKEND GENERATED / ONE-OFF SCRIPTS ===
-backend/alembic/versions/
-backend/data/
-backend/scripts/
-scripts/
 audit.py
 generate_tree.py
 full_tree.txt
@@ -104,6 +105,10 @@ definitive_schema_audit.json
 handshake*.txt
 test_out.txt
 test_results.txt
+
+# === PRODUCTION ASSETS (DO NOT IGNORE) ===
+# backend/alembic/versions/  <-- REMOVED FROM IGNORE (CRITICAL)
+# backend/scripts/           <-- REMOVED FROM IGNORE (CRITICAL)
 
 # === MAERSK / THIRD-PARTY API SPECS ===
 maersk/
