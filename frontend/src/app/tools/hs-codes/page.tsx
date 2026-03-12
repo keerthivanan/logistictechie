@@ -13,20 +13,28 @@ export default function HSCodesPage() {
     const [results, setResults] = useState<any[]>([])
     const [hasSearched, setHasSearched] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [apiError, setApiError] = useState('')
 
     const fetchHS = async (term: string) => {
         if (!term.trim()) return
         setLoading(true)
+        setApiError('')
         try {
             const res = await fetch(`${API_URL}/api/tools/hs-code-classify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: term })
             })
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}))
+                setApiError(err.detail || 'Classification service temporarily unavailable.')
+                setResults([])
+                return
+            }
             const data = await res.json()
             setResults(data.results || [])
         } catch (e) {
-            console.error('HS Classification failed', e)
+            setApiError('Network error. Please check your connection and try again.')
             setResults([])
         } finally {
             setLoading(false)
@@ -59,7 +67,7 @@ export default function HSCodesPage() {
             {/* ─── HERO ─── */}
             <section className="relative bg-black min-h-screen flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] font-inter mb-8">Sovereign Tools</p>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] font-inter mb-8">CargoLink Tools</p>
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-outfit uppercase mb-12 leading-[1.1] text-white max-w-4xl">
                         HS Code Discovery
                     </h1>
@@ -145,7 +153,17 @@ export default function HSCodesPage() {
                                         : 'Sample Classifications'}
                             </p>
 
-                            {hasSearched && results.length === 0 && (
+                            {hasSearched && apiError && (
+                                <div className="flex items-center justify-center py-16 border border-red-500/10 rounded-lg bg-red-500/5">
+                                    <div className="text-center">
+                                        <AlertCircle className="w-7 h-7 text-red-500/50 mx-auto mb-3" />
+                                        <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest font-inter mb-1">Service Error</p>
+                                        <p className="text-zinc-500 text-xs font-inter">{apiError}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {hasSearched && !apiError && results.length === 0 && (
                                 <div className="flex items-center justify-center py-16 border border-white/5 rounded-lg bg-zinc-950/30">
                                     <div className="text-center">
                                         <AlertCircle className="w-7 h-7 text-zinc-700 mx-auto mb-3" />
@@ -204,7 +222,7 @@ export default function HSCodesPage() {
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to clear customs faster?</h2>
                     <p className="text-xl text-zinc-400 mb-10">
-                        Join 2,000+ shippers using Sovereign&apos;s AI customs engine for zero-friction border crossings.
+                        Join 2,000+ shippers using CargoLink&apos;s AI customs engine for zero-friction border crossings.
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-zinc-200 transition-all">

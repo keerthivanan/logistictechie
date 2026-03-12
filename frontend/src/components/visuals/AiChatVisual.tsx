@@ -16,7 +16,7 @@ export default function AiChatVisual() {
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'assistant',
-            content: "THE CREATIVE CORTEX IS ONLINE. I can navigate the SOVEREIGN OS for you. Ask me to 'Track', 'Get Rates', or 'View Dashboard'."
+            content: "CARGOLINK AI IS ONLINE. I can navigate the CargoLink platform for you. Ask me to 'Track', 'Get Rates', or 'View Dashboard'."
         }
     ])
     const [input, setInput] = useState('')

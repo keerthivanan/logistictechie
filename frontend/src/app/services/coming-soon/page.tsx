@@ -58,7 +58,7 @@ export default function ServicesComingSoon() {
                 </div>
 
                 <p className="text-[8px] text-zinc-800 font-black uppercase tracking-[0.5em] pt-8">
-                    OMEGO SOVEREIGN OS // VER: 1.0.4-LOCKED
+                    CARGOLINK PLATFORM // VER: 2.0
                 </p>
             </motion.div>
         </div>

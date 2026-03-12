@@ -535,192 +535,147 @@ async def freight_estimate(req: FreightEstimateRequest):
 
 # ═══════════════════════════════════════════════════════
 # HS CODE / COMMODITY CLASSIFICATION ENGINE
-# 100% Pure Maersk — full catalogue cached in memory,
-# keyword-scored local search. No AI fallback needed.
+# Direct Maersk API search — queries Maersk with the
+# user's term, caches results per query for 24h.
 # ═══════════════════════════════════════════════════════
 import httpx
 import time as _time
 from typing import Any
+from app.core.config import settings
 
 
 class HSCodeRequest(BaseModel):
     query: str
 
 
-# ── In-memory cache: full Maersk commodity catalogue ──
-_maersk_cache: dict[str, Any] = {
-    "commodities": [],   # flat list of parsed entries
-    "fetched_at": 0.0,   # epoch timestamp
-}
-_CACHE_TTL = 86400  # refresh once per 24 h
+# Per-query result cache: { query_lower: {"results": [...], "fetched_at": float} }
+_query_cache: dict[str, Any] = {}
+_CACHE_TTL = 86400  # 24 h
 
 
-def _build_search_index(commodities: list) -> list:
+def _parse_maersk_results(commodities: list, limit: int = 6) -> list:
     """
-    Flatten the Maersk JSON response into a searchable list.
-    Each entry: { code, title, desc, comm_name, search_text }
+    Convert Maersk API response into frontend-ready classification results.
+    Confidence is position-based: Maersk returns results in relevance order.
     """
-    index = []
+    results = []
     seen_codes: set = set()
+
     for comm in commodities:
+        if len(results) >= limit:
+            break
         comm_name = comm.get("commodityName", "")
-        for hs in comm.get("hsCommodities", []):
-            code = hs.get("hsCommodityCode", "")
+        hs_codes = comm.get("hsCommodityCodes", [])
+        if not hs_codes:
+            continue
+        for hs in hs_codes:
+            if len(results) >= limit:
+                break
+            code_raw = hs.get("hsCommodityCode", "")
             desc = hs.get("hsCommodityName", "")
-            if not code or not desc or code in seen_codes:
+            if not code_raw or not desc or code_raw in seen_codes:
                 continue
-            seen_codes.add(code)
-            formatted = f"{code[:4]}.{code[4:]}" if len(code) == 6 else code
+            seen_codes.add(code_raw)
+            formatted = f"{code_raw[:4]}.{code_raw[4:]}" if len(code_raw) == 6 else code_raw
             title = (comm_name or desc.split(";")[0].split(",")[0]).strip().title()
-            # Combined text used for keyword matching
-            search_text = f"{comm_name} {desc}".lower()
-            index.append({
+            # Confidence: top result 99%, scales down to ~50% for 6th result
+            # Uses limit (max results) as denominator — always correct regardless of group count
+            position_ratio = 1.0 - (len(results) / limit) * 0.5
+            confidence = round(position_ratio * 99, 1)
+            results.append({
                 "code": formatted,
                 "title": title,
                 "desc": desc,
-                "search_text": search_text,
+                "prob": f"{confidence}%",
             })
-    return index
 
-
-async def _ensure_maersk_cache(maersk_key: str) -> list:
-    """
-    Fetch all Maersk commodities once and cache for 24h.
-    Returns the flat searchable index.
-    """
-    now = _time.time()
-    if _maersk_cache["commodities"] and (now - _maersk_cache["fetched_at"]) < _CACHE_TTL:
-        return _maersk_cache["commodities"]
-
-    logger.info("Maersk HS: fetching full commodity catalogue…")
-    async with httpx.AsyncClient(timeout=15.0) as client:
-        resp = await client.get(
-            "https://api.maersk.com/commodity-classifications",
-            headers={"Consumer-Key": maersk_key},
-        )
-    if resp.status_code != 200:
-        raise RuntimeError(f"Maersk catalogue fetch failed: {resp.status_code} {resp.text[:200]}")
-
-    raw = resp.json().get("commodities", [])
-    index = _build_search_index(raw)
-    _maersk_cache["commodities"] = index
-    _maersk_cache["fetched_at"] = now
-    logger.info(f"Maersk HS: cached {len(index)} HS codes from {len(raw)} commodities")
-    return index
-
-
-def _word_score(word: str, text: str) -> float:
-    """
-    Score a single word against text using strict word-boundary matching.
-    - 3.0: exact word  (space-word-space)          "tyre" in "new tyre set"
-    - 2.0: word prefix (space-word, allows plural)  "tyre" in "tyres"
-    - 0.0: pure substring (no leading space)       "tyre" in "styrene" → ZERO, avoid false positives
-    """
-    padded_text = f" {text} "
-    padded_word_exact = f" {word} "
-    padded_word_prefix = f" {word}"
-    if padded_word_exact in padded_text:
-        return 3.0
-    if padded_word_prefix in padded_text:
-        return 2.0
-    return 0.0
-
-
-def _score_entry(entry: dict, words: list[str]) -> float:
-    """
-    Score a catalogue entry against query words.
-    Only word-boundary matches count — no false substring matches (e.g. 'tyre' in 'styrene').
-    """
-    text = entry["search_text"]
-    desc_lower = entry["desc"].lower()
-    score = 0.0
-    matched = 0
-
-    for w in words:
-        ws = _word_score(w, text)
-        if ws > 0:
-            score += ws
-            matched += 1
-
-    if matched == 0:
-        return 0.0
-
-    # All-word match bonus (multi-word queries like "cotton shirt")
-    if len(words) > 1 and matched == len(words):
-        score += 4.0
-
-    # Boost: word appears in HS description directly (not just commodity name)
-    for w in words:
-        if _word_score(w, desc_lower) > 0:
-            score += 1.5
-            break
-
-    return score
-
-
-def _search_catalogue(index: list, query: str, limit: int = 6) -> list:
-    """
-    Keyword-score the full Maersk catalogue and return top N results.
-    """
-    words = [w.strip().lower() for w in query.split() if len(w.strip()) >= 2]
-    if not words:
-        return []
-
-    scored = []
-    for entry in index:
-        s = _score_entry(entry, words)
-        if s > 0:
-            scored.append((s, entry))
-
-    # Sort: highest score first; tie-break by LONGER desc (more specific = better)
-    scored.sort(key=lambda x: (-x[0], -len(x[1]["desc"])))
-
-    probs = ["99.8%", "96.5%", "91.2%", "85.0%", "78.4%", "65.0%"]
-    results = []
-    seen_codes: set = set()
-    for score, entry in scored:
-        if entry["code"] in seen_codes:
-            continue
-        seen_codes.add(entry["code"])
-        idx = len(results)
-        results.append({
-            "code": entry["code"],
-            "title": entry["title"],
-            "desc": entry["desc"],
-            "prob": probs[idx] if idx < len(probs) else "50.0%",
-        })
-        if len(results) >= limit:
-            break
     return results
+
+
+@router.get("/hs-code-test")
+async def hs_code_test():
+    """
+    Quick health-check: verifies Maersk API key is loaded and reachable.
+    Call GET /api/tools/hs-code-test in browser to diagnose.
+    """
+    maersk_key = settings.MAERSK_CONSUMER_KEY
+    if not maersk_key:
+        return {"status": "ERROR", "reason": "MAERSK_CONSUMER_KEY not loaded from .env"}
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                "https://api.maersk.com/commodity-classifications",
+                params={"commodityName": "cotton"},
+                headers={"Consumer-Key": maersk_key},
+            )
+        return {
+            "status": "OK" if resp.status_code == 200 else "ERROR",
+            "maersk_status": resp.status_code,
+            "key_loaded": True,
+            "key_preview": maersk_key[:8] + "...",
+            "commodities_returned": len(resp.json().get("commodities", [])) if resp.status_code == 200 else 0,
+            "error_body": resp.text[:300] if resp.status_code != 200 else None,
+        }
+    except Exception as e:
+        return {"status": "NETWORK_ERROR", "error": str(e)}
 
 
 @router.post("/hs-code-classify")
 async def classify_hs_code(req: HSCodeRequest):
     """
-    100% Pure Maersk HS Code classification.
-    Fetches the full Maersk commodity catalogue once (cached 24h),
-    then keyword-scores locally — works for every query.
+    Direct Maersk HS Code classification.
+    Queries the Maersk commodity-classifications API with the user's search term,
+    parses HS codes from the response, and caches per-query for 24 h.
     """
     if not req.query or len(req.query) < 2:
-        return {"results": [], "source": "WCO Harmonized System"}
+        return {"results": [], "source": "Maersk Commodity Reference"}
 
-    maersk_key = os.getenv("MAERSK_CONSUMER_KEY")
+    maersk_key = settings.MAERSK_CONSUMER_KEY
     if not maersk_key:
         raise HTTPException(500, "Classification service not configured.")
 
-    try:
-        index = await _ensure_maersk_cache(maersk_key)
-    except Exception as e:
-        logger.error(f"Maersk catalogue error: {e}")
-        raise HTTPException(502, "Classification service unavailable. Please try again.")
+    query_key = req.query.strip().lower()
+    now = _time.time()
 
-    results = _search_catalogue(index, req.query.strip())
+    # Return cached results if fresh
+    cached = _query_cache.get(query_key)
+    if cached and (now - cached["fetched_at"]) < _CACHE_TTL:
+        return {
+            "results": cached["results"],
+            "query": req.query,
+            "source": "Maersk Commodity Reference · Cached",
+            "confidence": cached["results"][0]["prob"] if cached["results"] else "0%",
+        }
+
+    # Query Maersk directly
+    logger.info(f"Maersk HS: querying '{query_key}'")
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(
+                "https://api.maersk.com/commodity-classifications",
+                params={"commodityName": req.query.strip()},
+                headers={"Consumer-Key": maersk_key},
+            )
+    except Exception as e:
+        logger.error(f"Maersk HS network error: {e}")
+        raise HTTPException(502, "Cannot reach Maersk classification service. Check network.")
+
+    if resp.status_code != 200:
+        logger.error(f"Maersk HS error: {resp.status_code} — {resp.text[:300]}")
+        raise HTTPException(502, f"Maersk returned {resp.status_code}. Please try again.")
+
+    raw = resp.json().get("commodities", [])
+    logger.info(f"Maersk HS: got {len(raw)} commodity groups for '{query_key}'")
+
+    results = _parse_maersk_results(raw, limit=6)
+
+    # Cache this query's results
+    _query_cache[query_key] = {"results": results, "fetched_at": now}
 
     return {
         "results": results,
         "query": req.query,
-        "source": "WCO Harmonized System · Live",
+        "source": "Maersk Commodity Reference · Live",
         "confidence": results[0]["prob"] if results else "0%",
-        "catalogue_size": len(index),
     }
 

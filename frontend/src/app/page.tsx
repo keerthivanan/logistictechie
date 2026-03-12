@@ -1,50 +1,26 @@
 'use client';
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { Globe, ArrowRight, Shield, Clock, Zap, BarChart3, Users, Award, CheckCircle, TrendingUp, Search, Lock, Cpu, Layers, Box, Map, PieChart, Loader2, X } from 'lucide-react'
+import { Globe, ArrowRight, Zap, BarChart3, Users, Award, Search, Lock, Layers } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Prism from '@/components/visuals/Prism'
 import TestimonialsSection from '@/components/sections/TestimonialsSection'
 import GlobalNetworkMap from '@/components/visuals/GlobalNetworkMap'
 import SmartDashboardPreview from '@/components/visuals/SmartDashboardPreview'
-
 import SolutionsGrid from '@/components/visuals/SolutionsGrid'
 import IntegrationEcosystem from '@/components/visuals/IntegrationEcosystem'
 import TrustedIndustries from '@/components/visuals/TrustedIndustries'
 import AiChatVisual from '@/components/visuals/AiChatVisual'
 import ComparisonChart from '@/components/visuals/ComparisonChart'
 import { useAuth } from '@/context/AuthContext'
-import { motion, AnimatePresence } from 'framer-motion'
-import { API_URL } from '@/lib/config'
 
 export default function Home() {
   const { user } = useAuth()
-  const [trackingId, setTrackingId] = useState('')
-  const [trackingResult, setTrackingResult] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false)
 
-  const handleTrack = async () => {
-    if (!trackingId) return
-    setIsLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/api/tracking/${trackingId}`)
-      const data = await res.json()
-      setTrackingResult(data)
-      setShowModal(true)
-    } catch (error) {
-      console.error('Tracking failed', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
       <Navbar />
-
-
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
@@ -57,18 +33,16 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-
-
           <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 animate-fade-in-up delay-100">
             SUPERCHARGE YOUR <br />
             <span className="text-white">SUPPLY CHAIN</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
-            Built for data-obsessed shippers. Sovereign is the only platform that unifies traditional freight forwarding with the new wave of Sovereign AI intelligence.
+            Built for data-obsessed shippers. CargoLink is the only platform that unifies traditional freight forwarding with next-generation AI intelligence.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up delay-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
             {user ? (
               <Link href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
                 Go to Dashboard <ArrowRight className="w-5 h-5" />
@@ -82,96 +56,10 @@ export default function Home() {
               View Tactical Simulation
             </Link>
           </div>
-
-          {/* Quick Track Input */}
-          <div className="max-w-2xl mx-auto mb-20 animate-fade-in-up delay-500 relative z-20">
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative flex items-center bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 shadow-2xl">
-                <Search className="w-6 h-6 text-gray-400 ml-4" />
-                <input
-                  type="text"
-                  value={trackingId}
-                  onChange={(e) => setTrackingId(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-                  placeholder="Carrier Code or Container ID (e.g., MSKU1234567)"
-                  className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 px-6 py-4 text-lg outline-none font-mono"
-                />
-                <button
-                  onClick={handleTrack}
-                  disabled={isLoading}
-                  className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-bold transition-all border border-white/5 whitespace-nowrap flex items-center gap-2"
-                >
-                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'TRACK'}
-                </button>
-              </div>
-            </div>
-
-            {/* Tracking Modal Overlay */}
-            <AnimatePresence>
-              {showModal && trackingResult && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="absolute top-full left-0 right-0 mt-4 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl text-left overflow-hidden z-50"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                        {trackingResult.status}
-                      </h3>
-                      <p className="text-gray-400 text-sm font-mono mt-1">ID: {trackingResult.container}</p>
-                    </div>
-                    <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                      <X className="w-5 h-5 text-gray-400" />
-                    </button>
-                  </div>
-
-                  <div className="flex justify-between items-center mb-8 relative">
-                    {/* Progress Line */}
-                    <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-white/10 -z-10"></div>
-                    <div className="absolute left-0 top-1/2 h-0.5 bg-blue-500 -z-10" style={{ width: `${trackingResult.progress}%` }}></div>
-
-                    <div className="text-center">
-                      <div className="w-4 h-4 bg-blue-500 rounded-full mb-2 mx-auto ring-4 ring-black"></div>
-                      <div className="text-2xl font-bold text-white">{trackingResult.origin}</div>
-                      <div className="text-xs text-gray-500 uppercase">Origin</div>
-                    </div>
-                    <div className="text-center">
-                      <div className={`w-4 h-4 rounded-full mb-2 mx-auto ring-4 ring-black ${trackingResult.progress === 100 ? 'bg-blue-500' : 'bg-gray-700'}`}></div>
-                      <div className="text-2xl font-bold text-white">{trackingResult.destination}</div>
-                      <div className="text-xs text-gray-500 uppercase">Destination</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="p-3 bg-black/40 rounded-lg border border-white/5">
-                      <div className="text-gray-500 mb-1">ETA</div>
-                      <div className="text-white font-mono">{trackingResult.eta}</div>
-                    </div>
-                    <div className="p-3 bg-black/40 rounded-lg border border-white/5">
-                      <div className="text-gray-500 mb-1">Carbon Estimate</div>
-                      <div className="text-green-400 font-mono">{trackingResult.carbon_footprint} kg</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-2 text-xs text-blue-400">
-                      <Shield className="w-3 h-3" /> {trackingResult.metadata.verification}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </section>
 
-
-
-      {/* The Shift Section - Merged with Hero */}
+      {/* The Shift Section */}
       <section className="py-24 bg-black border-t-0 -mt-1 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -203,7 +91,7 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Outperforming the industry standard.</h2>
               <p className="text-gray-400 text-lg mb-8 leading-relaxed">
                 Most tools give you a map. We give you a command center.
-                Sovereign is engineered for precision at infinite scale. We access more data points more frequently, ensuring your strategy is built on reality, not guesswork.
+                CargoLink is engineered for precision at infinite scale. We access more data points more frequently, ensuring your strategy is built on reality, not guesswork.
               </p>
 
               <div className="space-y-6">
@@ -277,7 +165,7 @@ export default function Home() {
               </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Active in 100+ Major Ports</h2>
               <p className="text-lg text-gray-400 mb-8">
-                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, Sovereign ensures your cargo moves with precision and speed, powered by our proprietary routing algorithms.
+                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, CargoLink ensures your cargo moves with precision and speed, powered by our proprietary routing algorithms.
               </p>
               <div className="grid grid-cols-2 gap-6">
                 {[
@@ -310,7 +198,7 @@ export default function Home() {
             Ready to dominate the <br /> new logistics landscape?
           </h2>
           <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-            Join 2,000+ forward-thinking teams orchestrating their global trade across the Sovereign Intelligence Network today.
+            Join 2,000+ forward-thinking teams orchestrating their global trade across the CargoLink Network today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup" className="px-10 py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-gray-200 transition-all">
@@ -324,6 +212,6 @@ export default function Home() {
       </section>
 
       <Footer />
-    </div >
+    </div>
   )
 }

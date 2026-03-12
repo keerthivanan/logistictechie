@@ -28,15 +28,15 @@ from app.core import redis as redis_mod
 async def lifespan(app: FastAPI):
     try:
         redis_mod.redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
-        print(f"[SYSTEM] OMEGO LOGISTICS OS Backend Initialized.")
+        print(f"[SYSTEM] CargoLink Logistics OS Backend Initialized.")
         print(f"[SYSTEM] CORS WHITELIST: {settings.ALLOWED_ORIGINS}")
         yield
     except asyncio.CancelledError:
-        print(f"[SYSTEM] OMEGO LOGISTICS OS: Shutdown Signal Received.")
+        print(f"[SYSTEM] CargoLink Logistics OS: Shutdown Signal Received.")
     finally:
         if redis_mod.redis_client:
             await redis_mod.redis_client.aclose()
-        print(f"[SYSTEM] OMEGO LOGISTICS OS: Securely Offline.")
+        print(f"[SYSTEM] CargoLink Logistics OS: Securely Offline.")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -52,20 +52,23 @@ async def security_and_rate_limit(request: Request, call_next):
 
     # 1. Rate Limit Check via Redis ZSET (Bypass for Localhost)
     if client_ip not in ["127.0.0.1", "::1"] and redis_mod.redis_client is not None:
-        now = time.time()
-        key = f"rate:{client_ip}"
-        pipe = redis_mod.redis_client.pipeline()
-        pipe.zremrangebyscore(key, 0, now - 60)
-        pipe.zadd(key, {str(now): now})
-        pipe.zcard(key)
-        pipe.expire(key, 60)
-        results = await pipe.execute()
-        request_count = results[2]
-        if request_count > settings.RATE_LIMIT_PER_MINUTE:
-            return JSONResponse(
-                status_code=429,
-                content={"detail": "Sovereign Threshold Exceeded."}
-            )
+        try:
+            now = time.time()
+            key = f"rate:{client_ip}"
+            pipe = redis_mod.redis_client.pipeline()
+            pipe.zremrangebyscore(key, 0, now - 60)
+            pipe.zadd(key, {str(now): now})
+            pipe.zcard(key)
+            pipe.expire(key, 60)
+            results = await pipe.execute()
+            request_count = results[2]
+            if request_count > settings.RATE_LIMIT_PER_MINUTE:
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Sovereign Threshold Exceeded."}
+                )
+        except Exception as e:
+            print(f"[REDIS_WARNING] Rate limiting disabled: {e}")
 
     # 2. Process Request
     try:

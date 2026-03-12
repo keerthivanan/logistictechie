@@ -23,7 +23,7 @@ if _is_neon:
     _connect_args = {
         "ssl": ctx,
         "command_timeout": 30,
-        "server_settings": {"application_name": "omego_backend"}
+        "server_settings": {"application_name": "cargolink_backend"}
     }
 
 engine = create_async_engine(

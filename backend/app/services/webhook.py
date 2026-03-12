@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger("omego.webhook")
+logger = logging.getLogger("cargolink.webhook")
 
 class WebhookService:
     """

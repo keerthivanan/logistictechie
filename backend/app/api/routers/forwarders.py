@@ -135,7 +135,7 @@ async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db), _: N
 @router.get("/active")
 async def list_forwarders(db: AsyncSession = Depends(get_db)):
     """
-    Returns all verified OMEGO partners as a flat JSON array for n8n compatibility.
+    Returns all verified CargoLink partners as a flat JSON array for n8n compatibility.
     """
     result = await db.execute(select(Forwarder).where(Forwarder.status.in_(["ACTIVE", "APPROVED"])))
     forwarders = result.scalars().all()
@@ -426,3 +426,120 @@ async def get_forwarder_dashboard(
         },
         "quotes": bids
     }
+
+
+@router.get("/portal-dashboard/{f_id}")
+async def portal_forwarder_dashboard(
+    f_id: str,
+    email: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Portal dashboard — authenticated by forwarder_id + email query param.
+    Used when forwarder logs in via portal (no JWT).
+    """
+    stmt = select(Forwarder).where(
+        Forwarder.forwarder_id == f_id,
+        Forwarder.email == email,
+        Forwarder.status == "ACTIVE"
+    )
+    result = await db.execute(stmt)
+    fwd = result.scalars().first()
+    if not fwd:
+        raise HTTPException(status_code=401, detail="Invalid portal credentials.")
+
+    bid_count_res = await db.execute(
+        select(func.count(ForwarderBidStatus.id)).where(ForwarderBidStatus.forwarder_id == f_id)
+    )
+    total_bids = bid_count_res.scalar() or 0
+
+    won_bids_res = await db.execute(
+        select(func.count(ForwarderBidStatus.id)).where(
+            ForwarderBidStatus.forwarder_id == f_id,
+            ForwarderBidStatus.status.in_(["ACCEPTED", "COMPLETED"])
+        )
+    )
+    won_bids = won_bids_res.scalar() or 0
+
+    recent_bids_stmt = (
+        select(ForwarderBidStatus, MarketplaceRequest)
+        .join(MarketplaceRequest, MarketplaceRequest.request_id == ForwarderBidStatus.request_id)
+        .where(ForwarderBidStatus.forwarder_id == f_id)
+        .order_by(ForwarderBidStatus.attempted_at.desc())
+        .limit(10)
+    )
+    recent_bids_res = await db.execute(recent_bids_stmt)
+    bids = []
+    for bid_status, req in recent_bids_res.all():
+        bids.append({
+            "request_id": req.request_id,
+            "origin": req.origin,
+            "destination": req.destination,
+            "cargo_type": req.cargo_type,
+            "your_price": float(bid_status.quoted_price) if bid_status.quoted_price else 0,
+            "status": req.status,
+            "your_position": None
+        })
+
+    return {
+        "company_name": fwd.company_name,
+        "metrics": {
+            "total_quotes_submitted": total_bids,
+            "active_bids": total_bids,
+            "won_bids": won_bids,
+            "reliability_score": fwd.reliability_score
+        },
+        "quotes": bids
+    }
+
+
+class PortalBidSubmit(BaseModel):
+    forwarder_id: str
+    email: str
+    request_id: str
+    price: float
+    status: str = "ANSWERED"
+
+@router.post("/portal-bid")
+async def portal_submit_bid(bid_in: PortalBidSubmit, db: AsyncSession = Depends(get_db)):
+    """
+    Portal bid submission endpoint — authenticated by forwarder_id + email pair.
+    Called directly from the Forwarder Portal UI (no n8n secret required).
+    """
+    # Validate forwarder identity
+    stmt = select(Forwarder).where(
+        Forwarder.forwarder_id == bid_in.forwarder_id,
+        Forwarder.email == bid_in.email,
+        Forwarder.status == "ACTIVE"
+    )
+    result = await db.execute(stmt)
+    fwd = result.scalars().first()
+    if not fwd:
+        raise HTTPException(status_code=401, detail="Invalid forwarder credentials.")
+
+    from app.models.marketplace import ForwarderBidStatus, MarketplaceRequest
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+    # Validate request exists
+    req_stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == bid_in.request_id)
+    req_res = await db.execute(req_stmt)
+    req = req_res.scalars().first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found.")
+
+    stmt = pg_insert(ForwarderBidStatus).values(
+        forwarder_id=bid_in.forwarder_id,
+        request_id=bid_in.request_id,
+        status=bid_in.status,
+        quoted_price=bid_in.price,
+        attempted_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        quoted_at=datetime.now(timezone.utc).replace(tzinfo=None)
+    )
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["forwarder_id", "request_id"],
+        set_={"status": stmt.excluded.status, "quoted_price": stmt.excluded.quoted_price, "quoted_at": stmt.excluded.quoted_at}
+    )
+    await db.execute(stmt)
+    await db.commit()
+
+    return {"success": True, "request_id": bid_in.request_id, "forwarder_id": bid_in.forwarder_id}
