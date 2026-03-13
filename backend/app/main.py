@@ -68,7 +68,9 @@ async def security_and_rate_limit(request: Request, call_next):
                     content={"detail": "Sovereign Threshold Exceeded."}
                 )
         except Exception as e:
-            print(f"[REDIS_WARNING] Rate limiting disabled: {e}")
+            # Silent fallback for Redis connection errors to keep logs clean
+            if "Connect call failed" not in str(e):
+                print(f"[REDIS_WARNING] Rate limiting disabled: {e}")
 
     # 2. Process Request
     try:
@@ -143,6 +145,7 @@ async def global_forwarder_my_bids(db: AsyncSession = Depends(get_db), current_u
 
 
 @app.get("/health")
+@app.get("/api/health")
 @app.get("/")
 def health_check():
     return {
