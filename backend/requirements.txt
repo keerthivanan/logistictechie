@@ -21,3 +21,4 @@ openai>=1.0.0
 langchain-openai
 sse_starlette>=3.0.0
 redis[asyncio]>=5.0.0
+pyre-check
