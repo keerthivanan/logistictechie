@@ -1,4 +1,7 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+    "python.defaultInterpreterPath": "c:\\Users\\91709\\OneDrive\\Documents\\logistics\\backend\\venv\\Scripts\\python.exe",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend"
+    ]
 }
