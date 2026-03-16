@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Globe, ExternalLink, Loader2, BadgeCheck, Building2, ArrowUpRight } from 'lucide-react';
+import { Search, MapPin, Loader2, BadgeCheck, Building2, ArrowUpRight } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Avatar from '@/components/visuals/Avatar';
 import PartnerModal from '@/components/modals/PartnerModal';
@@ -16,6 +16,10 @@ interface Forwarder {
     country: string;
     logo_url: string;
     website?: string;
+    phone?: string;
+    reliability_score?: number;
+    specializations?: string;
+    routes?: string;
 }
 
 export default function ForwarderDirectoryPage() {
