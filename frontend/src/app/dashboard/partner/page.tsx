@@ -81,12 +81,12 @@ export default function PartnerDashboard() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold tracking-widest uppercase">
-                        PORTAL: Verified Partner Mode
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
+                        Forwarder Portal
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight uppercase font-outfit">Partner Center</h1>
+                    <h1 className="text-4xl font-bold tracking-tight font-outfit">Partner Center</h1>
                     <p className="text-zinc-500 text-sm font-medium tracking-tight">
-                        Master Node: <span className="text-white font-mono">{user.sovereign_id}</span>
+                        Company ID: <span className="text-white font-mono">{user.sovereign_id}</span>
                     </p>
                 </div>
                 <div className="flex gap-4">
@@ -102,7 +102,7 @@ export default function PartnerDashboard() {
                     { label: 'Total Bids', value: bids.length, icon: Box, color: 'text-blue-400' },
                     { label: 'Active Quotes', value: pendingBids, icon: Zap, color: 'text-yellow-400' },
                     { label: 'Contracts Won', value: wonBids, icon: TrendingUp, color: 'text-emerald-400' },
-                    { label: 'Security Grade', value: 'A+', icon: Terminal, color: 'text-purple-400' },
+                    { label: 'Verified Status', value: 'A+', icon: Terminal, color: 'text-purple-400' },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -113,7 +113,7 @@ export default function PartnerDashboard() {
                     >
                         <stat.icon className={`w-5 h-5 ${stat.color} mb-4`} />
                         <h3 className="text-3xl font-bold font-mono text-white mb-1">{stat.value}</h3>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-inter">{stat.label}</p>
+                        <p className="text-xs font-medium text-zinc-500 font-inter">{stat.label}</p>
                     </motion.div>
                 ))}
             </div>
@@ -129,7 +129,7 @@ export default function PartnerDashboard() {
                     {bids.length === 0 ? (
                         <div className="bg-zinc-950 border border-dashed border-white/5 rounded-3xl p-20 text-center space-y-4">
                             <Clock className="w-8 h-8 text-zinc-700 mx-auto" />
-                            <p className="text-zinc-500 text-sm font-medium">No active bids detected in your node.</p>
+                            <p className="text-zinc-500 text-sm font-medium">You haven&apos;t submitted any bids yet.</p>
                         </div>
                     ) : (
                         bids.map((bid) => (
@@ -142,7 +142,7 @@ export default function PartnerDashboard() {
                                 <div className="space-y-1.5 font-inter">
                                     <div className="flex items-center gap-3">
                                         <span className="text-[10px] font-mono text-zinc-600 uppercase font-bold tracking-tighter">REQ-{bid.request_id}</span>
-                                        <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${['ACCEPTED', 'COMPLETED'].includes(bid.bid_status) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                        <div className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${['ACCEPTED', 'COMPLETED'].includes(bid.bid_status) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                             bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                                                 bid.bid_status === 'EXPIRED' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' :
                                                     'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
@@ -153,14 +153,14 @@ export default function PartnerDashboard() {
                                     <h4 className="text-lg font-bold text-white uppercase tracking-tight">
                                         {bid.origin} → {bid.destination}
                                     </h4>
-                                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                    <p className="text-xs text-zinc-500">
                                         {bid.cargo_type} · Submitted {new Date(bid.attempted_at).toLocaleDateString()}
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-8">
                                     <div className="text-right">
-                                        <p className="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Quoted Value</p>
+                                        <p className="text-xs text-zinc-600 mb-1">Quoted Value</p>
                                         <p className="text-xl font-mono font-bold text-emerald-400">${bid.quoted_price?.toLocaleString() || '---'}</p>
                                     </div>
                                     <div className="w-px h-10 bg-white/5 hidden md:block" />

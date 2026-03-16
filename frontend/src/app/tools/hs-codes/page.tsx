@@ -200,7 +200,7 @@ export default function HSCodesPage() {
             <section className="py-24 bg-black border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="mb-16 text-center">
-                        <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-zinc-500">Intelligence Protocol</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-zinc-500">Why It Matters</h2>
                     </div>
                     <div className="grid md:grid-cols-3 gap-12 text-center">
                         {[

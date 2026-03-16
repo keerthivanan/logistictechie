@@ -41,7 +41,7 @@ export default function DashboardPage() {
                     return
                 }
 
-                if (!response.ok) throw new Error('Failed to fetch intelligence vector')
+                if (!response.ok) throw new Error('Failed to load dashboard data')
 
                 const data = await response.json()
                 setStats(data)
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Node Link</p>
+                <p className="text-xs text-zinc-600">Loading...</p>
             </div>
         )
     }
@@ -96,14 +96,14 @@ export default function DashboardPage() {
                 <div className="xl:col-span-1 min-h-0 overflow-hidden">
                     <CommandFeed
                         activities={stats?.recent_activity || []}
-                        title={isForwarder ? 'Partner Log' : 'Command Feed'}
+                        title={isForwarder ? 'Bid Activity' : 'Recent Activity'}
                     />
                 </div>
                 <div className="xl:col-span-3 min-h-0 overflow-hidden">
                     <SovereignFlow
                         shipments={stats?.kanban_shipments || []}
                         activeCount={stats?.active_shipments || 0}
-                        title={isForwarder ? 'Live Market Bids' : 'Operational Flow'}
+                        title={isForwarder ? 'Live Market Bids' : 'Shipment Pipeline'}
                     />
                 </div>
             </div>

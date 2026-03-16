@@ -83,7 +83,7 @@ export default function TasksPage() {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Optimizing Task View</p>
+                <p className="text-xs text-zinc-600">Loading tasks...</p>
             </div>
         )
     }
@@ -106,34 +106,32 @@ export default function TasksPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
                 <div className="space-y-1">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-bold tracking-tight text-white uppercase font-outfit">
-                            Mission <span className="text-zinc-600">Control</span>
+                        <h1 className="text-lg font-bold tracking-tight text-white font-outfit">
+                            Tasks
                         </h1>
-                        <div className="h-3 w-px bg-white/10" />
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] font-inter">Protocol: Operational Sync</p>
                     </div>
-                    <p className="text-zinc-600 font-medium font-inter text-xs">Executive actions required for cargo synchronization.</p>
+                    <p className="text-zinc-500 font-inter text-xs">Manage and track your pending action items.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
                         <span className="text-lg font-bold font-inter text-white">{tasks.filter(t => t.status === 'PENDING').length}</span>
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest font-inter">Active</span>
+                        <span className="text-xs text-zinc-600 font-inter">Active</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
                         <span className="text-lg font-bold font-inter text-zinc-500">{tasks.filter(t => t.status === 'COMPLETED').length}</span>
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest font-inter">Done</span>
+                        <span className="text-xs text-zinc-600 font-inter">Done</span>
                     </div>
                 </div>
             </div>
 
             {/* Controls */}
             <div className="flex items-center justify-between flex-shrink-0">
-                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Active Duty</h3>
+                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Pending</h3>
                 <div className="flex items-center gap-3">
                     <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
                         {(['NEWEST', 'PRIORITY'] as const).map(o => (
                             <button key={o} onClick={() => setSortOrder(o)}
-                                className={`text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-full transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
                                 {o}
                             </button>
                         ))}
@@ -141,7 +139,7 @@ export default function TasksPage() {
                     <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
                         {(['ALL', 'HIGH', 'CRITICAL'] as const).map(p => (
                             <button key={p} onClick={() => setFilterPriority(p)}
-                                className={`text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-full transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
                                 {p}
                             </button>
                         ))}
@@ -160,7 +158,7 @@ export default function TasksPage() {
                             )) : (
                                 <div className="col-span-full py-16 border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-20">
                                     <CheckCircle2 className="w-8 h-8 mb-3" />
-                                    <p className="text-xs font-black uppercase tracking-[0.2em]">Operational Equilibrium Achieved</p>
+                                    <p className="text-xs font-semibold uppercase tracking-widest">All tasks complete</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -170,7 +168,7 @@ export default function TasksPage() {
                 {/* Completed tasks */}
                 {completedTasks.length > 0 && (
                     <div className="xl:col-span-1 overflow-y-auto custom-scrollbar pr-1">
-                        <h2 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter mb-3">Archived Protocol</h2>
+                        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider font-inter mb-3">Completed</h2>
                         <div className="space-y-2">
                             {completedTasks.map(task => (
                                 <motion.div layout key={task.id}
@@ -182,8 +180,8 @@ export default function TasksPage() {
                                         </button>
                                         <div className="overflow-hidden">
                                             <p className="text-[10px] font-bold text-zinc-400 tracking-tight line-through decoration-zinc-800 truncate">{task.title}</p>
-                                            <p className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-0.5">
-                                                Resolved {new Date(task.created_at).toLocaleDateString()}
+                                            <p className="text-[10px] text-zinc-700 mt-0.5">
+                                                Done {new Date(task.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
@@ -206,7 +204,7 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: s
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full ${task.priority === 'CRITICAL' ? 'bg-red-500 animate-pulse' : task.priority === 'HIGH' ? 'bg-orange-500' : 'bg-zinc-600'}`} />
-                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest font-inter">{task.priority} Vector</span>
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider font-inter">{task.priority}</span>
                     </div>
                     <button onClick={() => onToggle(task.id)} disabled={isToggling}
                         className="w-6 h-6 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center hover:bg-white hover:text-black transition-all flex-shrink-0 disabled:opacity-50">
@@ -220,13 +218,13 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: s
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-zinc-600">
                         <Calendar className="w-3 h-3" />
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] font-inter">
-                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No Limit'}
+                        <span className="text-[10px] font-medium font-inter">
+                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
                         </span>
                     </div>
                     <button onClick={() => onToggle(task.id)} disabled={isToggling}
-                        className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40">
-                        Commit <ArrowRight className="w-3 h-3" />
+                        className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40">
+                        Mark done <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>
             </div>

@@ -26,15 +26,15 @@ export default function AboutPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
 
                         <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter">
-                            ORCHESTRATING <br />
+                            CONNECTING SHIPPERS <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                                EARTH&apos;S CARGO.
+                                WITH TRUSTED FORWARDERS.
                             </span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-16 font-light leading-relaxed">
-                            We aren&apos;t just moving boxes. We are rewriting the physics of global trade with
-                            <span className="text-white font-bold"> artificial intelligence </span>
-                            and absolute precision.
+                            CargoLink simplifies international freight by connecting shippers with verified freight forwarders through
+                            <span className="text-white font-bold"> AI-powered matching </span>
+                            and real-time quotes.
                         </p>
                     </div>
                 </section>
@@ -56,9 +56,9 @@ export default function AboutPage() {
                                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 group-hover:bg-white/10 transition-colors">
                                     <Cpu className="w-10 h-10 text-white" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4">Silicon Intelligence</h3>
+                                <h3 className="text-2xl font-bold mb-4">AI-Powered Matching</h3>
                                 <p className="text-gray-400 leading-relaxed">
-                                    Replacing instinct with algorithms. Our AI core predicts disruptions before they happen.
+                                    Smart algorithms match your shipment requirements with the best-fit forwarders instantly.
                                 </p>
                             </div>
                             <div className="text-center group">
@@ -81,10 +81,9 @@ export default function AboutPage() {
 
                         <div className="relative border-l border-white/10 ml-8 md:ml-1/2 space-y-16">
                             {[
-                                { year: "2024", title: "Project Alpha", desc: "The code was written. A new intelligence was born to solve the fragmentation of global trade." },
-                                { year: "2025", title: "The Neural Network", desc: "Sovereign connected 100+ major ports into a single, real-time nervous system." },
-                                { year: "2026", title: "Global Dominance", desc: "Today, we process billions in cargo value with zero human error. The standard has been set." },
-                                { year: "FUTURE", title: "Autonomous Logistics", desc: "Self-correcting supply chains. The engine that runs the world." }
+                                { year: "2024", title: "Platform Launch", desc: "CargoLink was founded to solve the fragmentation of international freight procurement." },
+                                { year: "2025", title: "Forwarder Network", desc: "Onboarded 100+ verified freight forwarders across major global trade lanes." },
+                                { year: "2026", title: "Global Coverage", desc: "Today, we connect shippers and forwarders across 195 countries with real-time quotes." },
                             ].map((item, i) => (
                                 <div key={i} className="relative pl-12">
                                     <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-white rounded-full ring-4 ring-black"></div>

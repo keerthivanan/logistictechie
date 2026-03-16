@@ -47,7 +47,7 @@ export default function ShipmentsPage() {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Synchronizing Ledger...</p>
+                <p className="text-xs text-zinc-600">Loading shipments...</p>
             </div>
         )
     }
@@ -58,17 +58,15 @@ export default function ShipmentsPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
                 <div className="space-y-1">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-bold tracking-tight text-white uppercase font-outfit">
-                            Logistics <span className="text-zinc-600">Ledger</span>
+                        <h1 className="text-lg font-bold tracking-tight text-white font-outfit">
+                            My Shipments
                         </h1>
-                        <div className="h-3 w-px bg-white/10" />
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] font-inter">Vector: Active Shipments</p>
                     </div>
-                    <p className="text-zinc-600 font-medium font-inter text-xs">Executive oversight of all physical vectors currently in transit.</p>
+                    <p className="text-zinc-500 font-inter text-xs">Track and manage all your active freight requests.</p>
                 </div>
                 <Link href="/marketplace"
-                    className="bg-white text-black px-6 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all font-inter self-start md:self-auto">
-                    New Booking Protocol
+                    className="bg-white text-black px-6 py-3 rounded-2xl text-sm font-semibold hover:bg-zinc-200 transition-all font-inter self-start md:self-auto">
+                    + New Shipment
                 </Link>
             </div>
 
@@ -83,9 +81,9 @@ export default function ShipmentsPage() {
                         <p className="text-[10px] text-zinc-600 max-w-sm mb-8 font-medium font-inter leading-relaxed">
                             Start a new search to lock in a quote and begin your shipment journey.
                         </p>
-                        <Link href="/"
+                        <Link href="/dashboard"
                             className="text-[9px] font-black text-white hover:text-emerald-400 underline-offset-8 underline decoration-zinc-800 hover:decoration-emerald-500 transition-all uppercase tracking-widest font-inter">
-                            Return to Command Center
+                            Back to Dashboard
                         </Link>
                     </div>
                 ) : (
@@ -93,12 +91,12 @@ export default function ShipmentsPage() {
                         <table className="w-full text-left border-collapse">
                             <thead className="sticky top-0 bg-[#0a0a0a] z-10">
                                 <tr className="border-b border-white/5 bg-white/[0.01]">
-                                    <th className="pl-8 pr-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Reference</th>
-                                    <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Route Matrix</th>
-                                    <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Modal Type</th>
-                                    <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Protocol Date</th>
-                                    <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Status</th>
-                                    <th className="pr-8 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter text-right">Commit</th>
+                                    <th className="pl-8 pr-6 py-5 text-xs font-medium text-zinc-500 font-inter">Reference</th>
+                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Route</th>
+                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Cargo Type</th>
+                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Date Submitted</th>
+                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Status</th>
+                                    <th className="pr-8 py-5 text-xs font-medium text-zinc-500 font-inter text-right">Commit</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/[0.02]">
@@ -107,7 +105,7 @@ export default function ShipmentsPage() {
                                         <td className="pl-8 pr-6 py-5">
                                             <div className="flex flex-col">
                                                 <span className="text-[12px] font-mono font-bold text-white tracking-widest">{s.request_id}</span>
-                                                <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">Marketplace Verified</span>
+                                                <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">Verified</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
@@ -118,7 +116,7 @@ export default function ShipmentsPage() {
                                                     <span>{s.destination || 'Unknown'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest font-inter">Global Vector Path</span>
+                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest font-inter">Freight Route</span>
                                                     {s.commodity && (
                                                         <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest font-inter px-1.5 py-0.5 bg-emerald-500/10 rounded-sm">
                                                             {s.commodity}
@@ -128,15 +126,12 @@ export default function ShipmentsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-white/[0.02] px-3 py-1.5 rounded-lg border border-white/5 font-inter">
-                                                {s.cargo_type} MODAL
+                                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest bg-white/[0.02] px-3 py-1.5 rounded-lg border border-white/5 font-inter">
+                                                {s.cargo_type}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-bold text-zinc-400 font-inter">{new Date(s.submitted_at).toLocaleDateString()}</span>
-                                                <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest mt-1 font-inter">Submission Point</span>
-                                            </div>
+                                            <span className="text-[11px] font-bold text-zinc-400 font-inter">{new Date(s.submitted_at).toLocaleDateString()}</span>
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-col gap-1.5">
@@ -150,10 +145,10 @@ export default function ShipmentsPage() {
                                                 </div>
                                                 <div className="flex gap-1">
                                                     {s.is_hazardous && (
-                                                        <span className="text-[7px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">HAZ</span>
+                                                        <span className="text-[10px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">HAZ</span>
                                                     )}
                                                     {s.needs_insurance && (
-                                                        <span className="text-[7px] font-black bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">INS</span>
+                                                        <span className="text-[10px] font-black bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">INS</span>
                                                     )}
                                                 </div>
                                             </div>

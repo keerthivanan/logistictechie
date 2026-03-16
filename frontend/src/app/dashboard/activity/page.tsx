@@ -65,7 +65,7 @@ export default function ActivityPage() {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.4em]">Deciphering Audit Stream</p>
+                <p className="text-xs text-zinc-600">Loading activity...</p>
             </div>
         )
     }
@@ -80,7 +80,7 @@ export default function ActivityPage() {
     const actionMeta = (act: Activity) => {
         if (act.action === 'SEARCH') return `${act.metadata?.origin} → ${act.metadata?.destination}`
         if (act.action === 'BOOKING_CREATED') return `Reference: ${act.metadata?.reference}`
-        return 'Operational Commit Verified'
+        return 'System event'
     }
 
     return (
@@ -89,19 +89,17 @@ export default function ActivityPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
                 <div className="space-y-1">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-bold tracking-tight text-white uppercase font-outfit">
-                            Audit <span className="text-zinc-600">Ledger</span>
+                        <h1 className="text-lg font-bold tracking-tight text-white font-outfit">
+                            Activity <span className="text-zinc-600">Log</span>
                         </h1>
-                        <div className="h-3 w-px bg-white/10" />
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] font-inter">Signal: Intelligence History</p>
                     </div>
-                    <p className="text-zinc-600 font-medium font-inter text-xs">Permanent ledger of all intelligence vectors and operational commits.</p>
+                    <p className="text-zinc-500 font-inter text-xs">Your complete activity history across the platform.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-5 py-3 bg-white/[0.02] border border-white/5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white hover:border-white/20 transition-all font-inter">
+                    <button className="flex items-center gap-2 px-5 py-3 bg-white/[0.02] border border-white/5 rounded-2xl text-xs font-semibold text-zinc-500 hover:text-white hover:border-white/20 transition-all font-inter">
                         <Filter className="w-3.5 h-3.5" /> Filter
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-3 bg-white text-black rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all font-inter">
+                    <button className="flex items-center gap-2 px-5 py-3 bg-white text-black rounded-2xl text-xs font-semibold hover:bg-zinc-200 transition-all font-inter">
                         Export
                     </button>
                 </div>
@@ -113,11 +111,11 @@ export default function ActivityPage() {
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 bg-[#0a0a0a] z-10">
                             <tr className="border-b border-white/5 bg-white/[0.01]">
-                                <th className="pl-8 pr-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Timestamp</th>
-                                <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Action Protocol</th>
-                                <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Entity Vector</th>
-                                <th className="px-6 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter">Intelligence</th>
-                                <th className="pr-8 py-5 text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] font-inter text-right">Commit</th>
+                                <th className="pl-8 pr-6 py-5 text-xs font-medium text-zinc-500 font-inter">Timestamp</th>
+                                <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Action</th>
+                                <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Reference</th>
+                                <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Details</th>
+                                <th className="pr-8 py-5 text-xs font-medium text-zinc-500 font-inter text-right">Link</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.02]">
@@ -128,7 +126,7 @@ export default function ActivityPage() {
                                             <span className="text-[11px] font-bold text-white font-inter tracking-tight">
                                                 {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-0.5 font-inter">
+                                            <span className="text-[10px] text-zinc-700 mt-0.5 font-inter">
                                                 {new Date(act.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                             </span>
                                         </div>
@@ -173,8 +171,8 @@ export default function ActivityPage() {
 
                 {/* Pagination */}
                 <div className="px-8 py-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-between flex-shrink-0">
-                    <p className="text-[9px] font-black text-zinc-700 uppercase tracking-widest font-inter">
-                        Slice: <span className="text-zinc-500">{page * limit + 1}–{page * limit + activities.length}</span>
+                    <p className="text-xs text-zinc-600 font-inter">
+                        Page: <span className="text-zinc-500">{page * limit + 1}–{page * limit + activities.length}</span>
                     </p>
                     <div className="flex items-center gap-2">
                         <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}

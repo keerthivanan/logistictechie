@@ -41,7 +41,7 @@ export default function Navbar() {
                 { label: "CargoLink Marketplace", href: "/marketplace", desc: "Live Freight Tendering" },
                 { label: "Partner Directory", href: "/forwarders", desc: "Global Logistics Network" },
                 { label: "Carrier Registration", href: "/forwarders/register", desc: "Join the CargoLink Network" },
-                { label: "Shipper Tools", href: "/search", desc: "Tactical Cargo Orchestration" },
+                { label: "Shipper Tools", href: "/search", desc: "Search & Book Shipments" },
             ]
         },
         {
@@ -103,8 +103,8 @@ export default function Navbar() {
                                                         href={child.href}
                                                         className="block px-4 py-3 hover:bg-white/5 rounded-xl group/item"
                                                     >
-                                                        <div className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover/item:text-white transition-colors">{child.label}</div>
-                                                        <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-1">{child.desc}</div>
+                                                        <div className="text-xs font-semibold text-zinc-300 group-hover/item:text-white transition-colors">{child.label}</div>
+                                                        <div className="text-[11px] text-zinc-600 mt-0.5">{child.desc}</div>
                                                     </Link>
                                                 ))}
                                             </div>
@@ -218,8 +218,8 @@ export default function Navbar() {
                                     <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
                                 </div>
                                 <div className="flex flex-col items-start">
-                                    <span className="text-[9px] font-black text-white tracking-widest leading-none mb-0.5 uppercase">{user.name ? user.name.split(' ')[0] : 'User'}</span>
-                                    <span className="text-[6px] font-black text-zinc-500 tracking-[0.2em] leading-none uppercase">{user.sovereign_id || 'ALPHA-1'}</span>
+                                    <span className="text-xs font-semibold text-white leading-none mb-0.5">{user.name ? user.name.split(' ')[0] : 'User'}</span>
+                                    <span className="text-[10px] text-zinc-500 font-mono leading-none">{user.sovereign_id || ''}</span>
                                 </div>
                                 <ChevronDown className={`w-3 h-3 text-zinc-600 transition-transform duration-300 ${activeDropdown === 'User' ? 'rotate-180' : ''}`} />
                             </button>
@@ -236,30 +236,30 @@ export default function Navbar() {
                                         >
                                             <div className="p-4 border-b border-white/5 mb-1">
                                                 {user?.sovereign_id?.startsWith('REG-') ? (
-                                                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-1 flex items-center gap-1">PORTAL: CargoLink Partner</p>
+                                                    <p className="text-xs font-semibold text-emerald-400 mb-1">CargoLink Partner</p>
                                                 ) : (
-                                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1">CargoLink Member</p>
+                                                    <p className="text-xs font-semibold text-zinc-400 mb-1">CargoLink Member</p>
                                                 )}
                                                 <p className="text-xs font-bold text-white truncate">{user.name}</p>
                                             </div>
                                             {user?.sovereign_id?.startsWith('REG-') && (
                                                 <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all group/item">
                                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70 group-hover/item:opacity-100">PORTAL</span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest">Partner Terminal</span>
+                                                    <span className="text-xs font-semibold">Partner Portal</span>
                                                 </Link>
                                             )}
                                             <Link href="/profile" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group/item">
                                                 <UserIcon className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">Profile</span>
+                                                <span className="text-xs font-semibold">Profile</span>
                                             </Link>
                                             <Link href="/settings" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group/item">
                                                 <SettingsIcon className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">Settings</span>
+                                                <span className="text-xs font-semibold">Settings</span>
                                             </Link>
                                             <div className="h-px bg-white/5 my-2 mx-2" />
                                             <button onClick={() => { logout(); setActiveDropdown(null); }} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl text-zinc-400 hover:text-red-500 transition-all group/item">
                                                 <LogOut className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">Sign Out</span>
+                                                <span className="text-xs font-semibold">Sign Out</span>
                                             </button>
                                         </motion.div>
                                     </>
@@ -321,7 +321,7 @@ export default function Navbar() {
                             {/* Mobile Auth */}
                             {user ? (
                                 <div className="space-y-4">
-                                    <div className="text-center text-gray-800 font-black tracking-widest text-[10px] uppercase mb-4">CARGOLINK: ACTIVE</div>
+                                    <div className="text-center text-gray-500 text-xs mb-4">Signed in</div>
                                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-bold py-3 border border-white/10 rounded-xl text-sm">
                                         Profile
                                     </Link>

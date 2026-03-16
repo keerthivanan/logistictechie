@@ -158,9 +158,8 @@ def health_check():
 # Must be added AFTER all @app.middleware to be the OUTERMOST for requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_origin_regex=r"https://.*\.vercel\.app",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With", "X-OMEGO-Key", "ngrok-skip-browser-warning"],
     expose_headers=["X-Total-Count", "X-Request-ID"],

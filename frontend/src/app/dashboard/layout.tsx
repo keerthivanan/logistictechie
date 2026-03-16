@@ -162,7 +162,7 @@ export default function DashboardLayout({
                         <Avatar src={user?.avatar_url} name={user?.name} size="sm" className="border-zinc-800" />
                         <div className="flex-1 overflow-hidden">
                             <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
-                            <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">{user?.sovereign_id}</p>
+                            <p className="text-[11px] text-zinc-500 font-mono">{user?.sovereign_id}</p>
                         </div>
                     </Link>
                 </div>
@@ -240,7 +240,7 @@ export default function DashboardLayout({
                                             className="absolute top-full right-0 mt-4 w-56 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
                                         >
                                             <div className="px-4 py-2 border-b border-white/5 mb-1">
-                                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">Entity Status</span>
+                                                <span className="text-[11px] text-zinc-600">Status</span>
                                             </div>
                                             {['All Active', 'In Transit', 'Pending Review', 'Critical Only'].map((opt) => (
                                                 <button
@@ -288,23 +288,23 @@ export default function DashboardLayout({
                                                     <div key={act.id} className="flex gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
                                                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
                                                         <div className="space-y-1">
-                                                            <p className="text-[10px] font-bold text-white tracking-tight uppercase">{act.action.replace('_', ' ')}</p>
-                                                            <p className="text-[8px] font-medium text-zinc-500 uppercase tracking-widest leading-relaxed">
-                                                                Vector: {act.entity || 'System'} detected status change.
+                                                            <p className="text-xs font-medium text-white">{act.action.replace(/_/g, ' ')}</p>
+                                                            <p className="text-[11px] text-zinc-500 leading-relaxed">
+                                                                {act.entity || 'System'}
                                                             </p>
-                                                            <p className="text-[7px] font-black text-zinc-700 uppercase">{new Date(act.timestamp).toLocaleTimeString()}</p>
+                                                            <p className="text-[10px] text-zinc-700">{new Date(act.timestamp).toLocaleTimeString()}</p>
                                                         </div>
                                                     </div>
                                                 ))}
                                                 {(!stats?.recent_activity || stats.recent_activity.length === 0) && (
                                                     <div className="py-10 text-center opacity-20">
                                                         <Bell className="w-6 h-6 mx-auto mb-2 text-zinc-500" />
-                                                        <p className="text-[8px] font-bold uppercase tracking-widest">No Active Alerts</p>
+                                                        <p className="text-xs">No alerts</p>
                                                     </div>
                                                 )}
                                             </div>
-                                            <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-6 pt-4 border-t border-white/5 text-center text-[8px] font-black text-zinc-500 hover:text-white uppercase tracking-[0.3em] transition-colors">
-                                                Full Audit Record
+                                            <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-6 pt-4 border-t border-white/5 text-center text-xs text-zinc-500 hover:text-white transition-colors">
+                                                View all activity
                                             </Link>
                                         </motion.div>
                                     )}
