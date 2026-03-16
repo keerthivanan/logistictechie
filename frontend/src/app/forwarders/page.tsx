@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Truck, Plane, Globe, Mail, Phone, ExternalLink, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { Search, MapPin, Globe, ExternalLink, Loader2, BadgeCheck, Building2, ArrowUpRight } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Avatar from '@/components/visuals/Avatar';
 import PartnerModal from '@/components/modals/PartnerModal';
@@ -91,82 +89,62 @@ export default function ForwarderDirectoryPage() {
                         <Loader2 className="w-10 h-10 animate-spin text-white/20" />
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <AnimatePresence>
                             {filteredForwarders.map((forwarder, i) => (
                                 <motion.div
                                     key={forwarder.id}
-                                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     onClick={() => handleOpenModal(forwarder)}
-                                    className="bg-black border border-white/10 rounded-2xl p-6 group hover:border-white/30 transition-all hover:bg-zinc-950 relative overflow-hidden shadow-2xl cursor-pointer"
+                                    className="bg-zinc-950 border border-white/8 rounded-2xl p-6 group hover:border-white/20 hover:bg-zinc-900 transition-all duration-200 cursor-pointer"
                                 >
-                                    {/* Holographic Subtle Glow */}
-                                    <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 blur-[50px] pointer-events-none group-hover:bg-emerald-500/20 transition-colors" />
-
-                                    <div className="relative z-10">
-                                        <div className="flex items-start justify-between mb-8">
-                                            <div className="relative group/logo">
-                                                <Avatar
-                                                    src={forwarder.logo_url || undefined}
-                                                    name={forwarder.company_name}
-                                                    size="lg"
-                                                    shape="square"
-                                                    className="border-white/10 group-hover:border-white/20 transition-all shadow-inner bg-white/[0.03]"
-                                                />
-                                                <div className="absolute -top-1 -left-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black animate-pulse" />
-                                            </div>
-
-                                            <div className="flex flex-col items-end gap-2">
-                                                <div className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                                                    <span className="text-[9px] font-black uppercase tracking-widest font-outfit">VERIFIED PORTAL</span>
-                                                </div>
-                                                <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Node ID: {forwarder.forwarder_id || 'TBD'}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <h3 className="text-xl font-black mb-1 group-hover:text-emerald-400 transition-colors font-outfit uppercase tracking-tighter">
-                                                    {forwarder.company_name}
-                                                </h3>
-                                                <div className="flex items-center text-zinc-500 text-[10px] font-bold uppercase tracking-widest font-inter">
-                                                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-emerald-500/50" />
-                                                    {forwarder.country} Registry
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 gap-3 pt-6 border-t border-white/5 relative">
-                                                <div className="flex items-center justify-between group/info">
-                                                    <div className="flex items-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-inter">
-                                                        <Globe className="w-4 h-4 mr-3 text-emerald-500" />
-                                                        CargoLink Network
-                                                    </div>
-                                                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Active</span>
-                                                </div>
-
-                                                {forwarder.website && (
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest font-inter">
-                                                            <ExternalLink className="w-4 h-4 mr-3 text-zinc-600" />
-                                                            Public Node
-                                                        </div>
-                                                        <span className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors cursor-pointer truncate max-w-[120px]">
-                                                            {forwarder.website.replace(/^https?:\/\//, '')}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <button className="w-full mt-6 bg-white/[0.03] border border-white/10 group-hover:bg-white text-zinc-400 group-hover:text-black py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] transition-all font-inter active:scale-[0.98]">
-                                                Initiate Connection
-                                            </button>
+                                    {/* Top row: avatar + verified badge */}
+                                    <div className="flex items-start justify-between mb-5">
+                                        <Avatar
+                                            src={forwarder.logo_url || undefined}
+                                            name={forwarder.company_name}
+                                            size="lg"
+                                            shape="square"
+                                            className="rounded-xl border border-white/10"
+                                        />
+                                        <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium px-2.5 py-1 rounded-full">
+                                            <BadgeCheck className="w-3.5 h-3.5" />
+                                            Verified
                                         </div>
                                     </div>
 
-                                    {/* Scanline Effect */}
-                                    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.01),rgba(0,255,0,0.005),rgba(0,0,255,0.01))] bg-[length:100%_2px,3px_100%] opacity-20" />
+                                    {/* Company name + location */}
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-white transition-colors leading-tight">
+                                            {forwarder.company_name}
+                                        </h3>
+                                        <div className="flex items-center gap-1.5 text-zinc-500 text-sm">
+                                            <MapPin className="w-3.5 h-3.5" />
+                                            {forwarder.country}
+                                        </div>
+                                    </div>
+
+                                    {/* Meta row */}
+                                    <div className="flex items-center gap-3 pt-4 border-t border-white/6 mb-5">
+                                        <div className="flex items-center gap-1.5 text-zinc-500 text-xs">
+                                            <Building2 className="w-3.5 h-3.5" />
+                                            <span className="font-mono text-zinc-600">{forwarder.forwarder_id || '—'}</span>
+                                        </div>
+                                        {forwarder.website && (
+                                            <div className="flex items-center gap-1 text-zinc-500 text-xs ml-auto">
+                                                <Globe className="w-3.5 h-3.5" />
+                                                <span className="truncate max-w-[100px]">{forwarder.website.replace(/^https?:\/\//, '')}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* CTA */}
+                                    <button className="w-full flex items-center justify-center gap-2 bg-white text-black py-2.5 rounded-xl text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-[0.98]">
+                                        View Profile <ArrowUpRight className="w-4 h-4" />
+                                    </button>
+                                    <div className="w-full py-2.5 group-hover:hidden" />
                                 </motion.div>
                             ))}
                         </AnimatePresence>
