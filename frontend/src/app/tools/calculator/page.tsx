@@ -161,7 +161,7 @@ export default function CalculatorPage() {
                         ))}
                     </div>
                     <button onClick={() => calcRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                        className="inline-flex items-center px-7 py-3.5 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-500 transition-colors text-sm">
+                        className="inline-flex items-center px-7 py-3.5 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-colors text-sm">
                         Calculate Rate <ArrowRight className="ml-2 w-4 h-4" />
                     </button>
                 </div>
