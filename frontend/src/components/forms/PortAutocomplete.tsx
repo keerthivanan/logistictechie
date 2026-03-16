@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Loader2, MapPin, Plus, Search } from 'lucide-react';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 interface PortAutocompleteProps {
     name: string;

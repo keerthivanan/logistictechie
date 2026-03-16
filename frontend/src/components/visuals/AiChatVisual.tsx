@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bot, User, Sparkles, Send, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 
 interface Message {
     role: 'user' | 'assistant'
@@ -39,7 +39,7 @@ export default function AiChatVisual() {
         setLoading(true)
 
         try {
-            const res = await fetch(`${API_URL}/api/ai/chat`, {
+            const res = await apiFetch(`/api/ai/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

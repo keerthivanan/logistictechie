@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ChevronDown, Star, Ship, MapPin, Edit2, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
@@ -48,7 +48,7 @@ function ResultsContent() {
         else if (value && parseFloat(value) > 50000) commodity = "High Value Goods"
 
         const token = localStorage.getItem('token')
-        const res = await fetch(`${API_URL}/api/quotes/`, {
+        const res = await apiFetch(`/api/quotes/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

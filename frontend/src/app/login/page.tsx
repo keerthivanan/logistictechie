@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import Prism from '@/components/visuals/Prism'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/context/AuthContext'
@@ -45,7 +45,7 @@ function LoginContent() {
             setIsLoading(true)
             setError('')
             try {
-                const res = await fetch(`${API_URL}/api/auth/social-sync`, {
+                const res = await apiFetch(`/api/auth/social-sync`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: tokenResponse.access_token, provider: 'google' })
@@ -73,7 +73,7 @@ function LoginContent() {
         setIsLoading(true)
         setError('')
         try {
-            const res = await fetch(`${API_URL}/api/auth/login`, {
+            const res = await apiFetch(`/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: loginEmail.trim().toLowerCase(), password: loginPassword })
@@ -105,7 +105,7 @@ function LoginContent() {
         setIsLoading(true)
         try {
             // Step 1: Register
-            const res = await fetch(`${API_URL}/api/auth/register`, {
+            const res = await apiFetch(`/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -119,7 +119,7 @@ function LoginContent() {
             if (!res.ok) throw new Error(data.detail || 'Registration failed')
 
             // Step 2: Auto-login with the same credentials
-            const loginRes = await fetch(`${API_URL}/api/auth/login`, {
+            const loginRes = await apiFetch(`/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: signupEmail.trim().toLowerCase(), password: signupPassword })

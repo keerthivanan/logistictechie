@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 import { Suspense } from 'react';
 
@@ -30,7 +30,7 @@ function SuccessContent() {
                 // 1. Upgrade the User ID to REG-OMEGO securely
                 // (n8n will handle standard approval emails and logic later)
                 const token = localStorage.getItem('token');
-                const res = await fetch(`${API_URL}/api/forwarders/upgrade-id?email=${encodeURIComponent(user.email)}&session_id=${encodeURIComponent(sessionId)}`, {
+                const res = await apiFetch(`/api/forwarders/upgrade-id?email=${encodeURIComponent(user.email)}&session_id=${encodeURIComponent(sessionId)}`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`

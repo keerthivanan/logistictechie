@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import {
     X,
     MapPin,
@@ -33,7 +33,7 @@ export default function PartnerDashboard() {
         const fetchBids = async () => {
             try {
                 const token = localStorage.getItem('token')
-                const res = await fetch(`${API_URL}/api/forwarders/my-bids`, {
+                const res = await apiFetch(`/api/forwarders/my-bids`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 if (res.ok) {

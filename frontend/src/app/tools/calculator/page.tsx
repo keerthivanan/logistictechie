@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Navbar from '@/components/layout/Navbar'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import {
     Calculator, MapPin, ArrowRight, ChevronDown,
     RefreshCw, TrendingUp, Clock,
@@ -35,7 +35,7 @@ function PortInput({ label, value, onChange, onSelect, placeholder }: {
         const id = setTimeout(async () => {
             setSearching(true)
             try {
-                const res = await fetch(`${API_URL}/api/references/ports/search?q=${encodeURIComponent(value)}`)
+                const res = await apiFetch(`/api/references/ports/search?q=${encodeURIComponent(value)}`)
                 const data = await res.json()
                 setOptions(data.results || [])
             } catch { setOptions([]) }
@@ -117,7 +117,7 @@ export default function CalculatorPage() {
         e.preventDefault()
         setLoading(true); setApiError(null); setResult(null)
         try {
-            const res = await fetch(`${API_URL}/api/tools/freight-estimate`, {
+            const res = await apiFetch(`/api/tools/freight-estimate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

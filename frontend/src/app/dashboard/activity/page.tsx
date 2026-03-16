@@ -14,7 +14,7 @@ import {
     Globe,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import Link from 'next/link'
 
 interface Activity {
@@ -44,7 +44,7 @@ export default function ActivityPage() {
             try {
                 setLoading(true)
                 const token = localStorage.getItem('token')
-                const res = await fetch(`${API_URL}/api/dashboard/activity/full?limit=${limit}&offset=${page * limit}`, {
+                const res = await apiFetch(`/api/dashboard/activity/full?limit=${limit}&offset=${page * limit}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 if (res.ok) {

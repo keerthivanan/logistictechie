@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { Search, ChevronDown, MapPin, ArrowRight, Package, Calendar, DollarSign, Truck, Box, X, Info, Plus, AlertCircle, Loader2, Anchor, Phone } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/context/AuthContext'
@@ -104,7 +104,7 @@ export default function SearchPage() {
     }
     setIsSearching(true)
     try {
-      const res = await fetch(`${API_URL}/api/references/ports/search?q=${q}`)
+      const res = await apiFetch(`/api/references/ports/search?q=${q}`)
       const data = await res.json()
       setSuggestions(data.results || [])
     } catch (e) {
@@ -223,7 +223,7 @@ export default function SearchPage() {
     const handleSearch = async () => {
       setSearching(true)
       try {
-        const res = await fetch(`${API_URL}/api/references/ports/search?q=${query}`)
+        const res = await apiFetch(`/api/references/ports/search?q=${query}`)
         const data = await res.json()
         setResults(data.results || [])
       } catch (e) { }
@@ -274,7 +274,7 @@ export default function SearchPage() {
     const handleSearch = async () => {
       setSearching(true)
       try {
-        const res = await fetch(`${API_URL}/api/references/commodities/search?q=${query}`)
+        const res = await apiFetch(`/api/references/commodities/search?q=${query}`)
         const data = await res.json()
         setResults(data.results || [])
       } catch (e) { }
@@ -324,7 +324,7 @@ export default function SearchPage() {
     const handleSearch = async () => {
       setSearching(true)
       try {
-        const res = await fetch(`${API_URL}/api/references/offices/search?q=${query}`)
+        const res = await apiFetch(`/api/references/offices/search?q=${query}`)
         const data = await res.json()
         setResults(data.offices || [])
       } catch (e) { }
@@ -375,7 +375,7 @@ export default function SearchPage() {
     const handleSearch = async () => {
       setSearching(true)
       try {
-        const res = await fetch(`${API_URL}/api/references/deadlines?un_locode=${unlocode}&imo=${imo}`)
+        const res = await apiFetch(`/api/references/deadlines?un_locode=${unlocode}&imo=${imo}`)
         const data = await res.json()
         setResults(data.deadlines)
       } catch (e) { }

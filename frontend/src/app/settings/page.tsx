@@ -16,7 +16,7 @@ import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Avatar from '@/components/visuals/Avatar'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import Navbar from '@/components/layout/Navbar'
 
 export default function RebuiltSettingsPage() {
@@ -48,7 +48,7 @@ export default function RebuiltSettingsPage() {
         setIsUpdating(true)
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`${API_URL}/api/auth/update-profile`, {
+            const res = await apiFetch(`/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ full_name: name, avatar_url: avatarUrl })

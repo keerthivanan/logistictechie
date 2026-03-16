@@ -11,7 +11,7 @@ import {
     ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Task {
@@ -43,7 +43,7 @@ export default function TasksPage() {
         const fetchTasks = async () => {
             try {
                 const token = localStorage.getItem('token')
-                const res = await fetch(`${API_URL}/api/tasks/me`, {
+                const res = await apiFetch(`/api/tasks/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 if (res.ok) {
@@ -64,7 +64,7 @@ export default function TasksPage() {
         setTogglingId(taskId)
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`${API_URL}/api/tasks/${taskId}/toggle`, {
+            const res = await apiFetch(`/api/tasks/${taskId}/toggle`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             })

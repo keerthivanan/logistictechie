@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Search, ArrowUpRight, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -16,7 +16,7 @@ export default function ShipmentsPage() {
     const fetchShipments = useCallback(async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`${API_URL}/api/marketplace/my-requests`, {
+            const res = await apiFetch(`/api/marketplace/my-requests`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.status === 401) {

@@ -20,7 +20,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 
 export default function DashboardLayout({
     children,
@@ -39,7 +39,7 @@ export default function DashboardLayout({
             try {
                 const token = localStorage.getItem('token')
                 if (!token) return
-                const res = await fetch(`${API_URL}/api/dashboard/stats/me`, {
+                const res = await apiFetch(`/api/dashboard/stats/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 if (res.ok) {

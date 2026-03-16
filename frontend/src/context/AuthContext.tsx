@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 interface User {
     id: string;
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const fetchProfile = useCallback(async (token: string) => {
         try {
-            const res = await fetch(`${API_URL}/api/auth/me`, {
+            const res = await apiFetch(`/api/auth/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -152,7 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const token = localStorage.getItem('token');
         // Fire-and-forget: log LOGOUT activity on backend (don't block UI)
         if (token) {
-            fetch(`${API_URL}/api/auth/logout`, {
+            apiFetch(`/api/auth/logout`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` }
             }).catch(() => { /* ignore network errors on logout */ });

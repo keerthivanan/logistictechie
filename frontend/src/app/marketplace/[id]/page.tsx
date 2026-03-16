@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, Activity, Zap } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 interface Quote {
     quotation_id: string;
@@ -34,7 +34,7 @@ export default function MarketplaceLiveDashboard() {
         const fetchQuotes = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`${API_URL}/api/marketplace/request/${requestId}`, {
+                const res = await apiFetch(`/api/marketplace/request/${requestId}`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                 });
                 if (!res.ok) throw new Error('Network error');

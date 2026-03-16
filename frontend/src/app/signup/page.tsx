@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import Prism from '@/components/visuals/Prism'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/context/AuthContext'
@@ -37,7 +37,7 @@ function SignupContent() {
             setIsLoading(true)
             setError('')
             try {
-                const res = await fetch(`${API_URL}/api/auth/social-sync`, {
+                const res = await apiFetch(`/api/auth/social-sync`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: tokenResponse.access_token, provider: 'google' })
@@ -75,7 +75,7 @@ function SignupContent() {
 
         setIsLoading(true)
         try {
-            const res = await fetch(`${API_URL}/api/auth/register`, {
+            const res = await apiFetch(`/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

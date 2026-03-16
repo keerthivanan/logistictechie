@@ -9,7 +9,7 @@ import {
     Copy, ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 const PortalNavbar = () => (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-xl border-b border-white/5 z-[100] px-8 flex items-center justify-between">
@@ -76,7 +76,7 @@ export default function ForwarderPortal() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`${API_URL}/api/forwarders/auth`, {
+            const res = await apiFetch(`/api/forwarders/auth`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ forwarder_id: id, email: mail })
@@ -129,7 +129,7 @@ export default function ForwarderPortal() {
         if (!selectedRequest || !bidPrice) return;
         setSubmittingBid(true);
         try {
-            const res = await fetch(`${API_URL}/api/forwarders/portal-bid`, {
+            const res = await apiFetch(`/api/forwarders/portal-bid`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

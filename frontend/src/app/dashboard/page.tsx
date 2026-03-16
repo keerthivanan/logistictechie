@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 
 import DashboardHeader from './_components/DashboardHeader'
 import MetricCards from './_components/MetricCards'
@@ -31,7 +31,7 @@ export default function DashboardPage() {
                 setLoading(true)
                 const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
 
-                const response = await fetch(`${API_URL}/api/dashboard/stats/me`, {
+                const response = await apiFetch(`/api/dashboard/stats/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
 

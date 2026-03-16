@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 
 const QUICK_SEARCHES = ['smartphone', 'cotton shirt', 'steel plates', 'laptop', 'tyre', 'battery', 'furniture', 'coffee']
 
@@ -20,7 +20,7 @@ export default function HSCodesPage() {
         setLoading(true)
         setApiError('')
         try {
-            const res = await fetch(`${API_URL}/api/tools/hs-code-classify`, {
+            const res = await apiFetch(`/api/tools/hs-code-classify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: term })

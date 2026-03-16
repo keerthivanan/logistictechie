@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { countries } from '@/lib/countries';
 import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 import Navbar from '@/components/layout/Navbar';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 import Avatar from '@/components/visuals/Avatar';
 
 interface Country {
@@ -105,7 +105,7 @@ export default function ForwarderRegisterPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_URL}/api/forwarders/promote`, {
+            const response = await apiFetch(`/api/forwarders/promote`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({

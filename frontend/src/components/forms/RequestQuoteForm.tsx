@@ -9,7 +9,7 @@ import {
     ShieldAlert, FileText, Anchor, ArrowRight, Loader2, Info
 } from 'lucide-react';
 import { countries } from '@/lib/countries';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
 import PortAutocomplete from '@/components/forms/PortAutocomplete';
 import CommodityAutocomplete from '@/components/forms/CommodityAutocomplete';
@@ -190,7 +190,7 @@ export default function RequestQuoteForm() {
             };
 
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/marketplace/submit`, {
+            const res = await apiFetch(`/api/marketplace/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

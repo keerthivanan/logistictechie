@@ -8,7 +8,7 @@ import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Avatar from '@/components/visuals/Avatar';
 import PartnerModal from '@/components/modals/PartnerModal';
-import { API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 
 interface Forwarder {
     id: string;
@@ -30,7 +30,7 @@ export default function ForwarderDirectoryPage() {
     useEffect(() => {
         const fetchForwarders = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/forwarders/active`);
+                const res = await apiFetch('/api/forwarders/active');
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setForwarders(data);
