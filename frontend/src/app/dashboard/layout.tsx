@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard,
     Package,
@@ -22,14 +22,29 @@ import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
 
+const ACTION_MAP: Record<string, string> = {
+    VECTOR_SEARCH: 'Freight Search',
+    QUOTE_REQUESTED: 'Quote Requested',
+    QUOTE_ACCEPTED: 'Quote Accepted',
+    BOOKING_CREATED: 'Booking Created',
+    SHIPMENT_UPDATED: 'Shipment Updated',
+    TASK_COMPLETED: 'Task Completed',
+    BID_SUBMITTED: 'Bid Submitted',
+    BID_ACCEPTED: 'Bid Accepted',
+    LOGIN: 'Signed In',
+    LOGOUT: 'Signed Out',
+}
+
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
     const pathname = usePathname()
+    const router = useRouter()
     const { user } = useAuth()
     const [stats, setStats] = useState<any>(null)
+    const [searchQuery, setSearchQuery] = useState('')
     const [sortOpen, setSortOpen] = useState(false)
     const [filterOpen, setFilterOpen] = useState(false)
     const [notifOpen, setNotifOpen] = useState(false)
@@ -46,8 +61,8 @@ export default function DashboardLayout({
                     const data = await res.json()
                     setStats(data)
                 }
-            } catch (err) {
-                console.error("Dashboard layout sync failed", err)
+            } catch {
+                // silently ignore
             }
         }
 
@@ -136,21 +151,27 @@ export default function DashboardLayout({
                         </nav>
                     </div>
 
-                    {/* Partner Section (Dynamic) */}
-                    {user?.role === 'forwarder' && (
+                    {/* Partner Section — visible to all users */}
+                    {user && (
                         <div>
-                            <h3 className="px-4 text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-4">Partner Center</h3>
+                            <h3 className={`px-4 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${user.role === 'forwarder' ? 'text-emerald-500' : 'text-zinc-600'}`}>Partner Center</h3>
                             <nav className="space-y-1">
-                                {partnerNav.map((item) => (
-                                    <Link
-                                        key={item.name}
-                                        href={item.href}
-                                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all group"
-                                    >
-                                        <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-white" />
-                                        <span className="text-sm tracking-tight">{item.name}</span>
-                                    </Link>
-                                ))}
+                                {partnerNav.map((item) => {
+                                    const isActive = pathname === item.href
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive
+                                                ? 'bg-white text-black font-bold'
+                                                : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                            }`}
+                                        >
+                                            <item.icon className={`w-5 h-5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                            <span className="text-sm tracking-tight">{item.name}</span>
+                                        </Link>
+                                    )
+                                })}
                             </nav>
                         </div>
                     )}
@@ -162,7 +183,7 @@ export default function DashboardLayout({
                         <Avatar src={user?.avatar_url} name={user?.name} size="sm" className="border-zinc-800" />
                         <div className="flex-1 overflow-hidden">
                             <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
-                            <p className="text-[11px] text-zinc-500 font-mono">{user?.sovereign_id}</p>
+                            <p className="text-[11px] text-zinc-500 font-mono truncate">{user?.email}</p>
                         </div>
                     </Link>
                 </div>
@@ -177,8 +198,15 @@ export default function DashboardLayout({
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 group-focus-within:text-white transition-colors" />
                             <input
                                 type="text"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' && searchQuery.trim()) {
+                                        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                                    }
+                                }}
                                 placeholder="Search shipments, commodities, or forwarders..."
-                                className="w-full bg-white/5 border border-white/5 rounded-full py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
+                                className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
                             />
                         </div>
                     </div>
@@ -277,18 +305,23 @@ export default function DashboardLayout({
                                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                            className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-2xl z-[60]"
+                                            className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl z-[60]"
                                         >
                                             <div className="flex items-center justify-between mb-6">
                                                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-outfit">CargoLink Alerts</h3>
-                                                <button className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest">Clear All</button>
+                                                <button
+                                                    onClick={() => setStats((s: any) => s ? { ...s, recent_activity: [] } : s)}
+                                                    className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest transition-colors"
+                                                >
+                                                    Clear All
+                                                </button>
                                             </div>
                                             <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
                                                 {stats?.recent_activity?.slice(0, 5).map((act: any) => (
-                                                    <div key={act.id} className="flex gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
+                                                    <div key={act.id} className="flex gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
                                                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
                                                         <div className="space-y-1">
-                                                            <p className="text-xs font-medium text-white">{act.action.replace(/_/g, ' ')}</p>
+                                                            <p className="text-xs font-medium text-white">{ACTION_MAP[act.action] ?? act.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
                                                             <p className="text-[11px] text-zinc-500 leading-relaxed">
                                                                 {act.entity || 'System'}
                                                             </p>
@@ -311,7 +344,7 @@ export default function DashboardLayout({
                                 </AnimatePresence>
                             </div>
 
-                            <Link href="/marketplace" className="bg-white text-black text-xs font-black px-6 py-3 rounded-full hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <Link href="/marketplace" className="bg-white text-black text-xs font-black px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                 <Plus className="w-4 h-4" /> NEW SHIPMENT
                             </Link>
                         </div>

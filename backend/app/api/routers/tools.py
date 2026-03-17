@@ -542,6 +542,7 @@ import httpx
 import time as _time
 from typing import Any
 from app.core.config import settings
+from app.data.hs_codes import HS_HEADINGS
 
 
 class HSCodeRequest(BaseModel):
@@ -565,7 +566,7 @@ def _parse_maersk_results(commodities: list, limit: int = 6) -> list:
         if len(results) >= limit:
             break
         comm_name = comm.get("commodityName", "")
-        hs_codes = comm.get("hsCommodityCodes", [])
+        hs_codes = comm.get("hsCommodities", [])
         if not hs_codes:
             continue
         for hs in hs_codes:
@@ -669,13 +670,30 @@ async def classify_hs_code(req: HSCodeRequest):
 
     results = _parse_maersk_results(raw, limit=6)
 
+    # WCO fallback if Maersk returned no parseable HS codes
+    source = "Maersk Commodity Reference · Live"
+    if not results:
+        q_lower = query_key
+        wco_matches = [h for h in HS_HEADINGS if q_lower in h["name"].lower()][:6]
+        results = [
+            {
+                "code": h["code"],
+                "title": h["name"],
+                "desc": h["name"],
+                "prob": f"{round(99 - i * 8, 1)}%",
+            }
+            for i, h in enumerate(wco_matches)
+        ]
+        source = "WCO HS 2022 · Fallback"
+        logger.info(f"Maersk HS: no parseable results for '{query_key}', using WCO fallback ({len(results)} hits)")
+
     # Cache this query's results
     _query_cache[query_key] = {"results": results, "fetched_at": now}
 
     return {
         "results": results,
         "query": req.query,
-        "source": "Maersk Commodity Reference · Live",
+        "source": source,
         "confidence": results[0]["prob"] if results else "0%",
     }
 

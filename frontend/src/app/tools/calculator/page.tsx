@@ -161,7 +161,7 @@ export default function CalculatorPage() {
                         ))}
                     </div>
                     <button onClick={() => calcRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                        className="inline-flex items-center px-7 py-3.5 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-colors text-sm">
+                        className="inline-flex items-center px-7 py-3.5 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-colors text-xs uppercase tracking-widest font-inter">
                         Calculate Rate <ArrowRight className="ml-2 w-4 h-4" />
                     </button>
                 </div>
@@ -169,22 +169,22 @@ export default function CalculatorPage() {
 
             {/* ─── CALCULATOR ─── */}
             <section ref={calcRef} className="py-24 bg-black border-t border-white/5">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-12 items-center">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid md:grid-cols-2 gap-20 items-start">
 
-                        {/* FORM SIDE */}
-                        <div className="w-full space-y-8">
-                            <div className="space-y-3">
-                                <h2 className="text-4xl font-bold tracking-tight">Know your full <br /> landed cost.</h2>
-                                <p className="text-zinc-400 leading-relaxed text-sm max-w-md">
+                        {/* LEFT: description + quick routes */}
+                        <div className="space-y-8">
+                            <div className="space-y-4">
+                                <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Know your full <br /> landed cost.</h2>
+                                <p className="text-lg text-zinc-400 leading-relaxed max-w-xl">
                                     Rates from Drewry WCI, SCFI, and Xeneta Q1 2025. Includes ocean freight, BAF, EBS (Red Sea), CAF, THC origin/destination, B/L, AMS/ENS, and destination customs fees. Sanctions validated against 10 jurisdictions.
                                 </p>
                                 <p className="text-[11px] text-zinc-600 font-inter">Indicative only — verify with a licensed freight forwarder before booking.</p>
                             </div>
 
                             {/* Quick routes */}
-                            <div>
-                                <p className="text-xs font-medium text-zinc-500 font-inter mb-3">Quick Routes</p>
+                            <div className="space-y-3 pt-4 border-t border-white/5">
+                                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider font-inter">Quick Routes</p>
                                 <div className="flex flex-wrap gap-2">
                                     {QUICK_ROUTES.map(r => (
                                         <button key={`${r.orig}-${r.dest}`} type="button" onClick={() => applyRoute(r)}
@@ -194,9 +194,12 @@ export default function CalculatorPage() {
                                     ))}
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Form */}
-                            <form onSubmit={handleCalculate} className="bg-zinc-950 border border-white/5 rounded-3xl p-8 space-y-5">
+                        {/* RIGHT: form + results */}
+                        <div className="space-y-4">
+                            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider font-inter mb-5">Rate Calculator</p>
+                            <form onSubmit={handleCalculate} className="bg-zinc-950 border border-white/5 rounded-2xl p-8 space-y-5">
                                 <div className="grid grid-cols-2 gap-4">
                                     <PortInput label="Origin Port" value={origCode} placeholder="Type city or LOCODE…"
                                         onChange={v => { setOrigCode(v); setOrigName(v); setResult(null) }}
@@ -255,19 +258,17 @@ export default function CalculatorPage() {
                                     {loading ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Calculating…</> : <><RefreshCw className="w-3.5 h-3.5" /> Calculate Full Landed Cost</>}
                                 </button>
                             </form>
-                        </div>
 
-                        {/* RESULTS SIDE */}
-                        <div className="w-full">
+                        {/* RESULTS */}
                             {apiError && (
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-6 flex items-start gap-4">
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 flex items-start gap-4">
                                     <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                                     <p className="text-sm text-red-400 font-inter leading-relaxed">{apiError}</p>
                                 </div>
                             )}
 
                             {result?.cannot_ship && (
-                                <div className="bg-red-950/40 border border-red-500/30 rounded-3xl p-8 space-y-4">
+                                <div className="bg-red-950/40 border border-red-500/30 rounded-2xl p-8 space-y-4">
                                     <div className="flex items-center gap-3">
                                         <XCircle className="w-6 h-6 text-red-500 shrink-0" />
                                         <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider font-outfit">Route Not Serviceable</h3>
@@ -296,7 +297,7 @@ export default function CalculatorPage() {
                                     )}
 
                                     {/* Total landed */}
-                                    <div className="bg-zinc-950 border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+                                    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 p-8 opacity-[0.025]"><Calculator className="w-40 h-40" /></div>
                                         <p className="text-xs font-medium text-zinc-500 font-inter mb-2">Total Estimated Landed Cost</p>
                                         <div className="flex items-baseline gap-3 mb-3">
@@ -322,7 +323,7 @@ export default function CalculatorPage() {
                                     </div>
 
                                     {/* Ocean + surcharges */}
-                                    <div className="bg-zinc-950 border border-white/5 rounded-3xl p-6">
+                                    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6">
                                         <p className="text-xs font-medium text-zinc-500 font-inter mb-5">Ocean Freight + Surcharges</p>
                                         <div className="space-y-2.5">
                                             <div className="flex justify-between items-center">
@@ -349,7 +350,7 @@ export default function CalculatorPage() {
                                     </div>
 
                                     {/* Customs */}
-                                    <div className="bg-zinc-950 border border-white/5 rounded-3xl p-6">
+                                    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6">
                                         <div className="flex items-center justify-between mb-5">
                                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] font-inter">{result.customs?.authority}</p>
                                             <span className="text-[10px] font-semibold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">Destination Customs</span>
@@ -415,8 +416,8 @@ export default function CalculatorPage() {
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready for real rates?</h2>
                     <p className="text-xl text-zinc-400 mb-10">Post your shipment and receive live quotes from verified freight forwarders within hours.</p>
                     <div className="flex justify-center gap-4 flex-wrap">
-                        <Link href="/search" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-all">Get Live Quotes</Link>
-                        <Link href="/services/ocean-freight" className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-all">Ocean Services</Link>
+                        <Link href="/search" className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">Get Live Quotes</Link>
+                        <Link href="/services/ocean-freight" className="px-8 py-4 bg-transparent border border-white/20 text-white font-black rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-widest font-inter">Ocean Services</Link>
                     </div>
                 </div>
             </section>

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Ship, X, Loader2, Search } from 'lucide-react';
-import { apiFetch } from '@/lib/config';
+import { API_URL } from '@/lib/config';
 
 interface VesselAutocompleteProps {
     name: string;

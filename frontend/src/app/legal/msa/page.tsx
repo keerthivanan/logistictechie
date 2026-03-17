@@ -1,45 +1,100 @@
 'use client'
 
 import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import { FileText, Download } from 'lucide-react'
+
+const provisions = [
+    {
+        num: '01',
+        title: 'Service Scope',
+        body: 'CargoLink provides a digital platform for requesting, comparing, and booking international freight forwarding services. The platform connects shippers with verified freight forwarders and carriers.',
+    },
+    {
+        num: '02',
+        title: 'Service Availability',
+        body: 'Platform access is subject to network availability and scheduled maintenance windows. We target 99.9% uptime and will provide advance notice of planned downtime where possible.',
+    },
+    {
+        num: '03',
+        title: 'User Obligations',
+        body: 'Users agree to provide accurate shipment information, comply with all applicable laws and regulations, and not use the platform for prohibited or unlawful cargo.',
+    },
+    {
+        num: '04',
+        title: 'Confidentiality',
+        body: 'Both parties agree to protect each other\'s proprietary and confidential information. Pricing, business data, and cargo information shall not be disclosed to unauthorized third parties.',
+    },
+    {
+        num: '05',
+        title: 'Payment Terms',
+        body: 'All fees are billed in accordance with the rate schedule agreed at the time of booking. CargoLink charges a service fee on completed bookings, clearly disclosed before confirmation.',
+    },
+    {
+        num: '06',
+        title: 'Liability Limitation',
+        body: 'CargoLink\'s liability is limited to direct damages arising from platform errors. CargoLink is not liable for cargo loss, damage, or delay caused by carriers or freight forwarders.',
+    },
+    {
+        num: '07',
+        title: 'Termination',
+        body: 'Either party may terminate this agreement with 30 days written notice. CargoLink reserves the right to suspend accounts for violations of these terms without prior notice.',
+    },
+    {
+        num: '08',
+        title: 'Governing Law',
+        body: 'This agreement shall be governed by applicable international commercial law. Disputes shall be resolved through binding arbitration under standard commercial arbitration rules.',
+    },
+]
 
 export default function MSAPage() {
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
             <Navbar />
 
-            <main className="pt-24 pb-12">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                    <h1 className="text-4xl font-bold mb-8">Master Service Agreement (MSA)</h1>
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
 
-                    <div className="bg-zinc-900 border border-white/10 p-8 rounded-2xl mb-12 text-center">
-                        <FileText className="w-16 h-16 text-white mx-auto mb-6" />
-                        <h2 className="text-2xl font-bold mb-4">Download the Full MSA</h2>
-                        <p className="text-gray-400 mb-8">
-                            Our Master Service Agreement governs the use of the Sovereign marketplace for all shippers and carriers.
-                        </p>
-                        <button
-                            onClick={() => alert("⬇️ DOWNLOADING SECURE ASSET...\n\nFILE: SOVEREIGN_MSA_v2.4.pdf\nSIZE: 4.2 MB\nSTATUS: ENCRYPTED")}
-                            className="bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-all flex items-center justify-center mx-auto hover:scale-105 active:scale-95"
-                        >
-                            Download PDF <Download className="w-5 h-5 ml-2" />
-                        </button>
-                    </div>
-
-                    <div className="space-y-8 text-gray-300">
-                        <h2 className="text-2xl font-bold text-white">Key Provisions Summary</h2>
-                        <ul className="list-disc pl-6 space-y-4">
-                            <li><strong className="text-white">Service Scope:</strong> We provide a digital platform for booking international freight.</li>
-                            <li><strong className="text-white">Service Availability:</strong> Logistics nodes and vessel access are subject to current network capacity and sovereign synchronization.</li>
-                            <li><strong className="text-white">Confidentiality:</strong> Both parties agree to protect proprietary information.</li>
-                            <li><strong className="text-white">Termination:</strong> Either party may terminate with 30 days written notice.</li>
-                        </ul>
-                    </div>
+                {/* Header */}
+                <div className="mb-10">
+                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">
+                        Master Service Agreement
+                    </h1>
+                    <p className="text-xs text-zinc-500 font-inter">The terms governing use of the CargoLink platform for all shippers, forwarders, and carriers.</p>
+                    <p className="text-xs text-zinc-700 font-mono mt-2">Last updated: February 16, 2026</p>
                 </div>
-            </main>
 
-            <Footer />
+                {/* Download notice */}
+                <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-5 mb-6 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-1">Full MSA Document</p>
+                        <p className="text-xs text-zinc-500 font-inter">Contact our team to receive the full executed MSA document.</p>
+                    </div>
+                    <a
+                        href="mailto:legal@cargolink.io?subject=MSA Request"
+                        className="bg-white text-black px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
+                    >
+                        Request Document
+                    </a>
+                </div>
+
+                {/* Provisions */}
+                <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl divide-y divide-white/[0.05]">
+                    {provisions.map(({ num, title, body }) => (
+                        <div key={num} className="p-6">
+                            <div className="flex items-start gap-4">
+                                <span className="text-[10px] font-mono text-zinc-700 mt-0.5 flex-shrink-0">{num}</span>
+                                <div>
+                                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-inter mb-2">{title}</p>
+                                    <p className="text-sm text-zinc-400 font-inter leading-relaxed">{body}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <p className="text-xs text-zinc-700 font-inter text-center mt-8">
+                    Legal inquiries:{' '}
+                    <a href="mailto:legal@cargolink.io" className="text-zinc-500 hover:text-white transition-colors underline">legal@cargolink.io</a>
+                </p>
+            </div>
         </div>
     )
 }

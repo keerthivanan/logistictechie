@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Package, X, Loader2, Info, Plus, Search } from 'lucide-react';
-import { apiFetch } from '@/lib/config';
+import { Package, X, Loader2, Plus, Search } from 'lucide-react';
+import { API_URL } from '@/lib/config';
 
 interface CommodityAutocompleteProps {
     name: string;
@@ -149,7 +149,8 @@ export default function CommodityAutocomplete({ name, value, onChange, placehold
                                             {item.name}
                                         </span>
                                         <span className="text-[9px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">
-                                            {item.source === "API" ? `Reference ID: ${item.id}` : "Standard Shipping Class"}
+                                            {item.id ? `HS: ${item.id}` : "Standard Shipping Class"}
+                                            {item.type && item.type !== 'DRY' ? ` · ${item.type}` : ''}
                                         </span>
                                     </div>
                                     <Search className="w-3 h-3 text-zinc-800 group-hover:text-zinc-400 transition-colors" />

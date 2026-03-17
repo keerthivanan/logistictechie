@@ -16,6 +16,7 @@ class WebhookService:
     def __init__(self):
         self.forwarder_webhook = os.getenv("N8N_FORWARDER_REGISTER_WEBHOOK")
         self.marketplace_webhook = os.getenv("N8N_MARKETPLACE_SUBMIT_WEBHOOK")
+        self.forwarder_decision_webhook = os.getenv("N8N_FORWARDER_DECISION_WEBHOOK")
         if not os.getenv("OMEGO_API_SECRET", ""):
             logger.warning("[CRITICAL] OMEGO_API_SECRET is empty. Webhook authentication is bypassed!")
 
@@ -51,6 +52,18 @@ class WebhookService:
             self.forwarder_webhook, 
             forwarder_data, 
             "FORWARDER_REGISTER"
+        )
+
+    async def trigger_forwarder_decision_webhook(self, decision_data: Dict[str, Any]):
+        """
+        Fires when admin approves or rejects a forwarder application.
+        Payload includes decision (APPROVED/REJECTED), company details, and forwarder email.
+        n8n sends the appropriate email to the forwarder.
+        """
+        return await self._trigger(
+            self.forwarder_decision_webhook,
+            decision_data,
+            "FORWARDER_DECISION"
         )
 
     async def trigger_marketplace_webhook(self, request_data: Dict[str, Any]):

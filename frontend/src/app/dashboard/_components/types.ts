@@ -1,8 +1,3 @@
-export interface ChartPoint {
-    label: string
-    value: number
-}
-
 export interface Activity {
     id: string
     action: string
@@ -26,10 +21,9 @@ export interface KanbanShipment {
 
 export interface DashboardStats {
     active_shipments: number
-    containers: number
-    on_time_rate: string
+    total_shipments: number
+    delivered_shipments: number
     pending_tasks_count: number
-    chart_data: ChartPoint[]
     recent_activity: Activity[]
     kanban_shipments: KanbanShipment[]
 }

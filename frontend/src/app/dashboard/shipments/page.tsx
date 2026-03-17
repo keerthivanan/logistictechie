@@ -12,6 +12,7 @@ export default function ShipmentsPage() {
     const router = useRouter()
     const [shipments, setShipments] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(false)
 
     const fetchShipments = useCallback(async () => {
         try {
@@ -26,9 +27,11 @@ export default function ShipmentsPage() {
             const data = await res.json()
             if (data.success) {
                 setShipments(data.requests)
+            } else {
+                setError(true)
             }
-        } catch (e) {
-            console.error('Failed to fetch shipments', e)
+        } catch {
+            setError(true)
         } finally {
             setLoading(false)
         }
@@ -48,6 +51,14 @@ export default function ShipmentsPage() {
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
                 <p className="text-xs text-zinc-600">Loading shipments...</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="h-full flex flex-col items-center justify-center space-y-2">
+                <p className="text-xs text-red-400">Failed to load shipments. Please refresh.</p>
             </div>
         )
     }

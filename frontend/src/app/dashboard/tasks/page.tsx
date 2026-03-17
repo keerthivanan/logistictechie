@@ -50,8 +50,8 @@ export default function TasksPage() {
                     const data = await res.json()
                     setTasks(data)
                 }
-            } catch (err) {
-                console.error('Failed to fetch tasks', err)
+            } catch {
+                // silently ignore
             } finally {
                 setLoading(false)
             }
@@ -72,8 +72,8 @@ export default function TasksPage() {
                 const updatedTask = await res.json()
                 setTasks(tasks.map(t => t.id === taskId ? updatedTask : t))
             }
-        } catch (err) {
-            console.error('Failed to toggle task', err)
+        } catch {
+            // silently ignore
         } finally {
             setTogglingId(null)
         }
@@ -128,18 +128,18 @@ export default function TasksPage() {
             <div className="flex items-center justify-between flex-shrink-0">
                 <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Pending</h3>
                 <div className="flex items-center gap-3">
-                    <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
+                    <div className="flex bg-white/5 border border-white/5 rounded-xl p-1">
                         {(['NEWEST', 'PRIORITY'] as const).map(o => (
                             <button key={o} onClick={() => setSortOrder(o)}
-                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-full transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
                                 {o}
                             </button>
                         ))}
                     </div>
-                    <div className="flex bg-white/5 border border-white/5 rounded-full p-1">
+                    <div className="flex bg-white/5 border border-white/5 rounded-xl p-1">
                         {(['ALL', 'HIGH', 'CRITICAL'] as const).map(p => (
                             <button key={p} onClick={() => setFilterPriority(p)}
-                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-full transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
                                 {p}
                             </button>
                         ))}
@@ -175,7 +175,7 @@ export default function TasksPage() {
                                     className="flex items-center justify-between p-3 bg-white/[0.01] border border-white/5 rounded-2xl group hover:bg-white/[0.04] hover:border-white/10 transition-all">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <button onClick={() => handleToggle(task.id)}
-                                            className="w-5 h-5 rounded-full border border-emerald-500/30 flex items-center justify-center text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-black transition-all flex-shrink-0">
+                                            className="w-5 h-5 rounded-xl border border-emerald-500/30 flex items-center justify-center text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-black transition-all flex-shrink-0">
                                             <CheckCircle2 className="w-3 h-3" />
                                         </button>
                                         <div className="overflow-hidden">
@@ -199,7 +199,7 @@ export default function TasksPage() {
 function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: string) => void; isToggling: boolean }) {
     return (
         <motion.div layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            className="group relative bg-[#0a0a0a] border border-white/5 rounded-3xl p-5 hover:border-white/20 transition-all overflow-hidden">
+            className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 hover:border-white/20 transition-all overflow-hidden">
             <div className="space-y-4">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: s
                         <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider font-inter">{task.priority}</span>
                     </div>
                     <button onClick={() => onToggle(task.id)} disabled={isToggling}
-                        className="w-6 h-6 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center hover:bg-white hover:text-black transition-all flex-shrink-0 disabled:opacity-50">
+                        className="w-6 h-6 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-center hover:bg-white hover:text-black transition-all flex-shrink-0 disabled:opacity-50">
                         {isToggling ? <Loader2 className="w-3 h-3 animate-spin text-zinc-500" /> : <Circle className="w-3 h-3" />}
                     </button>
                 </div>

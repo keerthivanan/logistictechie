@@ -4,234 +4,215 @@ import React, { Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
-import { Ship, MapPin, Package, Info, ArrowRight, CheckCircle } from 'lucide-react'
+import { Ship, ArrowRight, CheckCircle2, Clock, FileText } from 'lucide-react'
+import Navbar from '@/components/layout/Navbar'
+import { motion } from 'framer-motion'
 
-// Separate component for search params logic
 function BookingContent() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
 
-  // --- Role Protection ---
   useEffect(() => {
-    if (!authLoading && user?.role === 'forwarder') {
-      router.push('/dashboard')
-    }
+    if (!authLoading && user?.role === 'forwarder') router.push('/dashboard')
   }, [user, authLoading, router])
 
-  const quoteId = searchParams.get('quoteId') || ''
-  const carrier = searchParams.get('carrier') || 'Generic Carrier'
-  const priceStr = searchParams.get('price') || '0'
-  const price = parseFloat(priceStr)
-  const origin = searchParams.get('origin') || 'CNSHA'
+  const quoteId     = searchParams.get('quoteId')   || ''
+  const carrier     = searchParams.get('carrier')   || 'Carrier'
+  const priceStr    = searchParams.get('price')     || '0'
+  const price       = parseFloat(priceStr)
+  const origin      = searchParams.get('origin')    || 'CNSHA'
   const destination = searchParams.get('destination') || 'USNYC'
-  const transit = searchParams.get('transit') || '30'
-  const vessel = searchParams.get('vessel') || 'TBD'
-  const container = searchParams.get('container') || '40FT'
-  const wisdom = searchParams.get('wisdom') || ''
+  const transit     = searchParams.get('transit')   || '30'
+  const vessel      = searchParams.get('vessel')    || 'TBD'
+  const container   = searchParams.get('container') || '40FT'
+  const wisdom      = searchParams.get('wisdom')    || ''
   const breakdownStr = searchParams.get('breakdown') || '{}'
 
-  let breakdown = { fuel_component: 0, terminal_handling: 0, surcharges: 0 }
-  try {
-    breakdown = JSON.parse(breakdownStr)
-  } catch (e) {
-    console.error('Failed to parse breakdown', e)
-  }
+  let breakdown: any = {}
+  try { breakdown = JSON.parse(breakdownStr) } catch { /* ignore */ }
 
-  // Calculate simple breakdown if not provided
-  const fuel = breakdown.fuel_component || price * 0.4
-  const handling = breakdown.terminal_handling || price * 0.3
-  const surcharges = breakdown.surcharges || price * 0.3
+  const baseRate      = breakdown.base_rate      || Math.round(price * 0.63)
+  const fuelSurcharge = breakdown.fuel_surcharge || Math.round(price * 0.18)
+  const portFees      = breakdown.port_fees      || Math.round(price * 0.07)
+  const surcharges    = breakdown.surcharges     || 0
+  const total         = breakdown.total          || price
 
   const handleConfirm = () => {
     const params = new URLSearchParams({
       carrier, price: priceStr, origin, destination,
-      container, transit, vessel, quoteId
+      container, transit, vessel, quoteId,
     }).toString()
     router.push(`/booking/confirmation?${params}`)
   }
 
+  const details = [
+    { label: 'Carrier',   value: carrier },
+    { label: 'Vessel',    value: vessel, mono: true },
+    { label: 'Container', value: `1 × ${container}` },
+    { label: 'Service',   value: 'Full Container Load' },
+    { label: 'Cargo',     value: 'General Cargo' },
+  ]
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Booking Summary */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-8">Shipment Summary</h2>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid lg:grid-cols-5 gap-6"
+      >
+        {/* ── Left panel ── */}
+        <div className="lg:col-span-3 space-y-4">
 
-            {/* Route Diagram */}
-            <div className="flex items-center justify-between mb-8 bg-black p-6 rounded-xl border border-white/5">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-3 mx-auto">
-                  <MapPin className="w-8 h-8 text-white" />
-                </div>
-                <div className="font-bold text-2xl font-mono">{origin}</div>
+          {/* Route card */}
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">Route Overview</p>
+
+            {/* Visual route */}
+            <div className="flex items-center gap-4 mb-5">
+              <div className="flex-1">
+                <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{origin}</p>
+                <p className="text-[10px] text-zinc-600 mt-1 font-inter">Origin Port</p>
               </div>
-
-              <div className="flex-1 px-8">
-                <div className="relative">
-                  <div className="h-px bg-white/20 w-full dashed"></div>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black px-4">
-                    <Ship className="w-6 h-6 text-gray-400" />
-                  </div>
+              <div className="flex flex-col items-center gap-1 flex-1 px-2">
+                <p className="text-xs font-bold text-zinc-300 font-inter">{transit} days</p>
+                <div className="flex items-center gap-1 w-full">
+                  <div className="h-px flex-1 bg-white/10" />
+                  <Ship className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+                  <div className="h-px flex-1 bg-white/10" />
                 </div>
+                <p className="text-[10px] text-zinc-700 font-inter">Transit</p>
               </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-3 mx-auto">
-                  <MapPin className="w-8 h-8 text-white" />
-                </div>
-                <div className="font-bold text-2xl font-mono">{destination}</div>
-              </div>
-            </div>
-
-            {/* Shipment Details */}
-            <div className="grid md:grid-cols-2 gap-4 mb-8">
-              <div className="bg-black/50 p-4 rounded-xl border border-white/5">
-                <div className="flex items-center mb-2">
-                  <Ship className="w-5 h-5 text-gray-400 mr-2" />
-                  <span className="font-semibold text-white">{carrier} (FCL)</span>
-                </div>
-                <div className="text-xs text-gray-500">Vessel: {vessel}</div>
-              </div>
-
-              <div className="bg-black/50 p-4 rounded-xl border border-white/5">
-                <div className="flex items-center mb-2">
-                  <Info className="w-5 h-5 text-gray-400 mr-2" />
-                  <span className="font-semibold text-white">Transit: {transit} Days</span>
-                </div>
-                <div className="text-xs text-gray-500">Direct Service</div>
+              <div className="flex-1 text-right">
+                <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{destination}</p>
+                <p className="text-[10px] text-zinc-600 mt-1 font-inter">Destination Port</p>
               </div>
             </div>
 
-            {/* Load Section */}
-            <div className="mb-8 p-6 bg-black/50 rounded-xl border border-white/5">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mr-4">
-                  <Package className="w-6 h-6 text-white" />
+            {/* Details rows */}
+            <div className="border-t border-white/5 pt-4 space-y-3">
+              {details.map(({ label, value, mono }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">{label}</p>
+                  <p className={`text-xs font-bold text-white ${mono ? 'font-mono' : 'font-inter'}`}>{value}</p>
                 </div>
-                <div>
-                  <h4 className="font-bold text-white text-lg">1 × {container} Container</h4>
-                  <p className="text-gray-400 text-sm">General Merchandise • Verified Cargo</p>
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* Parties */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Freight Forwarder</h4>
-                <div className="flex items-center bg-black/30 p-3 rounded-lg border border-white/5">
-                  <div className="w-10 h-10 bg-white rounded flex items-center justify-center mr-3">
-                    <Ship className="w-5 h-5 text-black" />
-                  </div>
-                  <span className="font-semibold">Sovereign Logistics</span>
-                </div>
+            {/* Insight */}
+            {wisdom && !wisdom.includes('PROPHETIC') && (
+              <div className="mt-4 pt-4 border-t border-white/5">
+                <p className="text-[11px] text-zinc-500 font-inter leading-relaxed italic">{wisdom}</p>
               </div>
+            )}
+          </div>
 
-              <div>
-                <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Customs Broker</h4>
-                <div className="flex items-center bg-black/30 p-3 rounded-lg border border-white/5">
-                  <div className="w-10 h-10 bg-zinc-800 rounded flex items-center justify-center mr-3">
-                    <span className="font-bold text-white">AI</span>
+          {/* What happens next */}
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">What Happens Next</p>
+            <div className="space-y-4">
+              {[
+                { icon: Ship,       text: 'Booking request sent to the carrier immediately.' },
+                { icon: Clock,      text: 'Freight specialist confirms your slot within 24 hours.' },
+                { icon: FileText,   text: 'Shipping instructions and B/L draft delivered to your email.' },
+                { icon: CheckCircle2, text: 'Cargo loaded and tracked until delivery.' },
+              ].map(({ icon: Icon, text }, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-7 h-7 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-3.5 h-3.5 text-zinc-500" />
                   </div>
-                  <span className="font-semibold">Sovereign Customs AI</span>
+                  <p className="text-xs text-zinc-400 font-inter leading-relaxed pt-0.5">{text}</p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Price Details Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 sticky top-24">
-            <h3 className="text-xl font-bold text-white mb-6">Cost Breakdown</h3>
+        {/* ── Right panel ── */}
+        <div className="lg:col-span-2">
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 sticky top-24">
+            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">Cost Breakdown</p>
 
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Ocean Freight (Fuel)</span>
-                <span className="font-mono font-medium text-white">${fuel.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
+            <div className="space-y-3">
+              {[
+                { label: 'Base Rate',       value: baseRate },
+                { label: 'Fuel Surcharge',  value: fuelSurcharge },
+                { label: 'Port Fees',       value: portFees },
+                ...(surcharges > 0 ? [{ label: 'Surcharges', value: surcharges }] : []),
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <p className="text-xs text-zinc-500 font-inter">{label}</p>
+                  <p className="text-xs font-mono font-bold text-zinc-300">${value.toLocaleString()}</p>
+                </div>
+              ))}
 
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Terminal Handling</span>
-                <span className="font-mono font-medium text-white">${handling.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-400">Strategic Surcharges</span>
-                <span className="font-mono font-medium text-white">${surcharges.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
-
-              <div className="pt-4 border-t border-white/10">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-white">Total</span>
-                  <span className="text-2xl font-bold text-white font-mono">${price.toLocaleString()}</span>
+              <div className="pt-3 mt-1 border-t border-white/5">
+                <div className="flex items-end justify-between">
+                  <p className="text-xs font-bold text-white font-inter">Total</p>
+                  <div className="text-right">
+                    <p className="text-2xl font-black font-mono text-white leading-none">${total.toLocaleString()}</p>
+                    <p className="text-[10px] text-zinc-600 font-inter mt-0.5">per container · all-in</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {quoteId && (
+              <p className="text-[10px] text-zinc-700 font-mono mt-4">Quote #{quoteId.slice(0, 12)}</p>
+            )}
 
             <button
               onClick={handleConfirm}
-              className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center group"
+              className="mt-5 w-full bg-white text-black py-3.5 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-zinc-200 transition-all font-inter flex items-center justify-center gap-2 active:scale-[0.98]"
             >
-              Confirm Booking <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              Confirm Booking <ArrowRight className="w-3.5 h-3.5" />
             </button>
 
-            <p className="text-xs text-center text-gray-600 mt-4">
-              Sovereign Direct Booking. By confirming you agree to our Terms of Service.
+            <p className="text-[10px] text-center text-zinc-700 mt-3 font-inter">
+              By confirming you agree to our{' '}
+              <Link href="/legal/terms" className="underline hover:text-zinc-500 transition-colors">Terms of Service</Link>.
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
 
 export default function BookingPage() {
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
-      {/* Navigation */}
-      <nav className="bg-black border-b border-white/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 group">
-              <span className="text-2xl font-bold tracking-tight text-white">CARGOLINK</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
+      <Navbar />
 
-      {/* Progress Bar */}
-      <div className="bg-zinc-900 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 text-sm">
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 text-white" />
-                <span className="ml-2 font-medium text-gray-300 hidden sm:inline">Search</span>
+      {/* Step bar */}
+      <div className="bg-black border-b border-white/5 pt-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center gap-3">
+            {[
+              { label: 'Search',       done: true,  active: false },
+              { label: 'Results',      done: true,  active: false },
+              { label: 'Booking',      done: false, active: true  },
+              { label: 'Confirmation', done: false, active: false },
+            ].map((step, i) => (
+              <div key={step.label} className="flex items-center gap-2">
+                {i > 0 && <div className="h-px w-8 bg-white/10" />}
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${step.done || step.active ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 border border-white/5'}`}>
+                  {step.done ? '✓' : i + 1}
+                </div>
+                <span className={`text-[10px] font-bold uppercase tracking-widest font-inter ${step.active ? 'text-white' : step.done ? 'text-zinc-500' : 'text-zinc-700'}`}>{step.label}</span>
               </div>
-              <div className="h-px w-8 sm:w-12 bg-white/20"></div>
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 text-white" />
-                <span className="ml-2 font-medium text-gray-300 hidden sm:inline">Results</span>
-              </div>
-              <div className="h-px w-8 sm:w-12 bg-white/20"></div>
-              <div className="flex items-center">
-                <div className="w-6 h-6 bg-white text-black rounded-full flex items-center justify-center font-bold text-xs">3</div>
-                <span className="ml-2 font-medium text-white">Booking</span>
-              </div>
-              <div className="h-px w-8 sm:w-12 bg-white/20"></div>
-              <div className="flex items-center">
-                <div className="w-6 h-6 bg-zinc-800 text-gray-500 rounded-full flex items-center justify-center font-bold text-xs">4</div>
-                <span className="ml-2 font-medium text-gray-600 hidden sm:inline">Confirmation</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <Suspense fallback={<div className="text-center py-20">Loading Booking Details...</div>}>
+      {/* Page title */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-2">
+        <h1 className="text-xl font-black font-outfit uppercase tracking-tight text-white">Review & Confirm</h1>
+        <p className="text-xs text-zinc-500 font-inter mt-1">Check the details below before confirming your booking.</p>
+      </div>
+
+      <Suspense fallback={<div className="text-center py-20 text-zinc-600 text-xs">Loading booking details...</div>}>
         <BookingContent />
       </Suspense>
     </div>

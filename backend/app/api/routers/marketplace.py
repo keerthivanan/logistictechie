@@ -121,7 +121,7 @@ async def submit_request(
         "cargo_specification": request_in.cargo_specification,
         "packing_type": request_in.packing_type,
         "quantity": request_in.quantity,
-        "weight": weight_kg,
+        "weight_kg": weight_kg,
         "weight_raw": request_in.weight,
         "weight_unit": request_in.weight_unit,
         "dimensions": request_in.dimensions,
@@ -202,7 +202,7 @@ async def submit_request(
         "uniqueId": request_id, 
         "request_id": request_id,
         "sovereign_id": current_user.sovereign_id,
-        "status": "SENT_TO_COMMAND_CENTER",
+        "status": "PROCESSING",
         "normalized_weight_kg": round(weight_kg, 2)
     }
 
@@ -347,7 +347,7 @@ async def get_request_details(
         "quotations": [{
             "quotation_id": b.quotation_id,
             "forwarder_company": b.forwarder_company,
-            "total_price": b.total_price,
+            "total_price": float(b.total_price) if b.total_price is not None else None,
             "currency": b.currency,
             "transit_days": b.transit_days,
             "ai_summary": b.ai_summary,

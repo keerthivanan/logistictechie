@@ -2,129 +2,170 @@
 
 import React, { Suspense } from 'react'
 import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import { CheckCircle, Printer, ArrowRight, Ship, MapPin } from 'lucide-react'
+import { CheckCircle2, Printer, ArrowRight, Ship, FileText, Clock, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { motion } from 'framer-motion'
 
 function ConfirmationContent() {
     const searchParams = useSearchParams()
 
-    // Read all params passed from /booking page
-    const carrier = searchParams.get('carrier') || 'Sovereign Prime'
-    const priceStr = searchParams.get('price') || '0'
-    const price = parseFloat(priceStr)
-    const origin = searchParams.get('origin') || 'CNSHA'
+    const carrier     = searchParams.get('carrier')     || 'Carrier'
+    const priceStr    = searchParams.get('price')       || '0'
+    const price       = parseFloat(priceStr)
+    const origin      = searchParams.get('origin')      || 'CNSHA'
     const destination = searchParams.get('destination') || 'USNYC'
-    const container = searchParams.get('container') || '40FT'
-    const transit = searchParams.get('transit') || '30'
-    const vessel = searchParams.get('vessel') || 'TBD'
-    const quoteId = searchParams.get('quoteId') || ''
+    const container   = searchParams.get('container')   || '40FT'
+    const transit     = searchParams.get('transit')     || '30'
+    const vessel      = searchParams.get('vessel')      || 'TBD'
+    const quoteId     = searchParams.get('quoteId')     || ''
 
-    // Generate a booking reference from quoteId or a timestamp
     const bookingRef = quoteId
         ? `BK-${quoteId.slice(0, 8).toUpperCase()}`
         : `BK-${Date.now().toString(36).toUpperCase()}`
 
-    // Estimated arrival
     const arrivalDate = new Date()
     arrivalDate.setDate(arrivalDate.getDate() + parseInt(transit))
-    const arrivalStr = arrivalDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    const arrivalStr = arrivalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+    const details = [
+        { label: 'Carrier',           value: carrier },
+        { label: 'Vessel',            value: vessel, mono: true },
+        { label: 'Container',         value: `1 × ${container} · FCL` },
+        { label: 'Transit Time',      value: `${transit} days` },
+        { label: 'Est. Arrival',      value: arrivalStr },
+        { label: 'Status',            value: 'Confirmed', highlight: true },
+    ]
 
     return (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-            {/* Success Icon */}
-            <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(34,197,94,0.3)]">
-                <CheckCircle className="w-12 h-12 text-black" />
-            </div>
-
-            <h1 className="text-4xl font-bold mb-4">Booking Confirmed!</h1>
-            <p className="text-xl text-gray-400 mb-2">
-                Reference: <span className="font-mono text-white">{bookingRef}</span>
-            </p>
-            <p className="text-sm text-gray-600 mb-12">
-                A confirmation has been recorded. Estimated arrival: <span className="text-gray-400">{arrivalStr}</span>
-            </p>
-
-            {/* Shipment Details */}
-            <div className="bg-zinc-900 border border-white/10 rounded-2xl p-8 mb-8 text-left">
-                <h3 className="font-bold mb-6 border-b border-white/10 pb-4 text-lg">Shipment Details</h3>
-
-                {/* Route */}
-                <div className="flex items-center justify-between mb-6 bg-black p-4 rounded-xl border border-white/5">
-                    <div className="text-center">
-                        <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center mb-2 mx-auto">
-                            <MapPin className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="font-bold text-xl font-mono">{origin}</div>
-                        <div className="text-xs text-gray-500 mt-1">Origin</div>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-5"
+            >
+                {/* Success header */}
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-8 text-center">
+                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-5">
+                        <CheckCircle2 className="w-7 h-7 text-black" />
                     </div>
-                    <div className="flex-1 px-6 text-center">
-                        <Ship className="w-5 h-5 text-gray-500 mx-auto mb-1" />
-                        <div className="text-xs text-green-400 font-bold">{transit} Days</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center mb-2 mx-auto">
-                            <MapPin className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="font-bold text-xl font-mono">{destination}</div>
-                        <div className="text-xs text-gray-500 mt-1">Destination</div>
+                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">Booking Confirmed</h1>
+                    <p className="text-xs text-zinc-500 font-inter mb-4">
+                        Your shipment has been booked. A confirmation has been recorded in our system.
+                    </p>
+                    <div className="inline-flex items-center gap-2 bg-white/[0.04] border border-white/5 rounded-xl px-4 py-2.5">
+                        <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Booking Reference</span>
+                        <span className="text-sm font-black font-mono text-white">{bookingRef}</span>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                    <div>
-                        <div className="text-gray-500 text-xs uppercase font-bold mb-1">Carrier</div>
-                        <div className="font-medium">{carrier}</div>
+                {/* Route + details */}
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">Shipment Details</p>
+
+                    {/* Route visual */}
+                    <div className="flex items-center gap-4 mb-5 bg-black/50 rounded-xl px-5 py-4 border border-white/[0.04]">
+                        <div className="flex-1">
+                            <p className="text-xl font-black font-mono text-white leading-none">{origin}</p>
+                            <p className="text-[10px] text-zinc-600 mt-1 font-inter">Origin</p>
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                            <p className="text-[10px] font-bold text-zinc-400 font-inter">{transit} days</p>
+                            <Ship className="w-3.5 h-3.5 text-zinc-600" />
+                        </div>
+                        <div className="flex-1 text-right">
+                            <p className="text-xl font-black font-mono text-white leading-none">{destination}</p>
+                            <p className="text-[10px] text-zinc-600 mt-1 font-inter">Destination</p>
+                        </div>
                     </div>
-                    <div>
-                        <div className="text-gray-500 text-xs uppercase font-bold mb-1">Container</div>
-                        <div className="font-medium">{container}</div>
-                    </div>
-                    <div>
-                        <div className="text-gray-500 text-xs uppercase font-bold mb-1">Vessel</div>
-                        <div className="font-medium font-mono text-sm">{vessel}</div>
-                    </div>
-                    <div>
-                        <div className="text-gray-500 text-xs uppercase font-bold mb-1">Status</div>
-                        <div className="font-medium text-green-400">CONFIRMED</div>
-                    </div>
-                    <div className="col-span-2 pt-4 border-t border-white/10">
-                        <div className="text-gray-500 text-xs uppercase font-bold mb-1">Total Charged</div>
-                        <div className="font-bold text-2xl font-mono">${price.toLocaleString()}</div>
+
+                    {/* Detail rows */}
+                    <div className="space-y-3">
+                        {details.map(({ label, value, mono, highlight }) => (
+                            <div key={label} className="flex items-center justify-between">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">{label}</p>
+                                <p className={`text-xs font-bold font-inter ${highlight ? 'text-emerald-400' : 'text-white'} ${mono ? 'font-mono' : ''}`}>{value}</p>
+                            </div>
+                        ))}
+                        <div className="pt-3 mt-1 border-t border-white/5 flex items-end justify-between">
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Total Charged</p>
+                            <div className="text-right">
+                                <p className="text-2xl font-black font-mono text-white leading-none">${price.toLocaleString()}</p>
+                                <p className="text-[10px] text-zinc-600 font-inter mt-0.5">per container · all-in</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                <Link
-                    href="/dashboard"
-                    className="bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-gray-200 transition-all flex items-center justify-center"
-                >
-                    Go to Dashboard <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
-                <button
-                    onClick={() => window.print()}
-                    className="bg-zinc-900 border border-white/10 text-white px-8 py-4 rounded-full font-bold hover:border-white transition-all flex items-center justify-center"
-                >
-                    <Printer className="w-5 h-5 mr-2" /> Print Confirmation
-                </button>
-            </div>
+                {/* What's next */}
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6">
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4">Next Steps</p>
+                    <div className="space-y-3">
+                        {[
+                            { icon: Ship,      text: 'Carrier will confirm your slot within 24 hours.' },
+                            { icon: FileText,  text: 'Shipping instructions and B/L draft sent to your email.' },
+                            { icon: Clock,     text: `Estimated arrival at ${destination}: ${arrivalStr}.` },
+                        ].map(({ icon: Icon, text }, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-lg bg-white/[0.03] border border-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <Icon className="w-3 h-3 text-zinc-600" />
+                                </div>
+                                <p className="text-xs text-zinc-500 font-inter leading-relaxed">{text}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Link
+                        href="/dashboard"
+                        className="flex-1 bg-white text-black py-3.5 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 font-inter"
+                    >
+                        <LayoutDashboard className="w-3.5 h-3.5" /> Go to Dashboard
+                    </Link>
+                    <button
+                        onClick={() => window.print()}
+                        className="flex-1 bg-transparent border border-white/10 text-white py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs hover:border-white/30 hover:bg-white/[0.03] transition-all flex items-center justify-center gap-2 font-inter"
+                    >
+                        <Printer className="w-3.5 h-3.5" /> Print Receipt
+                    </button>
+                </div>
+            </motion.div>
         </div>
     )
 }
 
 export default function ConfirmationPage() {
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
             <Navbar />
-            <main className="pt-24 pb-12">
-                <Suspense fallback={<div className="text-center py-20 text-gray-400">Finalizing Booking...</div>}>
-                    <ConfirmationContent />
-                </Suspense>
-            </main>
-            <Footer />
+
+            {/* Step bar */}
+            <div className="bg-black border-b border-white/5 pt-20">
+                <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+                    <div className="flex items-center gap-3">
+                        {[
+                            { label: 'Search',       done: true,  active: false },
+                            { label: 'Results',      done: true,  active: false },
+                            { label: 'Booking',      done: true,  active: false },
+                            { label: 'Confirmation', done: false, active: true  },
+                        ].map((step, i) => (
+                            <div key={step.label} className="flex items-center gap-2">
+                                {i > 0 && <div className="h-px w-8 bg-white/10" />}
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${step.done || step.active ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 border border-white/5'}`}>
+                                    {step.done ? '✓' : i + 1}
+                                </div>
+                                <span className={`text-[10px] font-bold uppercase tracking-widest font-inter ${step.active ? 'text-white' : step.done ? 'text-zinc-500' : 'text-zinc-700'}`}>{step.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <Suspense fallback={<div className="text-center py-20 text-zinc-600 text-xs">Loading confirmation...</div>}>
+                <ConfirmationContent />
+            </Suspense>
         </div>
     )
 }

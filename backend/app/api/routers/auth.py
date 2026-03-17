@@ -220,6 +220,12 @@ async def login_for_access_token(
     if not user.is_active:
         raise HTTPException(status_code=401, detail="User account is inactive. Contact support.")
 
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=400,
+            detail="This account was created with Google. Please use 'Sign in with Google' to login."
+        )
+
     if not security.verify_password(form_data.password, user.password_hash):
         # Increment failed attempts
         current_attempts = int(user.failed_login_attempts or 0)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, JSON, Boolean, DateTime, Numeric, Integer, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import Column, String, JSON, Boolean, DateTime, Date, Numeric, Integer, ForeignKey, UniqueConstraint, Index
 from app.db.session import Base
 from datetime import datetime, timezone
 import uuid
@@ -162,6 +162,6 @@ class N8nAnalytics(Base):
     """Metrics: Daily tally of closed requests and quotes."""
     __tablename__ = "n8n_analytics"
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(DateTime, unique=True, index=True)
+    date = Column(Date, unique=True, index=True)
     requests_closed = Column(Integer, default=0)
     total_quotations = Column(Integer, default=0)

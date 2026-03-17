@@ -93,9 +93,9 @@ CONTAINER_MULT = {
     "LCL": 0.38,
 }
 
-CARRIERS = ["Sovereign Prime", "Direct Network", "Global Alliance", "Executive Tier", "Priority Node"]
+CARRIERS = ["Maersk", "MSC", "CMA CGM", "Hapag-Lloyd", "Evergreen", "ONE", "COSCO Shipping"]
 
-VESSEL_PREFIXES = ["MERIDIAN", "VECTOR", "SOVEREIGN", "PACIFIC", "ATLANTIC", "ALLIANCE", "NAVIGATOR"]
+VESSEL_PREFIXES = ["MERIDIAN", "PACIFIC", "ATLANTIC", "NAVIGATOR", "PIONEER", "HORIZON", "VOYAGER"]
 
 
 # ── AI Quote Generation ───────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ Return a JSON object with key "quotes" containing exactly 3 quotes:
 3. Express — fastest, premium price
 
 Each quote object must have:
-- carrier_name: one of ["Sovereign Prime", "Direct Network", "Global Alliance", "Executive Tier", "Priority Node"]
+- carrier_name: one of ["Maersk", "MSC", "CMA CGM", "Hapag-Lloyd", "Evergreen", "ONE", "COSCO Shipping"]
 - price: integer USD total (realistic market rate)
 - transit_time_days: integer
 - vessel_name: realistic vessel name in format "WORD WORD" (e.g., "PACIFIC MERIDIAN")
@@ -230,9 +230,9 @@ def _deterministic_quotes(origin: str, destination: str, container: str,
     )
 
     return [
-        _make(0.83, t_eco, "Global Alliance",   "PACIFIC BRIDGE",      eco_wisdom),
-        _make(1.00, t_dir, "Sovereign Prime",    "SOVEREIGN MERIDIAN",  dir_wisdom),
-        _make(1.24, t_exp, "Priority Node",      "EXPRESS VECTOR",      exp_wisdom),
+        _make(0.83, t_eco, "CMA CGM",        "PACIFIC BRIDGE",      eco_wisdom),
+        _make(1.00, t_dir, "Maersk",         "MAERSK MERIDIAN",     dir_wisdom),
+        _make(1.24, t_exp, "Hapag-Lloyd",    "ATLANTIC EXPRESS",    exp_wisdom),
     ]
 
 
@@ -267,7 +267,7 @@ async def get_instant_quotes(
         quote_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, route_key))
         quotes.append({
             "id": quote_id,
-            "carrier_name": q.get("carrier_name", "Sovereign Prime"),
+            "carrier_name": q.get("carrier_name", "Maersk"),
             "price": float(q.get("price", 0)),
             "transit_time_days": int(q.get("transit_time_days") or q.get("transit_time") or 21),
             "vessel_name": q.get("vessel_name", "TBD"),

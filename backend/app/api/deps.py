@@ -52,6 +52,18 @@ def get_current_active_user(
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
+async def get_admin_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Only the configured ADMIN_EMAIL can access admin endpoints."""
+    import os
+    admin_email = os.getenv("ADMIN_EMAIL", "")
+    if not admin_email:
+        raise HTTPException(status_code=500, detail="ADMIN_EMAIL not configured on server.")
+    if current_user.email.lower() != admin_email.lower():
+        raise HTTPException(status_code=403, detail="Access denied. Admin only.")
+    return current_user
+
 async def get_current_user_optional(
     db: AsyncSession = Depends(get_db),
     request: Request = None

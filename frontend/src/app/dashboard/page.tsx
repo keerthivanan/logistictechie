@@ -10,6 +10,7 @@ import DashboardHeader from './_components/DashboardHeader'
 import MetricCards from './_components/MetricCards'
 import CommandFeed from './_components/CommandFeed'
 import SovereignFlow from './_components/SovereignFlow'
+import OpenRequestsPanel from './_components/OpenRequestsPanel'
 import { DashboardStats } from './_components/types'
 
 export default function DashboardPage() {
@@ -82,29 +83,31 @@ export default function DashboardPage() {
     const isForwarder = user?.role === 'forwarder'
 
     return (
-        <div className="h-full flex flex-col gap-6 overflow-hidden">
-            {/* Identity & Metrics Row */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 flex-shrink-0">
-                <DashboardHeader
-                    userName={isForwarder ? `Partner: ${user?.name}` : user?.name}
-                />
+        <div className="h-full flex flex-col gap-4 overflow-hidden">
+            {/* Header row: name + metrics */}
+            <div className="flex-shrink-0 flex items-center justify-between gap-6 pb-4 border-b border-white/5">
+                <DashboardHeader userName={user?.name} />
                 <MetricCards stats={stats} />
             </div>
 
-            {/* Strategic Layout: Activity & Flow */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-1 min-h-0">
+            {/* Activity + main panel */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 flex-1 min-h-0">
                 <div className="xl:col-span-1 min-h-0 overflow-hidden">
                     <CommandFeed
                         activities={stats?.recent_activity || []}
-                        title={isForwarder ? 'Bid Activity' : 'Recent Activity'}
+                        title="Recent Activity"
                     />
                 </div>
                 <div className="xl:col-span-3 min-h-0 overflow-hidden">
-                    <SovereignFlow
-                        shipments={stats?.kanban_shipments || []}
-                        activeCount={stats?.active_shipments || 0}
-                        title={isForwarder ? 'Live Market Bids' : 'Shipment Pipeline'}
-                    />
+                    {isForwarder ? (
+                        <SovereignFlow
+                            shipments={stats?.kanban_shipments || []}
+                            activeCount={stats?.active_shipments || 0}
+                            title="Live Market Bids"
+                        />
+                    ) : (
+                        <OpenRequestsPanel />
+                    )}
                 </div>
             </div>
         </div>

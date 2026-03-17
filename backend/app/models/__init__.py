@@ -1,6 +1,14 @@
 from .user import User
 from .forwarder import Forwarder
-from .marketplace import MarketplaceRequest, MarketplaceBid
+from .marketplace import (
+    MarketplaceRequest,
+    MarketplaceBid,
+    ForwarderBidStatus,
+    N8nEventLog,
+    N8nBroadcastLog,
+    RejectedAttempt,
+    N8nAnalytics,
+)
 from .activity import UserActivity
 from .task import Task
 

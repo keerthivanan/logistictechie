@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Package, Clock, Truck, TrendingUp, Zap, ClipboardList } from 'lucide-react'
+import { Package, Clock, Truck, ClipboardList } from 'lucide-react'
 import { DashboardStats } from './types'
 
 export default function MetricCards({ stats }: { stats: DashboardStats | null }) {
@@ -14,8 +14,8 @@ export default function MetricCards({ stats }: { stats: DashboardStats | null })
         },
         {
             icon: Clock,
-            value: stats?.on_time_rate || '100%',
-            label: 'On-Time',
+            value: stats?.total_shipments || 0,
+            label: 'Total Shipments',
             bgColor: 'bg-white/[0.02]'
         },
         {
@@ -26,8 +26,8 @@ export default function MetricCards({ stats }: { stats: DashboardStats | null })
         },
         {
             icon: Truck,
-            value: stats?.containers || 0,
-            label: 'TEU Volume',
+            value: stats?.delivered_shipments || 0,
+            label: 'Delivered',
             bgColor: 'bg-white/[0.02]'
         }
     ]

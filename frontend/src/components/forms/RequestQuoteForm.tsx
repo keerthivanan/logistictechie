@@ -255,8 +255,8 @@ export default function RequestQuoteForm() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-12"
                 >
-                    <h1 className="text-4xl font-bold mb-3 tracking-tight font-outfit uppercase">Operational Request</h1>
-                    <p className="text-zinc-400 font-medium font-inter">Index a new quote request into the Sovereign Logistics Network.</p>
+                    <h1 className="text-4xl font-bold mb-3 tracking-tight font-outfit uppercase">Request a Quote</h1>
+                    <p className="text-zinc-400 font-medium font-inter">Submit a freight request and receive quotes from verified forwarders.</p>
                 </motion.div>
 
                 <motion.form
@@ -268,7 +268,7 @@ export default function RequestQuoteForm() {
                 >
                     {/* 1. Mode Selection */}
                     <div className="space-y-4">
-                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Transport Protocol *</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Transport Mode *</label>
                         <div className="relative">
                             <Ship className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                             <select
@@ -291,12 +291,12 @@ export default function RequestQuoteForm() {
                         {/* Origin */}
                         <div className="space-y-6">
                             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin Node
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Origin
                             </h3>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Territory Control *</label>
+                                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Origin Country *</label>
                                         <select
                                             name="origin_country"
                                             value={formData.origin_country}
@@ -374,11 +374,11 @@ export default function RequestQuoteForm() {
                         {/* Destination */}
                         <div className="space-y-6">
                             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] font-outfit text-zinc-400 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Destination Node
+                                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500"></span> Destination
                             </h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Target Territory *</label>
+                                    <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-2 font-inter">Destination Country *</label>
                                     <select
                                         name="dest_country"
                                         value={formData.dest_country}
@@ -434,7 +434,7 @@ export default function RequestQuoteForm() {
                     {/* 3. Shipment Specs */}
                     <div className="grid md:grid-cols-2 gap-12">
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Window (Target Date)</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Target Shipment Date</label>
                             <div className="relative">
                                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                                 <input
@@ -517,7 +517,7 @@ export default function RequestQuoteForm() {
                             </select>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Operational Quantity</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Quantity (Pieces / Units)</label>
                             <input
                                 type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
                                 name="quantity"
@@ -531,7 +531,7 @@ export default function RequestQuoteForm() {
 
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms Strategy *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Incoterms *</label>
                             <select
                                 name="incoterms"
                                 value={formData.incoterms}
@@ -545,7 +545,7 @@ export default function RequestQuoteForm() {
                             </select>
                         </div>
                         <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Mass Allocation *</label>
+                            <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Total Weight *</label>
                             <div className="flex">
                                 <input
                                     type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()}
@@ -616,7 +616,7 @@ export default function RequestQuoteForm() {
 
                     {/* 4. Measurements */}
                     <div className="space-y-4">
-                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Volumetric Protocol (L x W x H)</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Dimensions (L x W x H)</label>
                         <div className="flex gap-4">
                             <input
                                 type="number" min="0" onWheel={(e) => (e.target as HTMLElement).blur()} name="length" placeholder="L"
@@ -647,7 +647,7 @@ export default function RequestQuoteForm() {
 
                     {/* 5. Options (Checkboxes) */}
                     <div className="space-y-4">
-                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Additional Telemetry</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Cargo Options</label>
                         <div className="grid md:grid-cols-3 gap-4">
                             <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-2xl cursor-pointer hover:bg-white/[0.04] transition-all group">
                                 <input
@@ -684,7 +684,7 @@ export default function RequestQuoteForm() {
 
                     {/* 6. Notes */}
                     <div className="space-y-4">
-                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Strategic Handling Notes</label>
+                        <label className="block text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Special Instructions / Notes</label>
                         <textarea
                             name="notes"
                             value={formData.notes}
@@ -693,7 +693,7 @@ export default function RequestQuoteForm() {
                             className="w-full bg-black border border-white/5 rounded-lg px-4 py-3 text-[10px] font-bold text-white focus:border-white/20 outline-none min-h-[100px] font-inter"
                         />
                         <p className="text-[10px] text-zinc-700 font-bold uppercase tracking-widest flex items-center gap-2">
-                            <Info className="w-3 h-3 text-emerald-500" /> Identity signals will be automatically appended to the request packet.
+                            <Info className="w-3 h-3 text-emerald-500" /> Your contact details will be included with this request.
                         </p>
                     </div>
 
@@ -706,11 +706,11 @@ export default function RequestQuoteForm() {
                         {loading ? (
                             <>
                                 <Loader2 className="w-5 h-5 animate-spin mr-3" />
-                                Indexing...
+                                Submitting...
                             </>
                         ) : (
                             <>
-                                Commit Quote Request <ArrowRight className="w-5 h-5 ml-3" />
+                                Submit Quote Request <ArrowRight className="w-5 h-5 ml-3" />
                             </>
                         )}
                     </button>

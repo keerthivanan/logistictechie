@@ -8,7 +8,7 @@ import { KanbanShipment } from './types'
 export default function SovereignFlow({
     shipments,
     activeCount,
-    title = "Sovereign Flow"
+    title = "Shipment Pipeline"
 }: {
     shipments: KanbanShipment[],
     activeCount: number,
@@ -29,7 +29,7 @@ export default function SovereignFlow({
                 <div className="flex items-center gap-3">
                     <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">{title}</h3>
                     <div className="bg-white/5 px-2 py-0.5 rounded text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-inter">
-                        {activeCount} Active Vectors
+                        {activeCount} Active
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@ export default function SovereignFlow({
                                         key={shipment.id}
                                         initial={{ opacity: 0, scale: 0.98 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        onClick={() => router.push(`/booking/confirmation?id=${shipment.id}`)}
+                                        onClick={() => router.push(`/marketplace/${shipment.id}`)}
                                         className="p-4 rounded-xl border border-white/5 bg-zinc-900/40 hover:border-white/20 transition-all cursor-pointer group shadow-sm"
                                     >
                                         <div className="flex justify-between items-start mb-2">

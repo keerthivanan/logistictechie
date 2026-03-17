@@ -19,41 +19,38 @@ export default function Home() {
   const { user } = useAuth()
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
       <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
-        {/* Global Network Prism Visual - Main Background */}
         <div className="absolute inset-0 z-0 opacity-100 mix-blend-screen pointer-events-none">
           <Prism />
         </div>
-
-        {/* Cinematic Gradient Blend To Body */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 animate-fade-in-up delay-100">
-            SUPERCHARGE YOUR <br />
-            <span className="text-white">SUPPLY CHAIN</span>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 text-white">
+            SHIP SMARTER. <br />
+            <span className="text-white/70">MOVE FASTER.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in-up delay-200">
-            Built for data-obsessed shippers. CargoLink is the only platform that unifies traditional freight forwarding with next-generation AI intelligence.
+          <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-inter">
+            CargoLink connects freight professionals with verified forwarders worldwide — real quotes, real carriers, and zero guesswork.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {user ? (
-              <Link href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                Go to Dashboard <ArrowRight className="w-5 h-5" />
+              <Link href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest font-inter">
+                Go to Dashboard <ArrowRight className="w-4 h-4" />
               </Link>
             ) : (
-              <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                Launch Operations <ArrowRight className="w-5 h-5" />
+              <Link href="/signup" className="w-full sm:w-auto px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest font-inter">
+                Get Started <ArrowRight className="w-4 h-4" />
               </Link>
             )}
-            <Link href="/demo" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all flex items-center justify-center text-sm">
-              View Tactical Simulation
+            <Link href="/demo" className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 text-white font-black rounded-xl hover:bg-white/5 transition-all flex items-center justify-center text-sm uppercase tracking-widest font-inter">
+              View Demo
             </Link>
           </div>
         </div>
@@ -64,12 +61,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-4xl font-bold tracking-tight mb-6">The logistics landscape has shifted.</h2>
-              <p className="text-lg text-gray-400 mb-6">
-                Containers aren&apos;t just moving physical goods; they are generating massive streams of data.
-                Legacy tools approximate this data to save costs.
+              <h2 className="text-3xl font-black tracking-tight mb-6 font-outfit">The freight industry has changed.</h2>
+              <p className="text-sm text-zinc-400 mb-6 font-inter leading-relaxed">
+                Containers aren&apos;t just moving physical goods — they are generating massive streams of data.
+                Legacy tools approximate this data. CargoLink acts on it in real time.
               </p>
-              <p className="text-lg text-white font-medium">
+              <p className="text-sm text-white font-medium font-inter">
                 &quot;More than 90% of supply chain disruptions are predictable with the right intelligence.&quot;
               </p>
             </div>
@@ -88,20 +85,19 @@ export default function Home() {
               <ComparisonChart />
             </div>
             <div className="order-1 md:order-2">
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Outperforming the industry standard.</h2>
-              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                Most tools give you a map. We give you a command center.
-                CargoLink is engineered for precision at infinite scale. We access more data points more frequently, ensuring your strategy is built on reality, not guesswork.
+              <h2 className="text-3xl font-black tracking-tight mb-6 font-outfit">Outperforming the industry standard.</h2>
+              <p className="text-sm text-zinc-400 mb-8 leading-relaxed font-inter">
+                Most tools give you a map. CargoLink gives you a single platform built for precision at scale — accessing more data points, more frequently, so your strategy is built on reality, not guesswork.
               </p>
 
               <div className="space-y-6">
                 <div className="flex gap-4">
-                  <div className="bg-zinc-900 p-3 rounded-lg h-fit border border-white/10">
-                    <Zap className="w-6 h-6 text-yellow-400" />
+                  <div className="bg-[#0a0a0a] p-3 rounded-xl h-fit border border-white/[0.05]">
+                    <Zap className="w-5 h-5 text-zinc-400" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-white">Real-time Updates</h4>
-                    <p className="text-sm text-gray-400">Refresh critical keywords on demand, instantly.</p>
+                    <p className="text-sm font-black text-white font-inter">Real-time Updates</p>
+                    <p className="text-xs text-zinc-500 font-inter mt-0.5">Live quote refresh and carrier availability on demand.</p>
                   </div>
                 </div>
               </div>
@@ -113,22 +109,22 @@ export default function Home() {
       {/* Everything You Need Section */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold tracking-tight mb-16 text-center">Everything you need to scale.</h2>
+          <h2 className="text-3xl font-black tracking-tight mb-12 text-center font-outfit">Everything you need to scale.</h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: Search, label: "Smart Search" },
-              { icon: Layers, label: "Stack Tracking" },
-              { icon: Lock, label: "Secure Vault" },
+              { icon: Layers, label: "Shipment Tracking" },
+              { icon: Lock, label: "Secure Documents" },
               { icon: Zap, label: "Instant Quotes" },
-              { icon: BarChart3, label: "Deep Analytics" },
+              { icon: BarChart3, label: "Analytics" },
               { icon: Award, label: "Compliance" },
               { icon: Users, label: "Team Access" },
-              { icon: Globe, label: "API Global" },
+              { icon: Globe, label: "Global API" },
             ].map((feature, i) => (
-              <div key={i} className="flex flex-col items-center justify-center p-8 bg-black border border-white/10 rounded-xl hover:border-white/30 transition-all cursor-crosshair">
-                <feature.icon className="w-8 h-8 text-white mb-4" />
-                <span className="font-bold text-gray-300">{feature.label}</span>
+              <div key={i} className="flex flex-col items-center justify-center p-6 bg-[#0a0a0a] border border-white/[0.05] rounded-2xl hover:border-white/[0.15] transition-all cursor-pointer">
+                <feature.icon className="w-5 h-5 text-zinc-400 mb-3" />
+                <span className="text-xs font-black text-zinc-300 font-inter uppercase tracking-widest text-center">{feature.label}</span>
               </div>
             ))}
           </div>
@@ -139,12 +135,11 @@ export default function Home() {
 
       {/* Smart Dashboard Section */}
       <section className="py-32 bg-black relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">The Operating System for Global Trade</h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Command your entire supply chain from a single, beautiful interface. Real-time visibility, automated workflows, and predictive analytics.
+            <h2 className="text-3xl font-black mb-4 tracking-tight font-outfit">One Platform for Global Trade</h2>
+            <p className="text-sm text-zinc-400 max-w-xl mx-auto font-inter leading-relaxed">
+              Manage your entire supply chain from a single dashboard — real-time visibility, automated workflows, and predictive analytics.
             </p>
           </div>
           <SmartDashboardPreview />
@@ -160,23 +155,23 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6">
-                <Globe className="w-4 h-4" /> Global Coverage
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 text-xs font-inter mb-6">
+                <Globe className="w-3.5 h-3.5" /> Global Coverage
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Active in 100+ Major Ports</h2>
-              <p className="text-lg text-gray-400 mb-8">
-                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, CargoLink ensures your cargo moves with precision and speed, powered by our proprietary routing algorithms.
+              <h2 className="text-3xl font-black mb-6 tracking-tight font-outfit">Active in 100+ Major Ports</h2>
+              <p className="text-sm text-zinc-400 mb-8 font-inter leading-relaxed">
+                Our digital infrastructure spans every continent. From Rotterdam to Shanghai, CargoLink ensures your cargo moves with precision and speed, powered by our proprietary routing engine.
               </p>
               <div className="grid grid-cols-2 gap-6">
                 {[
                   { label: 'Countries Served', value: '150+' },
                   { label: 'Carrier Partners', value: '2,000+' },
-                  { label: 'Weekly Teu', value: '500k' },
+                  { label: 'Weekly TEU', value: '500k' },
                   { label: 'Uptime', value: '99.99%' },
                 ].map((stat) => (
                   <div key={stat.label}>
-                    <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-500">{stat.label}</div>
+                    <div className="text-2xl font-black text-white mb-1 font-inter">{stat.value}</div>
+                    <div className="text-xs text-zinc-600 font-inter uppercase tracking-widest">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -192,20 +187,19 @@ export default function Home() {
 
       {/* Final CTA */}
       <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0"></div>
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8">
-            Ready to dominate the <br /> new logistics landscape?
+        <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-6 font-outfit">
+            Ready to ship smarter?
           </h2>
-          <p className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-            Join 2,000+ forward-thinking teams orchestrating their global trade across the CargoLink Network today.
+          <p className="text-sm text-zinc-400 mb-10 max-w-xl mx-auto font-inter leading-relaxed">
+            Join thousands of shippers and forwarders already using CargoLink to get instant quotes and move cargo faster.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signup" className="px-10 py-5 bg-white text-black text-xl font-bold rounded-full hover:bg-gray-200 transition-all">
+            <Link href="/signup" className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">
               Start Free Trial
             </Link>
-            <Link href="/contact" className="px-10 py-5 bg-transparent border border-white/30 text-white text-xl font-bold rounded-full hover:bg-white/10 transition-all">
-              Talk to Specialist
+            <Link href="/contact" className="px-8 py-4 bg-transparent border border-white/20 text-white font-black rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-widest font-inter">
+              Talk to the Team
             </Link>
           </div>
         </div>

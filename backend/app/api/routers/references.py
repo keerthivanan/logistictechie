@@ -5,6 +5,7 @@ from typing import Dict, Any
 from datetime import datetime
 from urllib.parse import quote
 import httpx
+from app.data.hs_codes import HS_HEADINGS
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
     consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
     if consumer_key:
         try:
-            url = f"https://api.maersk.com/reference-data/locations?cityName={quote(q.strip())}|contains&limit=30"
+            url = f"https://api.maersk.com/reference-data/locations?cityName={quote(q.strip())}|contains&limit=50"
             if country:
                 url += f"&countryCode={quote(country.strip())}"
             
@@ -74,37 +75,51 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
 @router.get("/commodities/search", response_model=Dict[str, Any])
 async def search_commodities(q: str = ""):
     """
-    Live Commodity Search Pipeline strictly passing through to Maersk.
+    Commodity search — official WCO HS 2022 headings dataset (~500 entries).
+    Tries Maersk live API first; falls back to HS headings if unavailable.
     """
     consumer_key = os.getenv('MAERSK_CONSUMER_KEY')
     results = []
-    
+
     if consumer_key:
         try:
-            # According to spec: /commodity-classifications?commodityName=[name]
-            url = "https://api.maersk.com/reference-data/commodity-classifications?limit=100"
+            url = "https://api.maersk.com/commodity-classifications"
             if q.strip():
-                url = f"https://api.maersk.com/reference-data/commodity-classifications?commodityName={quote(q.strip())}&limit=100"
-                
+                url += f"?commodityName={quote(q.strip())}"
+
             async with httpx.AsyncClient() as client:
-                response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=5.0)
-                
+                response = await client.get(url, headers={'Consumer-Key': consumer_key}, timeout=8.0)
+
             if response.status_code == 200:
                 data = response.json()
-                # The response structure is {"commodities": [...]}
                 commodities = data.get("commodities", []) if isinstance(data, dict) else data
-                results = [
-                    {
-                        "id": r.get('commodityCode'), 
+                for r in commodities:
+                    if not r.get('commodityName'):
+                        continue
+                    # Include all HS codes as sub-entries for better search granularity
+                    hs_codes = r.get('hsCommodities', [])
+                    results.append({
+                        "id": r.get('commodityCode'),
                         "name": r.get('commodityName'),
-                        "type": r.get('cargoTypes', ['DRY'])[0] if r.get('cargoTypes') else 'DRY'
-                    } 
-                    for r in commodities if r.get('commodityName')
-                ]
+                        "type": r.get('cargoTypes', ['DRY'])[0] if r.get('cargoTypes') else 'DRY',
+                        "hs_codes": [
+                            {"code": h.get('hsCommodityCode'), "name": h.get('hsCommodityName')}
+                            for h in hs_codes if h.get('hsCommodityCode')
+                        ]
+                    })
         except Exception as e:
             logger.error(f"Commodity Search Error: {e}")
 
-    return {"results": results[:50], "source": "Global Commodity Database"}
+    # Use WCO HS 2022 headings if Maersk API returned nothing
+    if not results:
+        q_lower = q.strip().lower()
+        if q_lower:
+            hs_results = [h for h in HS_HEADINGS if q_lower in h["name"].lower()]
+        else:
+            hs_results = HS_HEADINGS
+        results = [{"id": h["code"], "name": h["name"], "type": "DRY"} for h in hs_results]
+
+    return {"results": results[:50], "source": "WCO HS 2022"}
 
 @router.get("/vessels/search", response_model=Dict[str, Any])
 async def search_vessels(q: str = ""):
@@ -150,7 +165,7 @@ async def get_market_indices():
         "success": True,
         "indices": [
             { "id": "01", "name": "SCFI_INDEX", "value": "2,143.50", "change": "+0.45%", "status": "BULLISH" },
-            { "id": "03", "name": "SOVEREIGN_CORRIDOR", "value": "1.04_VOL", "change": "+0.002", "status": "OPTIMIZED" }
+            { "id": "03", "name": "FBXI_INDEX", "value": "1,840.20", "change": "-0.12%", "status": "NEUTRAL" }
         ],
         "timestamp": datetime.now().isoformat()
     }
@@ -167,8 +182,8 @@ async def get_sailing_schedules(origin: str = "Shanghai", destination: str = "Je
         depart_date = today + timedelta(days=5*i)
         arrive_date = depart_date + timedelta(days=18)
         formatted.append({
-            "carrier": "Sovereign Carrier",
-            "vessel": f"SOVEREIGN {origin.upper()[:3]} PIONEER",
+            "carrier": "CargoLink Carrier",
+            "vessel": f"CL {origin.upper()[:3]} PIONEER",
             "voyage": f"{depart_date.strftime('%y')}{i}W",
             "departure": depart_date.isoformat(),
             "arrival": arrive_date.isoformat(),

@@ -9,7 +9,7 @@ import {
     Copy, ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { apiFetch } from '@/lib/config';
+import { apiFetch, API_URL } from '@/lib/config';
 
 const PortalNavbar = () => (
     <nav className="fixed top-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-xl border-b border-white/5 z-[100] px-8 flex items-center justify-between">

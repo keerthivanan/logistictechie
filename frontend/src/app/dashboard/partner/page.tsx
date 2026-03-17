@@ -5,29 +5,32 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 import {
-    X,
-    MapPin,
-    Globe,
-    ExternalLink,
     Zap,
     TrendingUp,
     Box,
-    MessageSquare,
     Clock,
-    CheckCircle2,
     AlertCircle,
     ArrowUpRight,
     Terminal,
-    Ship,
-    Package,
-    Calendar
 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function PartnerDashboard() {
     const { user } = useAuth()
     const [bids, setBids] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+    const [, setLoading] = useState(true)
+    const [appStatus, setAppStatus] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!user || user.role === 'forwarder') return
+        const token = localStorage.getItem('token')
+        apiFetch('/api/forwarders/my-status', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(r => r.json())
+            .then(d => setAppStatus(d.status))
+            .catch(() => {})
+    }, [user])
 
     useEffect(() => {
         const fetchBids = async () => {
@@ -40,8 +43,8 @@ export default function PartnerDashboard() {
                     const data = await res.json()
                     setBids(data.bids || [])
                 }
-            } catch (err) {
-                console.error("Failed to fetch partner bids", err)
+            } catch {
+                // silently ignore
             } finally {
                 setLoading(false)
             }
@@ -51,9 +54,28 @@ export default function PartnerDashboard() {
     }, [user])
 
     if (user?.role !== 'forwarder') {
+        if (appStatus === 'PENDING') {
+            return (
+                <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
+                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <Clock className="w-8 h-8 text-amber-400" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-xl font-bold uppercase tracking-tight">Application Under Review</h2>
+                        <p className="text-zinc-500 text-sm max-w-md mx-auto">
+                            Your partner registration is being reviewed by our team.
+                            You will be notified once your account is approved.
+                        </p>
+                    </div>
+                    <div className="px-6 py-2 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-bold uppercase tracking-widest">
+                        Pending Approval
+                    </div>
+                </div>
+            )
+        }
         return (
             <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
                     <AlertCircle className="w-8 h-8 text-red-500" />
                 </div>
                 <div className="space-y-2">
@@ -65,7 +87,7 @@ export default function PartnerDashboard() {
                 </div>
                 <Link
                     href="/forwarders/register"
-                    className="bg-white text-black px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
+                    className="bg-white text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
                 >
                     Register Now
                 </Link>
@@ -81,12 +103,12 @@ export default function PartnerDashboard() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
                         Forwarder Portal
                     </div>
-                    <h1 className="text-4xl font-bold tracking-tight font-outfit">Partner Center</h1>
+                    <h1 className="text-xl font-black tracking-tight font-outfit uppercase">Partner Center</h1>
                     <p className="text-zinc-500 text-sm font-medium tracking-tight">
-                        Company ID: <span className="text-white font-mono">{user.sovereign_id}</span>
+                        Company ID: <span className="text-white font-mono">{user?.email}</span>
                     </p>
                 </div>
                 <div className="flex gap-4">
@@ -109,7 +131,7 @@ export default function PartnerDashboard() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-zinc-950 border border-white/5 p-6 rounded-[24px] hover:border-white/10 transition-all group"
+                        className="bg-zinc-950 border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-all group"
                     >
                         <stat.icon className={`w-5 h-5 ${stat.color} mb-4`} />
                         <h3 className="text-3xl font-bold font-mono text-white mb-1">{stat.value}</h3>
@@ -127,7 +149,7 @@ export default function PartnerDashboard() {
 
                 <div className="grid gap-4">
                     {bids.length === 0 ? (
-                        <div className="bg-zinc-950 border border-dashed border-white/5 rounded-3xl p-20 text-center space-y-4">
+                        <div className="bg-zinc-950 border border-dashed border-white/5 rounded-2xl p-20 text-center space-y-4">
                             <Clock className="w-8 h-8 text-zinc-700 mx-auto" />
                             <p className="text-zinc-500 text-sm font-medium">You haven&apos;t submitted any bids yet.</p>
                         </div>
@@ -137,7 +159,7 @@ export default function PartnerDashboard() {
                                 key={bid.request_id}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="bg-zinc-950 border border-white/5 p-6 rounded-[24px] hover:bg-white/[0.02] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
+                                className="bg-zinc-950 border border-white/5 p-6 rounded-2xl hover:bg-white/[0.02] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
                             >
                                 <div className="space-y-1.5 font-inter">
                                     <div className="flex items-center gap-3">

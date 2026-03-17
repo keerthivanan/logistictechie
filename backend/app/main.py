@@ -16,7 +16,7 @@ from app.db.session import get_db
 from app.api import deps
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools
+from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools, admin
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from app.models.user import User
@@ -65,7 +65,7 @@ async def security_and_rate_limit(request: Request, call_next):
             if request_count > settings.RATE_LIMIT_PER_MINUTE:
                 return JSONResponse(
                     status_code=429,
-                    content={"detail": "Sovereign Threshold Exceeded."}
+                    content={"detail": "Too many requests. Please try again in a moment."}
                 )
         except Exception as e:
             # Silent fallback for Redis connection errors to keep logs clean
@@ -100,6 +100,7 @@ app.include_router(forwarders.router, prefix="/api/forwarders", tags=["Forwarder
 app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
 app.include_router(quotes.router, prefix="/api/quotes", tags=["Instant Quote Engine"])
 app.include_router(tools.router, prefix="/api/tools", tags=["Freight Intelligence Tools"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
 # GLOBAL BRIDGE: Headless n8n Aliases (Matches COMPLETE_SETUP_GUIDE hardcoded URLs)
 # All 4 routes are protected by verify_n8n_webhook

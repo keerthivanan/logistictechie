@@ -55,7 +55,7 @@ async def get_dashboard_stats(
                 "kanban_shipments": [
                     {
                         "id": b["request_id"],
-                        "company": "Shipper",
+                        "company": f"{b['origin']} → {b['destination']}",
                         "desc": f"{b['cargo_type']} ({b['origin']} ➔ {b['destination']})",
                         "date": b["attempted_at"].strftime("%d %b") if b["attempted_at"] else "Now",
                         "comments": b["bid_status"],
@@ -135,10 +135,10 @@ async def get_dashboard_stats(
             elif act.action == "TASK_COMPLETED" or act.action == "TASK_REOPENED" or act.action == "TASK_CREATED":
                 resume_url = "/dashboard/tasks"
             elif act.action == "PROFILE_UPDATE" or act.action == "SECURITY_UPDATE":
-                resume_url = "/dashboard/settings"
+                resume_url = "/settings"
             elif act.action == "MARKETPLACE_SUBMIT":
                 resume_url = f"/marketplace/{act.entity_id}"
-                
+
             activity_list.append({
                 "id": act.id,
                 "action": act.action,
@@ -184,10 +184,10 @@ async def get_full_activity_history(
             elif "TASK" in act.action:
                 resume_url = "/dashboard/tasks"
             elif "PROFILE" in act.action or "SECURITY" in act.action:
-                resume_url = "/dashboard/settings"
+                resume_url = "/settings"
             elif act.action == "MARKETPLACE_SUBMIT":
                 resume_url = f"/marketplace/{act.entity_id}"
-                
+
             activity_list.append({
                 "id": act.id,
                 "action": act.action,
@@ -218,7 +218,7 @@ async def create_lead(lead: LeadCreate):
     logger.info(f"[LEAD CAPTURE] New Interest: {lead.email} ({lead.company}) - {lead.interest}")
     # In a real scenario, this would save to DB or CRM.
     # For 'Best of All Time' demo, we log and return success.
-    return {"success": True, "message": "Oracle has received your request. Dispatching sales team."}
+    return {"success": True, "message": "Thank you for your interest. Our team will be in touch shortly."}
 
 @router.get("/market-ticker")
 async def get_market_ticker():

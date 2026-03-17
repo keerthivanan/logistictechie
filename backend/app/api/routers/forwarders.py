@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.forwarder import Forwarder
@@ -9,6 +9,7 @@ from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
 from app.services.activity import activity_service
+from app.services.webhook import webhook_service
 import logging
 
 router = APIRouter()
@@ -177,6 +178,7 @@ class ForwarderPromote(BaseModel):
 @router.post("/promote")
 async def promote_to_forwarder(
     f_in: ForwarderPromote,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -189,20 +191,20 @@ async def promote_to_forwarder(
     if not current_user.sovereign_id:
         raise HTTPException(status_code=400, detail="Account has no Sovereign ID. Please contact support.")
 
-    # Idempotent — if profile already exists, sync role and return
-    existing = await db.execute(select(Forwarder).where(Forwarder.email == email))
-    if existing.scalars().first():
-        if current_user.role != "forwarder":
-            current_user.role = "forwarder"
-            if not current_user.sovereign_id.startswith("REG-"):
-                current_user.sovereign_id = f"REG-{current_user.sovereign_id}"
-            await db.commit()
-        return {"success": True, "message": "Forwarder profile already exists. Role synchronized."}
+    # Idempotent — if profile already exists, return current status
+    existing_result = await db.execute(select(Forwarder).where(Forwarder.email == email))
+    existing = existing_result.scalars().first()
+    if existing:
+        return {
+            "success": True,
+            "status": existing.status,
+            "message": f"Application status: {existing.status}",
+        }
 
-    # forwarder_id must match the new sovereign_id so bid queries align
-    # Guard: never double-prefix if sovereign_id already has REG- (e.g. retry after partial failure)
-    old_sovereign_id = current_user.sovereign_id
-    fwd_id = old_sovereign_id if old_sovereign_id.startswith("REG-") else f"REG-{old_sovereign_id}"
+    # Store with PENDING status — user role and sovereign_id unchanged until admin approves
+    # forwarder_id uses the original sovereign_id (no REG- prefix yet)
+    orig_sovereign_id = current_user.sovereign_id
+    fwd_id = f"REG-{orig_sovereign_id}"
 
     new_f = Forwarder(
         forwarder_id=fwd_id,
@@ -219,37 +221,70 @@ async def promote_to_forwarder(
         tax_id=f_in.tax_id,
         document_url=f_in.document_url,
         logo_url=f_in.logo_url,
-        status="ACTIVE",
+        status="PENDING",       # ← awaiting admin approval
         is_verified=False,
         is_paid=False,
         registered_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        expires_at=(datetime.now(timezone.utc) + timedelta(days=30)).replace(tzinfo=None),
+        expires_at=(datetime.now(timezone.utc) + timedelta(days=365)).replace(tzinfo=None),
     )
     db.add(new_f)
-
-    # Promote user role and assign matching sovereign_id
-    current_user.role = "forwarder"
-    current_user.sovereign_id = fwd_id
-
+    # Do NOT change user.role or user.sovereign_id — admin approval does that
     await db.commit()
 
-    # Log PARTNER_REGISTERED activity
+    # Notify n8n of new application
+    background_tasks.add_task(webhook_service.trigger_registration_webhook, {
+        "forwarder_id": fwd_id,
+        "company_name": f_in.company_name,
+        "contact_person": f_in.contact_person,
+        "email": current_user.email,
+        "company_email": f_in.company_email or "",
+        "phone": f_in.phone,
+        "whatsapp": f_in.whatsapp or f_in.phone,
+        "country": f_in.country,
+        "specializations": f_in.specializations,
+        "routes": f_in.routes,
+        "tax_id": f_in.tax_id,
+        "website": f_in.website or "",
+        "document_url": f_in.document_url or "",
+        "logo_url": f_in.logo_url or "",
+        "status": "PENDING",
+    })
+
     try:
         await activity_service.log(
             db,
             user_id=str(current_user.id),
-            action="PARTNER_REGISTERED",
+            action="PARTNER_APPLIED",
             entity_type="FORWARDER",
             entity_id=fwd_id,
             metadata={"company_name": f_in.company_name, "forwarder_id": fwd_id}
         )
     except Exception:
-        pass  # Never block registration due to activity logging failure
+        pass
 
     return {
         "success": True,
+        "status": "PENDING",
         "forwarder_id": fwd_id,
-        "message": f"Partner {f_in.company_name} registered. ID: {fwd_id}",
+        "message": "Application submitted. Pending admin approval.",
+    }
+
+
+@router.get("/my-status")
+async def get_my_application_status(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns the current user's forwarder application status."""
+    result = await db.execute(select(Forwarder).where(Forwarder.email == current_user.email))
+    forwarder = result.scalars().first()
+    if not forwarder:
+        return {"status": "NOT_APPLIED", "forwarder_id": None, "company_name": None}
+    return {
+        "status": forwarder.status,
+        "forwarder_id": forwarder.forwarder_id,
+        "company_name": forwarder.company_name,
+        "registered_at": str(forwarder.registered_at),
     }
 
 
