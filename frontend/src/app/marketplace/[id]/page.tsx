@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle, Clock, Plane, Ship, Check, ArrowRight, BrainCircuit, Activity, Zap } from 'lucide-react';
+import { Loader2, ArrowRight, BrainCircuit, Activity, Zap } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
 
@@ -81,20 +81,20 @@ export default function MarketplaceLiveDashboard() {
                     >
                         {status === 'CLOSED' ? (
                             <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center shadow-lg shadow-emerald-500/5">
-                                <Activity className="w-4 h-4 mr-3" /> Analysis Protocol Finalized
+                                <Activity className="w-4 h-4 mr-3" /> Quoting Complete
                             </div>
                         ) : (
                             <div className="bg-white/5 text-zinc-400 border border-white/10 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center">
-                                <BrainCircuit className="w-4 h-4 mr-3 animate-pulse text-emerald-500" /> Intercepting Carrier Quotations...
+                                <BrainCircuit className="w-4 h-4 mr-3 animate-pulse text-emerald-500" /> Collecting Forwarder Quotes...
                             </div>
                         )}
                         <h1 className="text-5xl font-black mb-6 tracking-tighter font-outfit uppercase bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
-                            Live Intelligence <span className="text-white">Grid</span>
+                            Live Quote <span className="text-white">Results</span>
                         </h1>
                         <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm leading-relaxed">
                             Request: <span className="text-zinc-200 font-mono tracking-widest">{requestId}</span>
                             <br />
-                            Real-time spot rate synthesis for {shipmentInfo?.origin} ➔ {shipmentInfo?.destination}
+                            {shipmentInfo?.origin} → {shipmentInfo?.destination}
                         </p>
                     </motion.div>
                 </div>
@@ -217,7 +217,7 @@ export default function MarketplaceLiveDashboard() {
                                         <div className="text-4xl font-black text-white mb-2 font-outfit tracking-tighter">
                                             {quote.currency} {Number(quote.total_price).toLocaleString()}
                                         </div>
-                                        <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">Verified Spot Protocol</div>
+                                        <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">Verified Quote</div>
                                     </div>
 
                                     {/* Action Vector */}
@@ -252,16 +252,16 @@ export default function MarketplaceLiveDashboard() {
                             <div className="w-16 h-16 bg-white/[0.03] rounded-3xl flex items-center justify-center mb-8 border border-white/10">
                                 <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
                             </div>
-                            <h4 className="text-lg font-bold text-zinc-400 mb-2 font-outfit uppercase">Grid Synchronization in Progress</h4>
+                            <h4 className="text-lg font-bold text-zinc-400 mb-2 font-outfit uppercase">Waiting for Quotes</h4>
                             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.3em] max-w-xs leading-loose">
-                                Waiting for remaining carrier vectors. Target: 3 Quotations.
+                                Forwarders are reviewing your request. Target: 3 Quotes.
                             </p>
                         </div>
                     )}
                 </div>
 
                 <div className="mt-32 pt-20 border-t border-white/5 text-center opacity-20">
-                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.8em]">Sovereign Market Intelligence End of Node</p>
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.8em]">CargoLink · Freight Marketplace</p>
                 </div>
             </div>
         </div>

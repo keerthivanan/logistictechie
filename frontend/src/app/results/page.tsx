@@ -234,76 +234,99 @@ function ResultsContent() {
                 return (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.04 }}
-                    className="bg-[#0a0a0a] border border-white/5 rounded-2xl hover:border-white/10 transition-all"
+                    transition={{ delay: idx * 0.04, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+                    className="bg-black border border-white/5 rounded-3xl group hover:border-white/10 transition-all duration-500 hover:bg-zinc-950 relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.01)]"
                   >
-                    <div className="p-5 flex flex-col md:flex-row md:items-stretch gap-0">
+                    {/* Premium Shimmer Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.01)_50%,transparent_75%)] bg-[length:250%_250%] animate-shimmer" />
+
+                    <div className="p-8 flex flex-col md:flex-row md:items-stretch gap-8 relative z-10">
 
                       {/* Left: carrier + route + insight */}
-                      <div className="flex-1 space-y-4 pr-0 md:pr-6">
+                      <div className="flex-1 space-y-8">
 
                         {/* Carrier row */}
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-white/[0.03] border border-white/5 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Ship className="w-3.5 h-3.5 text-zinc-400" />
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:border-white/10 transition-colors">
+                              <Ship className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-white font-inter leading-none">{quote.carrier_name}</p>
-                              <p className="text-[10px] text-zinc-600 font-inter mt-0.5">Verified carrier · {container} FCL</p>
+                              <p className="text-sm font-black text-white font-outfit uppercase tracking-tight">{quote.carrier_name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[9px] font-bold text-white/30 font-inter uppercase tracking-widest">{container} FCL</span>
+                                <div className="w-1 h-1 bg-white/20 rounded-full" />
+                                <span className="text-[9px] font-bold text-white/30 font-inter uppercase tracking-widest">Verified Fleet</span>
+                              </div>
                             </div>
                           </div>
                           {isBest && (
-                            <span className="text-[10px] font-black uppercase tracking-widest bg-white text-black px-2.5 py-1 rounded-full font-inter">Best Value</span>
+                            <div className="flex items-center gap-1.5 border border-emerald-500/20 px-3 py-1 rounded-full bg-emerald-500/5">
+                              <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                              <span className="text-[9px] font-black font-inter text-emerald-500 uppercase tracking-widest">PROPHETIC BEAT</span>
+                            </div>
                           )}
                         </div>
 
-                        {/* Route */}
-                        <div className="grid grid-cols-3 items-center gap-1 bg-black/50 rounded-xl px-4 py-3 border border-white/[0.04]">
-                          <div>
-                            <p className="text-base font-black font-mono text-white leading-none">{origin}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Origin</p>
+                        {/* Route Visualization */}
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-8 px-6 bg-white/[0.01] rounded-2xl border border-white/[0.03]">
+                          <div className="space-y-1.5">
+                            <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{origin}</p>
+                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Departure</p>
                           </div>
-                          <div className="text-center">
-                            <p className="text-xs font-bold text-zinc-300 leading-none">{transitDays} days</p>
-                            <div className="flex items-center gap-1 my-1.5">
-                              <div className="h-px flex-1 bg-white/10" />
-                              <ArrowRight className="w-2.5 h-2.5 text-zinc-700" />
-                              <div className="h-px flex-1 bg-white/10" />
+
+                          <div className="flex flex-col items-center gap-2 min-w-[120px]">
+                            <span className="text-[10px] font-black text-white/60 font-inter tracking-[0.1em]">{transitDays} DAYS</span>
+                            <div className="w-full h-px bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.1),transparent)] relative">
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                             </div>
-                            <p className="text-[10px] text-zinc-600">Transit Time</p>
+                            <span className="text-[8px] font-bold text-white/10 uppercase tracking-widest font-inter">Transit Period</span>
                           </div>
-                          <div className="text-right">
-                            <p className="text-base font-black font-mono text-white leading-none">{destination}</p>
-                            <p className="text-[10px] text-zinc-600 mt-1">Destination</p>
+
+                          <div className="text-right space-y-1.5">
+                            <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{destination}</p>
+                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Arrival</p>
                           </div>
                         </div>
 
                         {/* Insight */}
-                        {quote.wisdom && !isBest && (
-                          <p className="text-[11px] text-zinc-600 font-inter leading-relaxed">{quote.wisdom}</p>
+                        {quote.wisdom && (
+                          <div className="flex items-start gap-4 pt-4">
+                            <Zap className={`w-4 h-4 mt-0.5 ${isBest ? 'text-emerald-500' : 'text-white/20'}`} />
+                            <p className="text-[11px] text-white/40 font-inter leading-relaxed italic group-hover:text-white/60 transition-colors">
+                              &ldquo;{quote.wisdom}&rdquo;
+                            </p>
+                          </div>
                         )}
                       </div>
 
                       {/* Divider */}
-                      <div className="hidden md:block w-px bg-white/5 mx-1" />
+                      <div className="hidden md:block w-px bg-white/5" />
 
                       {/* Right: price + CTA */}
-                      <div className="md:pl-6 md:w-44 flex flex-col justify-between items-end pt-4 md:pt-0 border-t md:border-t-0 border-white/5">
-                        <div className="text-right">
-                          <p className="text-[10px] text-zinc-600 font-inter mb-1">All-in Rate</p>
-                          <p className="text-2xl font-black font-mono text-white leading-none">${quote.price.toLocaleString()}</p>
-                          <p className="text-[10px] text-zinc-600 font-inter mt-1">per container</p>
+                      <div className="md:w-56 flex flex-col justify-between items-end pt-8 md:pt-0">
+                        <div className="text-right space-y-1">
+                          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-inter">Total Vector Magnitude</p>
+                          <div className="flex items-baseline gap-1 justify-end">
+                            <span className="text-[14px] font-black text-white/40">$</span>
+                            <p className="text-4xl font-black font-mono text-white tracking-tighter leading-none select-all">{quote.price.toLocaleString()}</p>
+                          </div>
+                          <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] font-inter">All-In Fixed</p>
                         </div>
-                        <button
-                          onClick={() => handleSelectQuote(quote)}
-                          className="mt-4 w-full bg-white text-black py-2.5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-zinc-200 transition-all font-inter flex items-center justify-center gap-1.5"
-                        >
-                          Book Now <ArrowRight className="w-3 h-3" />
-                        </button>
-                        <p className="text-[10px] text-zinc-800 font-mono mt-2">#{quote.id?.slice(0, 8)}</p>
+
+                        <div className="w-full space-y-4">
+                          <button
+                            onClick={() => handleSelectQuote(quote)}
+                            className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-[0.4em] text-[9px] transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(255,255,255,0.2)]"
+                          >
+                            Execute Booking
+                          </button>
+                          <div className="text-center">
+                            <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest">Ref: {quote.id?.slice(0, 8) || 'AUTO-VEC'}</span>
+                          </div>
+                        </div>
                       </div>
 
                     </div>

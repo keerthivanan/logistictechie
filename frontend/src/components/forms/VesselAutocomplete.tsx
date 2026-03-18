@@ -77,15 +77,15 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
 
     return (
         <div ref={wrapperRef} className="relative w-full">
-            <div className="relative flex items-center">
-                <Ship className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 z-10" />
+            <div className="relative flex items-center group">
+                <Ship className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-hover:text-white/40 transition-colors z-10" />
                 <input
                     type="text"
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => setIsOpen(true)}
-                    placeholder={placeholder || "Search Vessel..."}
-                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-10 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter transition-all"
+                    placeholder={placeholder || "Search Global Vessel Fleet..."}
+                    className="w-full bg-black border border-white/5 rounded-2xl pl-12 pr-12 py-4 text-[10px] font-black text-white placeholder:text-white/10 focus:border-white/20 outline-none font-inter transition-all shadow-[inset_0_0_20px_rgba(255,255,255,0.01)]"
                     autoComplete="off"
                 />
 
@@ -93,49 +93,70 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
                     <button
                         type="button"
                         onClick={clearInput}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors z-10"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors z-10 p-1"
                     >
                         <X className="w-4 h-4" />
                     </button>
                 )}
 
                 {isSearching && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 animate-spin z-10" />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
+                        <Loader2 className="w-4 h-4 text-white/20 animate-spin" />
+                    </div>
                 )}
             </div>
 
             {isOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden max-h-48 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full mt-2 bg-black border border-white/10 rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,1)] z-[100] overflow-hidden backdrop-blur-3xl">
                     {suggestions.length > 0 ? (
-                        suggestions.map((item, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => handleSelect(item.name)}
-                                className="w-full px-4 py-3 text-left hover:bg-white/5 flex items-center justify-between border-b border-white/5 last:border-0 group"
-                            >
-                                <div className="flex flex-col">
-                                    <span className="text-[11px] font-inter font-bold text-white group-hover:text-emerald-400 transition-colors">
-                                        {item.name}
-                                    </span>
-                                    <span className="text-[9px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">
-                                        IMO: {item.imo} | Flag: {item.flag}
-                                    </span>
-                                </div>
-                                <Search className="w-3 h-3 text-zinc-800 group-hover:text-zinc-400 transition-colors" />
-                            </button>
-                        ))
+                        <div className="divide-y divide-white/5">
+                            {suggestions.map((item, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleSelect(item.name)}
+                                    className="w-full px-6 py-4 text-left hover:bg-white/[0.03] flex items-center justify-between group/item transition-colors"
+                                >
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-[11px] font-black font-outfit text-white group-hover/item:text-white transition-colors uppercase tracking-tight">
+                                            {item.name}
+                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-[9px] text-white/20 font-mono uppercase tracking-tighter">
+                                                IMO: {item.imo}
+                                            </span>
+                                            <div className="w-1 h-1 bg-white/10 rounded-full" />
+                                            <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest font-inter">
+                                                Registry: {item.flag}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Search className="w-3 h-3 text-white/10 group-hover/item:text-white/40 transition-colors" />
+                                </button>
+                            ))}
+                        </div>
                     ) : !isSearching && query.length >= 2 && (
-                        <div className="p-4 text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                            No vessels found for &quot;{query}&quot;
+                        <div className="p-8 text-center">
+                            <Ship className="w-8 h-8 text-white/5 mx-auto mb-3" />
+                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-black">
+                                No vessels detected in sector &quot;{query}&quot;
+                            </p>
                         </div>
                     )}
                     {query.length < 2 && !isSearching && (
-                        <div className="p-4 text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
-                            Type to search Global Vessels
+                        <div className="p-8 text-center">
+                            <div className="flex justify-center gap-2 mb-3">
+                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce" />
+                            </div>
+                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-black">
+                                Awaiting fleet identification...
+                            </p>
                         </div>
                     )}
                 </div>
             )}
         </div>
     );
+
 }

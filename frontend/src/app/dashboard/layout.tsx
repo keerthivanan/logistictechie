@@ -6,16 +6,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard,
     Package,
-    CreditCard,
     Settings,
-    LogOut,
     Bell,
     ClipboardList,
     Activity as ActivityIcon,
     Users,
     Zap,
     Search,
-    Plus
+    Plus,
+    ShieldCheck
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
@@ -150,6 +149,22 @@ export default function DashboardLayout({
                             ))}
                         </nav>
                     </div>
+
+                    {/* Admin Section — backend gates via ADMIN_EMAIL, frontend just shows link */}
+                    {user && (
+                        <div>
+                            <h3 className="px-4 text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-4">System</h3>
+                            <nav className="space-y-1">
+                                <Link
+                                    href="/admin"
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${pathname === '/admin' ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
+                                >
+                                    <ShieldCheck className={`w-5 h-5 ${pathname === '/admin' ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                    <span className="text-sm tracking-tight">Admin Panel</span>
+                                </Link>
+                            </nav>
+                        </div>
+                    )}
 
                     {/* Partner Section — visible to all users */}
                     {user && (

@@ -2,7 +2,7 @@ import hmac
 from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import JWTError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import AsyncSessionLocal as SessionLocal
@@ -53,6 +53,7 @@ def get_current_active_user(
     return current_user
 
 async def get_admin_user(
+    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Only the configured ADMIN_EMAIL can access admin endpoints."""
@@ -62,6 +63,10 @@ async def get_admin_user(
         raise HTTPException(status_code=500, detail="ADMIN_EMAIL not configured on server.")
     if current_user.email.lower() != admin_email.lower():
         raise HTTPException(status_code=403, detail="Access denied. Admin only.")
+    # Auto-promote role to 'admin' so the frontend can use role checks
+    if current_user.role != "admin":
+        current_user.role = "admin"
+        await db.commit()
     return current_user
 
 async def get_current_user_optional(

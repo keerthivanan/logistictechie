@@ -27,6 +27,19 @@ module.exports = {
           foreground: '#000000',
         },
       },
+      fontFamily: {
+        inter: ['var(--font-inter)'],
+        outfit: ['var(--font-outfit)'],
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
+      animation: {
+        shimmer: 'shimmer 8s infinite linear',
+      },
     },
   },
   plugins: [],

@@ -95,8 +95,8 @@ export default function PartnerDashboard() {
         )
     }
 
-    const wonBids = bids.filter(b => b.bid_status === 'ACCEPTED').length
-    const pendingBids = bids.filter(b => b.bid_status === 'ANSWERED').length
+    const wonBids = bids.filter(b => b.bid_status === 'ACCEPTED' || b.bid_status === 'COMPLETED').length
+    const pendingBids = bids.filter(b => b.bid_status === 'ANSWERED' && b.request_status === 'OPEN').length
 
     return (
         <div className="space-y-10 max-w-7xl mx-auto py-6">
@@ -108,7 +108,7 @@ export default function PartnerDashboard() {
                     </div>
                     <h1 className="text-xl font-black tracking-tight font-outfit uppercase">Partner Center</h1>
                     <p className="text-zinc-500 text-sm font-medium tracking-tight">
-                        Company ID: <span className="text-white font-mono">{user?.email}</span>
+                        Partner ID: <span className="text-white font-mono">{user?.sovereign_id || user?.email}</span>
                     </p>
                 </div>
                 <div className="flex gap-4">
