@@ -307,7 +307,7 @@ function LoginContent() {
                     <div className="mt-6 pt-6 border-t border-white/5 text-center">
                         <p className="text-zinc-700 text-[9px] font-bold uppercase tracking-widest leading-loose font-inter">
                             By continuing, you agree to{' '}
-                            <Link href="/legal/terms" className="text-zinc-500 hover:text-white transition-colors underline decoration-white/5">Sovereign Data Protocols</Link>
+                            <Link href="/legal/terms" className="text-zinc-500 hover:text-white transition-colors underline decoration-white/5">Terms of Service</Link>
                         </p>
                     </div>
                 </div>

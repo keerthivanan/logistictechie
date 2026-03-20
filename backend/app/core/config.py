@@ -48,7 +48,6 @@ class Settings(BaseSettings):
 
     RATE_LIMIT_PER_MINUTE: int = 60
     DEBUG: bool = False
-    AI_PERSONA: str = "Logistics Oracle"
 
     # Pydantic V2 Config
     model_config = SettingsConfigDict(

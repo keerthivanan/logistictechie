@@ -1,32 +1,58 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, ArrowUpRight, Loader2 } from 'lucide-react'
+import { Search, ArrowRight, Loader2, Ship, Zap, CheckCircle2, Clock, Package, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/config'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+
+interface Quotation {
+    quotation_id: string
+    forwarder_company: string
+    total_price: number
+    currency: string
+    transit_days: number | null
+    ai_summary: string | null
+    carrier: string | null
+    received_at: string
+}
+
+interface ShipmentRequest {
+    request_id: string
+    origin: string
+    destination: string
+    cargo_type: string
+    commodity: string
+    weight_kg: number
+    container_type: string | null
+    is_hazardous: boolean
+    needs_insurance: boolean
+    status: string
+    quotation_count: number
+    submitted_at: string
+    quotations: Quotation[]
+}
 
 export default function ShipmentsPage() {
     const { user, logout, loading: authLoading } = useAuth()
     const router = useRouter()
-    const [shipments, setShipments] = useState<any[]>([])
+    const [requests, setRequests] = useState<ShipmentRequest[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
+    const [search, setSearch] = useState('')
 
-    const fetchShipments = useCallback(async () => {
+    const fetchRequests = useCallback(async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await apiFetch(`/api/marketplace/my-requests`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await apiFetch('/api/marketplace/my-requests', {
+                headers: { Authorization: `Bearer ${token}` }
             })
-            if (res.status === 401) {
-                logout()
-                return
-            }
+            if (res.status === 401) { logout(); return }
             const data = await res.json()
             if (data.success) {
-                setShipments(data.requests)
+                setRequests(data.requests)
             } else {
                 setError(true)
             }
@@ -39,17 +65,44 @@ export default function ShipmentsPage() {
 
     useEffect(() => {
         if (authLoading) return
-        if (!user) {
-            router.push('/login')
-        } else {
-            fetchShipments()
+        if (!user) { router.push('/login'); return }
+        if (user.role === 'forwarder') { router.push('/dashboard/partner'); return }
+        fetchRequests()
+    }, [user, authLoading, router, fetchRequests])
+
+    const openChat = async (quote: Quotation, req: ShipmentRequest) => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch('/api/conversations/start', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request_id: req.request_id, quote_id: quote.quotation_id }),
+            })
+            const data = await res.json()
+            if (res.ok && data.public_id) {
+                window.open(`/dashboard/messages/${data.public_id}`, '_blank')
+            }
+        } catch {
+            // silently fail — user can retry
         }
-    }, [user, authLoading, router, fetchShipments])
+    }
+
+    const filtered = requests.filter(r => {
+        if (!search.trim()) return true
+        const s = search.toLowerCase()
+        return (
+            r.request_id.toLowerCase().includes(s) ||
+            r.origin.toLowerCase().includes(s) ||
+            r.destination.toLowerCase().includes(s) ||
+            r.cargo_type.toLowerCase().includes(s) ||
+            r.commodity?.toLowerCase().includes(s)
+        )
+    })
 
     if (loading || authLoading) {
         return (
-            <div className="h-full flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
+            <div className="h-full flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin text-white/20" />
                 <p className="text-xs text-zinc-600">Loading shipments...</p>
             </div>
         )
@@ -57,7 +110,7 @@ export default function ShipmentsPage() {
 
     if (error) {
         return (
-            <div className="h-full flex flex-col items-center justify-center space-y-2">
+            <div className="h-full flex flex-col items-center justify-center gap-2">
                 <p className="text-xs text-red-400">Failed to load shipments. Please refresh.</p>
             </div>
         )
@@ -65,121 +118,217 @@ export default function ShipmentsPage() {
 
     return (
         <div className="h-full flex flex-col gap-4 overflow-hidden">
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-bold tracking-tight text-white font-outfit">
-                            My Shipments
-                        </h1>
-                    </div>
-                    <p className="text-zinc-500 font-inter text-xs">Track and manage all your active freight requests.</p>
+                <div>
+                    <h1 className="text-lg font-bold tracking-tight text-white font-outfit">My Shipments</h1>
+                    <p className="text-zinc-500 text-xs font-inter mt-0.5">Review received quotes and confirm your booking.</p>
                 </div>
-                <Link href="/marketplace"
-                    className="bg-white text-black px-6 py-3 rounded-2xl text-sm font-semibold hover:bg-zinc-200 transition-all font-inter self-start md:self-auto">
-                    + New Shipment
+                <Link
+                    href="/marketplace"
+                    className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all font-inter self-start md:self-auto"
+                >
+                    + New Request
                 </Link>
             </div>
 
-            {/* Table */}
-            <div className="flex-1 min-h-0 bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden flex flex-col">
-                {shipments.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-                        <div className="p-6 bg-white/[0.02] border border-white/5 rounded-full mb-6">
-                            <Search className="w-10 h-10 text-zinc-700" />
+            {/* Search */}
+            <div className="relative flex-shrink-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+                <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search by route, cargo, or request ID..."
+                    className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-zinc-700 focus:border-white/15 outline-none transition-colors font-inter"
+                />
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar space-y-4 pr-1">
+                {filtered.length === 0 ? (
+                    <div className="h-[60vh] flex flex-col items-center justify-center text-center gap-4">
+                        <div className="w-16 h-16 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center">
+                            <Package className="w-7 h-7 text-zinc-700" />
                         </div>
-                        <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-tight font-outfit">No active shipments found</h3>
-                        <p className="text-[10px] text-zinc-600 max-w-sm mb-8 font-medium font-inter leading-relaxed">
-                            Start a new search to lock in a quote and begin your shipment journey.
-                        </p>
-                        <Link href="/dashboard"
-                            className="text-[9px] font-black text-white hover:text-emerald-400 underline-offset-8 underline decoration-zinc-800 hover:decoration-emerald-500 transition-all uppercase tracking-widest font-inter">
-                            Back to Dashboard
+                        <div>
+                            <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">No shipments yet</h3>
+                            <p className="text-xs text-zinc-600 font-inter max-w-xs">Submit a freight request to get quotes from verified forwarders.</p>
+                        </div>
+                        <Link href="/marketplace" className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all">
+                            Request a Quote
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="sticky top-0 bg-[#0a0a0a] z-10">
-                                <tr className="border-b border-white/5 bg-white/[0.01]">
-                                    <th className="pl-8 pr-6 py-5 text-xs font-medium text-zinc-500 font-inter">Reference</th>
-                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Route</th>
-                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Cargo Type</th>
-                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Date Submitted</th>
-                                    <th className="px-6 py-5 text-xs font-medium text-zinc-500 font-inter">Status</th>
-                                    <th className="pr-8 py-5 text-xs font-medium text-zinc-500 font-inter text-right">Commit</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/[0.02]">
-                                {shipments.map((s) => (
-                                    <tr key={s.request_id} className="group hover:bg-white/[0.02] transition-colors">
-                                        <td className="pl-8 pr-6 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-[12px] font-mono font-bold text-white tracking-widest">{s.request_id}</span>
-                                                <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.2em] mt-1 font-inter">Verified</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-300 font-inter tracking-tight">
-                                                    <span>{s.origin || 'Unknown'}</span>
-                                                    <ArrowUpRight className="w-3 h-3 text-zinc-700 group-hover:text-emerald-500 transition-colors" />
-                                                    <span>{s.destination || 'Unknown'}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest font-inter">Freight Route</span>
-                                                    {s.commodity && (
-                                                        <span className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest font-inter px-1.5 py-0.5 bg-emerald-500/10 rounded-sm">
-                                                            {s.commodity}
-                                                        </span>
-                                                    )}
+                    <AnimatePresence>
+                        {filtered.map((req, idx) => {
+                            const quotes = req.quotations || []
+                            const bestPrice = quotes.length > 0 ? Math.min(...quotes.map(q => q.total_price)) : null
+                            const validTransit = quotes.filter(q => q.transit_days != null)
+                            const fastestDays = validTransit.length > 0 ? Math.min(...validTransit.map(q => q.transit_days!)) : null
+                            const isBooked = req.status === 'CLOSED'
+
+                            return (
+                                <motion.div
+                                    key={req.request_id}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden"
+                                >
+                                    {/* Request Header */}
+                                    <div className="px-5 py-4 border-b border-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="flex-shrink-0">
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isBooked ? 'bg-emerald-500/10' : 'bg-white/[0.03] border border-white/5'}`}>
+                                                    {isBooked
+                                                        ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                                        : <Ship className="w-4 h-4 text-zinc-600" />
+                                                    }
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest bg-white/[0.02] px-3 py-1.5 rounded-lg border border-white/5 font-inter">
-                                                {s.cargo_type}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className="text-[11px] font-bold text-zinc-400 font-inter">{new Date(s.submitted_at).toLocaleDateString()}</span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col gap-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor] ${s.status === 'SHIPPED' || s.status === 'CLOSED' ? 'bg-emerald-500' :
-                                                        s.status === 'OPEN' ? 'bg-amber-500 animate-pulse' : 'bg-blue-500'}`} />
-                                                    <span className={`text-[10px] font-black uppercase tracking-[0.1em] font-inter ${s.status === 'SHIPPED' || s.status === 'CLOSED' ? 'text-emerald-400' :
-                                                        s.status === 'OPEN' ? 'text-amber-400' : 'text-blue-400'}`}>
-                                                        {s.status}
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-xs font-mono font-bold text-white">{req.request_id}</span>
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                                        isBooked
+                                                            ? 'bg-emerald-500/10 text-emerald-400'
+                                                            : quotes.length >= 3
+                                                            ? 'bg-blue-500/10 text-blue-400'
+                                                            : 'bg-amber-500/10 text-amber-400 animate-pulse'
+                                                    }`}>
+                                                        {isBooked ? 'Booked' : quotes.length >= 3 ? 'Quotes Ready' : 'Collecting Quotes'}
                                                     </span>
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    {s.is_hazardous && (
-                                                        <span className="text-[10px] font-black bg-red-500/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">HAZ</span>
-                                                    )}
-                                                    {s.needs_insurance && (
-                                                        <span className="text-[10px] font-black bg-blue-500/10 text-blue-500 border border-blue-500/20 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">INS</span>
-                                                    )}
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="text-xs font-bold text-zinc-300 truncate">{req.origin}</span>
+                                                    <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
+                                                    <span className="text-xs font-bold text-zinc-300 truncate">{req.destination}</span>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="pr-8 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <Link href={`/marketplace/${s.request_id}`}
-                                                    className="w-9 h-9 flex items-center justify-center rounded-full border border-white/5 bg-white/[0.01] text-zinc-700 hover:text-white hover:border-white/20 hover:bg-white/5 transition-all group-hover:scale-110">
-                                                    <ArrowUpRight className="w-4 h-4" />
-                                                </Link>
-                                                <div className="px-3 py-1.5 bg-white/[0.02] border border-white/5 rounded-xl text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] font-inter">
-                                                    {s.quotation_count} QUOTES
-                                                </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            {req.commodity && (
+                                                <span className="text-[9px] font-bold text-zinc-500 bg-white/[0.03] px-2 py-1 rounded-lg border border-white/5 uppercase tracking-wider hidden sm:block">
+                                                    {req.commodity}
+                                                </span>
+                                            )}
+                                            <span className="text-[9px] font-bold text-zinc-600 font-inter">
+                                                {req.submitted_at ? new Date(req.submitted_at).toLocaleDateString() : ''}
+                                            </span>
+                                            <Link
+                                                href={`/marketplace/${req.request_id}`}
+                                                className="text-[9px] font-black text-zinc-600 hover:text-white uppercase tracking-widest border border-white/5 px-2.5 py-1.5 rounded-lg hover:border-white/20 transition-all"
+                                            >
+                                                Full View
+                                            </Link>
+                                        </div>
+                                    </div>
+
+                                    {/* Quotes Section */}
+                                    {quotes.length === 0 ? (
+                                        <div className="px-5 py-6 flex items-center gap-4 text-center justify-center">
+                                            <Loader2 className="w-4 h-4 animate-spin text-zinc-700 flex-shrink-0" />
+                                            <div className="text-left">
+                                                <p className="text-xs font-bold text-zinc-500 font-inter">Waiting for forwarder quotes</p>
+                                                <p className="text-[10px] text-zinc-700 font-inter mt-0.5">Quotes will appear here as forwarders respond.</p>
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    ) : (
+                                        <div className="divide-y divide-white/[0.03]">
+                                            {!isBooked && (
+                                                <div className="px-5 py-3 flex items-center gap-2">
+                                                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">
+                                                        {quotes.length} {quotes.length === 1 ? 'Quote' : 'Quotes'} Received
+                                                        {quotes.length >= 3 ? ' — Select one to book' : ''}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {quotes.map((quote, qIdx) => {
+                                                const isBest = quote.total_price === bestPrice
+                                                const isFastest = quote.transit_days != null && quote.transit_days === fastestDays
+
+                                                return (
+                                                    <div
+                                                        key={quote.quotation_id}
+                                                        className={`px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all ${
+                                                            isBest && !isBooked ? 'bg-emerald-500/[0.03]' : ''
+                                                        }`}
+                                                    >
+                                                        {/* Rank */}
+                                                        <div className="flex-shrink-0">
+                                                            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/5 flex items-center justify-center text-[10px] font-black text-zinc-500 font-mono">
+                                                                0{qIdx + 1}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Info */}
+                                                        <div className="flex-1 min-w-0 space-y-1.5">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <span className="text-sm font-black text-white font-outfit">{quote.forwarder_company}</span>
+                                                                {quote.carrier && (
+                                                                    <span className="text-[9px] font-bold bg-white/5 text-zinc-500 px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-widest">
+                                                                        {quote.carrier}
+                                                                    </span>
+                                                                )}
+                                                                {isBest && !isBooked && (
+                                                                    <span className="text-[9px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                                        Best Price
+                                                                    </span>
+                                                                )}
+                                                                {isFastest && !isBooked && (
+                                                                    <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                                        Fastest
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            {quote.transit_days && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <Clock className="w-3 h-3 text-zinc-600" />
+                                                                    <span className="text-[10px] text-zinc-500 font-inter">{quote.transit_days} days transit</span>
+                                                                </div>
+                                                            )}
+                                                            {quote.ai_summary && (
+                                                                <div className="flex items-start gap-1.5">
+                                                                    <Zap className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                                                    <p className="text-[10px] text-zinc-500 font-inter leading-relaxed italic line-clamp-2">{quote.ai_summary}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Price + Book */}
+                                                        <div className="flex items-center gap-4 flex-shrink-0">
+                                                            <div className="text-right">
+                                                                <p className="text-lg font-black font-mono text-white leading-none">
+                                                                    {quote.currency} {Number(quote.total_price).toLocaleString()}
+                                                                </p>
+                                                                <p className="text-[9px] text-zinc-600 font-inter mt-0.5">all-in</p>
+                                                            </div>
+
+                                                            {isBooked ? (
+                                                                <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
+                                                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                                                    <span className="text-[9px] font-black uppercase tracking-widest">Booked</span>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => openChat(quote, req)}
+                                                                    className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
+                                                                >
+                                                                    <MessageSquare className="w-3 h-3" /> Chat
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )
+                        })}
+                    </AnimatePresence>
                 )}
             </div>
         </div>

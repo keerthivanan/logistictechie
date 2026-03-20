@@ -1,16 +1,33 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, CheckCircle2, History, Package, FileText, Globe, ArrowUpRight, Activity as ActivityIcon } from 'lucide-react'
+import { Search, CheckCircle2, History, Package, FileText, Globe, ArrowUpRight, Activity as ActivityIcon, LogIn, LogOut, UserPlus, User, ShieldCheck, Send, Store, Zap } from 'lucide-react'
 import { Activity } from './types'
 
 const ACTION_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-    SEARCH:          { label: 'Freight Search',  icon: Search,       color: 'text-blue-400' },
-    VECTOR_SEARCH:   { label: 'Freight Search',  icon: Search,       color: 'text-blue-400' },
-    BOOKING_CREATED: { label: 'Booking Created', icon: CheckCircle2, color: 'text-emerald-400' },
-    BOOKING_UPDATED: { label: 'Booking Updated', icon: Package,      color: 'text-yellow-400' },
-    DOCUMENT_UPLOAD: { label: 'Document Upload', icon: FileText,     color: 'text-zinc-400' },
-    SOCIAL_LINK:     { label: 'Profile Updated', icon: Globe,        color: 'text-purple-400' },
+    // Auth
+    LOGIN:              { label: 'Signed In',          icon: LogIn,        color: 'text-blue-400' },
+    LOGOUT:             { label: 'Signed Out',          icon: LogOut,       color: 'text-zinc-500' },
+    SIGNUP:             { label: 'Account Created',     icon: UserPlus,     color: 'text-emerald-400' },
+    SOCIAL_LINK:        { label: 'Google Sign-In',      icon: Globe,        color: 'text-blue-400' },
+    // Profile
+    PROFILE_UPDATE:     { label: 'Profile Updated',     icon: User,         color: 'text-purple-400' },
+    SECURITY_UPDATE:    { label: 'Password Changed',    icon: ShieldCheck,  color: 'text-amber-400' },
+    // Marketplace
+    MARKETPLACE_SUBMIT: { label: 'Shipment Requested',  icon: Store,        color: 'text-emerald-400' },
+    SEARCH:             { label: 'Freight Search',      icon: Search,       color: 'text-blue-400' },
+    VECTOR_SEARCH:      { label: 'Freight Search',      icon: Search,       color: 'text-blue-400' },
+    // Forwarder
+    PARTNER_APPLIED:    { label: 'Partner Application', icon: Send,         color: 'text-amber-400' },
+    BID_SUBMITTED:      { label: 'Bid Submitted',       icon: Zap,          color: 'text-emerald-400' },
+    // Tasks
+    TASK_CREATED:       { label: 'Task Created',        icon: FileText,     color: 'text-zinc-400' },
+    TASK_COMPLETED:     { label: 'Task Completed',      icon: CheckCircle2, color: 'text-emerald-400' },
+    TASK_REOPENED:      { label: 'Task Reopened',       icon: History,      color: 'text-yellow-400' },
+    // Bookings
+    BOOKING_CREATED:    { label: 'Booking Created',     icon: CheckCircle2, color: 'text-emerald-400' },
+    BOOKING_UPDATED:    { label: 'Booking Updated',     icon: Package,      color: 'text-yellow-400' },
+    DOCUMENT_UPLOAD:    { label: 'Document Uploaded',   icon: FileText,     color: 'text-zinc-400' },
 }
 
 function getConfig(action: string) {

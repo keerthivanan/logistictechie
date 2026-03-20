@@ -91,15 +91,22 @@ export default function Home() {
               </p>
 
               <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="bg-[#0a0a0a] p-3 rounded-xl h-fit border border-white/[0.05]">
-                    <Zap className="w-5 h-5 text-zinc-400" />
+                {[
+                  { icon: Zap, title: 'Real-time Updates', desc: 'Live quote refresh and carrier availability on demand.' },
+                  { icon: BarChart3, title: 'Deep Analytics', desc: 'Compare spot rates, transit times, and carrier performance side by side.' },
+                  { icon: Globe, title: 'Global Coverage', desc: '150+ countries, 2,000+ verified carrier partners across all modes.' },
+                  { icon: Lock, title: 'Compliance Built-in', desc: 'Automated HS code classification and customs documentation.' },
+                ].map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="flex gap-4">
+                    <div className="bg-[#0a0a0a] p-3 rounded-xl h-fit border border-white/[0.05]">
+                      <Icon className="w-5 h-5 text-zinc-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white font-inter">{title}</p>
+                      <p className="text-xs text-zinc-500 font-inter mt-0.5">{desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-black text-white font-inter">Real-time Updates</p>
-                    <p className="text-xs text-zinc-500 font-inter mt-0.5">Live quote refresh and carrier availability on demand.</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

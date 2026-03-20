@@ -62,7 +62,7 @@ export default function AiChatVisual() {
             }
         } catch (err) {
             console.error(err)
-            setMessages(prev => [...prev, { role: 'assistant', content: "INTELLIGENCE SYNC ERROR: Link to Sovereign Node lost." }])
+            setMessages(prev => [...prev, { role: 'assistant', content: "Something went wrong. Please try again." }])
         } finally {
             setLoading(false)
         }
@@ -76,8 +76,8 @@ export default function AiChatVisual() {
             {/* Chat Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/50">
                 <div className="flex items-center gap-2">
-                    <Bot className="w-5 h-5 text-blue-400" />
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Sovereign Oracle v5.0</span>
+                    <Bot className="w-5 h-5 text-zinc-400" />
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">CargoLink AI Assistant</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
@@ -93,8 +93,8 @@ export default function AiChatVisual() {
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {m.role === 'assistant' && (
-                            <div className="mr-3 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
-                                <Bot className="w-4 h-4 text-white" />
+                            <div className="mr-3 w-8 h-8 bg-zinc-800 border border-white/[0.08] rounded-full flex items-center justify-center flex-shrink-0">
+                                <Bot className="w-4 h-4 text-zinc-300" />
                             </div>
                         )}
                         <div className={`
@@ -106,13 +106,13 @@ export default function AiChatVisual() {
                         `}>
                             {m.role === 'assistant' && i === messages.length - 1 && loading && (
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Sparkles className="w-3 h-3 text-blue-400 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">Analyzing...</span>
+                                    <Sparkles className="w-3 h-3 text-zinc-400 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Analyzing...</span>
                                 </div>
                             )}
                             {m.content}
                             {m.action && m.action.type === 'NAVIGATE' && (
-                                <div className="mt-3 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg text-[10px] font-bold text-blue-400 uppercase flex items-center gap-2">
+                                <div className="mt-3 p-2 bg-white/[0.04] border border-white/10 rounded-lg text-[10px] font-bold text-zinc-400 uppercase flex items-center gap-2">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Auto-navigating to {m.action.payload}
                                 </div>
                             )}
@@ -132,8 +132,8 @@ export default function AiChatVisual() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Task the Oracle (e.g. 'Track BK-1024')"
-                    className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Ask me to track a shipment, get rates, or open your dashboard..."
+                    className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-white/30 outline-none transition-colors"
                     disabled={loading}
                 />
                 <button

@@ -22,14 +22,14 @@ async def get_db() -> Generator:
     finally:
         await db.close()
 
-from app.core.redis import redis_client
+from app.core import redis as _redis_mod
 
 async def get_current_user(
     db: AsyncSession = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:
     try:
-        if redis_client:
-            is_blacklisted = await redis_client.get(f"blacklist:{token}")
+        if _redis_mod.redis_client:
+            is_blacklisted = await _redis_mod.redis_client.get(f"blacklist:{token}")
             if is_blacklisted:
                 raise HTTPException(status_code=401, detail="Token has been revoked/logged out")
                 
@@ -136,5 +136,5 @@ def verify_n8n_webhook(
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Sovereign Access Denied. Invalid or missing Webhook API Key."
+        detail="Unauthorized. Invalid or missing Webhook API Key."
     )

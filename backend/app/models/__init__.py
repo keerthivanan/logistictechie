@@ -11,5 +11,7 @@ from .marketplace import (
 )
 from .activity import UserActivity
 from .task import Task
+from .booking import Booking
+from .conversation import Conversation, ChatMessage
 
 

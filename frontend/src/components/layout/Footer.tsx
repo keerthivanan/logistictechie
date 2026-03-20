@@ -1,76 +1,138 @@
 import Link from 'next/link'
-import { Mail, Globe } from 'lucide-react'
+import { Mail, Globe, Twitter, Linkedin } from 'lucide-react'
+
+const columns = [
+    {
+        heading: 'Product',
+        links: [
+            { label: 'Shipper Portal', href: '/search' },
+            { label: 'AI Quoting', href: '/marketplace' },
+            { label: 'Carrier Partners', href: '/carriers' },
+            { label: 'Enterprise', href: '/services/coming-soon' },
+            { label: 'Live Demo', href: '/demo' },
+        ],
+    },
+    {
+        heading: 'Features',
+        links: [
+            { label: 'Search Rates', href: '/search' },
+            { label: 'Dashboard', href: '/dashboard' },
+            { label: 'Freight Calculator', href: '/tools/calculator' },
+            { label: 'HS Codes', href: '/tools/hs-codes' },
+            { label: 'Shipment Tracking', href: '/tracking' },
+        ],
+    },
+    {
+        heading: 'Company',
+        links: [
+            { label: 'About Us', href: '/about' },
+            { label: 'Contact', href: '/contact' },
+            { label: 'Carriers', href: '/carriers' },
+        ],
+    },
+    {
+        heading: 'Resources',
+        links: [
+            { label: 'Help Center', href: '/help' },
+            { label: 'API Docs', href: '/services/coming-soon' },
+            { label: 'Become a Partner', href: '/forwarders/register' },
+        ],
+    },
+    {
+        heading: 'Legal',
+        links: [
+            { label: 'Privacy Policy', href: '/legal/privacy' },
+            { label: 'Terms of Service', href: '/legal/terms' },
+            { label: 'Cookie Policy', href: '/legal/cookies' },
+        ],
+    },
+]
 
 export default function Footer() {
     return (
-        <footer className="bg-black border-t border-white/10 py-20 pb-12">
+        <footer className="bg-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-16">
-                    <div className="flex items-center space-x-2 mb-6">
-                        <div className="w-3 h-6 bg-white rounded-sm"></div>
-                        <div className="w-3 h-6 bg-white/70 rounded-sm"></div>
-                        <div className="w-3 h-6 bg-white/40 rounded-sm"></div>
-                        <span className="text-2xl font-bold tracking-tight text-white ml-2">CARGOLINK</span>
-                    </div>
-                    <p className="text-gray-500 max-w-xl">
-                        The intelligent freight marketplace connecting shippers and forwarders globally. Move cargo smarter, faster, and with full transparency.
+
+                {/* Top — brand + tagline, centered */}
+                <div className="py-16 flex flex-col items-center text-center">
+                    {/* Logo — matches Navbar */}
+                    <Link href="/" className="flex items-center gap-2.5 mb-4">
+                        <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center shrink-0">
+                            <span className="text-black text-xs font-black font-inter">C</span>
+                        </div>
+                        <span className="text-sm font-black tracking-widest text-white font-outfit">CARGOLINK</span>
+                    </Link>
+                    <p className="text-sm text-zinc-500 font-inter max-w-md leading-relaxed">
+                        The intelligent freight marketplace connecting shippers and forwarders globally.
+                        Move cargo smarter, faster, and with full transparency.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-20">
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Product</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/search" className="hover:text-white transition-colors">Shipper Portal</Link></li>
-                            <li><Link href="/forwarders" className="hover:text-white transition-colors">AI Quoting</Link></li>
-                            <li><Link href="/carriers" className="hover:text-white transition-colors">Carrier Partners</Link></li>
-                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">Enterprise</Link></li>
-                            <li><Link href="/demo" className="hover:text-white transition-colors">Live Demo</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Features</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/search" className="hover:text-white transition-colors">Search Rates</Link></li>
-                            <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-                            <li><Link href="/tools/calculator" className="hover:text-white transition-colors">Calculator</Link></li>
-                            <li><Link href="/tools/hs-codes" className="hover:text-white transition-colors">HS Codes</Link></li>
-                            <li><Link href="/tracking" className="hover:text-white transition-colors">Shipment Tracking</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Company</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                            <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                            <li><Link href="/carriers" className="hover:text-white transition-colors">Carriers</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Resources</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-                            <li><Link href="/services/coming-soon" className="hover:text-white transition-colors">API Docs</Link></li>
-                            <li><Link href="/forwarders/register" className="hover:text-white transition-colors">Become a Partner</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="text-white font-bold mb-6 text-sm uppercase tracking-wider">Legal</h3>
-                        <ul className="space-y-4 text-sm text-gray-500">
-                            <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
-                            <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms</Link></li>
-                            <li><Link href="/legal/cookies" className="hover:text-white transition-colors">Cookies</Link></li>
-                        </ul>
+                {/* Middle — link columns */}
+                <div className="py-14 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 border-b border-white/[0.05]">
+                    {columns.map((col) => (
+                        <div key={col.heading}>
+                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em] font-inter mb-5">
+                                {col.heading}
+                            </h4>
+                            <ul className="space-y-3">
+                                {col.links.map((link) => (
+                                    <li key={link.label}>
+                                        <Link
+                                            href={link.href}
+                                            className="text-xs text-zinc-500 font-inter hover:text-white transition-colors duration-200"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Bottom — copyright + socials */}
+                <div className="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-xs text-zinc-600 font-inter">
+                        © 2025–2026 CargoLink Technologies. All rights reserved.
+                    </p>
+
+                    <div className="flex items-center gap-4">
+                        <a
+                            href="https://twitter.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Twitter"
+                            className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
+                        >
+                            <Twitter className="w-3.5 h-3.5" />
+                        </a>
+                        <a
+                            href="https://linkedin.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="LinkedIn"
+                            className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
+                        >
+                            <Linkedin className="w-3.5 h-3.5" />
+                        </a>
+                        <a
+                            href="/contact"
+                            aria-label="Website"
+                            className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
+                        >
+                            <Globe className="w-3.5 h-3.5" />
+                        </a>
+                        <a
+                            href="mailto:support@cargolink.io"
+                            aria-label="Email"
+                            className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
+                        >
+                            <Mail className="w-3.5 h-3.5" />
+                        </a>
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10">
-                    <p className="text-gray-600 text-sm">© 2024-2026 CargoLink. All rights reserved.</p>
-                    <div className="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" className="text-gray-400 hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
-                        <a href="mailto:support@cargolink.io" className="text-gray-400 hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
-                    </div>
-                </div>
             </div>
         </footer>
     )

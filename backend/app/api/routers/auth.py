@@ -93,7 +93,7 @@ async def social_sync(
         await db.flush()       # Send INSERT so DB assigns user.id
         await db.refresh(user) # Populate user.id from the DB
         needs_commit = True
-        logger.info(f"[SOCIAL_SYNC] New Citizen Enrolled: {email} | ID: {new_sovereign_id}")
+        logger.info(f"[SOCIAL_SYNC] New user registered: {email} | ID: {new_sovereign_id}")
         
         # OMEGO PROTOCOL: Create Initial Mission Set
         await create_default_tasks(db, str(user.id))
@@ -111,7 +111,7 @@ async def social_sync(
 
             user.sovereign_id = new_sovereign_id
             needs_commit = True
-            logger.info(f"[SELF-HEALING] Assigned Sovereign ID {new_sovereign_id} to {email}")
+            logger.info(f"[SELF-HEALING] Assigned Account ID {new_sovereign_id} to {email}")
 
         # Update avatar if missing or changed
         if picture and (not user.avatar_url or user.avatar_url != picture):
@@ -171,24 +171,24 @@ async def social_sync(
     }
 
 async def create_default_tasks(db: AsyncSession, user_id: str):
-    """Enroll the user in the Sovereign Onboarding sequence."""
+    """Create default onboarding tasks for a new user."""
     from app import crud
     default_tasks = [
         {
-            "title": "Complete Profile Verification",
-            "description": "Ensure your Sovereign identity is fully verified for priority boarding.",
+            "title": "Complete Your Profile",
+            "description": "Add your company name, phone number, and contact details to your profile.",
             "task_type": "SECURITY",
             "priority": "HIGH"
         },
         {
-            "title": "Partner Network Verification",
-            "description": "Complete your forwarder profile for inclusion in the global broadcast network.",
+            "title": "Verify Your Account",
+            "description": "Complete identity verification to unlock all platform features.",
             "task_type": "SECURITY",
             "priority": "CRITICAL"
         },
         {
-            "title": "Explore Global Marketplace",
-            "description": "Scan the marketplace for the most efficient logistics vectors.",
+            "title": "Browse the Marketplace",
+            "description": "Explore open freight requests and find the right shipping partner for your cargo.",
             "task_type": "DOCUMENT",
             "priority": "MEDIUM"
         }
@@ -302,6 +302,8 @@ async def refresh_access_token(
         user = await crud.user.get_by_email(db, email=email)
         if not user or not user.is_active:
             raise HTTPException(status_code=401, detail="User not found or inactive")
+        if user.is_locked:
+            raise HTTPException(status_code=401, detail="Account is locked. Contact support.")
 
         access_token = security.create_access_token(
             data={
@@ -356,7 +358,7 @@ async def register_user(
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="Email already registered in our Oracle network."
+            detail="An account with this email already exists. Please sign in."
         )
     
     user = await crud.user.create(
@@ -462,7 +464,7 @@ async def update_profile(
     
     return updated_user
 
-from app.core.redis import redis_client
+from app.core import redis as _redis_mod
 
 @router.post("/logout")
 async def logout(
@@ -473,16 +475,16 @@ async def logout(
     try:
         payload = security.decode_token(token)
         user_id = payload.get("user_id")
-        
+
         # Blacklist the token in Redis
-        if redis_client:
+        if _redis_mod.redis_client:
             # Token expiration time could be extracted from payload ('exp'), else default to ACCESS_TOKEN_EXPIRE_MINUTES
             exp = payload.get("exp")
             import time
             current_time = int(time.time())
             ttl = exp - current_time if exp else settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
             if ttl > 0:
-                await redis_client.setex(f"blacklist:{token}", ttl, "true")
+                await _redis_mod.redis_client.setex(f"blacklist:{token}", ttl, "true")
         
         if user_id:
             await activity_service.log(

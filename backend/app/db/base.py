@@ -15,5 +15,7 @@ from app.models.marketplace import (
     N8nAnalytics
 )
 from app.models.task import Task
+from app.models.booking import Booking
+from app.models.conversation import Conversation, ChatMessage
 
 

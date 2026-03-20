@@ -1,201 +1,380 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { apiFetch } from '@/lib/config'
+import { apiFetch, API_URL } from '@/lib/config'
 import {
-    Zap,
-    TrendingUp,
-    Box,
-    Clock,
-    AlertCircle,
-    ArrowUpRight,
-    Terminal,
+    Search, Package, TrendingUp, CheckCircle2,
+    ArrowRight, Clock, AlertCircle, Star,
+    DollarSign, Ship, Truck, Info, Loader2,
+    Zap, X
 } from 'lucide-react'
 import Link from 'next/link'
 
+interface Quote {
+    request_id: string
+    origin: string
+    destination: string
+    cargo_type: string
+    your_price: number
+}
+
+interface Metrics {
+    total_quotes_submitted: number
+    active_bids: number
+    won_bids: number
+    reliability_score: number
+}
+
 export default function PartnerDashboard() {
     const { user } = useAuth()
-    const [bids, setBids] = useState<any[]>([])
-    const [, setLoading] = useState(true)
+    const [quotes, setQuotes] = useState<Quote[]>([])
+    const [metrics, setMetrics] = useState<Metrics | null>(null)
+    const [companyName, setCompanyName] = useState('')
+    const [loading, setLoading] = useState(true)
     const [appStatus, setAppStatus] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!user || user.role === 'forwarder') return
+    const [search, setSearch] = useState('')
+    const [selectedRequest, setSelectedRequest] = useState<Quote | null>(null)
+    const [bidPrice, setBidPrice] = useState('')
+    const [submittingBid, setSubmittingBid] = useState(false)
+    const [bidSuccess, setBidSuccess] = useState(false)
+    const [bidError, setBidError] = useState('')
+
+    const fetchData = useCallback(async () => {
+        if (!user) return
         const token = localStorage.getItem('token')
-        apiFetch('/api/forwarders/my-status', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(r => r.json())
-            .then(d => setAppStatus(d.status))
-            .catch(() => {})
+        const fwdId = user.sovereign_id
+
+        try {
+            const res = await fetch(
+                `${API_URL}/api/forwarders/portal-dashboard/${fwdId}?email=${encodeURIComponent(user.email)}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            if (res.ok) {
+                const data = await res.json()
+                setCompanyName(data.company_name || user.name || '')
+                setQuotes(data.quotes || [])
+                setMetrics(data.metrics || null)
+            }
+        } catch { /* silent */ } finally {
+            setLoading(false)
+        }
     }, [user])
 
     useEffect(() => {
-        const fetchBids = async () => {
-            try {
-                const token = localStorage.getItem('token')
-                const res = await apiFetch(`/api/forwarders/my-bids`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    setBids(data.bids || [])
-                }
-            } catch {
-                // silently ignore
-            } finally {
-                setLoading(false)
-            }
+        if (!user) return
+        if (user.role !== 'forwarder') {
+            const token = localStorage.getItem('token')
+            apiFetch('/api/forwarders/my-status', { headers: { Authorization: `Bearer ${token}` } })
+                .then(r => r.json())
+                .then(d => setAppStatus(d.status))
+                .catch(() => {})
+                .finally(() => setLoading(false))
+            return
         }
+        fetchData()
+    }, [user, fetchData])
 
-        if (user) fetchBids()
-    }, [user])
+    const submitBid = async () => {
+        if (!selectedRequest || !bidPrice || !user) return
+        setSubmittingBid(true)
+        setBidError('')
+        try {
+            const res = await apiFetch('/api/forwarders/portal-bid', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    request_id: selectedRequest.request_id,
+                    forwarder_id: user.sovereign_id,
+                    email: user.email,
+                    status: 'ANSWERED',
+                    price: parseFloat(bidPrice)
+                })
+            })
+            if (res.ok) {
+                setBidSuccess(true)
+                setBidPrice('')
+                fetchData()
+                setTimeout(() => {
+                    setBidSuccess(false)
+                    setSelectedRequest(null)
+                }, 2500)
+            } else {
+                const err = await res.json().catch(() => null)
+                setBidError(err?.detail || 'Failed to submit quote.')
+            }
+        } catch {
+            setBidError('Network error. Please try again.')
+        } finally {
+            setSubmittingBid(false)
+        }
+    }
 
-    if (user?.role !== 'forwarder') {
+    // Non-forwarder states
+    if (!loading && user?.role !== 'forwarder') {
         if (appStatus === 'PENDING') {
             return (
-                <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                        <Clock className="w-8 h-8 text-amber-400" />
+                <div className="h-[60vh] flex flex-col items-center justify-center text-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                        <Clock className="w-6 h-6 text-amber-400" />
                     </div>
-                    <div className="space-y-2">
-                        <h2 className="text-xl font-bold uppercase tracking-tight">Application Under Review</h2>
-                        <p className="text-zinc-500 text-sm max-w-md mx-auto">
-                            Your partner registration is being reviewed by our team.
-                            You will be notified once your account is approved.
-                        </p>
+                    <div>
+                        <h2 className="text-base font-bold text-white mb-1">Application Under Review</h2>
+                        <p className="text-zinc-500 text-sm max-w-sm mx-auto">Your partner registration is being reviewed. You'll be notified once approved.</p>
                     </div>
-                    <div className="px-6 py-2 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-bold uppercase tracking-widest">
-                        Pending Approval
-                    </div>
+                    <span className="px-4 py-1.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-bold uppercase tracking-widest">Pending Approval</span>
                 </div>
             )
         }
         return (
-            <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
-                    <AlertCircle className="w-8 h-8 text-red-500" />
+            <div className="h-[60vh] flex flex-col items-center justify-center text-center gap-5">
+                <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-red-400" />
                 </div>
-                <div className="space-y-2">
-                    <h2 className="text-xl font-bold uppercase tracking-tight">Access Restricted</h2>
-                    <p className="text-zinc-500 text-sm max-w-md mx-auto">
-                        This terminal is reserved for Registered CargoLink Partners.
-                        Please complete your registration to unlock the Partner Center.
-                    </p>
+                <div>
+                    <h2 className="text-base font-bold text-white mb-1">Partner Access Only</h2>
+                    <p className="text-zinc-500 text-sm max-w-sm mx-auto">This section is reserved for registered CargoLink freight partners.</p>
                 </div>
-                <Link
-                    href="/forwarders/register"
-                    className="bg-white text-black px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
-                >
-                    Register Now
+                <Link href="/forwarders/register" className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all">
+                    Apply as Partner
                 </Link>
             </div>
         )
     }
 
-    const wonBids = bids.filter(b => b.bid_status === 'ACCEPTED' || b.bid_status === 'COMPLETED').length
-    const pendingBids = bids.filter(b => b.bid_status === 'ANSWERED' && b.request_status === 'OPEN').length
+    // Filtered requests
+    const filtered = quotes.filter(q => {
+        if (!search.trim()) return true
+        const s = search.toLowerCase()
+        return (
+            q.origin?.toLowerCase().includes(s) ||
+            q.destination?.toLowerCase().includes(s) ||
+            q.cargo_type?.toLowerCase().includes(s) ||
+            q.request_id?.toLowerCase().includes(s)
+        )
+    })
 
     return (
-        <div className="space-y-10 max-w-7xl mx-auto py-6">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
-                        Forwarder Portal
+        <div className="h-full flex flex-col gap-5 overflow-hidden">
+
+            {/* Header */}
+            <div className="flex items-center justify-between flex-shrink-0 border-b border-white/5 pb-4">
+                <div>
+                    <h1 className="text-lg font-bold text-white tracking-tight">{companyName || user?.name}</h1>
+                    <div className="flex items-center gap-3 mt-0.5">
+                        <span className="text-xs font-mono text-zinc-500">{user?.sovereign_id}</span>
+                        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active Partner
+                        </span>
                     </div>
-                    <h1 className="text-xl font-black tracking-tight font-outfit uppercase">Partner Center</h1>
-                    <p className="text-zinc-500 text-sm font-medium tracking-tight">
-                        Partner ID: <span className="text-white font-mono">{user?.sovereign_id || user?.email}</span>
-                    </p>
-                </div>
-                <div className="flex gap-4">
-                    <Link href="/marketplace" className="bg-zinc-900 border border-white/5 text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition-all">
-                        Browse Marketplace
-                    </Link>
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Stats */}
+            <div className="grid grid-cols-4 gap-3 flex-shrink-0">
                 {[
-                    { label: 'Total Bids', value: bids.length, icon: Box, color: 'text-blue-400' },
-                    { label: 'Active Quotes', value: pendingBids, icon: Zap, color: 'text-yellow-400' },
-                    { label: 'Contracts Won', value: wonBids, icon: TrendingUp, color: 'text-emerald-400' },
-                    { label: 'Verified Status', value: 'A+', icon: Terminal, color: 'text-purple-400' },
-                ].map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-zinc-950 border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-all group"
-                    >
-                        <stat.icon className={`w-5 h-5 ${stat.color} mb-4`} />
-                        <h3 className="text-3xl font-bold font-mono text-white mb-1">{stat.value}</h3>
-                        <p className="text-xs font-medium text-zinc-500 font-inter">{stat.label}</p>
-                    </motion.div>
+                    { label: 'Total Bids', value: metrics?.total_quotes_submitted ?? 0, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/[0.07]', border: 'border-blue-500/10' },
+                    { label: 'Active', value: metrics?.active_bids ?? 0, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/[0.07]', border: 'border-amber-500/10' },
+                    { label: 'Won', value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/[0.07]', border: 'border-emerald-500/10' },
+                    { label: 'Reliability', value: metrics?.reliability_score ? `${metrics.reliability_score}/5` : '—', icon: Star, color: 'text-purple-400', bg: 'bg-purple-500/[0.07]', border: 'border-purple-500/10' },
+                ].map(s => (
+                    <div key={s.label} className="bg-zinc-950 border border-white/5 rounded-xl p-4 flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg ${s.bg} border ${s.border} flex items-center justify-center flex-shrink-0`}>
+                            <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
+                        </div>
+                        <div>
+                            <p className="text-base font-bold text-white leading-none mb-0.5">{loading ? '—' : s.value}</p>
+                            <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-medium">{s.label}</p>
+                        </div>
+                    </div>
                 ))}
             </div>
 
-            {/* Main Area: Active Bids */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.4em]">Active Bid Log</h2>
-                    <Link href="/forwarders/portal" className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">Full Portal</Link>
-                </div>
+            {/* Main split */}
+            <div className="flex-1 flex gap-4 min-h-0">
 
-                <div className="grid gap-4">
-                    {bids.length === 0 ? (
-                        <div className="bg-zinc-950 border border-dashed border-white/5 rounded-2xl p-20 text-center space-y-4">
-                            <Clock className="w-8 h-8 text-zinc-700 mx-auto" />
-                            <p className="text-zinc-500 text-sm font-medium">You haven&apos;t submitted any bids yet.</p>
+                {/* LEFT — Open Requests + Search */}
+                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+
+                    {/* Search header */}
+                    <div className="px-4 py-3 border-b border-white/5 flex-shrink-0">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Search by route, cargo type, or ID..."
+                                className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-700 focus:border-white/15 outline-none transition-colors"
+                            />
+                            {search && (
+                                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <X className="w-3.5 h-3.5 text-zinc-600 hover:text-white transition-colors" />
+                                </button>
+                            )}
                         </div>
-                    ) : (
-                        bids.map((bid) => (
-                            <motion.div
-                                key={bid.request_id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-zinc-950 border border-white/5 p-6 rounded-2xl hover:bg-white/[0.02] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
-                            >
-                                <div className="space-y-1.5 font-inter">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-[10px] font-mono text-zinc-600 uppercase font-bold tracking-tighter">REQ-{bid.request_id}</span>
-                                        <div className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${['ACCEPTED', 'COMPLETED'].includes(bid.bid_status) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                            bid.bid_status === 'DECLINED_LATE' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                bid.bid_status === 'EXPIRED' ? 'bg-zinc-500/10 text-zinc-500 border border-zinc-500/20' :
-                                                    'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
-                                            }`}>
-                                            {bid.bid_status}
-                                        </div>
-                                    </div>
-                                    <h4 className="text-lg font-bold text-white uppercase tracking-tight">
-                                        {bid.origin} → {bid.destination}
-                                    </h4>
-                                    <p className="text-xs text-zinc-500">
-                                        {bid.cargo_type} · Submitted {new Date(bid.attempted_at).toLocaleDateString()}
+                    </div>
+
+                    {/* Panel sub-header */}
+                    <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.03] flex-shrink-0">
+                        <div className="flex items-center gap-2">
+                            <Package className="w-3 h-3 text-zinc-600" />
+                            <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Open Requests</span>
+                        </div>
+                        <span className="text-[9px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-md">
+                            {filtered.length} {filtered.length === 1 ? 'request' : 'requests'}
+                        </span>
+                    </div>
+
+                    {/* Request list */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+                        {loading ? (
+                            <div className="h-full flex items-center justify-center">
+                                <Loader2 className="w-5 h-5 animate-spin text-white/10" />
+                            </div>
+                        ) : filtered.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center gap-3 py-16 opacity-30">
+                                <Clock className="w-8 h-8 text-zinc-600" />
+                                <div>
+                                    <p className="text-sm font-bold text-white mb-1">
+                                        {search ? 'No results found' : 'No open requests'}
+                                    </p>
+                                    <p className="text-xs text-zinc-600">
+                                        {search ? 'Try a different search term' : 'New requests will appear here once assigned to you'}
                                     </p>
                                 </div>
-
-                                <div className="flex items-center gap-8">
-                                    <div className="text-right">
-                                        <p className="text-xs text-zinc-600 mb-1">Quoted Value</p>
-                                        <p className="text-xl font-mono font-bold text-emerald-400">${bid.quoted_price?.toLocaleString() || '---'}</p>
-                                    </div>
-                                    <div className="w-px h-10 bg-white/5 hidden md:block" />
-                                    <Link
-                                        href={`/marketplace/${bid.request_id}`}
-                                        className="bg-white/5 hover:bg-white/10 text-white p-3 rounded-xl transition-all"
+                            </div>
+                        ) : (
+                            filtered.map(q => {
+                                const isSelected = selectedRequest?.request_id === q.request_id
+                                return (
+                                    <div
+                                        key={q.request_id}
+                                        onClick={() => { setSelectedRequest(q); setBidSuccess(false); setBidPrice('') }}
+                                        className={`p-3.5 rounded-xl border cursor-pointer transition-all group ${
+                                            isSelected
+                                                ? 'bg-emerald-500/[0.06] border-emerald-500/25 border-l-2 border-l-emerald-500'
+                                                : 'bg-black/50 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                                        }`}
                                     >
-                                        <ArrowUpRight className="w-5 h-5 opacity-40 group-hover:opacity-100 transition-opacity" />
-                                    </Link>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
+                                                    isSelected ? 'bg-emerald-500 text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600'
+                                                }`}>
+                                                    {q.cargo_type?.includes('SEA') ? <Ship className="w-3.5 h-3.5" /> : <Truck className="w-3.5 h-3.5" />}
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-1.5 mb-0.5">
+                                                        <span className="text-sm font-bold text-white">{q.origin}</span>
+                                                        <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
+                                                        <span className="text-sm font-bold text-white">{q.destination}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[9px] font-mono text-zinc-600">{q.request_id}</span>
+                                                        <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                                                        <span className="text-[9px] text-zinc-600 uppercase tracking-wide">{q.cargo_type}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-[8px] text-zinc-600 uppercase tracking-wider mb-0.5">Your Quote</p>
+                                                <p className={`text-sm font-bold font-mono ${q.your_price > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
+                                                    {q.your_price > 0 ? `$${q.your_price.toLocaleString()}` : '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        )}
+                    </div>
+                </div>
+
+                {/* RIGHT — Bid Form */}
+                <div className="w-68 flex-shrink-0">
+                    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 h-full flex flex-col">
+
+                        {!selectedRequest ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 opacity-25">
+                                <CheckCircle2 className="w-8 h-8 text-zinc-600" />
+                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                    Select a request from the list to submit your quote
+                                </p>
+                            </div>
+                        ) : bidSuccess ? (
+                            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
+                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
                                 </div>
-                            </motion.div>
-                        ))
-                    )}
+                                <div>
+                                    <p className="text-sm font-bold text-white mb-1">Quote Submitted</p>
+                                    <p className="text-xs text-zinc-500">Your bid has been sent successfully.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col h-full gap-4">
+                                {/* Form header */}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Submit Quote</span>
+                                    <button onClick={() => setSelectedRequest(null)} className="text-zinc-600 hover:text-white transition-colors">
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+
+                                {/* Request info */}
+                                <div className="bg-black border border-white/5 rounded-xl p-3 space-y-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <Info className="w-3 h-3 text-zinc-600 flex-shrink-0" />
+                                        <span className="text-[10px] font-mono text-zinc-500 truncate">{selectedRequest.request_id}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-sm font-bold text-white">
+                                        <span className="truncate">{selectedRequest.origin}</span>
+                                        <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
+                                        <span className="truncate">{selectedRequest.destination}</span>
+                                    </div>
+                                    <span className="inline-block text-[9px] font-bold text-zinc-500 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-lg uppercase tracking-wider">
+                                        {selectedRequest.cargo_type}
+                                    </span>
+                                </div>
+
+                                {/* Price input */}
+                                <div className="flex-1 flex flex-col justify-end gap-3">
+                                    <div>
+                                        <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Your Price (USD)</label>
+                                        <div className="relative">
+                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                                            <input
+                                                type="number"
+                                                placeholder="0.00"
+                                                value={bidPrice}
+                                                onChange={e => setBidPrice(e.target.value)}
+                                                className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-xl font-bold text-emerald-400 placeholder-zinc-800 focus:border-emerald-500/30 outline-none transition-colors font-mono"
+                                            />
+                                        </div>
+                                    </div>
+                                    {bidError && (
+                                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-[10px] text-red-400 font-inter leading-relaxed">
+                                            {bidError}
+                                        </div>
+                                    )}
+                                    <button
+                                        disabled={!bidPrice || submittingBid}
+                                        onClick={submitBid}
+                                        className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-30 active:scale-[0.98]"
+                                    >
+                                        {submittingBid
+                                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                                            : <>Submit Quote <ArrowRight className="w-3.5 h-3.5" /></>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

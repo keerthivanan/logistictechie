@@ -394,7 +394,7 @@ export default function AdminPage() {
                         <table className="w-full text-xs">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.02]">
-                                    {['Name', 'Email', 'Sovereign ID', 'Role', 'Status', 'Joined'].map(h => (
+                                    {['Name', 'Email', 'Account ID', 'Role', 'Status', 'Joined'].map(h => (
                                         <th key={h} className="text-left px-4 py-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>

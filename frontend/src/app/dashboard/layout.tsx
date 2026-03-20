@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
     LayoutDashboard,
     Package,
-    Settings,
     Bell,
     ClipboardList,
     Activity as ActivityIcon,
@@ -14,7 +13,8 @@ import {
     Zap,
     Search,
     Plus,
-    ShieldCheck
+    ShieldCheck,
+    MessageSquare
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
@@ -78,6 +78,12 @@ export default function DashboardLayout({
         },
         { name: 'Activity', href: '/dashboard/activity', icon: ActivityIcon },
         { name: 'Shipments', href: '/dashboard/shipments', icon: Package },
+        {
+            name: 'Messages',
+            href: '/dashboard/messages',
+            icon: MessageSquare,
+            badge: stats?.unread_messages_count > 0 ? stats.unread_messages_count.toString() : null
+        },
     ]
 
     const ecosystemNav = [
@@ -87,107 +93,117 @@ export default function DashboardLayout({
 
     const partnerNav = [
         { name: 'Partner Center', href: '/dashboard/partner', icon: Zap },
-        { name: 'Service Profile', href: '/profile', icon: Settings },
     ]
 
     return (
         <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black flex">
             {/* Sidebar */}
-            <aside className="w-64 border-r border-white/5 fixed h-full bg-[#050505] z-50 hidden md:flex flex-col">
+            <aside className="w-64 border-r border-white/[0.04] fixed h-full bg-[#080808] z-50 hidden md:flex flex-col">
                 {/* Logo Section */}
-                <div className="flex items-center h-20 px-8">
+                <div className="flex items-center h-20 px-6 border-b border-white/[0.04]">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black rounded-lg group-hover:bg-blue-500 transition-colors">C</div>
-                        <span className="text-xl font-black tracking-tighter text-white">CARGOLINK</span>
+                        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black text-sm rounded-lg group-hover:bg-blue-500 transition-all duration-200 shadow-[0_0_12px_rgba(255,255,255,0.15)]">C</div>
+                        <span className="text-base font-black tracking-widest text-white uppercase">CargoLink</span>
                     </Link>
                 </div>
 
                 {/* Navigation Section */}
-                <div className="flex-1 px-4 py-6 space-y-10 overflow-y-auto custom-scrollbar">
+                <div className="flex-1 px-3 py-5 space-y-8 overflow-y-auto custom-scrollbar">
                     {/* Main Menu */}
+                    <div className="space-y-0.5">
+                        {mainNav.map((item) => {
+                            const isActive = pathname === item.href
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                                        ? 'bg-white text-black font-bold shadow-[0_2px_16px_rgba(255,255,255,0.08)]'
+                                        : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                            <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                        </div>
+                                        <span className="text-[13px] font-semibold tracking-tight">{item.name}</span>
+                                    </div>
+                                    {item.badge && (
+                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'}`}>
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </Link>
+                            )
+                        })}
+                    </div>
+
+                    {/* Ecosystem — shippers only, not forwarders */}
+                    {user?.role !== 'forwarder' && (
                     <div>
-                        <nav className="space-y-1">
-                            {mainNav.map((item) => {
+                        <p className="px-3 text-[9px] font-black text-zinc-600 uppercase tracking-[0.25em] mb-2">Ecosystem</p>
+                        <div className="space-y-0.5">
+                            {ecosystemNav.map((item) => {
                                 const isActive = pathname === item.href
                                 return (
                                     <Link
                                         key={item.name}
                                         href={item.href}
-                                        className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${isActive
-                                            ? 'bg-white text-black font-bold shadow-[0_0_20px_rgba(255,255,255,0.1)]'
-                                            : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                                            }`}
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <item.icon className={`w-5 h-5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
-                                            <span className="text-sm tracking-tight">{item.name}</span>
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                            <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
                                         </div>
-                                        {item.badge && (
-                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${isActive ? 'bg-black text-white' : 'bg-white/10 text-zinc-400'}`}>
-                                                {item.badge}
-                                            </span>
-                                        )}
+                                        <span className="text-[13px] font-semibold tracking-tight">{item.name}</span>
                                     </Link>
                                 )
                             })}
-                        </nav>
-                    </div>
-
-                    {/* Ecosystem */}
-                    <div>
-                        <h3 className="px-4 text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] mb-4">Ecosystem</h3>
-                        <nav className="space-y-1">
-                            {ecosystemNav.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-500 hover:text-white hover:bg-white/5 transition-all group"
-                                >
-                                    <item.icon className="w-5 h-5 text-zinc-500 group-hover:text-white" />
-                                    <span className="text-sm tracking-tight">{item.name}</span>
-                                </Link>
-                            ))}
-                        </nav>
-                    </div>
-
-                    {/* Admin Section — backend gates via ADMIN_EMAIL, frontend just shows link */}
-                    {user && (
-                        <div>
-                            <h3 className="px-4 text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] mb-4">System</h3>
-                            <nav className="space-y-1">
-                                <Link
-                                    href="/admin"
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${pathname === '/admin' ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}
-                                >
-                                    <ShieldCheck className={`w-5 h-5 ${pathname === '/admin' ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
-                                    <span className="text-sm tracking-tight">Admin Panel</span>
-                                </Link>
-                            </nav>
                         </div>
+                    </div>
                     )}
 
-                    {/* Partner Section — visible to all users */}
-                    {user && (
+                    {/* Partner Section — forwarders only */}
+                    {user?.role === 'forwarder' && (
                         <div>
-                            <h3 className={`px-4 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${user.role === 'forwarder' ? 'text-emerald-500' : 'text-zinc-600'}`}>Partner Center</h3>
-                            <nav className="space-y-1">
+                            <p className="px-3 text-[9px] font-black text-emerald-500/70 uppercase tracking-[0.25em] mb-2">Partner Center</p>
+                            <div className="space-y-0.5">
                                 {partnerNav.map((item) => {
                                     const isActive = pathname === item.href
                                     return (
                                         <Link
                                             key={item.name}
                                             href={item.href}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive
-                                                ? 'bg-white text-black font-bold'
-                                                : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                                                ? 'bg-emerald-500 text-white font-bold shadow-[0_2px_16px_rgba(16,185,129,0.2)]'
+                                                : 'text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/[0.06]'
                                             }`}
                                         >
-                                            <item.icon className={`w-5 h-5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
-                                            <span className="text-sm tracking-tight">{item.name}</span>
+                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-white/20' : 'bg-emerald-500/[0.08] group-hover:bg-emerald-500/[0.15]'}`}>
+                                                <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-emerald-600 group-hover:text-emerald-400'}`} />
+                                            </div>
+                                            <span className="text-[13px] font-semibold tracking-tight">{item.name}</span>
                                         </Link>
                                     )
                                 })}
-                            </nav>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Admin Section — backend gates via ADMIN_EMAIL */}
+                    {user?.role === 'admin' && (
+                        <div>
+                            <p className="px-3 text-[9px] font-black text-zinc-700 uppercase tracking-[0.25em] mb-2">System</p>
+                            <div className="space-y-0.5">
+                                <Link
+                                    href="/admin"
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${pathname === '/admin' ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}
+                                >
+                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${pathname === '/admin' ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                        <ShieldCheck className={`w-3.5 h-3.5 ${pathname === '/admin' ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                    </div>
+                                    <span className="text-[13px] font-semibold tracking-tight">Admin Panel</span>
+                                </Link>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -359,9 +375,11 @@ export default function DashboardLayout({
                                 </AnimatePresence>
                             </div>
 
-                            <Link href="/marketplace" className="bg-white text-black text-xs font-black px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                                <Plus className="w-4 h-4" /> NEW SHIPMENT
+                            {user?.role !== 'forwarder' && (
+                            <Link href="/search" className="bg-white text-black text-xs font-black px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                <Plus className="w-4 h-4" /> BOOK SHIPMENT
                             </Link>
+                            )}
                         </div>
                     </div>
                 </header>

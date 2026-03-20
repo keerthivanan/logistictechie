@@ -16,7 +16,7 @@ from app.db.session import get_db
 from app.api import deps
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools, admin
+from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools, admin, bookings, conversations, forwarder_conversations
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from app.models.user import User
@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="The 'Sovereign Mirror' Engine. Powered by the n8n Brain.",
+    description="CargoLink API — Freight logistics platform.",
     lifespan=lifespan
 )
 
@@ -101,6 +101,9 @@ app.include_router(tasks.router, prefix="/api/tasks", tags=["User Tasks"])
 app.include_router(quotes.router, prefix="/api/quotes", tags=["Instant Quote Engine"])
 app.include_router(tools.router, prefix="/api/tools", tags=["Freight Intelligence Tools"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
+app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
+app.include_router(forwarder_conversations.router, prefix="/api/forwarders/conversations", tags=["Forwarder Portal Chat"])
 
 # GLOBAL BRIDGE: Headless n8n Aliases (Matches COMPLETE_SETUP_GUIDE hardcoded URLs)
 # All 4 routes are protected by verify_n8n_webhook
@@ -151,15 +154,14 @@ async def global_forwarder_my_bids(db: AsyncSession = Depends(get_db), current_u
 def health_check():
     return {
         "status": "Online",
-        "mode": "TRUE_OCEAN_PROTOCOL",
-        "note": "This system connects to Real APIs only. Authentication required."
+        "note": "CargoLink API is running. Authentication required."
     }
 
 # CORS CONFIGURATION (G.O.A.T. Security - OUTERMOST)
 # Must be added AFTER all @app.middleware to be the OUTERMOST for requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With", "X-OMEGO-Key", "ngrok-skip-browser-warning"],

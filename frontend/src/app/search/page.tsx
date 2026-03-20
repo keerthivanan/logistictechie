@@ -964,7 +964,7 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* Sovereign Analytics */}
+            {/* Route Analytics */}
             <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 hover:border-white/20 transition-all">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white font-outfit uppercase tracking-tight">Network Analytics</h3>

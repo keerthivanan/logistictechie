@@ -211,7 +211,7 @@ export default function TrackingPage() {
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
             <main className="pt-24 pb-12">
-                <Suspense fallback={<div className="text-center py-20">Initializing Sovereign Trace...</div>}>
+                <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
                     <TrackingContent />
                 </Suspense>
             </main>

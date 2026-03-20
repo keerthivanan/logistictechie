@@ -21,16 +21,16 @@ export default function ServicesComingSoon() {
                 </div>
 
                 <div className="space-y-4">
-                    <h1 className="text-4xl font-black tracking-tighter uppercase font-outfit">Operational Hardening</h1>
+                    <h1 className="text-4xl font-black tracking-tighter uppercase font-outfit">Coming Soon</h1>
                     <p className="text-zinc-500 font-medium">
-                        This tactical node is currently undergoing <span className="text-white">Sovereign Hardening</span>. High-fidelity integration for this service is slated for the next synchronization cycle.
+                        This service is currently being built. We&apos;re working hard to bring it to you soon.
                     </p>
                 </div>
 
                 <div className="p-6 bg-zinc-950 border border-white/5 rounded-[24px] text-left space-y-4">
                     <div className="flex items-center gap-3">
                         <Cpu className="w-5 h-5 text-blue-500" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Node Status: Building Protocol</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Status: In Development</span>
                     </div>
                     <div className="space-y-2">
                         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -42,15 +42,15 @@ export default function ServicesComingSoon() {
                             />
                         </div>
                         <div className="flex justify-between text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">
-                            <span>Alpha Core</span>
-                            <span>75% Synchronized</span>
+                            <span>Development</span>
+                            <span>75% Complete</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <Link href="/" className="flex-1 px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest">
-                        <ArrowLeft className="w-4 h-4" /> Return to Base
+                        <ArrowLeft className="w-4 h-4" /> Go Home
                     </Link>
                     <Link href="/contact" className="flex-1 px-8 py-4 bg-transparent border border-white/10 text-white font-black rounded-xl hover:bg-white/5 transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest">
                         Inquire Early <Sparkles className="w-4 h-4" />

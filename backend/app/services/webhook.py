@@ -17,6 +17,9 @@ class WebhookService:
         self.forwarder_webhook = os.getenv("N8N_FORWARDER_REGISTER_WEBHOOK")
         self.marketplace_webhook = os.getenv("N8N_MARKETPLACE_SUBMIT_WEBHOOK")
         self.forwarder_decision_webhook = os.getenv("N8N_FORWARDER_DECISION_WEBHOOK")
+        self.booking_webhook = os.getenv("N8N_BOOKING_WEBHOOK")
+        self.quotes_complete_webhook = os.getenv("N8N_QUOTES_COMPLETE_WEBHOOK")
+        self.new_conversation_webhook = os.getenv("N8N_NEW_CONVERSATION_WEBHOOK")
         if not os.getenv("OMEGO_API_SECRET", ""):
             logger.warning("[CRITICAL] OMEGO_API_SECRET is empty. Webhook authentication is bypassed!")
 
@@ -74,6 +77,42 @@ class WebhookService:
             self.marketplace_webhook, 
             request_data, 
             "MARKETPLACE_SUBMIT"
+        )
+
+    async def trigger_quotes_complete_webhook(self, payload: dict):
+        """
+        Fires when 3 quotes are received via the portal (not email path).
+        n8n WF3 equivalent: sends comparison email to the shipper.
+        Set N8N_QUOTES_COMPLETE_WEBHOOK to the WF3 webhook URL (add a second
+        trigger node to WF3 — a Webhook trigger alongside the Execute Workflow trigger).
+        """
+        return await self._trigger(
+            self.quotes_complete_webhook,
+            payload,
+            "QUOTES_COMPLETE"
+        )
+
+    async def trigger_new_conversation_webhook(self, payload: dict):
+        """
+        Fires when a shipper clicks 'Chat with Forwarder' on a quote.
+        n8n WF7 sends an email to the forwarder: 'A shipper is interested — log in to chat.'
+        Set N8N_NEW_CONVERSATION_WEBHOOK to the WF7 webhook URL.
+        """
+        return await self._trigger(
+            self.new_conversation_webhook,
+            payload,
+            "NEW_CONVERSATION"
+        )
+
+    async def trigger_booking_webhook(self, booking_data: dict):
+        """
+        Fires after a booking is confirmed.
+        n8n sends a 'Booking Confirmed' email to the shipper.
+        """
+        return await self._trigger(
+            self.booking_webhook,
+            booking_data,
+            "BOOKING_CONFIRMED"
         )
 
 webhook_service = WebhookService()

@@ -34,6 +34,7 @@ const getFlagEmoji = (countryCode: string) => {
 export default function RequestQuoteForm() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [formError, setFormError] = useState('');
     const { user } = useAuth();
 
     // Advanced Form State (Matches Screenshot Logic)
@@ -108,11 +109,35 @@ export default function RequestQuoteForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFormError('');
         setLoading(true);
 
         try {
             if (!user) {
-                alert("Please log in to submit a request.");
+                setFormError("You must be logged in to submit a request.");
+                setLoading(false);
+                return;
+            }
+
+            // Client-side validation — all required fields
+            if (!formData.origin_district.trim()) {
+                setFormError("Origin port or address is required.");
+                setLoading(false);
+                return;
+            }
+            if (!formData.dest_district.trim()) {
+                setFormError("Destination port or address is required.");
+                setLoading(false);
+                return;
+            }
+            if (!formData.commodity.trim()) {
+                setFormError("Commodity is required — forwarders need this to quote accurately.");
+                setLoading(false);
+                return;
+            }
+            const parsedWeight = parseFloat(formData.weight);
+            if (!formData.weight || isNaN(parsedWeight) || parsedWeight <= 0) {
+                setFormError("Please enter a valid weight greater than 0.");
                 setLoading(false);
                 return;
             }
@@ -204,12 +229,11 @@ export default function RequestQuoteForm() {
             if (data.success) {
                 router.push(`/marketplace/${data.uniqueId}`);
             } else {
-                const errorMsg = data.detail || data.message || 'Unknown Error';
-                alert('Submission Rejected: ' + errorMsg);
+                const errorMsg = data.detail || data.message || 'Unknown error. Please try again.';
+                setFormError(errorMsg);
             }
-        } catch (error) {
-            console.error(error);
-            alert('Network error. Please try again.');
+        } catch {
+            setFormError('Network error. Please check your connection and try again.');
         } finally {
             setLoading(false);
         }
@@ -696,6 +720,13 @@ export default function RequestQuoteForm() {
                             <Info className="w-3 h-3 text-emerald-500" /> Your contact details will be included with this request.
                         </p>
                     </div>
+
+                    {/* Inline error */}
+                    {formError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-[11px] text-red-400 font-inter font-medium leading-relaxed">
+                            {formError}
+                        </div>
+                    )}
 
                     {/* Submit */}
                     <button

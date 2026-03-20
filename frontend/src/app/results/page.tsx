@@ -94,7 +94,7 @@ function ResultsContent() {
       wisdom: quote.wisdom || '',
       breakdown: JSON.stringify(quote.breakdown || {}),
     }).toString()
-    router.push(`/booking?${query}`)
+    router.push('/marketplace')
   }
 
   return (
@@ -308,7 +308,7 @@ function ResultsContent() {
                       {/* Right: price + CTA */}
                       <div className="md:w-56 flex flex-col justify-between items-end pt-8 md:pt-0">
                         <div className="text-right space-y-1">
-                          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-inter">Total Vector Magnitude</p>
+                          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-inter">Total Price</p>
                           <div className="flex items-baseline gap-1 justify-end">
                             <span className="text-[14px] font-black text-white/40">$</span>
                             <p className="text-4xl font-black font-mono text-white tracking-tighter leading-none select-all">{quote.price.toLocaleString()}</p>
@@ -321,7 +321,7 @@ function ResultsContent() {
                             onClick={() => handleSelectQuote(quote)}
                             className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-[0.4em] text-[9px] transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(255,255,255,0.2)]"
                           >
-                            Execute Booking
+                            Book Now
                           </button>
                           <div className="text-center">
                             <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest">Ref: {quote.id?.slice(0, 8) || 'AUTO-VEC'}</span>

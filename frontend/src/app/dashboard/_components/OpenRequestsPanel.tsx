@@ -121,7 +121,7 @@ export default function OpenRequestsPanel() {
                     )}
                 </div>
                 <Link
-                    href="/marketplace"
+                    href="/search"
                     className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors"
                 >
                     <Plus className="w-3 h-3" /> New
@@ -377,8 +377,8 @@ function EmptyState({ filter }: { filter: Filter }) {
                     {filter === 'OPEN' ? 'No open requests' : filter === 'CLOSED' ? 'No closed requests' : 'No requests yet'}
                 </p>
                 {filter !== 'CLOSED' && (
-                    <Link href="/marketplace" className="text-[10px] text-zinc-600 font-inter hover:text-white transition-colors underline underline-offset-4 mt-1 block">
-                        Start a new shipment
+                    <Link href="/search" className="text-[10px] text-zinc-600 font-inter hover:text-white transition-colors underline underline-offset-4 mt-1 block">
+                        Get an instant quote
                     </Link>
                 )}
             </div>

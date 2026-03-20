@@ -1,20 +1,22 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from app.models.user import User
 from app.core import security
 from app.schemas import UserLogin
 
 class CRUDUser:
     async def get_by_email(self, db: AsyncSession, email: str) -> User | None:
-        result = await db.execute(select(User).filter(User.email == email))
+        result = await db.execute(select(User).filter(func.lower(User.email) == email.lower().strip()))
         return result.scalars().first()
 
     async def create(self, db: AsyncSession, email: str, password: str, full_name: str = None, company_name: str = None, avatar_url: str = None) -> User:
+        email = email.lower().strip()
         # Best-of-All-Time Validation
         if "@" not in email:
             raise ValueError("Invalid email format")
         if not security.validate_password_strength(password):
-            raise ValueError("Password does not meet the Sovereign Strength requirements (8+ chars, Mixed Case, Digits).")
+            raise ValueError("Password must be at least 10 characters with uppercase, lowercase, number, and special character.")
             
         db_user = User(
             email=email,

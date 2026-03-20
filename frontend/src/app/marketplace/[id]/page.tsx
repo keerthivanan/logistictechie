@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ArrowRight, BrainCircuit, Activity, Zap } from 'lucide-react';
+import { Loader2, BrainCircuit, Activity, Zap, Search, MessageSquare } from 'lucide-react';
+import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
 
@@ -24,6 +25,7 @@ export default function MarketplaceLiveDashboard() {
     const router = useRouter();
     const requestId = params.id as string;
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [status, setStatus] = useState('OPEN');
     const [progress, setProgress] = useState(0);
@@ -48,8 +50,8 @@ export default function MarketplaceLiveDashboard() {
                     setShipmentInfo(data.request);
                     setStatus(data.request.status);
                 }
-            } catch (error) {
-                console.error("Sovereign Link Error:", error);
+            } catch {
+                setFetchError(true);
             } finally {
                 setLoading(false);
             }
@@ -105,13 +107,13 @@ export default function MarketplaceLiveDashboard() {
                         <motion.div
                             className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
                             initial={{ width: 0 }}
-                            animate={{ width: `${(progress / 3) * 100}%` }}
+                            animate={{ width: `${Math.min((progress / 3) * 100, 100)}%` }}
                         />
                     </div>
                     <div className="mt-4 flex justify-between items-center text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em]">
-                        <span>Scanning Hubs</span>
-                        <span className={progress >= 3 ? "text-emerald-500" : "animate-pulse"}>
-                            {progress}/3 Vectors Found
+                        <span>{status === 'CLOSED' ? 'Quoting Complete' : 'Collecting Quotes'}</span>
+                        <span className={progress > 0 ? 'text-emerald-500' : 'animate-pulse'}>
+                            {progress} {progress === 1 ? 'Quote' : 'Quotes'} Received
                         </span>
                     </div>
                 </div>
@@ -132,19 +134,19 @@ export default function MarketplaceLiveDashboard() {
                             <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.cargo_specification || 'Standard'}</p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
-                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Mass/Vol Tally</p>
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Weight / Volume</p>
                             <p className="text-xs font-black text-white uppercase">
                                 {shipmentInfo.weight_kg}KG {shipmentInfo.total_volume_cbm ? `| ${shipmentInfo.total_volume_cbm}CBM` : ''}
                             </p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
-                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Operational Ready</p>
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Ready Date</p>
                             <p className="text-xs font-black text-white uppercase">
                                 {shipmentInfo.pickup_ready_date ? new Date(shipmentInfo.pickup_ready_date).toLocaleDateString() : 'IMMEDIATE'}
                             </p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
-                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Target Vessel</p>
+                            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Vessel Preference</p>
                             <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.vessel || 'Any Ready'}</p>
                         </div>
 
@@ -162,7 +164,7 @@ export default function MarketplaceLiveDashboard() {
                             </div>
                             {shipmentInfo.special_requirements && (
                                 <div className="pt-2 border-t border-white/5">
-                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Special Directives</p>
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Special Requirements</p>
                                     <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">{shipmentInfo.special_requirements}</p>
                                 </div>
                             )}
@@ -170,10 +172,27 @@ export default function MarketplaceLiveDashboard() {
                     </motion.div>
                 )}
 
+                {/* Choose Your Forwarder heading — shown when all quotes are in */}
+                {status === 'CLOSED' && quotes.length >= 3 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-2 text-center"
+                    >
+                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2">All Quotes Received</p>
+                        <h2 className="text-2xl font-black font-outfit uppercase tracking-tight text-white">Choose Your Forwarder</h2>
+                        <p className="text-xs text-zinc-500 mt-2 font-inter">Select the quote that best fits your timeline and budget.</p>
+                    </motion.div>
+                )}
+
                 {/* Analysis Cards */}
                 <div className="grid gap-6">
                     <AnimatePresence>
-                        {quotes.map((quote, index) => (
+                        {quotes.map((quote, index) => {
+                            const isBestPrice = quotes.length > 0 && quote.total_price === Math.min(...quotes.map(q => q.total_price))
+                            const validTransit = quotes.filter(q => q.transit_days != null)
+                            const isFastest = validTransit.length > 0 && quote.transit_days != null && quote.transit_days === Math.min(...validTransit.map(q => q.transit_days!))
+                            return (
                             <motion.div
                                 key={quote.quotation_id}
                                 initial={{ opacity: 0, x: -20 }}
@@ -181,15 +200,30 @@ export default function MarketplaceLiveDashboard() {
                                 transition={{ delay: index * 0.15 }}
                                 className="group relative"
                             >
-                                <div className="bg-[#050505] border border-white/5 rounded-[2rem] p-10 flex flex-col lg:flex-row items-center gap-10 hover:border-white/20 transition-all shadow-2xl">
-                                    {/* Intelligence Rank */}
+                                {/* Comparison badges */}
+                                {(isBestPrice || isFastest) && (
+                                    <div className="absolute -top-3 left-8 flex gap-2 z-10">
+                                        {isBestPrice && (
+                                            <span className="text-[9px] font-black bg-emerald-500 text-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30">
+                                                Best Price
+                                            </span>
+                                        )}
+                                        {isFastest && (
+                                            <span className="text-[9px] font-black bg-blue-500 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-blue-500/30">
+                                                Fastest
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                <div className={`bg-[#050505] border rounded-[2rem] p-10 flex flex-col lg:flex-row items-center gap-10 hover:border-white/20 transition-all shadow-2xl ${isBestPrice ? 'border-emerald-500/20' : 'border-white/5'}`}>
+                                    {/* Rank */}
                                     <div className="flex-shrink-0">
                                         <div className="w-14 h-14 rounded-2xl bg-white text-black font-black text-xl flex items-center justify-center font-outfit">
                                             0{index + 1}
                                         </div>
                                     </div>
 
-                                    {/* Strategic Core */}
+                                    {/* Details */}
                                     <div className="flex-1 text-center lg:text-left space-y-4">
                                         <div className="flex flex-col md:flex-row items-center gap-4">
                                             <h3 className="font-black text-2xl font-outfit uppercase tracking-tight text-white">{quote.forwarder_company}</h3>
@@ -203,7 +237,7 @@ export default function MarketplaceLiveDashboard() {
                                             </div>
                                         </div>
 
-                                        {/* AI INSIGHT - The Value Add */}
+                                        {/* AI Insight */}
                                         <div className="bg-white/[0.02] border border-white/5 p-4 rounded-xl flex items-start gap-3">
                                             <Zap className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
                                             <p className="text-zinc-400 text-xs font-medium leading-relaxed italic">
@@ -212,50 +246,72 @@ export default function MarketplaceLiveDashboard() {
                                         </div>
                                     </div>
 
-                                    {/* Financial Commitment */}
+                                    {/* Price */}
                                     <div className="text-center lg:text-right px-6">
                                         <div className="text-4xl font-black text-white mb-2 font-outfit tracking-tighter">
                                             {quote.currency} {Number(quote.total_price).toLocaleString()}
                                         </div>
-                                        <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">Verified Quote</div>
+                                        <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">All-in Quote</div>
                                     </div>
 
-                                    {/* Action Vector */}
+                                    {/* Chat with Forwarder */}
                                     <div className="flex-shrink-0">
                                         <button
-                                            onClick={() => {
-                                                const query = new URLSearchParams({
-                                                    quoteId: quote.quotation_id,
-                                                    carrier: quote.forwarder_company,
-                                                    price: String(quote.total_price),
-                                                    origin: shipmentInfo?.origin || '',
-                                                    destination: shipmentInfo?.destination || '',
-                                                    container: shipmentInfo?.cargo_type || '40FT',
-                                                    transit: String(quote.transit_days || 30),
-                                                    vessel: quote.carrier || 'TBD',
-                                                }).toString()
-                                                router.push(`/booking?${query}`)
+                                            onClick={async () => {
+                                                const token = localStorage.getItem('token')
+                                                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/conversations/start`, {
+                                                    method: 'POST',
+                                                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ request_id: requestId, quote_id: quote.quotation_id }),
+                                                })
+                                                const data = await res.json()
+                                                if (res.ok && data.public_id) {
+                                                    window.open(`/dashboard/messages/${data.public_id}`, '_blank')
+                                                }
                                             }}
                                             className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3"
                                         >
-                                            Commit <ArrowRight className="w-4 h-4" />
+                                            <MessageSquare className="w-4 h-4" /> Chat
                                         </button>
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                            )
+                        })}
                     </AnimatePresence>
 
+                    {/* Error State */}
+                    {fetchError && quotes.length === 0 && !loading && (
+                        <div className="mt-10 p-20 bg-[#020202] rounded-[3rem] border border-red-500/10 border-dashed flex flex-col items-center justify-center text-center">
+                            <h4 className="text-lg font-bold text-zinc-400 mb-2 font-outfit uppercase">Failed to Load</h4>
+                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.3em] max-w-xs leading-loose mb-6">
+                                Could not load shipment details. Please try again.
+                            </p>
+                            <button onClick={() => router.back()} className="text-xs text-white underline underline-offset-4 hover:text-zinc-300 transition-colors">
+                                Go Back
+                            </button>
+                        </div>
+                    )}
+
                     {/* Pending State */}
-                    {quotes.length < 3 && !loading && (
+                    {quotes.length < 3 && !loading && !fetchError && (
                         <div className="mt-10 p-20 bg-[#020202] rounded-[3rem] border border-white/5 border-dashed flex flex-col items-center justify-center text-center">
                             <div className="w-16 h-16 bg-white/[0.03] rounded-3xl flex items-center justify-center mb-8 border border-white/10">
                                 <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
                             </div>
                             <h4 className="text-lg font-bold text-zinc-400 mb-2 font-outfit uppercase">Waiting for Quotes</h4>
                             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.3em] max-w-xs leading-loose">
-                                Forwarders are reviewing your request. Target: 3 Quotes.
+                                Forwarders are reviewing your request. You&apos;ll be notified when quotes arrive.
                             </p>
+                            <div className="mt-8 pt-8 border-t border-white/5 w-full max-w-xs">
+                                <p className="text-[10px] text-zinc-700 uppercase tracking-widest mb-4">Need quotes right now?</p>
+                                <Link
+                                    href="/search"
+                                    className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
+                                >
+                                    <Search className="w-3.5 h-3.5" /> Get Instant Quote
+                                </Link>
+                            </div>
                         </div>
                     )}
                 </div>

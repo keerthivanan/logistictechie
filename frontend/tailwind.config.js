@@ -36,9 +36,19 @@ module.exports = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        'infinite-scroll': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-33.333%)' },
+        },
+        'spin-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         shimmer: 'shimmer 8s infinite linear',
+        'infinite-scroll': 'infinite-scroll 25s linear infinite',
+        'spin-slow': 'spin-slow 30s linear infinite',
       },
     },
   },

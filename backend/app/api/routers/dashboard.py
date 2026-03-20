@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from urllib.parse import urlencode
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.db.session import get_db
@@ -47,11 +48,33 @@ async def get_dashboard_stats(
                 for act in fwd_activities
             ]
 
+            # Unread message count for forwarder
+            fwd_unread = 0
+            try:
+                from app.models.conversation import Conversation, ChatMessage
+                fwd_conv_ids_res = await db.execute(
+                    select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id)
+                )
+                fwd_conv_ids = [row[0] for row in fwd_conv_ids_res.all()]
+                if fwd_conv_ids:
+                    fwd_unread_res = await db.execute(
+                        select(func.count(ChatMessage.id)).where(
+                            ChatMessage.conversation_id.in_(fwd_conv_ids),
+                            ChatMessage.sender_id != current_user.sovereign_id,
+                            ChatMessage.is_read == False,  # noqa: E712
+                            ChatMessage.sender_role != "SYSTEM",
+                        )
+                    )
+                    fwd_unread = fwd_unread_res.scalar() or 0
+            except Exception:
+                fwd_unread = 0
+
             return {
                 "active_shipments": len([b for b in f_bids if b["request_status"] == "OPEN"]),
                 "total_shipments": len(f_bids),
                 "delivered_shipments": len([b for b in f_bids if b["bid_status"] == "COMPLETED"]),
                 "pending_tasks_count": fwd_pending_tasks,
+                "unread_messages_count": fwd_unread,
                 "kanban_shipments": [
                     {
                         "id": b["request_id"],
@@ -125,19 +148,22 @@ async def get_dashboard_stats(
             # Smart URL Construction for "Resume" Feature
             resume_url = "/dashboard"
             if act.action == "SEARCH":
-                origin = metadata.get("origin", "")
-                dest = metadata.get("destination", "")
-                cont = metadata.get("container", "40FT")
-                resume_url = f"/results?origin={origin}&destination={dest}&container={cont}"
+                resume_url = f"/results?{urlencode({'origin': metadata.get('origin', ''), 'destination': metadata.get('destination', ''), 'container': metadata.get('container', '40FT')})}"
             elif act.action == "BOOKING_CREATED":
                 ref = metadata.get("reference", act.entity_id)
                 resume_url = f"/booking/confirmation?id={ref}"
-            elif act.action == "TASK_COMPLETED" or act.action == "TASK_REOPENED" or act.action == "TASK_CREATED":
+            elif act.action in ("TASK_COMPLETED", "TASK_REOPENED", "TASK_CREATED"):
                 resume_url = "/dashboard/tasks"
-            elif act.action == "PROFILE_UPDATE" or act.action == "SECURITY_UPDATE":
-                resume_url = "/settings"
+            elif act.action in ("PROFILE_UPDATE", "SECURITY_UPDATE"):
+                resume_url = "/profile"
             elif act.action == "MARKETPLACE_SUBMIT":
                 resume_url = f"/marketplace/{act.entity_id}"
+            elif act.action == "PARTNER_APPLIED":
+                resume_url = "/dashboard/partner"
+            elif act.action == "BID_SUBMITTED":
+                resume_url = f"/marketplace/{act.entity_id}"
+            elif act.action in ("LOGIN", "LOGOUT", "SIGNUP", "SOCIAL_LINK"):
+                resume_url = "/dashboard"
 
             activity_list.append({
                 "id": act.id,
@@ -149,7 +175,34 @@ async def get_dashboard_stats(
             })
 
         stats["recent_activity"] = activity_list
-        
+
+        # Unread message count (for Messages nav badge)
+        try:
+            from app.models.conversation import Conversation, ChatMessage
+            if current_user.role == "forwarder":
+                conv_ids_res = await db.execute(
+                    select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id)
+                )
+            else:
+                conv_ids_res = await db.execute(
+                    select(Conversation.id).where(Conversation.shipper_id == current_user.sovereign_id)
+                )
+            conv_ids = [row[0] for row in conv_ids_res.all()]
+            if conv_ids:
+                unread_res = await db.execute(
+                    select(func.count(ChatMessage.id)).where(
+                        ChatMessage.conversation_id.in_(conv_ids),
+                        ChatMessage.sender_id != current_user.sovereign_id,
+                        ChatMessage.is_read == False,  # noqa: E712
+                        ChatMessage.sender_role != "SYSTEM",
+                    )
+                )
+                stats["unread_messages_count"] = unread_res.scalar() or 0
+            else:
+                stats["unread_messages_count"] = 0
+        except Exception:
+            stats["unread_messages_count"] = 0
+
         return stats
     except Exception as e:
         logger.error(f"[DASHBOARD] stats/me error: {e}", exc_info=True)
@@ -157,8 +210,8 @@ async def get_dashboard_stats(
 
 @router.get("/activity/full", response_model=Dict)
 async def get_full_activity_history(
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ):
@@ -178,14 +231,18 @@ async def get_full_activity_history(
                 
             resume_url = "/dashboard"
             if act.action == "SEARCH":
-                resume_url = f"/results?origin={metadata.get('origin', '')}&destination={metadata.get('destination', '')}&container={metadata.get('container', '40FT')}"
+                resume_url = f"/results?{urlencode({'origin': metadata.get('origin', ''), 'destination': metadata.get('destination', ''), 'container': metadata.get('container', '40FT')})}"
             elif act.action == "BOOKING_CREATED":
                 resume_url = f"/booking/confirmation?id={metadata.get('reference', act.entity_id)}"
             elif "TASK" in act.action:
                 resume_url = "/dashboard/tasks"
             elif "PROFILE" in act.action or "SECURITY" in act.action:
-                resume_url = "/settings"
+                resume_url = "/profile"
             elif act.action == "MARKETPLACE_SUBMIT":
+                resume_url = f"/marketplace/{act.entity_id}"
+            elif act.action == "PARTNER_APPLIED":
+                resume_url = "/dashboard/partner"
+            elif act.action == "BID_SUBMITTED":
                 resume_url = f"/marketplace/{act.entity_id}"
 
             activity_list.append({

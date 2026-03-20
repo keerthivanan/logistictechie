@@ -16,9 +16,9 @@ export default function Error({
     return (
         <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center p-4">
             <div className="text-center">
-                <h1 className="text-3xl font-bold mb-4 text-red-500">System Anomaly Detected</h1>
+                <h1 className="text-3xl font-bold mb-4 text-red-500">Something went wrong</h1>
                 <p className="text-gray-400 mb-8 max-w-md mx-auto">
-                    A discrepancy was identified in the Sovereign Matrix. Automated recovery protocols are standing by.
+                    An unexpected error occurred. Please try again or contact support if the problem persists.
                 </p>
                 <button
                     onClick={reset}

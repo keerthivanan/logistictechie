@@ -19,7 +19,7 @@ const services: Record<string, any> = {
         subtitle: 'Dominate the global trade lanes with guaranteed capacity and AI-driven routing.',
         icon: Ship,
         image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
-        desc: 'The ocean is unpredictable. Your supply chain shouldn’t be. Sovereign aggregates volume across the world’s most efficient tier-one carriers and sovereign nodes to secure spot rates that beat the market index by an average of 12%.',
+        desc: "The ocean is unpredictable. Your supply chain shouldn’t be. CargoLink aggregates volume across the world’s most efficient tier-one carriers to secure spot rates that beat the market index by an average of 12%.",
         stats: [
             { label: 'Global Carriers', value: '50+' },
             { label: 'Daily TEUs', value: '12k' },
@@ -99,7 +99,7 @@ const services: Record<string, any> = {
         subtitle: 'Unrivaled FTL and LTL connectivity across the continental logistics grid.',
         icon: Truck,
         image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Trucking is the pulse of commerce. Sovereign connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
+        desc: 'Trucking is the pulse of commerce. CargoLink connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
         stats: [
             { label: 'Carrier Network', value: '10k+' },
             { label: 'Weekly Loads', value: '25k' },
@@ -139,7 +139,7 @@ const services: Record<string, any> = {
         subtitle: 'The centralized operating system for global trade.',
         icon: BarChart,
         image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Visibility is not enough. You need control. Sovereign unifies your ERP, Carriers, and Customs data into a single source of truth, giving you the power to predict and prevent disruptions.',
+        desc: 'Visibility is not enough. You need control. CargoLink unifies your ERP, Carriers, and Customs data into a single source of truth, giving you the power to predict and prevent disruptions.',
         stats: [
             { label: 'Data Points', value: '1B+' },
             { label: 'Integrations', value: '50+' },
@@ -273,7 +273,7 @@ export default function ServicePage() {
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to upgrade your logistics?</h2>
                     <p className="text-xl text-gray-400 mb-10">
-                        Join 2,000+ forward-thinking shippers who have switched to the Sovereign Operating System.
+                        Join 2,000+ forward-thinking shippers who have switched to CargoLink.
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all">

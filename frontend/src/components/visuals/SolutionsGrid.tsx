@@ -56,7 +56,7 @@ export default function SolutionsGrid() {
                 <div className="text-center mb-20">
                     <h2 className="text-3xl md:text-5xl font-bold mb-6">Comprehensive Logistics Solutions</h2>
                     <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                        From raw material to final mile, Sovereign orchestrates every step of your journey with military-grade precision.
+                        From raw material to final mile, CargoLink orchestrates every step of your supply chain with precision and reliability.
                     </p>
                 </div>
 
@@ -82,7 +82,7 @@ export default function SolutionsGrid() {
                                     </p>
 
                                     <div className="mt-8 flex items-center text-xs font-black uppercase tracking-[0.2em] text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                        Explore Protocol <ArrowRight className="ml-2 w-4 h-4" />
+                                        Learn More <ArrowRight className="ml-2 w-4 h-4" />
                                     </div>
                                 </div>
                             </div>

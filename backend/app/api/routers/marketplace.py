@@ -52,6 +52,15 @@ class MarketplaceSubmit(BaseModel):
     incoterms: str = Field("FOB", max_length=10)
     currency: str = Field("USD", min_length=3, max_length=3)
 
+def _safe_parse_date(val: Optional[str]):
+    """Parse ISO date string safely — returns None on invalid input."""
+    if not val:
+        return None
+    try:
+        return datetime.fromisoformat(val.replace("Z", "+00:00")).replace(tzinfo=None)
+    except (ValueError, AttributeError):
+        return None
+
 def _fire_webhook(payload: dict):
     """Fire-and-forget webhook in a background thread."""
     asyncio.run(webhook_service.trigger_marketplace_webhook(payload))
@@ -163,8 +172,8 @@ async def submit_request(
         is_stackable=request_in.is_stackable,
         is_hazardous=request_in.is_hazardous,
         needs_insurance=request_in.needs_insurance,
-        target_date=datetime.fromisoformat(request_in.target_date.replace("Z", "+00:00")).replace(tzinfo=None) if request_in.target_date else None,
-        pickup_ready_date=datetime.fromisoformat(request_in.pickup_ready_date.replace("Z", "+00:00")).replace(tzinfo=None) if request_in.pickup_ready_date else None,
+        target_date=_safe_parse_date(request_in.target_date),
+        pickup_ready_date=_safe_parse_date(request_in.pickup_ready_date),
         total_weight_kg=request_in.total_weight_kg or weight_kg,
         total_volume_cbm=request_in.total_volume_cbm,
         container_count=request_in.container_count,
@@ -244,6 +253,7 @@ async def get_my_requests(
             "origin": r.origin,
             "destination": r.destination,
             "cargo_type": r.cargo_type,
+            "container_type": r.container_type,
             "commodity": r.commodity,
             "cargo_specification": r.cargo_specification,
             "quantity": r.quantity,
@@ -261,7 +271,8 @@ async def get_my_requests(
                 "currency": q.currency,
                 "transit_days": q.transit_days,
                 "ai_summary": q.ai_summary,
-                "received_at": q.received_at
+                "carrier": q.carrier,
+                "received_at": q.received_at,
             } for q in quotes]
         })
         
@@ -430,8 +441,8 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
             "is_stackable": sync_in.is_stackable,
             "is_hazardous": sync_in.is_hazardous,
             "needs_insurance": sync_in.needs_insurance,
-            "target_date": datetime.fromisoformat(sync_in.target_date.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.target_date else None,
-            "pickup_ready_date": datetime.fromisoformat(sync_in.pickup_ready_date.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.pickup_ready_date else None,
+            "target_date": _safe_parse_date(sync_in.target_date),
+            "pickup_ready_date": _safe_parse_date(sync_in.pickup_ready_date),
             "total_weight_kg": Decimal(str(sync_in.total_weight_kg)) if sync_in.total_weight_kg is not None else Decimal(str(sync_in.weight_kg)),
             "total_volume_cbm": Decimal(str(sync_in.total_volume_cbm)) if sync_in.total_volume_cbm is not None else None,
             "container_count": sync_in.container_count,
@@ -480,7 +491,7 @@ async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depend
     
     if req:
         req.status = sync_in.status
-        req.closed_at = datetime.fromisoformat(sync_in.closed_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.closed_at else datetime.now(timezone.utc)
+        req.closed_at = _safe_parse_date(sync_in.closed_at) or datetime.now(timezone.utc)
         req.closed_reason = sync_in.closed_reason
         await db.commit()
     else:
@@ -584,10 +595,13 @@ async def n8n_quote_sync(
             req.quotation_count = count_res.scalar() or 0
         
     await db.commit()
-    
+
     return {
         "success": True,
-        "request_id": sync_in.request_id
+        "request_id": sync_in.request_id,
+        "quotation_count": req.quotation_count if req else 0,
+        "request_status": req.status if req else "UNKNOWN",
+        "trigger_close": (req.quotation_count or 0) >= 3 if req else False,
     }
 
 class N8nBidStatusSync(BaseModel):

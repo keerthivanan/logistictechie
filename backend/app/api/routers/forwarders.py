@@ -189,7 +189,7 @@ async def promote_to_forwarder(
     email = current_user.email
 
     if not current_user.sovereign_id:
-        raise HTTPException(status_code=400, detail="Account has no Sovereign ID. Please contact support.")
+        raise HTTPException(status_code=400, detail="Account ID not found. Please contact support.")
 
     # Idempotent — if profile already exists, return current status
     existing_result = await db.execute(select(Forwarder).where(Forwarder.email == email))
@@ -536,7 +536,7 @@ class PortalBidSubmit(BaseModel):
     status: str = "ANSWERED"
 
 @router.post("/portal-bid")
-async def portal_submit_bid(bid_in: PortalBidSubmit, db: AsyncSession = Depends(get_db)):
+async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
     """
     Portal bid submission endpoint — authenticated by forwarder_id + email pair.
     Called directly from the Forwarder Portal UI (no n8n secret required).
@@ -562,19 +562,120 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, db: AsyncSession = Depends(
     if not req:
         raise HTTPException(status_code=404, detail="Request not found.")
 
-    stmt = pg_insert(ForwarderBidStatus).values(
+    # Block submissions on closed requests
+    if req.status == "CLOSED":
+        raise HTTPException(
+            status_code=409,
+            detail="This request is no longer accepting quotes — it has been fulfilled."
+        )
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    # Block portal submission if this forwarder already quoted via email (Path A)
+    existing_quote_stmt = select(MarketplaceBid).where(
+        MarketplaceBid.request_id == bid_in.request_id,
+        MarketplaceBid.forwarder_id == bid_in.forwarder_id,
+    )
+    existing_quote_res = await db.execute(existing_quote_stmt)
+    existing_quote = existing_quote_res.scalars().first()
+    if existing_quote and not existing_quote.quotation_id.startswith("PORTAL-"):
+        raise HTTPException(
+            status_code=409,
+            detail="You have already submitted a quote for this request via email. No further submission needed."
+        )
+
+    # 1. Upsert ForwarderBidStatus (partner tracking)
+    bid_status_stmt = pg_insert(ForwarderBidStatus).values(
         forwarder_id=bid_in.forwarder_id,
         request_id=bid_in.request_id,
         status=bid_in.status,
         quoted_price=bid_in.price,
-        attempted_at=datetime.now(timezone.utc).replace(tzinfo=None),
-        quoted_at=datetime.now(timezone.utc).replace(tzinfo=None)
+        attempted_at=now,
+        quoted_at=now,
     )
-    stmt = stmt.on_conflict_do_update(
+    bid_status_stmt = bid_status_stmt.on_conflict_do_update(
         index_elements=["forwarder_id", "request_id"],
-        set_={"status": stmt.excluded.status, "quoted_price": stmt.excluded.quoted_price, "quoted_at": stmt.excluded.quoted_at}
+        set_={"status": bid_status_stmt.excluded.status, "quoted_price": bid_status_stmt.excluded.quoted_price, "quoted_at": bid_status_stmt.excluded.quoted_at}
     )
-    await db.execute(stmt)
+    await db.execute(bid_status_stmt)
+
+    # 2. Upsert MarketplaceBid (shipowner-visible quote table)
+    # Use a deterministic quotation_id so re-submitting updates rather than duplicates
+    quotation_id = f"PORTAL-{bid_in.forwarder_id}-{bid_in.request_id}"
+    bid_record_stmt = pg_insert(MarketplaceBid).values(
+        quotation_id=quotation_id,
+        request_id=bid_in.request_id,
+        forwarder_id=bid_in.forwarder_id,
+        forwarder_email=bid_in.email,
+        forwarder_company=fwd.company_name,
+        total_price=bid_in.price,
+        currency="USD",
+        transit_days=None,
+        carrier=None,
+        service_type=None,
+        ai_summary=f"Direct quote submitted by {fwd.company_name} via the Partner Portal.",
+        status="ACTIVE",
+        received_at=now,
+    )
+    bid_record_stmt = bid_record_stmt.on_conflict_do_update(
+        index_elements=["quotation_id"],
+        set_={
+            "total_price": bid_record_stmt.excluded.total_price,
+            "ai_summary": bid_record_stmt.excluded.ai_summary,
+            "status": bid_record_stmt.excluded.status,
+        }
+    )
+    await db.execute(bid_record_stmt)
+
+    # 3. Update quotation_count on the request (count actual bids for accuracy)
+    count_stmt = select(func.count(MarketplaceBid.id)).where(MarketplaceBid.request_id == bid_in.request_id)
+    count_res = await db.execute(count_stmt)
+    new_count = count_res.scalar() or 0
+    req.quotation_count = new_count
+
+    # 4. Auto-close request when 3 quotes received (same threshold as n8n WF3)
+    should_send_comparison = False
+    if new_count >= 3 and req.status == "OPEN":
+        req.status = "CLOSED"
+        req.closed_reason = "Auto-closed: 3 quotes received via portal"
+        req.closed_at = now
+        should_send_comparison = True
+
     await db.commit()
 
-    return {"success": True, "request_id": bid_in.request_id, "forwarder_id": bid_in.forwarder_id}
+    # If 3 quotes reached via portal, notify shipper with comparison email
+    if should_send_comparison:
+        shipper_stmt = select(User).where(User.sovereign_id == req.user_sovereign_id)
+        shipper_res = await db.execute(shipper_stmt)
+        shipper = shipper_res.scalars().first()
+        if shipper:
+            background_tasks.add_task(webhook_service.trigger_quotes_complete_webhook, {
+                "request_id": req.request_id,
+                "origin": req.origin,
+                "destination": req.destination,
+                "user_name": shipper.full_name or shipper.email,
+                "user_email": shipper.email,
+                "quotation_count": new_count,
+            })
+
+    # Log bid submission against the user account
+    user_stmt = select(User).where(User.email == bid_in.email)
+    user_res = await db.execute(user_stmt)
+    bid_user = user_res.scalars().first()
+    if bid_user:
+        await activity_service.log(
+            db,
+            user_id=str(bid_user.id),
+            action="BID_SUBMITTED",
+            entity_type="REQUEST",
+            entity_id=str(bid_in.request_id),
+            metadata={"forwarder_id": bid_in.forwarder_id, "price": bid_in.price, "request_id": bid_in.request_id}
+        )
+
+    return {
+        "success": True,
+        "request_id": bid_in.request_id,
+        "forwarder_id": bid_in.forwarder_id,
+        "quotation_count": new_count,
+        "trigger_close": new_count >= 3,
+    }

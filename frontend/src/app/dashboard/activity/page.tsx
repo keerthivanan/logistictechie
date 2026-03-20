@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
     Search, CheckCircle2, History, ArrowUpRight,
     Loader2, Package, FileText, Globe, Zap,
+    LogIn, LogOut, UserPlus, User, ShieldCheck, Send, Store,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
@@ -20,13 +21,30 @@ interface Activity {
 }
 
 const ACTION_MAP: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-    SEARCH:           { label: 'Freight Search',    icon: Search,       color: 'text-blue-400' },
-    VECTOR_SEARCH:    { label: 'Freight Search',    icon: Search,       color: 'text-blue-400' },
-    BOOKING_CREATED:  { label: 'Booking Created',   icon: CheckCircle2, color: 'text-emerald-400' },
-    BOOKING_UPDATED:  { label: 'Booking Updated',   icon: Package,      color: 'text-yellow-400' },
-    QUOTE_REQUESTED:  { label: 'Quote Requested',   icon: Zap,          color: 'text-purple-400' },
-    DOCUMENT_UPLOAD:  { label: 'Document Uploaded', icon: FileText,     color: 'text-zinc-400' },
-    SOCIAL_LINK:      { label: 'Profile Updated',   icon: Globe,        color: 'text-purple-400' },
+    // Auth
+    LOGIN:              { label: 'Signed In',           icon: LogIn,        color: 'text-blue-400' },
+    LOGOUT:             { label: 'Signed Out',           icon: LogOut,       color: 'text-zinc-500' },
+    SIGNUP:             { label: 'Account Created',      icon: UserPlus,     color: 'text-emerald-400' },
+    SOCIAL_LINK:        { label: 'Google Sign-In',       icon: Globe,        color: 'text-blue-400' },
+    // Profile
+    PROFILE_UPDATE:     { label: 'Profile Updated',      icon: User,         color: 'text-purple-400' },
+    SECURITY_UPDATE:    { label: 'Password Changed',     icon: ShieldCheck,  color: 'text-amber-400' },
+    // Marketplace
+    MARKETPLACE_SUBMIT: { label: 'Shipment Requested',   icon: Store,        color: 'text-emerald-400' },
+    SEARCH:             { label: 'Freight Search',       icon: Search,       color: 'text-blue-400' },
+    VECTOR_SEARCH:      { label: 'Freight Search',       icon: Search,       color: 'text-blue-400' },
+    QUOTE_REQUESTED:    { label: 'Quote Requested',      icon: Zap,          color: 'text-purple-400' },
+    // Forwarder
+    PARTNER_APPLIED:    { label: 'Partner Application',  icon: Send,         color: 'text-amber-400' },
+    BID_SUBMITTED:      { label: 'Bid Submitted',        icon: Zap,          color: 'text-emerald-400' },
+    // Tasks
+    TASK_CREATED:       { label: 'Task Created',         icon: FileText,     color: 'text-zinc-400' },
+    TASK_COMPLETED:     { label: 'Task Completed',       icon: CheckCircle2, color: 'text-emerald-400' },
+    TASK_REOPENED:      { label: 'Task Reopened',        icon: History,      color: 'text-yellow-400' },
+    // Bookings
+    BOOKING_CREATED:    { label: 'Booking Created',      icon: CheckCircle2, color: 'text-emerald-400' },
+    BOOKING_UPDATED:    { label: 'Booking Updated',      icon: Package,      color: 'text-yellow-400' },
+    DOCUMENT_UPLOAD:    { label: 'Document Uploaded',    icon: FileText,     color: 'text-zinc-400' },
 }
 
 function getAction(action: string) {
@@ -34,14 +52,33 @@ function getAction(action: string) {
 }
 
 function getDetail(act: Activity) {
-    if (act.action === 'SEARCH' || act.action === 'VECTOR_SEARCH') {
-        const o = act.metadata?.origin
-        const d = act.metadata?.destination
-        if (o && d) return `${o} → ${d}`
-        return 'Freight route search'
+    const m = act.metadata || {}
+    switch (act.action) {
+        case 'SEARCH':
+        case 'VECTOR_SEARCH':
+            return m.origin && m.destination ? `${m.origin} → ${m.destination}` : 'Freight route search'
+        case 'MARKETPLACE_SUBMIT':
+            return m.origin && m.destination ? `${m.origin} → ${m.destination}` : 'New shipment request'
+        case 'BID_SUBMITTED':
+            return m.price ? `Quote: $${Number(m.price).toLocaleString()}` : `Request #${m.request_id ?? '—'}`
+        case 'BOOKING_CREATED':
+            return `Ref: ${m.reference ?? '—'}`
+        case 'TASK_COMPLETED':
+        case 'TASK_CREATED':
+        case 'TASK_REOPENED':
+            return m.title ?? 'Task update'
+        case 'PARTNER_APPLIED':
+            return 'Application submitted for review'
+        case 'PROFILE_UPDATE':
+            return 'Profile details updated'
+        case 'SECURITY_UPDATE':
+            return 'Password changed'
+        case 'LOGIN':
+        case 'SOCIAL_LINK':
+            return 'CargoLink platform'
+        default:
+            return '—'
     }
-    if (act.action === 'BOOKING_CREATED') return `Ref: ${act.metadata?.reference ?? '—'}`
-    return '—'
 }
 
 function timeAgo(ts: string) {

@@ -13,18 +13,25 @@ const industries = [
 
 export default function TrustedIndustries() {
     return (
-        <section className="py-20 bg-black overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black z-10 pointer-events-none"></div>
+        <section className="py-16 bg-black overflow-hidden relative">
+            {/* Fade edges */}
+            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
-                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">Powering Complex Supply Chains Across</h3>
-            </div>
+            {/* Label */}
+            <p className="text-center text-[10px] font-black text-zinc-600 uppercase tracking-[0.25em] font-inter mb-10">
+                Powering complex supply chains across
+            </p>
 
-            <div className="flex gap-20 animate-infinite-scroll">
+            {/* Marquee */}
+            <div className="flex animate-infinite-scroll">
                 {[...industries, ...industries, ...industries].map((item, i) => (
-                    <div key={i} className="flex items-center gap-4 text-gray-400 hover:text-white transition-colors group cursor-pointer whitespace-nowrap">
-                        <item.icon className="w-8 h-8 group-hover:scale-110 transition-transform" />
-                        <span className="text-xl font-bold">{item.name}</span>
+                    <div
+                        key={i}
+                        className="flex items-center gap-2.5 text-zinc-500 hover:text-white transition-colors cursor-pointer whitespace-nowrap mx-10 group"
+                    >
+                        <item.icon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                        <span className="text-sm font-black font-inter tracking-wide">{item.name}</span>
                     </div>
                 ))}
             </div>
