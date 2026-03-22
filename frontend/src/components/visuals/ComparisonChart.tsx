@@ -28,15 +28,11 @@ const metrics = [
 export default function ComparisonChart() {
     return (
         <div className="bg-[#0a0a0a] border border-white/[0.07] rounded-2xl p-8 relative overflow-hidden">
-            {/* Emerald ambient glow */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/8 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/4 rounded-full blur-[80px] pointer-events-none" />
-
             <div className="relative z-10">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-10">
                     <div>
-                        <h3 className="text-2xl font-black tracking-tight font-outfit text-white mb-1">
+                        <h3 className="text-2xl font-semibold tracking-tight font-outfit text-white mb-1">
                             Outperforming the industry.
                         </h3>
                         <p className="text-xs text-zinc-500 font-inter">
@@ -45,11 +41,11 @@ export default function ComparisonChart() {
                     </div>
                     <div className="flex flex-col gap-2 text-right">
                         <div className="flex items-center gap-2 justify-end">
-                            <span className="text-[10px] font-black text-emerald-400 font-inter uppercase tracking-widest">CargoLink</span>
-                            <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                            <span className="text-[10px] font-medium text-white font-inter uppercase tracking-widest">CargoLink</span>
+                            <div className="w-2 h-2 rounded-full bg-white" />
                         </div>
                         <div className="flex items-center gap-2 justify-end">
-                            <span className="text-[10px] font-black text-zinc-600 font-inter uppercase tracking-widest">Industry Avg.</span>
+                            <span className="text-[10px] font-medium text-zinc-600 font-inter uppercase tracking-widest">Industry Avg.</span>
                             <div className="w-2 h-2 rounded-full bg-zinc-700" />
                         </div>
                     </div>
@@ -60,28 +56,22 @@ export default function ComparisonChart() {
                     {metrics.map((m, i) => (
                         <div key={i}>
                             <div className="flex items-center justify-between mb-2">
-                                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.15em] font-inter">{m.label}</span>
+                                <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-[0.15em] font-inter">{m.label}</span>
                                 <div className="flex items-center gap-4">
-                                    <span className="text-[10px] text-zinc-600 font-inter line-through">{m.industry.value}</span>
-                                    <span className="text-xs font-black text-emerald-400 font-inter">{m.cargolink.value}</span>
+                                    <span className="text-[10px] text-zinc-700 font-inter line-through">{m.industry.value}</span>
+                                    <span className="text-xs font-semibold text-white font-inter">{m.cargolink.value}</span>
                                 </div>
                             </div>
 
-                            {/* CargoLink bar — emerald, tall */}
-                            <div className="h-3 bg-zinc-900 rounded-full mb-1.5 overflow-hidden">
+                            {/* CargoLink bar — clean white */}
+                            <div className="h-2.5 bg-zinc-900 rounded-full mb-1.5 overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     whileInView={{ width: `${m.cargolink.pct}%` }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1], delay: i * 0.12 }}
-                                    className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 relative overflow-hidden"
-                                >
-                                    <motion.div
-                                        animate={{ x: ['-100%', '200%'] }}
-                                        transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.3, ease: 'linear' }}
-                                        className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                                    />
-                                </motion.div>
+                                    className="h-full rounded-full bg-white"
+                                />
                             </div>
 
                             {/* Industry bar — thin, gray */}

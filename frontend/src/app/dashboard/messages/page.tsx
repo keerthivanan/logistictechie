@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
-import { MessageSquare, ArrowRight, Loader2, CheckCircle2, Clock } from 'lucide-react'
+import { MessageSquare, ArrowRight, CheckCircle2, Clock, X } from 'lucide-react'
+import { PageSpinner } from '@/components/ui/Spinner'
 import { motion } from 'framer-motion'
 
 interface ConversationSummary {
@@ -17,6 +18,7 @@ interface ConversationSummary {
     currency: string
     status: string
     created_at: string
+    unread_count?: number
     last_message: {
         content: string
         sender_role: string
@@ -50,6 +52,9 @@ export default function MessagesPage() {
         if (authLoading) return
         if (!user) { router.push('/login'); return }
         fetchConversations()
+        // Poll every 10 seconds so new conversations appear without manual refresh
+        const interval = setInterval(fetchConversations, 10000)
+        return () => clearInterval(interval)
     }, [user, authLoading, router, fetchConversations])
 
     const displayPrice = (conv: ConversationSummary) => {
@@ -60,9 +65,7 @@ export default function MessagesPage() {
 
     if (loading || authLoading) {
         return (
-            <div className="h-full flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-white/20" />
-            </div>
+            <PageSpinner />
         )
     }
 
@@ -97,6 +100,8 @@ export default function MessagesPage() {
                         {conversations.map((conv, idx) => {
                             const priceInfo = displayPrice(conv)
                             const isBooked = conv.status === 'BOOKED'
+                            const isClosed = conv.status === 'CLOSED'
+                            const hasUnread = (conv.unread_count ?? 0) > 0
 
                             return (
                                 <motion.div
@@ -105,31 +110,52 @@ export default function MessagesPage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.04 }}
                                     onClick={() => router.push(`/dashboard/messages/${conv.public_id}`)}
-                                    className="flex items-center gap-4 px-4 py-4 bg-[#0a0a0a] border border-white/5 rounded-2xl cursor-pointer hover:border-white/10 hover:bg-[#0d0d0d] transition-all"
+                                    className={`flex items-center gap-4 px-4 py-4 border rounded-2xl cursor-pointer transition-all ${
+                                        isClosed
+                                            ? 'bg-[#080808] border-white/[0.03] opacity-60 hover:opacity-80'
+                                            : hasUnread
+                                                ? 'bg-[#0a0a0a] border-white/15 hover:bg-[#0d0d0d]'
+                                                : 'bg-[#0a0a0a] border-white/5 hover:border-white/10 hover:bg-[#0d0d0d]'
+                                    }`}
                                 >
-                                    {/* Icon */}
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isBooked ? 'bg-emerald-500/10' : 'bg-white/[0.04] border border-white/5'}`}>
-                                        {isBooked
-                                            ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                            : <MessageSquare className="w-4 h-4 text-zinc-500" />
-                                        }
+                                    {/* Icon with unread indicator */}
+                                    <div className="relative flex-shrink-0">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                            isBooked ? 'bg-emerald-500/10' : 'bg-white/[0.04] border border-white/5'
+                                        }`}>
+                                            {isBooked
+                                                ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                                : isClosed
+                                                    ? <X className="w-4 h-4 text-zinc-600" />
+                                                    : <MessageSquare className={`w-4 h-4 ${hasUnread ? 'text-white' : 'text-zinc-500'}`} />
+                                            }
+                                        </div>
+                                        {hasUnread && !isClosed && (
+                                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-1">
+                                                {conv.unread_count! > 9 ? '9+' : conv.unread_count}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-0.5">
-                                            <span className="text-sm font-black text-white font-outfit truncate">{conv.forwarder_company}</span>
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full flex-shrink-0 ${
-                                                isBooked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-zinc-500'
+                                            <span className={`text-sm font-semibold font-outfit truncate ${isClosed ? 'text-zinc-500' : 'text-white'}`}>{conv.forwarder_company}</span>
+                                            <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                                isBooked ? 'bg-emerald-500/10 text-emerald-400'
+                                                : isClosed ? 'bg-zinc-800 text-zinc-600'
+                                                : 'bg-white/5 text-zinc-500'
                                             }`}>
-                                                {isBooked ? 'Booked' : 'Open'}
+                                                {isBooked ? 'Booked' : isClosed ? 'Closed' : 'Open'}
                                             </span>
                                         </div>
                                         <p className="text-[10px] text-zinc-600 font-mono mb-1">{conv.request_id}</p>
                                         {conv.last_message && (
                                             <p className="text-xs text-zinc-500 font-inter truncate">
                                                 {conv.last_message.sender_role === 'SYSTEM'
-                                                    ? conv.last_message.content.slice(0, 60) + '...'
+                                                    ? (conv.last_message.content.length > 60
+                                                        ? conv.last_message.content.slice(0, 60) + '...'
+                                                        : conv.last_message.content)
                                                     : conv.last_message.content.slice(0, 60)}
                                             </p>
                                         )}
@@ -137,7 +163,7 @@ export default function MessagesPage() {
 
                                     {/* Price + time */}
                                     <div className="text-right flex-shrink-0">
-                                        <p className={`text-sm font-black font-mono ${priceInfo.color}`}>
+                                        <p className={`text-sm font-semibold font-mono ${priceInfo.color}`}>
                                             {conv.currency} {Number(priceInfo.price).toLocaleString()}
                                         </p>
                                         <p className="text-[9px] text-zinc-700 font-inter">{priceInfo.label}</p>

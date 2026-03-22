@@ -109,7 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 avatar_url: avatar_url || undefined,
                 onboarding_completed
             });
-            fetchProfile(token);
+            setLoading(false); // Unblock UI immediately from localStorage cache
+            fetchProfile(token); // Silently refresh in background
         } else {
             // If no localStorage but cookie exists, clear the cookie to prevent middleware loops
             if (document.cookie.includes('token=')) {
@@ -132,7 +133,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.setItem('onboarding_completed', String(onboarding_completed));
         if (avatar_url) localStorage.setItem('avatar_url', avatar_url);
 
-        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax; Secure`;
+        const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax${secure}`;
 
         setUser({
             id: user_id || '',

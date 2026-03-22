@@ -54,7 +54,7 @@ export default function MSAPage() {
 
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">
+                    <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-2">
                         Master Service Agreement
                     </h1>
                     <p className="text-xs text-zinc-500 font-inter">The terms governing use of the CargoLink platform for all shippers, forwarders, and carriers.</p>
@@ -69,7 +69,7 @@ export default function MSAPage() {
                     </div>
                     <a
                         href="mailto:legal@cargolink.io?subject=MSA Request"
-                        className="bg-white text-black px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
+                        className="bg-white text-black px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
                     >
                         Request Document
                     </a>

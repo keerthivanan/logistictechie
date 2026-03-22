@@ -231,7 +231,7 @@ export default function ServicePage() {
                     <div className={slug === 'ocean-freight' ? '' : 'mb-32'}>
                         {slug === 'ocean-freight' && (
                             <div className="mb-12 text-center">
-                                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 mb-8">Intelligence Protocol</h2>
+                                <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 mb-8">Intelligence Protocol</h2>
                             </div>
                         )}
                         <div className="grid md:grid-cols-3 gap-12 text-center">

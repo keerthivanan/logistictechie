@@ -1,19 +1,21 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Package, X, Loader2, Plus, Search } from 'lucide-react';
-import { API_URL } from '@/lib/config';
+import { Package, X, Search } from 'lucide-react';
+import { Spinner } from '@/components/ui/Spinner';
+import { apiFetch } from '@/lib/config';
 
 interface CommodityAutocompleteProps {
     name: string;
     value: string;
     onChange: (name: string, value: string) => void;
+    onSelectItem?: (name: string, hsCode: string) => void;  // auto-fill HS code
     placeholder?: string;
 }
 
 
 
-export default function CommodityAutocomplete({ name, value, onChange, placeholder }: CommodityAutocompleteProps) {
+export default function CommodityAutocomplete({ name, value, onChange, onSelectItem, placeholder }: CommodityAutocompleteProps) {
     const [query, setQuery] = useState(value);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -38,9 +40,8 @@ export default function CommodityAutocomplete({ name, value, onChange, placehold
     const fetchSuggestions = async (q: string = "") => {
         setIsSearching(true);
         try {
-            const queryParam = q.trim() ? `q=${encodeURIComponent(q.trim())}` : "";
-            const url = `${API_URL}/api/references/commodities/search?${queryParam}`;
-            const res = await fetch(url);
+            const queryParam = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
+            const res = await apiFetch(`/api/references/commodities/search${queryParam}`);
             const data = await res.json();
 
             const apiResults = (data.results || []).map((r: any) => ({ ...r, source: "API" }));
@@ -56,22 +57,30 @@ export default function CommodityAutocomplete({ name, value, onChange, placehold
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setQuery(val);
-        setIsOpen(true); // Open immediately so they see the custom entry item updating
+        setSuggestions([]); // clear stale results immediately
         onChange(name, val);
 
         if (searchTimer.current) clearTimeout(searchTimer.current);
-        searchTimer.current = setTimeout(() => fetchSuggestions(val), val.length === 0 ? 0 : 200);
+        if (val.length >= 2) {
+            setIsOpen(true);
+            searchTimer.current = setTimeout(() => fetchSuggestions(val), 200);
+        } else {
+            setIsOpen(false);
+        }
     };
 
-    const handleSelect = (item: string | { name: string; id?: string; code?: string }) => {
+    const handleSelect = (item: string | { name: string; id?: string; code?: string; hs_code?: string }) => {
         let val: string;
+        let hsCode = '';
         if (typeof item === 'string') {
             val = item;
         } else {
             val = item.name;
+            hsCode = item.hs_code || item.id || '';
         }
         setQuery(val);
         onChange(name, val);
+        if (onSelectItem) onSelectItem(val, hsCode);
         setIsOpen(false);
     };
 
@@ -93,11 +102,10 @@ export default function CommodityAutocomplete({ name, value, onChange, placehold
                     value={query}
                     onChange={handleInputChange}
                     onFocus={() => {
-                        setIsOpen(true);
-                        if (suggestions.length === 0) fetchSuggestions(query);
+                        if (query.length >= 2) setIsOpen(true);
                     }}
                     placeholder={placeholder || "Search commodity..."}
-                    className="w-full bg-black border border-white/5 rounded-lg pl-10 pr-10 py-2.5 text-[10px] font-bold text-white focus:border-white/20 outline-none font-inter transition-all"
+                    className="w-full bg-black border border-white/5 rounded-xl pl-10 pr-10 py-3 text-sm font-medium text-white focus:border-zinc-700 outline-none font-inter transition-colors"
                     autoComplete="off"
                 />
 
@@ -111,68 +119,39 @@ export default function CommodityAutocomplete({ name, value, onChange, placehold
                     </button>
                 )}
 
-                {isSearching && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 animate-spin z-10" />
-                )}
             </div>
 
             {/* Dropdown Suggestions */}
-            {isOpen && (
+            {isOpen && query.length >= 2 && (
                 <div className="absolute left-0 right-0 top-full mt-1 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden max-h-48 overflow-y-auto">
-
-                    {/* Suggestions (API + Comprehensive Fallbacks) */}
-                    {results.length > 0 ? (
-                        <>
-                            {/* Subtle Custom Option at top if user typed something */}
-                            {query.length > 0 && !results.some(r => r.name.toLowerCase() === query.toLowerCase()) && (
-                                <button
-                                    onClick={() => handleSelect(query)}
-                                    className="w-full px-4 py-3 text-left hover:bg-white/5 border-b border-white/5 group transition-colors bg-white/[0.02]"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors" />
-                                        <div>
-                                            <div className="text-[10px] font-bold text-zinc-400 group-hover:text-white uppercase tracking-wider">Custom: &quot;{query}&quot;</div>
-                                        </div>
-                                    </div>
-                                </button>
-                            )}
-
-                            {results.map((item, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => handleSelect(item.name)}
-                                    className="w-full px-4 py-3 text-left hover:bg-white/5 flex items-center justify-between border-b border-white/5 last:border-0 group"
-                                >
-                                    <div className="flex flex-col">
-                                        <span className="text-[11px] font-inter font-bold text-white group-hover:text-white transition-colors">
-                                            {item.name}
-                                        </span>
-                                        <span className="text-[9px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">
-                                            {item.id ? `HS: ${item.id}` : "Standard Shipping Class"}
-                                            {item.type && item.type !== 'DRY' ? ` · ${item.type}` : ''}
-                                        </span>
-                                    </div>
-                                    <Search className="w-3 h-3 text-zinc-800 group-hover:text-zinc-400 transition-colors" />
-                                </button>
-                            ))}
-                        </>
-                    ) : !isSearching && query.length < 2 && (
-                        <div className="p-4 text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold font-inter">
-                            Search thousands of global products...
+                    {isSearching ? (
+                        <div className="flex items-center justify-center gap-2.5 px-4 py-5">
+                            <Spinner size="sm" />
+                            <span className="text-[11px] text-zinc-500 font-inter font-semibold uppercase tracking-widest">Searching commodities...</span>
                         </div>
-                    )}
-
-                    {/* No results message */}
-                    {!isSearching && query.length >= 2 && results.length === 0 && (
-                        <button
-                            onClick={() => handleSelect(query)}
-                            className="w-full p-4 hover:bg-white/5 transition-colors group"
-                        >
-                            <div className="text-center text-[10px] text-zinc-500 uppercase tracking-widest font-bold group-hover:text-white">
-                                No records found. Use custom: &quot;{query}&quot;
-                            </div>
-                        </button>
+                    ) : results.length > 0 ? (
+                        results.map((item, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleSelect(item)}
+                                className="w-full px-4 py-3 text-left hover:bg-white/5 flex items-center justify-between border-b border-white/5 last:border-0 group"
+                            >
+                                <div className="flex flex-col">
+                                    <span className="text-[11px] font-inter font-bold text-white group-hover:text-white transition-colors">
+                                        {item.name}
+                                    </span>
+                                    <span className="text-[9px] text-zinc-600 font-mono mt-0.5 uppercase tracking-tighter">
+                                        {item.id ? `HS: ${item.id}` : "Standard Shipping Class"}
+                                        {item.type && item.type !== 'DRY' ? ` · ${item.type}` : ''}
+                                    </span>
+                                </div>
+                                <Search className="w-3 h-3 text-zinc-800 group-hover:text-zinc-400 transition-colors" />
+                            </button>
+                        ))
+                    ) : (
+                        <div className="p-4 text-center text-[10px] text-zinc-600 uppercase tracking-widest font-bold font-inter">
+                            No commodities found for &quot;{query}&quot;
+                        </div>
                     )}
                 </div>
             )}

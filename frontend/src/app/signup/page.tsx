@@ -7,8 +7,10 @@ import { apiFetch } from '@/lib/config'
 import Prism from '@/components/visuals/Prism'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/context/AuthContext'
+import { useT } from '@/lib/i18n/t'
 
 function SignupContent() {
+    const t = useT()
     const { login } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -116,16 +118,11 @@ function SignupContent() {
             <div className="w-full max-w-sm px-6 relative z-10">
                 {/* Logo + Title */}
                 <div className="text-center mb-6">
-                    <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-                        <div className="flex items-center space-x-1">
-                            <div className="w-1.5 h-4 bg-white rounded-sm" />
-                            <div className="w-1.5 h-4 bg-white/70 rounded-sm" />
-                            <div className="w-1.5 h-4 bg-white/40 rounded-sm" />
-                        </div>
-                        <span className="text-xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
+                    <Link href="/" className="inline-flex items-center group mb-1">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-14 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
-                    <h1 className="text-2xl font-bold font-outfit uppercase tracking-tight">Create Account</h1>
-                    <p className="text-zinc-500 text-xs font-inter mt-1.5">Join the CargoLink freight network.</p>
+                    <h1 className="text-2xl font-bold font-outfit uppercase tracking-tight">{t('signup.title')}</h1>
+                    <p className="text-zinc-500 text-xs font-inter mt-1.5">{t('signup.sub')}</p>
                 </div>
 
                 {/* Card */}
@@ -150,7 +147,7 @@ function SignupContent() {
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
                         <span className="font-bold text-black text-xs uppercase tracking-[0.15em] font-inter">
-                            {isLoading ? 'Connecting...' : 'Continue with Google'}
+                            {isLoading ? 'Connecting...' : t('signup.google')}
                         </span>
                     </button>
 
@@ -165,7 +162,7 @@ function SignupContent() {
                     <form onSubmit={handleSignup} className="space-y-3">
                         <input
                             type="text"
-                            placeholder="Full name"
+                            placeholder={t('signup.name')}
                             value={signupName}
                             onChange={e => setSignupName(e.target.value)}
                             required
@@ -173,7 +170,7 @@ function SignupContent() {
                         />
                         <input
                             type="email"
-                            placeholder="Email address"
+                            placeholder={t('signup.email')}
                             value={signupEmail}
                             onChange={e => setSignupEmail(e.target.value)}
                             required
@@ -200,16 +197,16 @@ function SignupContent() {
                             disabled={isLoading}
                             className="w-full py-3.5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.15em] font-inter hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                         >
-                            {isLoading ? 'Creating Account...' : 'Create Account'}
+                            {isLoading ? t('signup.loading') : t('signup.cta')}
                         </button>
                     </form>
 
                     {/* Footer links */}
                     <div className="mt-5 flex items-center justify-between">
                         <p className="text-zinc-600 text-[10px] font-inter">
-                            Already have an account?{' '}
+                            {t('signup.have.account')}{' '}
                             <Link href="/login" className="text-zinc-300 hover:text-white font-bold underline decoration-white/10">
-                                Sign in
+                                {t('signup.login')}
                             </Link>
                         </p>
                         <Link href="/legal/terms" className="text-zinc-700 text-[9px] font-inter hover:text-zinc-500 transition-colors">

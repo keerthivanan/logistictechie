@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, ArrowRight, Loader2, Ship, Zap, CheckCircle2, Clock, Package, MessageSquare } from 'lucide-react'
+import { Search, ArrowRight, Ship, Zap, CheckCircle2, Clock, Package, MessageSquare } from 'lucide-react'
+import { PageSpinner, Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/config'
 import { useAuth } from '@/context/AuthContext'
@@ -101,10 +102,7 @@ export default function ShipmentsPage() {
 
     if (loading || authLoading) {
         return (
-            <div className="h-full flex flex-col items-center justify-center gap-3">
-                <Loader2 className="w-5 h-5 animate-spin text-white/20" />
-                <p className="text-xs text-zinc-600">Loading shipments...</p>
-            </div>
+            <PageSpinner />
         )
     }
 
@@ -191,7 +189,7 @@ export default function ShipmentsPage() {
                                             <div className="min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <span className="text-xs font-mono font-bold text-white">{req.request_id}</span>
-                                                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                                    <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                                                         isBooked
                                                             ? 'bg-emerald-500/10 text-emerald-400'
                                                             : quotes.length >= 3
@@ -219,7 +217,7 @@ export default function ShipmentsPage() {
                                             </span>
                                             <Link
                                                 href={`/marketplace/${req.request_id}`}
-                                                className="text-[9px] font-black text-zinc-600 hover:text-white uppercase tracking-widest border border-white/5 px-2.5 py-1.5 rounded-lg hover:border-white/20 transition-all"
+                                                className="text-[9px] font-semibold text-zinc-600 hover:text-white uppercase tracking-widest border border-white/5 px-2.5 py-1.5 rounded-lg hover:border-white/20 transition-all"
                                             >
                                                 Full View
                                             </Link>
@@ -229,7 +227,7 @@ export default function ShipmentsPage() {
                                     {/* Quotes Section */}
                                     {quotes.length === 0 ? (
                                         <div className="px-5 py-6 flex items-center gap-4 text-center justify-center">
-                                            <Loader2 className="w-4 h-4 animate-spin text-zinc-700 flex-shrink-0" />
+                                            <Spinner size="sm" className="flex-shrink-0" />
                                             <div className="text-left">
                                                 <p className="text-xs font-bold text-zinc-500 font-inter">Waiting for forwarder quotes</p>
                                                 <p className="text-[10px] text-zinc-700 font-inter mt-0.5">Quotes will appear here as forwarders respond.</p>
@@ -258,7 +256,7 @@ export default function ShipmentsPage() {
                                                     >
                                                         {/* Rank */}
                                                         <div className="flex-shrink-0">
-                                                            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/5 flex items-center justify-center text-[10px] font-black text-zinc-500 font-mono">
+                                                            <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/5 flex items-center justify-center text-[10px] font-semibold text-zinc-500 font-mono">
                                                                 0{qIdx + 1}
                                                             </div>
                                                         </div>
@@ -266,19 +264,19 @@ export default function ShipmentsPage() {
                                                         {/* Info */}
                                                         <div className="flex-1 min-w-0 space-y-1.5">
                                                             <div className="flex flex-wrap items-center gap-2">
-                                                                <span className="text-sm font-black text-white font-outfit">{quote.forwarder_company}</span>
+                                                                <span className="text-sm font-semibold text-white font-outfit">{quote.forwarder_company}</span>
                                                                 {quote.carrier && (
                                                                     <span className="text-[9px] font-bold bg-white/5 text-zinc-500 px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-widest">
                                                                         {quote.carrier}
                                                                     </span>
                                                                 )}
                                                                 {isBest && !isBooked && (
-                                                                    <span className="text-[9px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                                    <span className="text-[9px] font-semibold bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                                                                         Best Price
                                                                     </span>
                                                                 )}
                                                                 {isFastest && !isBooked && (
-                                                                    <span className="text-[9px] font-black bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                                    <span className="text-[9px] font-semibold bg-blue-500 text-white px-2 py-0.5 rounded-full uppercase tracking-widest">
                                                                         Fastest
                                                                     </span>
                                                                 )}
@@ -300,7 +298,7 @@ export default function ShipmentsPage() {
                                                         {/* Price + Book */}
                                                         <div className="flex items-center gap-4 flex-shrink-0">
                                                             <div className="text-right">
-                                                                <p className="text-lg font-black font-mono text-white leading-none">
+                                                                <p className="text-lg font-semibold font-mono text-white leading-none">
                                                                     {quote.currency} {Number(quote.total_price).toLocaleString()}
                                                                 </p>
                                                                 <p className="text-[9px] text-zinc-600 font-inter mt-0.5">all-in</p>
@@ -309,12 +307,12 @@ export default function ShipmentsPage() {
                                                             {isBooked ? (
                                                                 <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
                                                                     <CheckCircle2 className="w-3.5 h-3.5" />
-                                                                    <span className="text-[9px] font-black uppercase tracking-widest">Booked</span>
+                                                                    <span className="text-[9px] font-semibold uppercase tracking-widest">Booked</span>
                                                                 </div>
                                                             ) : (
                                                                 <button
                                                                     onClick={() => openChat(quote, req)}
-                                                                    className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
+                                                                    className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
                                                                 >
                                                                     <MessageSquare className="w-3 h-3" /> Chat
                                                                 </button>

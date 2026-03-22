@@ -140,19 +140,6 @@ export default function SettingsPage() {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Avatar URL</label>
-                                <div className="relative">
-                                    <Image className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
-                                    <input
-                                        type="url"
-                                        value={avatarUrl}
-                                        onChange={e => setAvatarUrl(e.target.value)}
-                                        placeholder="https://example.com/photo.jpg"
-                                        className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder-zinc-700 focus:border-white/20 outline-none transition-colors"
-                                    />
-                                </div>
-                            </div>
                         </div>
 
                         {profileMsg && (

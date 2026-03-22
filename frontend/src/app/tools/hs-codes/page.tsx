@@ -5,10 +5,12 @@ import Navbar from '@/components/layout/Navbar'
 import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 const QUICK_SEARCHES = ['smartphone', 'cotton shirt', 'steel plates', 'laptop', 'tyre', 'battery', 'furniture', 'coffee']
 
 export default function HSCodesPage() {
+    const t = useT()
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<any[]>([])
     const [hasSearched, setHasSearched] = useState(false)
@@ -67,9 +69,9 @@ export default function HSCodesPage() {
             {/* ─── HERO ─── */}
             <section className="relative bg-black min-h-screen flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] font-inter mb-8">CargoLink Tools</p>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-outfit uppercase mb-12 leading-[1.1] text-white max-w-4xl">
-                        HS Code Discovery
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-80 mb-8" />
+                    <h1 className="text-4xl md:text-5xl font-semibold tracking-tight font-outfit mb-12 leading-[1.1] text-white max-w-4xl">
+                        {t('tools.hs.title')}
                     </h1>
 
                     {/* Stats row */}
@@ -80,7 +82,7 @@ export default function HSCodesPage() {
                             { value: '99.9%', label: 'Accuracy' },
                         ].map((s) => (
                             <div key={s.label} className="flex flex-col gap-1">
-                                <div className="text-3xl md:text-4xl font-bold text-white tracking-tighter">{s.value}</div>
+                                <div className="text-2xl font-semibold text-white tracking-tight">{s.value}</div>
                                 <div className="text-[10px] text-zinc-500 uppercase tracking-[0.2em] font-bold">{s.label}</div>
                             </div>
                         ))}
@@ -120,7 +122,7 @@ export default function HSCodesPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid md:grid-cols-2 gap-20 mb-20 items-start">
                         <div className="space-y-8">
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Stop paying for <br /> wrong codes.</h2>
+                            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Stop paying for <br /> wrong codes.</h2>
                             <p className="text-lg text-zinc-400 leading-relaxed max-w-xl">
                                 Incorrect HS classification costs the industry $4B+ annually in overpaid duties and compliance penalties. Our keyword-scoring engine searches a curated database of 38 major product categories and ranks results by relevance — giving you the right 6-digit code with a confidence score.
                             </p>
@@ -129,7 +131,7 @@ export default function HSCodesPage() {
                                     { label: 'Taxonomy Structure', items: ['Chapter (2-digit)', 'Heading (4-digit)', 'Subheading (6-digit)', 'National Code (8–10 digit)'] },
                                 ].map(block => (
                                     <div key={block.label}>
-                                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] font-inter mb-3">{block.label}</p>
+                                        <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.2em] font-inter mb-3">{block.label}</p>
                                         <div className="space-y-2">
                                             {block.items.map((item, i) => (
                                                 <div key={i} className="flex items-center gap-3">
@@ -220,7 +222,7 @@ export default function HSCodesPage() {
             {/* ─── BOTTOM CTA ─── */}
             <section className="py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to clear customs faster?</h2>
+                    <h2 className="text-3xl md:text-4xl font-semibold mb-8">Ready to clear customs faster?</h2>
                     <p className="text-xl text-zinc-400 mb-10">
                         Join 2,000+ shippers using CargoLink&apos;s AI customs engine for zero-friction border crossings.
                     </p>

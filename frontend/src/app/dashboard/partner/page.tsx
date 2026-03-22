@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { apiFetch, API_URL } from '@/lib/config'
+import { apiFetch } from '@/lib/config'
 import {
     Search, Package, TrendingUp, CheckCircle2,
     ArrowRight, Clock, AlertCircle, Star,
     DollarSign, Ship, Truck, Info, Loader2,
     Zap, X
 } from 'lucide-react'
+import { Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
 
 interface Quote {
@@ -47,8 +48,8 @@ export default function PartnerDashboard() {
         const fwdId = user.sovereign_id
 
         try {
-            const res = await fetch(
-                `${API_URL}/api/forwarders/portal-dashboard/${fwdId}?email=${encodeURIComponent(user.email)}`,
+            const res = await apiFetch(
+                `/api/forwarders/portal-dashboard/${fwdId}?email=${encodeURIComponent(user.email)}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             if (res.ok) {
@@ -233,7 +234,7 @@ export default function PartnerDashboard() {
                     <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
                         {loading ? (
                             <div className="h-full flex items-center justify-center">
-                                <Loader2 className="w-5 h-5 animate-spin text-white/10" />
+                                <Spinner size="sm" />
                             </div>
                         ) : filtered.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center gap-3 py-16 opacity-30">

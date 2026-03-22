@@ -1,54 +1,56 @@
+'use client'
 import Link from 'next/link'
-import { Mail, Globe, Twitter, Linkedin } from 'lucide-react'
-
-const columns = [
-    {
-        heading: 'Product',
-        links: [
-            { label: 'Shipper Portal', href: '/search' },
-            { label: 'AI Quoting', href: '/marketplace' },
-            { label: 'Carrier Partners', href: '/carriers' },
-            { label: 'Enterprise', href: '/services/coming-soon' },
-            { label: 'Live Demo', href: '/demo' },
-        ],
-    },
-    {
-        heading: 'Features',
-        links: [
-            { label: 'Search Rates', href: '/search' },
-            { label: 'Dashboard', href: '/dashboard' },
-            { label: 'Freight Calculator', href: '/tools/calculator' },
-            { label: 'HS Codes', href: '/tools/hs-codes' },
-            { label: 'Shipment Tracking', href: '/tracking' },
-        ],
-    },
-    {
-        heading: 'Company',
-        links: [
-            { label: 'About Us', href: '/about' },
-            { label: 'Contact', href: '/contact' },
-            { label: 'Carriers', href: '/carriers' },
-        ],
-    },
-    {
-        heading: 'Resources',
-        links: [
-            { label: 'Help Center', href: '/help' },
-            { label: 'API Docs', href: '/services/coming-soon' },
-            { label: 'Become a Partner', href: '/forwarders/register' },
-        ],
-    },
-    {
-        heading: 'Legal',
-        links: [
-            { label: 'Privacy Policy', href: '/legal/privacy' },
-            { label: 'Terms of Service', href: '/legal/terms' },
-            { label: 'Cookie Policy', href: '/legal/cookies' },
-        ],
-    },
-]
+import { Mail, Globe, Linkedin } from 'lucide-react'
+import { useT } from '@/lib/i18n/t'
 
 export default function Footer() {
+    const t = useT()
+
+    const columns = [
+        {
+            heading: t('footer.product'),
+            links: [
+                { label: 'Shipper Portal', href: '/search' },
+                { label: 'Marketplace', href: '/marketplace' },
+                { label: 'Carrier Partners', href: '/carriers' },
+                { label: 'Enterprise', href: '/services/coming-soon' },
+                { label: 'Forwarder Portal', href: '/forwarders' },
+            ],
+        },
+        {
+            heading: t('footer.features'),
+            links: [
+                { label: 'Search Rates', href: '/search' },
+                { label: 'Dashboard', href: '/dashboard' },
+                { label: 'Freight Calculator', href: '/tools/calculator' },
+                { label: 'HS Codes', href: '/tools/hs-codes' },
+                { label: 'Shipment Tracking', href: '/tracking' },
+            ],
+        },
+        {
+            heading: t('footer.company'),
+            links: [
+                { label: 'About Us', href: '/about' },
+                { label: 'Contact', href: '/contact' },
+                { label: 'Carriers', href: '/carriers' },
+            ],
+        },
+        {
+            heading: t('footer.resources'),
+            links: [
+                { label: 'Help Center', href: '/help' },
+                { label: 'Become a Partner', href: '/forwarders/register' },
+            ],
+        },
+        {
+            heading: t('footer.legal'),
+            links: [
+                { label: 'Privacy Policy', href: '/legal/privacy' },
+                { label: 'Terms of Service', href: '/legal/terms' },
+                { label: 'Cookie Policy', href: '/legal/cookies' },
+            ],
+        },
+    ]
     return (
         <footer className="bg-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,15 +58,11 @@ export default function Footer() {
                 {/* Top — brand + tagline, centered */}
                 <div className="py-16 flex flex-col items-center text-center">
                     {/* Logo — matches Navbar */}
-                    <Link href="/" className="flex items-center gap-2.5 mb-4">
-                        <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center shrink-0">
-                            <span className="text-black text-xs font-black font-inter">C</span>
-                        </div>
-                        <span className="text-sm font-black tracking-widest text-white font-outfit">CARGOLINK</span>
+                    <Link href="/" className="flex items-center mb-4 group">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-36 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     <p className="text-sm text-zinc-500 font-inter max-w-md leading-relaxed">
-                        The intelligent freight marketplace connecting shippers and forwarders globally.
-                        Move cargo smarter, faster, and with full transparency.
+                        {t('footer.tagline')}
                     </p>
                 </div>
 
@@ -72,7 +70,7 @@ export default function Footer() {
                 <div className="py-14 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 border-b border-white/[0.05]">
                     {columns.map((col) => (
                         <div key={col.heading}>
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em] font-inter mb-5">
+                            <h4 className="text-[10px] font-semibold text-white uppercase tracking-[0.2em] font-inter mb-5">
                                 {col.heading}
                             </h4>
                             <ul className="space-y-3">
@@ -94,7 +92,7 @@ export default function Footer() {
                 {/* Bottom — copyright + socials */}
                 <div className="py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-xs text-zinc-600 font-inter">
-                        © 2025–2026 CargoLink Technologies. All rights reserved.
+                        © 2025–2026 CargoLink Technologies. {t('footer.rights')}
                     </p>
 
                     <div className="flex items-center gap-4">
@@ -105,7 +103,7 @@ export default function Footer() {
                             aria-label="Twitter"
                             className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
                         >
-                            <Twitter className="w-3.5 h-3.5" />
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.626 5.905-5.626zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                         </a>
                         <a
                             href="https://linkedin.com"

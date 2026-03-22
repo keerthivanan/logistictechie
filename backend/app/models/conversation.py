@@ -37,9 +37,16 @@ class Conversation(Base):
     status = Column(String, default="OPEN", index=True)
     booking_id = Column(String, nullable=True)
 
+    # Tracks who made the current pending offer: 'SHIPPER' | 'FORWARDER' | None
+    offer_side = Column(String, nullable=True)
+
     # Mutual close flags — both must be True for status to become CLOSED (off-platform deal)
     shipper_close_req = Column(Boolean, default=False, nullable=False)
     forwarder_close_req = Column(Boolean, default=False, nullable=False)
+
+    # Last seen — updated on every message poll. Used to show Online / Last seen X min ago
+    shipper_last_seen = Column(DateTime, nullable=True)
+    forwarder_last_seen = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)

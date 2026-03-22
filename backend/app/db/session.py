@@ -9,11 +9,12 @@ from app.core.config import settings
 # This requires DATABASE_URL to be set in .env
 # Example: postgresql+asyncpg://user:password@localhost/logistics_db
 
-DATABASE_URL = settings.DATABASE_URL
+_raw_url = settings.DATABASE_URL
 
-# Critical for Windows + Neon SSL stability
-# asyncpg on Windows requires explicit SSLContext, not string "require"
-_is_neon = "neon.tech" in DATABASE_URL
+# Critical for NeonDB + asyncpg: strip ?ssl=require from URL (handled via connect_args below)
+# asyncpg raises "duplicate SSL arguments" if ssl appears in both the URL and connect_args
+_is_neon = "neon.tech" in _raw_url
+DATABASE_URL = _raw_url.split("?")[0] if _is_neon else _raw_url
 
 _connect_args = {}
 if _is_neon:
@@ -23,7 +24,7 @@ if _is_neon:
     _connect_args = {
         "ssl": ctx,
         "command_timeout": 30,
-        "server_settings": {"application_name": "cargolink_backend"}
+        "server_settings": {"application_name": "cargolink_backend"},
     }
 
 engine = create_async_engine(

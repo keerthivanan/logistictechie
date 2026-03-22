@@ -7,8 +7,12 @@ import { apiFetch } from '@/lib/config'
 import Prism from '@/components/visuals/Prism'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useAuth } from '@/context/AuthContext'
+import { Loader2 } from 'lucide-react'
+import { FullPageSpinner } from '@/components/ui/Spinner'
+import { useT } from '@/lib/i18n/t'
 
 function LoginContent() {
+    const t = useT()
     const { login } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -98,8 +102,9 @@ function LoginContent() {
         setError('')
         if (!signupName.trim()) { setError('Full name is required.'); return }
         if (!signupEmail.trim()) { setError('Email is required.'); return }
-        if (signupPassword.length < 8) { setError('Password must be at least 8 characters.'); return }
+        if (signupPassword.length < 10) { setError('Password must be at least 10 characters.'); return }
         if (!/[A-Z]/.test(signupPassword) || !/[a-z]/.test(signupPassword) || !/[0-9]/.test(signupPassword)) { setError('Password must contain uppercase, lowercase, and a number.'); return }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/.test(signupPassword)) { setError('Password must contain at least one special character (e.g. !@#$%).'); return }
         if (signupPassword !== signupConfirm) { setError('Passwords do not match.'); return }
 
         setIsLoading(true)
@@ -148,7 +153,7 @@ function LoginContent() {
     }
 
     return (
-        <div className="min-h-screen bg-[#000000] text-white selection:bg-white selection:text-black flex items-center justify-center relative overflow-hidden">
+        <div className="h-screen bg-[#000000] text-white selection:bg-white selection:text-black flex items-center justify-center relative overflow-hidden">
             <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
                 <Prism />
             </div>
@@ -157,19 +162,14 @@ function LoginContent() {
             <div className="w-full max-w-sm p-8 relative z-10">
                 {/* Logo */}
                 <div className="text-center mb-10">
-                    <Link href="/" className="inline-flex items-center space-x-2 group mb-8">
-                        <div className="flex items-center space-x-1">
-                            <div className="w-1.5 h-4 bg-white rounded-sm" />
-                            <div className="w-1.5 h-4 bg-white/70 rounded-sm" />
-                            <div className="w-1.5 h-4 bg-white/40 rounded-sm" />
-                        </div>
-                        <span className="text-2xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
+                    <Link href="/" className="inline-flex items-center group mb-8">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-16 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">
-                        {mode === 'login' ? 'Sign In' : 'Create Account'}
+                        {mode === 'login' ? t('login.cta') : t('signup.cta')}
                     </h1>
                     <p className="text-zinc-500 font-medium font-inter text-xs">
-                        {mode === 'login' ? 'Access the global freight network.' : 'Join the CargoLink platform.'}
+                        {mode === 'login' ? t('login.sub') : t('signup.sub')}
                     </p>
                 </div>
 
@@ -199,7 +199,7 @@ function LoginContent() {
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
                         <span className="font-bold text-black text-xs uppercase tracking-[0.15em] font-inter">
-                            {isLoading ? 'Connecting...' : `Continue with Google`}
+                            {isLoading ? 'Connecting...' : t('login.google')}
                         </span>
                     </button>
 
@@ -215,7 +215,7 @@ function LoginContent() {
                         <form onSubmit={handleLogin} className="space-y-3">
                             <input
                                 type="email"
-                                placeholder="Email address"
+                                placeholder={t('login.email')}
                                 value={loginEmail}
                                 onChange={e => setLoginEmail(e.target.value)}
                                 required
@@ -223,7 +223,7 @@ function LoginContent() {
                             />
                             <input
                                 type="password"
-                                placeholder="Password"
+                                placeholder={t('login.password')}
                                 value={loginPassword}
                                 onChange={e => setLoginPassword(e.target.value)}
                                 required
@@ -234,8 +234,13 @@ function LoginContent() {
                                 disabled={isLoading}
                                 className="w-full py-3.5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.15em] font-inter hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 mt-1"
                             >
-                                {isLoading ? 'Signing In...' : 'Sign In'}
+                                {isLoading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-2" />{t('login.loading')}</> : t('login.cta')}
                             </button>
+                            <p className="text-center">
+                                <Link href="/forgot-password" className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors font-inter">
+                                    {t('login.forgot')}
+                                </Link>
+                            </p>
                         </form>
                     )}
 
@@ -244,7 +249,7 @@ function LoginContent() {
                         <form onSubmit={handleSignup} className="space-y-3">
                             <input
                                 type="text"
-                                placeholder="Full name"
+                                placeholder={t('signup.name')}
                                 value={signupName}
                                 onChange={e => setSignupName(e.target.value)}
                                 required
@@ -252,7 +257,7 @@ function LoginContent() {
                             />
                             <input
                                 type="email"
-                                placeholder="Email address"
+                                placeholder={t('signup.email')}
                                 value={signupEmail}
                                 onChange={e => setSignupEmail(e.target.value)}
                                 required
@@ -260,7 +265,7 @@ function LoginContent() {
                             />
                             <input
                                 type="password"
-                                placeholder="Password (min 8 characters)"
+                                placeholder="Password (min 10 chars, include !@#$%)"
                                 value={signupPassword}
                                 onChange={e => setSignupPassword(e.target.value)}
                                 required
@@ -279,7 +284,7 @@ function LoginContent() {
                                 disabled={isLoading}
                                 className="w-full py-3.5 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-[0.15em] font-inter hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 mt-1"
                             >
-                                {isLoading ? 'Creating Account...' : 'Create Account'}
+                                {isLoading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-2" />{t('signup.loading')}</> : t('signup.cta')}
                             </button>
                         </form>
                     )}
@@ -288,16 +293,16 @@ function LoginContent() {
                     <div className="mt-6 text-center">
                         {mode === 'login' ? (
                             <p className="text-zinc-600 text-[10px] font-inter">
-                                No account?{' '}
+                                {t('login.no.account')}{' '}
                                 <Link href="/signup" className="text-zinc-300 hover:text-white transition-colors font-bold underline decoration-white/10">
-                                    Create one
+                                    {t('login.signup')}
                                 </Link>
                             </p>
                         ) : (
                             <p className="text-zinc-600 text-[10px] font-inter">
-                                Already have an account?{' '}
+                                {t('signup.have.account')}{' '}
                                 <button onClick={() => switchMode('login')} className="text-zinc-300 hover:text-white transition-colors font-bold underline decoration-white/10">
-                                    Sign in
+                                    {t('signup.login')}
                                 </button>
                             </p>
                         )}
@@ -318,7 +323,7 @@ function LoginContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white text-xs font-inter uppercase tracking-widest">Initializing Secure Link...</div>}>
+        <Suspense fallback={<FullPageSpinner />}>
             <LoginContent />
         </Suspense>
     )

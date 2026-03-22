@@ -7,6 +7,7 @@ import {
     Scale, Calendar, Building2, ArrowRight, Plus, CheckCircle2
 } from 'lucide-react'
 import { apiFetch } from '@/lib/config'
+import { Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
 
 interface Quotation {
@@ -122,7 +123,7 @@ export default function OpenRequestsPanel() {
                 </div>
                 <Link
                     href="/search"
-                    className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors"
+                    className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-colors"
                 >
                     <Plus className="w-3 h-3" /> New
                 </Link>
@@ -151,7 +152,7 @@ export default function OpenRequestsPanel() {
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                 {loading ? (
                     <div className="flex items-center justify-center h-32">
-                        <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                        <Spinner size="sm" />
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center h-32 gap-2">
@@ -209,7 +210,7 @@ function RequestAccordion({
                 {/* Route + cargo */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-xs font-black text-white font-outfit uppercase tracking-tight truncate">
+                        <p className="text-xs font-semibold text-white font-outfit uppercase tracking-tight truncate">
                             {request.origin} → {request.destination}
                         </p>
                         {isOpen ? (
@@ -227,7 +228,7 @@ function RequestAccordion({
                 <div className="flex items-center gap-3 flex-shrink-0">
                     {request.quotation_count > 0 && (
                         <div className="text-right">
-                            <p className="text-sm font-black text-white font-inter leading-none">{request.quotation_count}</p>
+                            <p className="text-sm font-semibold text-white font-inter leading-none">{request.quotation_count}</p>
                             <p className="text-[9px] text-zinc-600 font-inter uppercase tracking-widest">quotes</p>
                         </div>
                     )}
@@ -322,7 +323,7 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
             {/* Top row: rank + company + price */}
             <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`text-[9px] font-black font-mono flex-shrink-0 w-5 text-center py-0.5 rounded ${isBest ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-700'}`}>
+                    <span className={`text-[9px] font-semibold font-mono flex-shrink-0 w-5 text-center py-0.5 rounded ${isBest ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-700'}`}>
                         {String(rank).padStart(2, '0')}
                     </span>
                     <div className="w-6 h-6 bg-white/[0.03] border border-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
@@ -330,9 +331,9 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                            <p className="text-xs font-black text-white font-inter truncate">{quote.forwarder_company}</p>
+                            <p className="text-xs font-semibold text-white font-inter truncate">{quote.forwarder_company}</p>
                             {isBest && (
-                                <span className="flex-shrink-0 text-[8px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">Best</span>
+                                <span className="flex-shrink-0 text-[8px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">Best</span>
                             )}
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
@@ -344,7 +345,7 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                     </div>
                 </div>
                 <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                    <p className={`text-sm font-black font-inter leading-none ${isBest ? 'text-emerald-400' : 'text-white'}`}>
+                    <p className={`text-sm font-semibold font-inter leading-none ${isBest ? 'text-emerald-400' : 'text-white'}`}>
                         ${quote.total_price.toLocaleString()}
                     </p>
                     <p className="text-[9px] text-zinc-600 font-inter uppercase">{quote.currency}</p>

@@ -43,6 +43,9 @@ class MarketplaceRequest(Base):
     container_count = Column(Integer, nullable=True)
     container_type = Column(String, nullable=True)
     vessel = Column(String, nullable=True) # Preferred Vessel (IMO or Name)
+    origin_locode = Column(String, nullable=True)      # UNLOCODE e.g. "CNSHA"
+    destination_locode = Column(String, nullable=True) # UNLOCODE e.g. "USLAX"
+    hs_code = Column(String, nullable=True)            # Harmonized System code
     special_requirements = Column(String) # Column J
     incoterms = Column(String, index=True) # Column K
     currency = Column(String, default="USD") # Column L

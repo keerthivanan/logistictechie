@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 import { Loader2, Send, CheckCircle2, X, ArrowLeft } from 'lucide-react'
+import { FullPageSpinner } from '@/components/ui/Spinner'
 
 interface Message {
     id: number
@@ -26,8 +27,20 @@ interface ConvMeta {
     currency: string
     status: string
     booking_id: string | null
+    offer_side: 'SHIPPER' | 'FORWARDER' | null
     shipper_close_req: boolean
     forwarder_close_req: boolean
+    shipper_last_seen: string | null
+    forwarder_last_seen: string | null
+}
+
+function lastSeenLabel(isoString: string | null): string {
+    if (!isoString) return 'Not yet active'
+    const diff = Math.floor((Date.now() - new Date(isoString + 'Z').getTime()) / 1000)
+    if (diff < 30) return 'Online now'
+    if (diff < 3600) return `Last seen ${Math.floor(diff / 60)}m ago`
+    if (diff < 86400) return `Last seen ${Math.floor(diff / 3600)}h ago`
+    return `Last seen ${Math.floor(diff / 86400)}d ago`
 }
 
 type Tab = 'chat' | 'offer'
@@ -37,8 +50,13 @@ export default function ChatPage() {
     const { user, loading: authLoading } = useAuth()
     const router = useRouter()
 
-    const [conv, setConv] = useState<ConvMeta | null>(null)
-    const [messages, setMessages] = useState<Message[]>([])
+    // Initialize from sessionStorage so return visits are instant (no blank spinner)
+    const [conv, setConv] = useState<ConvMeta | null>(() => {
+        try { return JSON.parse(sessionStorage.getItem(`chat_conv_${id}`) || 'null') } catch { return null }
+    })
+    const [messages, setMessages] = useState<Message[]>(() => {
+        try { return JSON.parse(sessionStorage.getItem(`chat_msgs_${id}`) || '[]') } catch { return [] }
+    })
     const [loading, setLoading] = useState(true)
     const [tab, setTab] = useState<Tab>('chat')
     const [text, setText] = useState('')
@@ -61,6 +79,11 @@ export default function ChatPage() {
             const data = await res.json()
             setConv(data.conversation)
             setMessages(data.messages)
+            // Cache for instant revisit
+            try {
+                sessionStorage.setItem(`chat_conv_${id}`, JSON.stringify(data.conversation))
+                sessionStorage.setItem(`chat_msgs_${id}`, JSON.stringify(data.messages))
+            } catch {}
         } catch {
             // silent poll failure
         } finally {
@@ -68,11 +91,11 @@ export default function ChatPage() {
         }
     }, [id])
 
-    // Initial load + 1-second polling
+    // Initial load + polling every 3 seconds
     useEffect(() => {
         if (authLoading || !user) return
         fetchMessages()
-        const interval = setInterval(fetchMessages, 1000)
+        const interval = setInterval(fetchMessages, 3000)
         return () => clearInterval(interval)
     }, [fetchMessages, authLoading, user])
 
@@ -172,6 +195,27 @@ export default function ChatPage() {
         }
     }
 
+    const acceptCounter = async () => {
+        if (sending) return
+        setSending(true)
+        setError('')
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch(`/api/conversations/${id}/accept-counter`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            if (!res.ok) {
+                const data = await res.json()
+                setError(data.detail || 'Failed to accept counter.')
+            }
+        } catch {
+            setError('Failed to accept counter.')
+        } finally {
+            setSending(false)
+        }
+    }
+
     const confirmBooking = async () => {
         if (sending) return
         setSending(true)
@@ -195,33 +239,48 @@ export default function ChatPage() {
         }
     }
 
-    // OLX-style offer chips: 0%, -5%, -10%, -15%, -20%
+    // Returns a clean step size based on price magnitude (1% of price, rounded to a nice number)
+    const getPriceStep = (price: number) => {
+        const raw = price * 0.01
+        const mag = Math.pow(10, Math.floor(Math.log10(raw)))
+        const n = raw / mag
+        const nice = n < 1.5 ? 1 : n < 3.5 ? 2.5 : n < 7.5 ? 5 : 10
+        return nice * mag
+    }
+
+    // OLX-style chips: actual prices going DOWN from reference (capped at floor)
     const getOfferChips = () => {
         if (!conv) return []
         const floor = conv.original_price * 0.80
-        return [
-            { label: 'Quoted', value: conv.original_price, pct: 0 },
-            { label: '-5%', value: Math.floor(conv.original_price * 0.95), pct: 5 },
-            { label: '-10%', value: Math.floor(conv.original_price * 0.90), pct: 10 },
-            { label: '-15%', value: Math.floor(conv.original_price * 0.85), pct: 15 },
-            { label: '-20%', value: Math.ceil(floor), pct: 20 },
-        ]
+        const step = getPriceStep(conv.original_price)
+        const chips: number[] = []
+        let price = conv.original_price - step
+        while (chips.length < 5 && price >= floor) {
+            chips.push(Math.round(price / step) * step)
+            price -= step
+        }
+        return chips
     }
 
+    // Feedback shown under the price input
     const getOfferFeedback = () => {
         if (!conv || !offerAmount) return null
         const amount = parseFloat(offerAmount)
         const floor = conv.original_price * 0.80
-        if (isNaN(amount) || amount < floor) return { text: 'Too low — minimum is ' + conv.currency + ' ' + Math.ceil(floor).toLocaleString(), color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' }
+        if (isNaN(amount) || amount <= 0) return null
+        if (amount >= conv.original_price) return { text: 'Must be less than the quoted price', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' }
+        if (amount < floor) return { text: `Too low — minimum is ${conv.currency} ${Math.ceil(floor).toLocaleString()}`, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' }
         const pct = ((conv.original_price - amount) / conv.original_price) * 100
-        if (pct <= 5) return { text: 'Very likely to be accepted', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' }
-        if (pct <= 12) return { text: 'Good offer — forwarder may accept', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' }
+        if (pct <= 3) return { text: 'Very likely to be accepted', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' }
+        if (pct <= 10) return { text: 'Good offer — forwarder may accept', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' }
         return { text: 'Fair offer — forwarder may counter', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' }
     }
 
     const isBooked = conv?.status === 'BOOKED'
     const isClosed = conv?.status === 'CLOSED'
     const hasPendingOffer = !!conv?.current_offer && !conv?.agreed_price
+    // offer_side tells whose turn it is
+    const forwarderCountered = conv?.offer_side === 'FORWARDER' // forwarder countered, shipper must respond
     const activePriceLabel = conv?.agreed_price ? 'Agreed' : conv?.current_offer ? 'Counter Offer' : 'Quoted'
     const activePrice = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
 
@@ -229,11 +288,10 @@ export default function ChatPage() {
     const iAlreadyRequestedClose = conv?.shipper_close_req ?? false
     const otherRequestedClose = conv?.forwarder_close_req ?? false
 
-    if (loading || authLoading) {
+    // Only block render on very first load (before any data arrives)
+    if ((loading || authLoading) && !conv) {
         return (
-            <div className="h-screen bg-[#050505] flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-white/20" />
-            </div>
+            <FullPageSpinner />
         )
     }
 
@@ -257,14 +315,23 @@ export default function ChatPage() {
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-zinc-600 truncate">{user?.sovereign_id || user?.email}</span>
                         <span className="text-zinc-700">↔</span>
-                        <span className="text-sm font-black text-white font-outfit truncate">{conv.forwarder_company}</span>
+                        <span className="text-sm font-semibold text-white font-outfit truncate">{conv.forwarder_company}</span>
                     </div>
-                    <p className="text-[10px] text-zinc-700 font-mono mt-0.5">{conv.request_id}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                            conv.forwarder_last_seen && (Date.now() - new Date(conv.forwarder_last_seen + 'Z').getTime()) < 30000
+                                ? 'bg-emerald-400'
+                                : 'bg-zinc-700'
+                        }`} />
+                        <p className="text-[10px] text-zinc-600 font-mono">{lastSeenLabel(conv.forwarder_last_seen)}</p>
+                    </div>
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    isBooked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-zinc-500'
+                <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
+                    isBooked ? 'bg-emerald-500/10 text-emerald-400'
+                    : isClosed ? 'bg-zinc-800 text-zinc-500'
+                    : 'bg-white/5 text-zinc-500'
                 }`}>
-                    {isBooked ? 'Booked' : 'Open'}
+                    {isBooked ? 'Booked' : isClosed ? 'Closed' : 'Open'}
                 </span>
             </div>
 
@@ -272,8 +339,8 @@ export default function ChatPage() {
             <div className="px-4 py-3 border-b border-white/[0.04] bg-[#080808] flex-shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
-                        <p className={`text-xl font-black font-mono leading-tight ${conv.agreed_price ? 'text-emerald-400' : conv.current_offer ? 'text-amber-400' : 'text-white'}`}>
+                        <p className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
+                        <p className={`text-xl font-semibold font-mono leading-tight ${conv.agreed_price ? 'text-emerald-400' : conv.current_offer ? 'text-amber-400' : 'text-white'}`}>
                             {conv.currency} {Number(activePrice).toLocaleString()}
                         </p>
                         {conv.current_offer && !conv.agreed_price && (
@@ -289,7 +356,7 @@ export default function ChatPage() {
                             <button
                                 onClick={confirmBooking}
                                 disabled={sending}
-                                className="bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
+                                className="bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
                             >
                                 {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm Booking'}
                             </button>
@@ -303,7 +370,7 @@ export default function ChatPage() {
                                 <button
                                     onClick={closeDeal}
                                     disabled={closingDeal}
-                                    className="bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
+                                    className="bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
                                 >
                                     Forwarder wants to close. Confirm?
                                 </button>
@@ -311,7 +378,7 @@ export default function ChatPage() {
                                 <button
                                     onClick={closeDeal}
                                     disabled={closingDeal}
-                                    className="bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                                    className="bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-semibold uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
                                 >
                                     {closingDeal ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Close Deal'}
                                 </button>
@@ -323,7 +390,7 @@ export default function ChatPage() {
                 {/* Booking success banner */}
                 {bookingResult && (
                     <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-                        <p className="text-xs font-black text-emerald-400">✅ Booking Confirmed — {bookingResult.reference}</p>
+                        <p className="text-xs font-semibold text-emerald-400">✅ Booking Confirmed — {bookingResult.reference}</p>
                         <p className="text-[10px] text-emerald-300/70 mt-0.5">Forwarder: {bookingResult.forwarder_email}</p>
                     </div>
                 )}
@@ -331,7 +398,7 @@ export default function ChatPage() {
                 {/* Deal closed banner (off-platform close, not booking) */}
                 {isClosed && !isBooked && !bookingResult && (
                     <div className="mt-3 bg-zinc-800/60 border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-xs font-black text-zinc-400">Deal closed by both parties. This conversation is archived.</p>
+                        <p className="text-xs font-semibold text-zinc-400">Deal closed by both parties. This conversation is archived.</p>
                     </div>
                 )}
             </div>
@@ -350,37 +417,53 @@ export default function ChatPage() {
                         )
                     }
 
-                    // OFFER message (special card)
+                    // OFFER message — shipper's offer card (read-only for shipper, forwarder responds in their portal)
                     if (msg.message_type === 'OFFER') {
                         const isMyOffer = msg.sender_id === user?.sovereign_id
-                        const isPending = hasPendingOffer && msg.id === Math.max(...messages.filter(m => m.message_type === 'OFFER').map(m => m.id))
                         return (
                             <div key={msg.id} className={`flex ${isMyOffer ? 'justify-end' : 'justify-start'}`}>
                                 <div className="bg-[#0d0d0d] border border-white/10 rounded-2xl p-4 max-w-[260px]">
-                                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Counter Offer</p>
-                                    <p className="text-2xl font-black font-mono text-white">
+                                    <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">Your Offer</p>
+                                    <p className="text-2xl font-semibold font-mono text-white">
                                         {conv.currency} {Number(msg.offer_amount).toLocaleString()}
                                     </p>
                                     <p className="text-[9px] text-zinc-600 font-inter mt-1">
-                                        {isMyOffer ? 'Sent by you' : `From ${conv.forwarder_company}`}
+                                        {isMyOffer ? 'Waiting for forwarder response' : 'Offered by shipper'}
                                     </p>
+                                </div>
+                            </div>
+                        )
+                    }
 
-                                    {/* Forwarder sees Accept/Reject on the latest pending offer */}
-                                    {!isMyOffer && !isShipper && isPending && !isBooked && (
+                    // COUNTER_OFFER message — forwarder's counter card (shipper must respond)
+                    if (msg.message_type === 'COUNTER_OFFER') {
+                        const latestCounterId = Math.max(...messages.filter(m => m.message_type === 'COUNTER_OFFER').map(m => m.id))
+                        const isActivePending = forwarderCountered && msg.id === latestCounterId
+                        return (
+                            <div key={msg.id} className="flex justify-start">
+                                <div className="bg-[#0d0d0d] border border-amber-500/20 rounded-2xl p-4 max-w-[260px]">
+                                    <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest mb-2">Forwarder Counter</p>
+                                    <p className="text-2xl font-semibold font-mono text-white">
+                                        {conv.currency} {Number(msg.offer_amount).toLocaleString()}
+                                    </p>
+                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">{conv.forwarder_company} wants this price</p>
+
+                                    {/* Shipper: Accept counter OR counter lower (switch to offer tab) */}
+                                    {isShipper && isActivePending && !isBooked && !isClosed && (
                                         <div className="flex gap-2 mt-3">
                                             <button
-                                                onClick={() => respondOffer('ACCEPT')}
+                                                onClick={acceptCounter}
                                                 disabled={sending}
-                                                className="flex-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
+                                                className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
                                             >
                                                 Accept
                                             </button>
                                             <button
-                                                onClick={() => respondOffer('REJECT')}
+                                                onClick={() => { setTab('offer'); setOfferAmount('') }}
                                                 disabled={sending}
-                                                className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
+                                                className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
                                             >
-                                                Reject
+                                                Counter
                                             </button>
                                         </div>
                                     )}
@@ -394,7 +477,7 @@ export default function ChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-center">
                                 <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-black text-emerald-400">✅ {msg.content}</p>
+                                    <p className="text-xs font-semibold text-emerald-400">✅ {msg.content}</p>
                                 </div>
                             </div>
                         )
@@ -405,7 +488,7 @@ export default function ChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-center">
                                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-black text-red-400">❌ {msg.content}</p>
+                                    <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
                                 </div>
                             </div>
                         )
@@ -443,12 +526,12 @@ export default function ChatPage() {
             {!isBooked && !isClosed && !bookingResult && (
                 <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
 
-                    {/* Tab switcher — shipper only */}
-                    {isShipper && (
+                    {/* Tab switcher — shipper only, hidden once price is agreed */}
+                    {isShipper && !conv.agreed_price && (
                         <div className="flex border-b border-white/[0.04]">
                             <button
                                 onClick={() => setTab('chat')}
-                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`flex-1 py-3 text-[10px] font-semibold uppercase tracking-widest transition-all ${
                                     tab === 'chat' ? 'text-white border-b-2 border-white' : 'text-zinc-600 hover:text-zinc-400'
                                 }`}
                             >
@@ -456,7 +539,7 @@ export default function ChatPage() {
                             </button>
                             <button
                                 onClick={() => setTab('offer')}
-                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`flex-1 py-3 text-[10px] font-semibold uppercase tracking-widest transition-all ${
                                     tab === 'offer' ? 'text-white border-b-2 border-white' : 'text-zinc-600 hover:text-zinc-400'
                                 }`}
                             >
@@ -489,19 +572,19 @@ export default function ChatPage() {
                     {/* MAKE OFFER tab (shipper only) */}
                     {tab === 'offer' && isShipper && (
                         <div className="px-4 py-4 space-y-4">
-                            {/* Quick-select chips */}
+                            {/* Quick-select price chips */}
                             <div className="flex gap-2 overflow-x-auto pb-1">
-                                {getOfferChips().map(chip => (
+                                {getOfferChips().map(price => (
                                     <button
-                                        key={chip.pct}
-                                        onClick={() => setOfferAmount(String(chip.value))}
-                                        className={`flex-shrink-0 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-wider transition-all ${
-                                            offerAmount === String(chip.value)
+                                        key={price}
+                                        onClick={() => setOfferAmount(String(price))}
+                                        className={`flex-shrink-0 px-3 py-1.5 rounded-full border text-[10px] font-semibold font-mono tracking-wider transition-all ${
+                                            offerAmount === String(price)
                                                 ? 'bg-white text-black border-white'
                                                 : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:border-white/20 hover:text-white'
                                         }`}
                                     >
-                                        {chip.pct === 0 ? 'Original' : chip.label} · {conv.currency} {chip.value.toLocaleString()}
+                                        {price.toLocaleString()}
                                     </button>
                                 ))}
                             </div>
@@ -513,7 +596,7 @@ export default function ChatPage() {
                                     type="number"
                                     value={offerAmount}
                                     onChange={e => setOfferAmount(e.target.value)}
-                                    className="flex-1 bg-transparent text-3xl font-black font-mono text-white outline-none border-b border-white/10 focus:border-white/30 transition-colors pb-1"
+                                    className="flex-1 bg-transparent text-3xl font-semibold font-mono text-white outline-none border-b border-white/10 focus:border-white/30 transition-colors pb-1"
                                     placeholder={String(Math.floor(conv.original_price * 0.9))}
                                 />
                             </div>
@@ -534,7 +617,7 @@ export default function ChatPage() {
                             <button
                                 onClick={sendOffer}
                                 disabled={sending || !offerAmount}
-                                className="w-full bg-white text-black text-xs font-black uppercase tracking-widest py-3 rounded-xl hover:bg-zinc-200 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-2"
+                                className="w-full bg-white text-black text-xs font-semibold uppercase tracking-widest py-3 rounded-xl hover:bg-zinc-200 transition-all active:scale-95 disabled:opacity-30 flex items-center justify-center gap-2"
                             >
                                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Offer'}
                             </button>

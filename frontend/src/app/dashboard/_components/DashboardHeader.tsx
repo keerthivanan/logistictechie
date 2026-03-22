@@ -3,7 +3,7 @@
 export default function DashboardHeader({ userName }: { userName?: string }) {
     return (
         <div>
-            <h1 className="text-lg font-black tracking-tight text-white uppercase font-outfit leading-none">
+            <h1 className="text-lg font-semibold tracking-tight text-white uppercase font-outfit leading-none">
                 {userName ? `${userName}'s Dashboard` : 'Dashboard'}
             </h1>
             <div className="flex items-center gap-1.5 mt-1.5">

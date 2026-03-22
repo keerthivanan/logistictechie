@@ -51,7 +51,7 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
     return (
         <div className={`relative flex-shrink-0 overflow-hidden bg-black border border-white/10 shadow-2xl ${sizeClasses[size]} ${shapeClasses[shape]} ${className}`}>
             {/* Fallback / Initial State */}
-            <div className="absolute inset-0 flex items-center justify-center font-black text-white bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08)_0%,rgba(24,24,27,1)_100%)] shadow-inner">
+            <div className="absolute inset-0 flex items-center justify-center font-semibold text-white bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08)_0%,rgba(24,24,27,1)_100%)] shadow-inner">
                 {name ? (
                     <span className="drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{initials}</span>
                 ) : (

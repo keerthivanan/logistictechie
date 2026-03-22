@@ -8,7 +8,7 @@ import {
     BarChart3, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { apiFetch, API_URL } from '@/lib/config';
+import { apiFetch } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
 
 export default function ForwarderPortal() {
@@ -31,6 +31,13 @@ export default function ForwarderPortal() {
     const [conversations, setConversations] = useState<any[]>([]);
     const [convLoading, setConvLoading] = useState(false);
 
+    // Currency converter state
+    const [cvAmount, setCvAmount] = useState('');
+    const [cvFrom, setCvFrom] = useState('USD');
+    const [cvTo, setCvTo] = useState('EUR');
+    const [cvResult, setCvResult] = useState<string | null>(null);
+    const [cvLoading, setCvLoading] = useState(false);
+
     const switchTab = (tab: 'requests' | 'conversations' | 'performance') => {
         setActiveTab(tab);
         if (tab === 'conversations') {
@@ -44,7 +51,8 @@ export default function ForwarderPortal() {
         setConvLoading(true);
         try {
             const res = await apiFetch(
-                `/api/forwarders/conversations/list?forwarder_id=${encodeURIComponent(id)}&email=${encodeURIComponent(mail)}`
+                `/api/forwarders/conversations/list`,
+                { headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail } }
             );
             if (res.ok) {
                 const data = await res.json();
@@ -61,19 +69,18 @@ export default function ForwarderPortal() {
         if (!id) return;
         try {
             const token = localStorage.getItem('token');
-            let url: string;
-            let headers: Record<string, string> = {};
+            let res: Response;
 
             if (token && token !== 'null') {
-                url = `${API_URL}/api/forwarders/dashboard/${id}`;
-                headers = { 'Authorization': `Bearer ${token}` };
+                res = await apiFetch(`/api/forwarders/dashboard/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
             } else {
                 const storedEmail = localStorage.getItem('cl_fwd_email');
                 if (!storedEmail) return;
-                url = `${API_URL}/api/forwarders/portal-dashboard/${id}?email=${encodeURIComponent(storedEmail)}`;
+                res = await apiFetch(`/api/forwarders/portal-dashboard/${id}?email=${encodeURIComponent(storedEmail)}`);
             }
 
-            const res = await fetch(url, { headers });
             if (res.ok) {
                 const data = await res.json();
                 setDashboardData(data);
@@ -129,6 +136,23 @@ export default function ForwarderPortal() {
         e.preventDefault();
         handleAuth(forwarderId.toUpperCase(), email);
     };
+
+    useEffect(() => {
+        const amount = parseFloat(cvAmount);
+        if (!cvAmount || isNaN(amount) || amount <= 0) { setCvResult(null); return; }
+        if (cvFrom === cvTo) { setCvResult(amount.toLocaleString(undefined, { maximumFractionDigits: 2 })); return; }
+        const controller = new AbortController();
+        setCvLoading(true);
+        fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${cvFrom}&to=${cvTo}`, { signal: controller.signal })
+            .then(r => r.json())
+            .then(data => {
+                const rate = data.rates?.[cvTo];
+                setCvResult(rate != null ? Number(rate).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null);
+            })
+            .catch(() => {})
+            .finally(() => setCvLoading(false));
+        return () => controller.abort();
+    }, [cvAmount, cvFrom, cvTo]);
 
     const submitBid = async () => {
         if (!selectedRequest || !bidPrice) return;
@@ -266,7 +290,7 @@ export default function ForwarderPortal() {
                             <button
                                 key={tab}
                                 onClick={() => switchTab(tab)}
-                                className={`flex-1 relative py-2 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`flex-1 relative py-2 px-4 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${
                                     activeTab === tab ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'
                                 }`}
                             >
@@ -315,10 +339,10 @@ export default function ForwarderPortal() {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[10px] font-mono text-zinc-600">{conv.request_id}</span>
                                                 {conv.unread_count > 0 && (
-                                                    <span className="text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full">{conv.unread_count}</span>
+                                                    <span className="text-[9px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{conv.unread_count}</span>
                                                 )}
                                             </div>
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                            <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                                                 conv.status === 'BOOKED' ? 'bg-emerald-500/10 text-emerald-400'
                                                 : conv.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500'
                                                 : 'bg-white/5 text-zinc-500'
@@ -335,7 +359,7 @@ export default function ForwarderPortal() {
                                                     {conv.agreed_price ? 'Agreed' : conv.current_offer ? 'Offer' : 'Quoted'}
                                                 </p>
                                                 <p className="text-sm font-bold font-mono text-white">
-                                                    ${Number(conv.agreed_price ?? conv.current_offer ?? conv.original_price).toLocaleString()}
+                                                    {conv.currency} {Number(conv.agreed_price ?? conv.current_offer ?? conv.original_price).toLocaleString()}
                                                 </p>
                                             </div>
                                         </div>
@@ -408,7 +432,7 @@ export default function ForwarderPortal() {
                                                 <div className="text-right flex-shrink-0">
                                                     <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">Your Quote</p>
                                                     <p className={`text-sm font-bold font-mono ${quote.your_price > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
-                                                        {quote.your_price > 0 ? `$${quote.your_price.toLocaleString()}` : '—'}
+                                                        {quote.your_price > 0 ? `USD ${quote.your_price.toLocaleString()}` : '—'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -447,6 +471,41 @@ export default function ForwarderPortal() {
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                         Active
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Currency Converter */}
+                        <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <DollarSign className="w-3 h-3 text-zinc-600" />
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Currency Converter</span>
+                            </div>
+                            <div className="space-y-2">
+                                <input
+                                    type="number"
+                                    placeholder="Enter amount"
+                                    value={cvAmount}
+                                    onChange={e => setCvAmount(e.target.value)}
+                                    className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-zinc-700 outline-none focus:border-white/10 transition-colors"
+                                />
+                                <div className="flex items-center gap-2">
+                                    <select value={cvFrom} onChange={e => setCvFrom(e.target.value)} className="flex-1 bg-black border border-white/5 rounded-xl px-2 py-2 text-[11px] text-zinc-400 outline-none cursor-pointer">
+                                        {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
+                                    </select>
+                                    <ArrowRight className="w-3 h-3 text-zinc-700 flex-shrink-0" />
+                                    <select value={cvTo} onChange={e => setCvTo(e.target.value)} className="flex-1 bg-black border border-white/5 rounded-xl px-2 py-2 text-[11px] text-zinc-400 outline-none cursor-pointer">
+                                        {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
+                                    </select>
+                                </div>
+                                <div className="bg-black border border-white/[0.04] rounded-xl px-3 py-2 text-center min-h-[36px] flex items-center justify-center">
+                                    {cvLoading ? (
+                                        <span className="text-[10px] text-zinc-600">Converting...</span>
+                                    ) : cvResult ? (
+                                        <span className="text-sm font-semibold font-mono text-emerald-400">{cvTo} {cvResult}</span>
+                                    ) : (
+                                        <span className="text-[10px] text-zinc-700">Enter an amount above</span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -506,6 +565,9 @@ export default function ForwarderPortal() {
                                                 />
                                             </div>
                                         </div>
+                                        {bidError && (
+                                            <p className="text-xs text-red-400 font-inter text-center px-1">{bidError}</p>
+                                        )}
                                         <button
                                             disabled={!bidPrice || submittingBid}
                                             onClick={submitBid}

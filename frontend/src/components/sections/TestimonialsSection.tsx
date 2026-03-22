@@ -67,7 +67,7 @@ export default function TestimonialsSection() {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 text-xs font-inter mb-6">
                         <ShieldCheck className="w-3.5 h-3.5" /> Verified Customers
                     </div>
-                    <h2 className="text-3xl font-black tracking-tight font-outfit text-white mb-3">
+                    <h2 className="text-3xl font-semibold tracking-tight font-outfit text-white mb-3">
                         Trusted by freight professionals worldwide.
                     </h2>
                     <p className="text-sm text-zinc-500 font-inter max-w-xl mx-auto">
@@ -92,19 +92,19 @@ export default function TestimonialsSection() {
                             {/* Metric highlight */}
                             <div className="mb-5">
                                 <div className="inline-flex flex-col bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-2">
-                                    <span className="text-sm font-black text-white font-inter">{t.metric}</span>
+                                    <span className="text-sm font-semibold text-white font-inter">{t.metric}</span>
                                     <span className="text-[10px] text-zinc-600 font-inter uppercase tracking-widest">{t.metricLabel}</span>
                                 </div>
                             </div>
 
                             {/* Author */}
                             <div className="flex items-center gap-3 pt-4 border-t border-white/[0.05]">
-                                <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-black text-zinc-300 font-inter shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-semibold text-zinc-300 font-inter shrink-0">
                                     {t.initials}
                                 </div>
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-1.5">
-                                        <p className="text-sm font-black text-white font-inter truncate">{t.name}</p>
+                                        <p className="text-sm font-semibold text-white font-inter truncate">{t.name}</p>
                                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                                     </div>
                                     <p className="text-[11px] text-zinc-500 font-inter truncate">{t.role} · {t.company}</p>

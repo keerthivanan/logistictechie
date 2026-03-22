@@ -662,10 +662,10 @@ async def classify_hs_code(req: HSCodeRequest):
         raise HTTPException(502, "Cannot reach Maersk classification service. Check network.")
 
     if resp.status_code != 200:
-        logger.error(f"Maersk HS error: {resp.status_code} — {resp.text[:300]}")
-        raise HTTPException(502, f"Maersk returned {resp.status_code}. Please try again.")
-
-    raw = resp.json().get("commodities", [])
+        logger.warning(f"Maersk HS error: {resp.status_code} — falling back to WCO")
+        raw = []
+    else:
+        raw = resp.json().get("commodities", [])
     logger.info(f"Maersk HS: got {len(raw)} commodity groups for '{query_key}'")
 
     results = _parse_maersk_results(raw, limit=6)
@@ -674,7 +674,34 @@ async def classify_hs_code(req: HSCodeRequest):
     source = "Maersk Commodity Reference · Live"
     if not results:
         q_lower = query_key
-        wco_matches = [h for h in HS_HEADINGS if q_lower in h["name"].lower()][:6]
+        # Synonym map — common search terms → HS database keywords
+        _synonyms = {
+            "clothes": ["garment", "apparel", "clothing", "wear", "shirt", "trouser"],
+            "clothing": ["garment", "apparel", "clothing", "wear"],
+            "shirt": ["shirt", "blouse", "garment"],
+            "pants": ["trouser", "breeches", "garment"],
+            "trousers": ["trouser", "breeches", "garment"],
+            "shoes": ["footwear", "shoe", "boot", "sandal"],
+            "shoe": ["footwear", "shoe", "boot", "sandal"],
+            "phone": ["telephone", "mobile", "cellular", "handset"],
+            "mobile": ["telephone", "cellular", "handset", "mobile"],
+            "car": ["motor vehicle", "automobile", "passenger car"],
+            "tv": ["television", "monitor", "display"],
+            "computer": ["data processing", "laptop", "computer"],
+            "medicine": ["pharmaceutical", "medicament", "drug"],
+            "food": ["edible", "food preparation", "provisions"],
+            "plastic": ["plastic", "polymer", "polyethylene"],
+            "metal": ["steel", "iron", "aluminium", "metal"],
+            "wood": ["wood", "timber", "lumber"],
+            "paper": ["paper", "paperboard", "cardboard"],
+            "fruit": ["fruit", "citrus", "berry", "tropical"],
+            "vegetable": ["vegetable", "legume", "root"],
+        }
+        search_terms = _synonyms.get(q_lower, [q_lower])
+        wco_matches = [
+            h for h in HS_HEADINGS
+            if any(t in h["name"].lower() for t in search_terms)
+        ][:6]
         results = [
             {
                 "code": h["code"],

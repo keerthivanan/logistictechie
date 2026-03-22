@@ -2,11 +2,11 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AppProviders } from '@/components/AppProviders'
 import { ElevenLabsWidget } from '@/components/ElevenLabsWidget'
-import { Inter, Outfit } from 'next/font/google'
-import Script from 'next/script'
+import { Inter, Outfit, Cairo } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
+const cairo = Cairo({ subsets: ['arabic', 'latin'], variable: '--font-cairo' })
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -54,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
       <body>
         <AppProviders>
           {children}

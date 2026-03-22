@@ -2,11 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid, ForwarderBidStatus
-from app.models.forwarder import Forwarder
 from sqlalchemy import select, func
 from datetime import datetime, timezone
-import asyncio
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 from app.services.webhook import webhook_service
 from app.models.user import User
@@ -51,6 +49,9 @@ class MarketplaceSubmit(BaseModel):
     special_requirements: str = Field("", max_length=1000)
     incoterms: str = Field("FOB", max_length=10)
     currency: str = Field("USD", min_length=3, max_length=3)
+    origin_locode: Optional[str] = Field(None, max_length=10)      # UNLOCODE e.g. "CNSHA"
+    destination_locode: Optional[str] = Field(None, max_length=10) # UNLOCODE e.g. "USLAX"
+    hs_code: Optional[str] = Field(None, max_length=20)            # Harmonized System code
 
 def _safe_parse_date(val: Optional[str]):
     """Parse ISO date string safely — returns None on invalid input."""
@@ -60,10 +61,6 @@ def _safe_parse_date(val: Optional[str]):
         return datetime.fromisoformat(val.replace("Z", "+00:00")).replace(tzinfo=None)
     except (ValueError, AttributeError):
         return None
-
-def _fire_webhook(payload: dict):
-    """Fire-and-forget webhook in a background thread."""
-    asyncio.run(webhook_service.trigger_marketplace_webhook(payload))
 
 @router.post("/submit")
 @router.post("/requests/create") # n8n Guide Compatibility Alias
@@ -148,7 +145,10 @@ async def submit_request(
         "vessel": request_in.vessel,
         "special_requirements": request_in.special_requirements,
         "incoterms": request_in.incoterms,
-        "currency": request_in.currency
+        "currency": request_in.currency,
+        "origin_locode": request_in.origin_locode,
+        "destination_locode": request_in.destination_locode,
+        "hs_code": request_in.hs_code,
     }
 
     # 2. SAVE TO POSTGRESQL IMMEDIATELY (ZERO LAG DASHBOARD)
@@ -180,6 +180,9 @@ async def submit_request(
         container_type=request_in.container_type,
         surcharge_details=request_in.surcharge_details,
         vessel=request_in.vessel,
+        origin_locode=request_in.origin_locode,
+        destination_locode=request_in.destination_locode,
+        hs_code=request_in.hs_code,
         special_requirements=request_in.special_requirements,
         incoterms=request_in.incoterms,
         currency=request_in.currency,
@@ -191,6 +194,8 @@ async def submit_request(
 
     # 3. Backend fires the webhook to n8n (Intake Brain) via BackgroundTasks
     # This makes the UI "Amazing" by not waiting for n8n's internal logic.
+    # WF1 payload already includes email, name, request_id, origin, destination —
+    # add a Send Email node inside WF1 for the shipper confirmation (no separate webhook needed).
     background_tasks.add_task(webhook_service.trigger_marketplace_webhook, payload)
     
     # We use the generated ID as the source of truth

@@ -606,7 +606,7 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
         quotation_id=quotation_id,
         request_id=bid_in.request_id,
         forwarder_id=bid_in.forwarder_id,
-        forwarder_email=bid_in.email,
+        forwarder_email=fwd.email,
         forwarder_company=fwd.company_name,
         total_price=bid_in.price,
         currency="USD",
@@ -642,6 +642,19 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
         should_send_comparison = True
 
     await db.commit()
+
+    # Always send forwarder a bid confirmation email (viceversa: portal submit → Gmail confirm)
+    background_tasks.add_task(webhook_service.trigger_bid_confirmation_webhook, {
+        "forwarder_email": fwd.email,
+        "forwarder_company": fwd.company_name,
+        "forwarder_id": bid_in.forwarder_id,
+        "request_id": bid_in.request_id,
+        "origin": req.origin,
+        "destination": req.destination,
+        "price": bid_in.price,
+        "currency": "USD",
+        "submitted_at": now.isoformat(),
+    })
 
     # If 3 quotes reached via portal, notify shipper with comparison email
     if should_send_comparison:

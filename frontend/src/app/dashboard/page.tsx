@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { PageSpinner } from '@/components/ui/Spinner'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 
@@ -18,7 +18,7 @@ export default function DashboardPage() {
     const router = useRouter()
 
     const [stats, setStats] = useState<DashboardStats | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
@@ -57,22 +57,15 @@ export default function DashboardPage() {
         if (user) fetchDashboardData()
     }, [user, authLoading, router, logout])
 
-    if (loading || authLoading) {
-        return (
-            <div className="h-full flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-xs text-zinc-600">Loading...</p>
-            </div>
-        )
-    }
+    if (authLoading) return <PageSpinner />
 
     if (error) {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4 max-w-xs mx-auto text-center">
-                <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">{error}</p>
+                <p className="text-xs text-zinc-600 font-bold uppercase tracking-widest">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="text-[8px] font-black uppercase tracking-[0.2em] text-white border-b border-white px-2 py-1"
+                    className="text-xs font-semibold uppercase tracking-[0.2em] text-white border-b border-white px-2 py-1"
                 >
                     Retry
                 </button>

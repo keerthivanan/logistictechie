@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { useT } from '@/lib/i18n/t';
 import {
     Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon,
     Ship, Plane, Truck, Warehouse, FileCheck,
@@ -28,7 +30,7 @@ const navItems = [
     {
         label: 'Ecosystem',
         children: [
-            { label: 'CargoLink Marketplace', href: '/marketplace', desc: 'Live Freight Tendering', icon: Store },
+            { label: 'Marketplace', href: '/marketplace', desc: 'Live Freight Bids & Quotes', icon: Store },
             { label: 'Partner Directory', href: '/forwarders', desc: 'Global Logistics Network', icon: Users },
             { label: 'Carrier Registration', href: '/forwarders/register', desc: 'Join the CargoLink Network', icon: UserPlus },
             { label: 'Shipper Tools', href: '/search', desc: 'Search & Book Shipments', icon: SearchIcon },
@@ -63,7 +65,7 @@ function DropdownMenu({ items }: { items: typeof navItems[0]['children'] }) {
                         <child.icon className="w-3.5 h-3.5 text-zinc-500 group-hover/item:text-white transition-colors" />
                     </div>
                     <div>
-                        <div className="text-xs font-black text-zinc-300 group-hover/item:text-white transition-colors font-inter leading-tight">{child.label}</div>
+                        <div className="text-xs font-semibold text-zinc-300 group-hover/item:text-white transition-colors font-inter leading-tight">{child.label}</div>
                         <div className="text-[10px] text-zinc-600 font-inter mt-0.5">{child.desc}</div>
                     </div>
                 </Link>
@@ -79,6 +81,8 @@ export default function Navbar() {
     const { user, logout } = useAuth();
     const pathname = usePathname();
     const router = useRouter();
+    const { lang, setLang } = useLanguage();
+    const t = useT();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -87,19 +91,17 @@ export default function Navbar() {
     }, []);
 
     return (
-        <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 w-fit max-w-[calc(100vw-2rem)] ${scrolled ? 'scale-95' : 'scale-100'}`}>
-            <div className="bg-black/40 backdrop-blur-2xl border border-white/10 rounded-full px-6 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-6">
+        <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${scrolled ? 'scale-[0.97]' : 'scale-100'}`}>
+            <div className="bg-black/30 backdrop-blur-3xl border border-white/10 rounded-full px-20 h-14 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center justify-between w-max min-w-[1100px] max-w-[95vw]">
+                {/* Logo Area */}
+                <div className="w-[220px] shrink-0">
+                    <Link href="/" className="flex items-center group">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-14 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                </div>
 
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                    <div className="h-7 w-7 bg-white text-black flex items-center justify-center font-black text-sm rounded-full group-hover:bg-zinc-200 transition-all">
-                        C
-                    </div>
-                    <span className="text-sm font-black tracking-widest text-white font-outfit">CARGOLINK</span>
-                </Link>
-
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center space-x-5 whitespace-nowrap">
+                {/* Primary Nav Links */}
+                <div className="hidden md:flex flex-1 items-center justify-center gap-10 whitespace-nowrap">
 
                     {user?.role !== 'forwarder' && (
                         <>
@@ -109,8 +111,8 @@ export default function Navbar() {
                                 onMouseEnter={() => setActiveDropdown('Services')}
                                 onMouseLeave={() => setActiveDropdown(null)}
                             >
-                                <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                                    Services <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Services' ? 'rotate-180' : ''}`} />
+                                <button className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                                    {t('nav.services')} <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Services' ? 'rotate-180' : ''}`} />
                                 </button>
                                 <AnimatePresence>
                                     {activeDropdown === 'Services' && (
@@ -127,20 +129,20 @@ export default function Navbar() {
                                 </AnimatePresence>
                             </div>
 
-                            <Link href="/search" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                                Instant Search
+                            <Link href="/search" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                                {t('nav.search')}
                             </Link>
                         </>
                     )}
 
                     {user && (
-                        <Link href="/dashboard" className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${user?.role === 'forwarder' ? 'text-emerald-400 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
-                            {user?.role === 'forwarder' ? 'Partner Dashboard' : 'Dashboard'}
+                        <Link href="/dashboard" className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-emerald-400 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
+                            {user?.role === 'forwarder' ? 'Partner Dashboard' : t('nav.dashboard')}
                         </Link>
                     )}
 
                     {user?.role === 'forwarder' && (
-                        <Link href="/forwarders/portal" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
+                        <Link href="/forwarders/portal" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
                             Portal
                         </Link>
                     )}
@@ -151,8 +153,8 @@ export default function Navbar() {
                         onMouseEnter={() => setActiveDropdown('Ecosystem')}
                         onMouseLeave={() => setActiveDropdown(null)}
                     >
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Ecosystem <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Ecosystem' ? 'rotate-180' : ''}`} />
+                        <button className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            {t('nav.ecosystem')} <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Ecosystem' ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                             {activeDropdown === 'Ecosystem' && (
@@ -175,8 +177,8 @@ export default function Navbar() {
                         onMouseEnter={() => setActiveDropdown('Tools')}
                         onMouseLeave={() => setActiveDropdown(null)}
                     >
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Tools <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Tools' ? 'rotate-180' : ''}`} />
+                        <button className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            {t('nav.tools')} <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Tools' ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                             {activeDropdown === 'Tools' && (
@@ -199,8 +201,8 @@ export default function Navbar() {
                         onMouseEnter={() => setActiveDropdown('Company')}
                         onMouseLeave={() => setActiveDropdown(null)}
                     >
-                        <button className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors">
-                            Company <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Company' ? 'rotate-180' : ''}`} />
+                        <button className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            {t('nav.company')} <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Company' ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                             {activeDropdown === 'Company' && (
@@ -216,31 +218,36 @@ export default function Navbar() {
                             )}
                         </AnimatePresence>
                     </div>
-
                 </div>
 
-                {/* Right side */}
-                <div className="flex items-center gap-5 shrink-0">
+                {/* Auth & Mobile Toggle Section */}
+                <div className="flex items-center justify-end shrink-0 gap-4 pl-10">
+                    <button
+                        onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+                        className="hidden md:block text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest font-inter px-2"
+                    >
+                        {lang === 'en' ? 'عربي' : 'EN'}
+                    </button>
                     {user ? (
                         <div className="relative">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'User' ? null : 'User')}
-                                className="relative group transition-transform active:scale-95 flex items-center gap-3"
+                                className="relative group transition-transform active:scale-95 flex items-center gap-4 py-1.5"
                             >
                                 <div className="relative">
                                     <Avatar
                                         src={user.avatar_url}
                                         name={user.name}
-                                        size="sm"
-                                        className="border-white/10 group-hover:border-white/40 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+                                        size="md"
+                                        className="border-white/10 group-hover:border-white/40 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                                     />
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
                                 </div>
-                                <div className="flex flex-col items-start">
-                                    <span className="text-xs font-semibold text-white leading-none mb-0.5">{user.name ? user.name.split(' ')[0] : 'User'}</span>
-                                    <span className="text-[10px] text-zinc-500 font-mono leading-none">{user.sovereign_id || ''}</span>
+                                <div className="flex flex-col items-start translate-y-[-1px]">
+                                    <span className="text-sm font-black text-white leading-none mb-1.5 tracking-tight">{user.name ? user.name.split(' ')[0] : 'User'}</span>
+                                    <span className="text-[10px] text-zinc-500 font-mono leading-none tracking-tighter uppercase opacity-80">{user.sovereign_id || ''}</span>
                                 </div>
-                                <ChevronDown className={`w-3 h-3 text-zinc-600 transition-transform duration-300 ${activeDropdown === 'User' ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-4 h-4 text-zinc-600 transition-all duration-500 ${activeDropdown === 'User' ? 'rotate-180 text-white shadow-[0_0_10px_white]' : ''}`} />
                             </button>
 
                             <AnimatePresence>
@@ -248,37 +255,33 @@ export default function Navbar() {
                                     <>
                                         <div className="fixed inset-0 z-[-1]" onClick={() => setActiveDropdown(null)} />
                                         <motion.div
-                                            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                                            initial={{ opacity: 0, y: 10, scale: 0.96 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                                            transition={{ duration: 0.15 }}
-                                            className="absolute top-full right-0 mt-5 w-60 bg-[#0a0a0a] border border-white/[0.08] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 z-[100]"
+                                            exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                                            transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+                                            className="absolute top-full right-0 mt-4 w-52 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/[0.08] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] p-1.5 z-[100]"
                                         >
-                                            <div className="px-3 py-3 border-b border-white/[0.05] mb-1">
-                                                {user?.sovereign_id?.startsWith('REG-') ? (
-                                                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1 font-inter">CargoLink Partner</p>
-                                                ) : (
-                                                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 font-inter">CargoLink Member</p>
-                                                )}
-                                                <p className="text-xs font-bold text-white font-inter truncate">{user.name}</p>
+                                            <div className="px-3 py-2.5 border-b border-white/[0.05] mb-1">
+                                                <p className="text-xs font-semibold text-white font-inter truncate">{user.name}</p>
+                                                <p className="text-[10px] text-zinc-600 font-mono mt-0.5">{user.sovereign_id}</p>
                                             </div>
-                                            {user?.sovereign_id?.startsWith('REG-') && (
-                                                <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all group/item">
-                                                    <Store className="w-4 h-4 opacity-60 group-hover/item:opacity-100" />
+                                            {user?.role === 'forwarder' && (
+                                                <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all">
+                                                    <Store className="w-3.5 h-3.5 opacity-70" />
                                                     <span className="text-xs font-semibold font-inter">Partner Portal</span>
                                                 </Link>
                                             )}
-                                            <Link href="/profile" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group/item">
-                                                <UserIcon className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
+                                            <Link href="/profile" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all">
+                                                <UserIcon className="w-3.5 h-3.5 opacity-60" />
                                                 <span className="text-xs font-semibold font-inter">Profile</span>
                                             </Link>
-                                            <Link href="/settings" onClick={() => setActiveDropdown(null)} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group/item">
-                                                <SettingsIcon className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
+                                            <Link href="/settings" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all">
+                                                <SettingsIcon className="w-3.5 h-3.5 opacity-60" />
                                                 <span className="text-xs font-semibold font-inter">Settings</span>
                                             </Link>
-                                            <div className="h-px bg-white/[0.05] my-2 mx-2" />
-                                            <button onClick={() => { logout(); setActiveDropdown(null); }} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-red-500/10 rounded-xl text-zinc-400 hover:text-red-500 transition-all group/item">
-                                                <LogOut className="w-4 h-4 opacity-50 group-hover/item:opacity-100" />
+                                            <div className="h-px bg-white/[0.05] my-1 mx-1" />
+                                            <button onClick={() => { logout(); setActiveDropdown(null); }} className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-red-500/10 rounded-xl text-zinc-500 hover:text-red-400 transition-all">
+                                                <LogOut className="w-3.5 h-3.5 opacity-60" />
                                                 <span className="text-xs font-semibold font-inter">Sign Out</span>
                                             </button>
                                         </motion.div>
@@ -287,20 +290,20 @@ export default function Navbar() {
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-4">
-                            <Link href="/login" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">Log In</Link>
-                            <Link href="/signup" className="bg-white text-black px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]">Sign Up</Link>
+                        <div className="flex items-center justify-end gap-4">
+                            <Link href="/login" className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-300 hover:text-white transition-all duration-200 px-4 py-2 rounded-full hover:bg-white/10">{t('nav.login')}</Link>
+                            <Link href="/signup" className="bg-white text-black px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-[0.2em] hover:bg-zinc-100 transition-all duration-200 shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:shadow-[0_0_35px_rgba(255,255,255,0.35)] hover:scale-105 active:scale-95 whitespace-nowrap">{t('nav.signup')}</Link>
                         </div>
                     )}
 
-                    {/* Mobile toggle */}
-                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white">
+                    {/* Mobile menu toggle */}
+                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white hover:text-zinc-300 transition-colors ml-4">
                         {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu — full width, positioned below h-16 bar */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
@@ -312,15 +315,15 @@ export default function Navbar() {
                         <div className="px-6 py-8 space-y-6">
                             <div className="space-y-4">
                                 {user?.role !== 'forwarder' && (
-                                    <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-black text-white font-inter">Instant Search</Link>
+                                    <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">Instant Search</Link>
                                 )}
                                 {user && (
-                                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-black text-white font-inter">
+                                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">
                                         {user?.role === 'forwarder' ? 'Partner Dashboard' : 'Dashboard'}
                                     </Link>
                                 )}
                                 {user?.role === 'forwarder' && (
-                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-black text-emerald-400 font-inter">Partner Portal</Link>
+                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-emerald-400 font-inter">Partner Portal</Link>
                                 )}
                                 {user?.role !== 'forwarder' && (
                                     <>
@@ -336,14 +339,14 @@ export default function Navbar() {
                             <div className="h-px bg-white/10" />
                             {user ? (
                                 <div className="space-y-3">
-                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-black py-3 border border-white/10 rounded-xl text-sm font-inter">Profile</Link>
-                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-black py-3 border border-white/10 rounded-xl text-sm font-inter">Settings</Link>
-                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="block w-full text-center text-red-500 font-black py-3 border border-red-500/20 bg-red-500/5 rounded-xl text-sm font-inter">Sign Out</button>
+                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">Profile</Link>
+                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">Settings</Link>
+                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="block w-full text-center text-red-500 font-semibold py-3 border border-red-500/20 bg-red-500/5 rounded-xl text-sm font-inter">Sign Out</button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-black text-sm font-inter">Log In</Link>
-                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-black text-sm font-inter">Sign Up</Link>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-semibold text-sm font-inter">Log In</Link>
+                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-semibold text-sm font-inter">Sign Up</Link>
                                 </div>
                             )}
                         </div>

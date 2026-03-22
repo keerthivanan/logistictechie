@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     Search, CheckCircle2, History, ArrowUpRight,
-    Loader2, Package, FileText, Globe, Zap,
+    Package, FileText, Globe, Zap,
     LogIn, LogOut, UserPlus, User, ShieldCheck, Send, Store,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
+import { PageSpinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
 
 interface Activity {
@@ -94,42 +95,39 @@ export default function ActivityPage() {
     const router = useRouter()
     const [activities, setActivities] = useState<Activity[]>([])
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [hasMore, setHasMore] = useState(false)
+    const [offset, setOffset] = useState(0)
+    const PAGE = 50
+
+    const fetchActivities = async (currentOffset: number, append = false) => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch(`/api/dashboard/activity/full?limit=${PAGE}&offset=${currentOffset}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                const raw: Activity[] = data.activities ?? []
+                setHasMore(raw.length === PAGE)
+                setActivities(prev => append ? [...prev, ...raw] : raw)
+                setOffset(currentOffset + raw.length)
+            }
+        } catch { /* silent */ } finally {
+            setLoading(false)
+            setLoadingMore(false)
+        }
+    }
 
     useEffect(() => {
         if (!authLoading && !user) { router.push('/login'); return }
         if (!user) return
-
-        const fetch = async () => {
-            try {
-                const token = localStorage.getItem('token')
-                const res = await apiFetch(`/api/dashboard/activity/full?limit=20&offset=0`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    // Deduplicate consecutive same-action entries, keep last 6
-                    const raw: Activity[] = data.activities ?? []
-                    const deduped: Activity[] = []
-                    for (const act of raw) {
-                        const prev = deduped[deduped.length - 1]
-                        const isSame = prev && prev.action === act.action &&
-                            prev.metadata?.origin === act.metadata?.origin &&
-                            prev.metadata?.destination === act.metadata?.destination
-                        if (!isSame) deduped.push(act)
-                        if (deduped.length >= 6) break
-                    }
-                    setActivities(deduped)
-                }
-            } catch { /* silent */ } finally { setLoading(false) }
-        }
-        fetch()
+        fetchActivities(0)
     }, [user, authLoading, router])
 
     if (loading || authLoading) {
         return (
-            <div className="h-full flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-white/10" />
-            </div>
+            <PageSpinner />
         )
     }
 
@@ -138,17 +136,17 @@ export default function ActivityPage() {
 
             {/* Header */}
             <div className="border-b border-white/5 pb-4">
-                <h1 className="text-base font-black font-outfit tracking-tight text-white mb-0.5">
+                <h1 className="text-base font-semibold font-outfit tracking-tight text-white mb-0.5">
                     Activity Log
                 </h1>
-                <p className="text-xs text-zinc-600 font-inter">Your 6 most recent platform actions.</p>
+                <p className="text-xs text-zinc-600 font-inter">Every action you've taken on the platform.</p>
             </div>
 
             {/* List */}
             {activities.length === 0 ? (
                 <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl flex flex-col items-center justify-center py-16 opacity-40">
                     <History className="w-6 h-6 mb-3 text-zinc-600" />
-                    <p className="text-xs font-black uppercase tracking-widest text-zinc-600 font-inter">No activity yet</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-600 font-inter">No activity yet</p>
                 </div>
             ) : (
                 <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl divide-y divide-white/[0.04]">
@@ -163,7 +161,7 @@ export default function ActivityPage() {
 
                                 {/* Label + detail */}
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-black text-white font-inter mb-0.5">{label}</p>
+                                    <p className="text-xs font-semibold text-white font-inter mb-0.5">{label}</p>
                                     <p className="text-[11px] text-zinc-600 font-inter truncate">{getDetail(act)}</p>
                                 </div>
 
@@ -181,8 +179,19 @@ export default function ActivityPage() {
                 </div>
             )}
 
-            {/* Footer hint */}
-            <p className="text-[10px] text-zinc-800 font-inter text-center">Showing last 6 unique actions</p>
+            {/* Load More */}
+            {hasMore && (
+                <button
+                    onClick={() => { setLoadingMore(true); fetchActivities(offset, true) }}
+                    disabled={loadingMore}
+                    className="w-full py-3 text-[11px] font-semibold text-zinc-600 hover:text-white uppercase tracking-widest font-inter border border-white/[0.05] rounded-2xl hover:border-white/10 transition-all disabled:opacity-40"
+                >
+                    {loadingMore ? 'Loading...' : 'Load More'}
+                </button>
+            )}
+            {!hasMore && activities.length > 0 && (
+                <p className="text-[10px] text-zinc-800 font-inter text-center">All {activities.length} actions loaded</p>
+            )}
         </div>
     )
 }

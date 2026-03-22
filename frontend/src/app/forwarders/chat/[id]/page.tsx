@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import { Loader2, Send, ArrowLeft, X, BarChart3, ArrowRight } from 'lucide-react'
+import { FullPageSpinner } from '@/components/ui/Spinner'
 
 interface Message {
     id: number
@@ -25,8 +26,20 @@ interface ConvMeta {
     currency: string
     status: string
     booking_id: string | null
+    offer_side: 'SHIPPER' | 'FORWARDER' | null
     shipper_close_req: boolean
     forwarder_close_req: boolean
+    shipper_last_seen: string | null
+    forwarder_last_seen: string | null
+}
+
+function lastSeenLabel(isoString: string | null): string {
+    if (!isoString) return 'Not yet active'
+    const diff = Math.floor((Date.now() - new Date(isoString + 'Z').getTime()) / 1000)
+    if (diff < 30) return 'Online now'
+    if (diff < 3600) return `Last seen ${Math.floor(diff / 60)}m ago`
+    if (diff < 86400) return `Last seen ${Math.floor(diff / 3600)}h ago`
+    return `Last seen ${Math.floor(diff / 86400)}d ago`
 }
 
 export default function ForwarderChatPage() {
@@ -40,15 +53,26 @@ export default function ForwarderChatPage() {
     const [authLoading, setAuthLoading] = useState(false)
     const [authError, setAuthError] = useState('')
 
-    // Chat state
-    const [conv, setConv] = useState<ConvMeta | null>(null)
-    const [messages, setMessages] = useState<Message[]>([])
+    // Chat state — initialized from sessionStorage so return visits are instant
+    const [conv, setConv] = useState<ConvMeta | null>(() => {
+        try { return JSON.parse(sessionStorage.getItem(`fwd_conv_${id}`) || 'null') } catch { return null }
+    })
+    const [messages, setMessages] = useState<Message[]>(() => {
+        try { return JSON.parse(sessionStorage.getItem(`fwd_msgs_${id}`) || '[]') } catch { return [] }
+    })
     const [loading, setLoading] = useState(false)
     const [text, setText] = useState('')
     const [sending, setSending] = useState(false)
     const [closingDeal, setClosingDeal] = useState(false)
+    const [counterAmount, setCounterAmount] = useState('')
+    const [showCounterInput, setShowCounterInput] = useState(false)
     const [error, setError] = useState('')
     const bottomRef = useRef<HTMLDivElement>(null)
+
+    // Currency converter state
+    const [convTo, setConvTo] = useState('USD')
+    const [convResult, setConvResult] = useState<string | null>(null)
+    const [convLoading, setConvLoading] = useState(false)
 
     // On mount: check localStorage for saved portal credentials
     useEffect(() => {
@@ -65,7 +89,8 @@ export default function ForwarderChatPage() {
         if (!fwdId || !fwdEmail) return
         try {
             const res = await apiFetch(
-                `/api/forwarders/conversations/${id}/messages?forwarder_id=${encodeURIComponent(fwdId)}&email=${encodeURIComponent(fwdEmail)}`
+                `/api/forwarders/conversations/${id}/messages`,
+                { headers: { 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail } }
             )
             if (!res.ok) {
                 if (res.status === 401) {
@@ -78,6 +103,11 @@ export default function ForwarderChatPage() {
             const data = await res.json()
             setConv(data.conversation)
             setMessages(data.messages)
+            // Cache for instant revisit
+            try {
+                sessionStorage.setItem(`fwd_conv_${id}`, JSON.stringify(data.conversation))
+                sessionStorage.setItem(`fwd_msgs_${id}`, JSON.stringify(data.messages))
+            } catch {}
         } catch {
             // silent poll failure
         } finally {
@@ -90,7 +120,7 @@ export default function ForwarderChatPage() {
         if (!isAuthenticated || !fwdId || !fwdEmail) return
         setLoading(true)
         fetchMessages()
-        const interval = setInterval(fetchMessages, 1000)
+        const interval = setInterval(fetchMessages, 3000)
         return () => clearInterval(interval)
     }, [isAuthenticated, fetchMessages, fwdId, fwdEmail])
 
@@ -98,6 +128,27 @@ export default function ForwarderChatPage() {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
+
+    // Currency converter — uses conv directly to avoid temporal dead zone with activePrice
+    useEffect(() => {
+        const price = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
+        if (!conv || !price) { setConvResult(null); return }
+        if (convTo === conv.currency) {
+            setConvResult(Number(price).toLocaleString(undefined, { maximumFractionDigits: 2 }))
+            return
+        }
+        const controller = new AbortController()
+        setConvLoading(true)
+        fetch(`https://api.frankfurter.app/latest?amount=${price}&from=${conv.currency}&to=${convTo}`, { signal: controller.signal })
+            .then(r => r.json())
+            .then(data => {
+                const rate = data.rates?.[convTo]
+                setConvResult(rate != null ? Number(rate).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null)
+            })
+            .catch(() => {})
+            .finally(() => setConvLoading(false))
+        return () => controller.abort()
+    }, [conv?.agreed_price, conv?.current_offer, conv?.original_price, convTo, conv?.currency])
 
     // ── Auth ──────────────────────────────────────────────────────────────────
 
@@ -150,17 +201,64 @@ export default function ForwarderChatPage() {
 
     const respondOffer = async (action: 'ACCEPT' | 'REJECT') => {
         setSending(true)
+        setError('')
         try {
-            await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
+            const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail, action }),
             })
+            if (!res.ok) {
+                const data = await res.json()
+                setError(data.detail || 'Failed.')
+            }
         } catch {
-            // silent
+            setError('Request failed.')
         } finally {
             setSending(false)
         }
+    }
+
+    const sendCounter = async () => {
+        const amount = parseFloat(counterAmount)
+        if (isNaN(amount) || amount <= 0 || !conv) return
+        setSending(true)
+        setError('')
+        try {
+            const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail, action: 'COUNTER', counter_amount: amount }),
+            })
+            if (res.ok) {
+                setShowCounterInput(false)
+                setCounterAmount('')
+            } else {
+                const data = await res.json()
+                setError(data.detail || 'Counter failed.')
+            }
+        } catch {
+            setError('Counter failed.')
+        } finally {
+            setSending(false)
+        }
+    }
+
+    // Counter chips: prices between shipper's offer and original (going UP)
+    const getCounterChips = (): number[] => {
+        if (!conv?.current_offer) return []
+        const low = conv.current_offer
+        const high = conv.original_price
+        const range = high - low
+        if (range <= 0) return []
+        const step = Math.max(1, Math.round(range / 5))
+        const chips: number[] = []
+        let p = low + step
+        while (chips.length < 4 && p < high) {
+            chips.push(Math.round(p / step) * step)
+            p += step
+        }
+        return chips
     }
 
     const closeDeal = async () => {
@@ -188,7 +286,7 @@ export default function ForwarderChatPage() {
 
     const isBooked = conv?.status === 'BOOKED'
     const isClosed = conv?.status === 'CLOSED'
-    const hasPendingOffer = !!conv?.current_offer && !conv?.agreed_price
+    const shipperWaiting = conv?.offer_side === 'SHIPPER'   // shipper sent offer → forwarder must respond
     const activePriceLabel = conv?.agreed_price ? 'Agreed' : conv?.current_offer ? 'Counter Offer' : 'Quoted'
     const activePrice = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
 
@@ -255,9 +353,7 @@ export default function ForwarderChatPage() {
 
     if (loading && !conv) {
         return (
-            <div className="h-screen bg-[#050505] flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-white/20" />
-            </div>
+            <FullPageSpinner />
         )
     }
 
@@ -284,13 +380,20 @@ export default function ForwarderChatPage() {
                 </button>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-white font-outfit truncate">{conv.forwarder_company}</span>
+                        <span className="text-sm font-semibold text-white font-outfit truncate">{conv.forwarder_company}</span>
                         <span className="text-zinc-700">↔</span>
                         <span className="text-xs font-mono text-zinc-600 truncate">Shipper</span>
                     </div>
-                    <p className="text-[10px] text-zinc-700 font-mono mt-0.5">{conv.request_id}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                            conv.shipper_last_seen && (Date.now() - new Date(conv.shipper_last_seen + 'Z').getTime()) < 30000
+                                ? 'bg-emerald-400'
+                                : 'bg-zinc-700'
+                        }`} />
+                        <p className="text-[10px] text-zinc-600 font-mono">{lastSeenLabel(conv.shipper_last_seen)}</p>
+                    </div>
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
+                <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
                     isBooked ? 'bg-emerald-500/10 text-emerald-400'
                     : isClosed ? 'bg-zinc-800 text-zinc-500'
                     : 'bg-white/5 text-zinc-500'
@@ -303,8 +406,8 @@ export default function ForwarderChatPage() {
             <div className="px-4 py-3 border-b border-white/[0.04] bg-[#080808] flex-shrink-0">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
-                        <p className={`text-xl font-black font-mono leading-tight ${
+                        <p className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
+                        <p className={`text-xl font-semibold font-mono leading-tight ${
                             conv.agreed_price ? 'text-emerald-400'
                             : conv.current_offer ? 'text-amber-400'
                             : 'text-white'
@@ -316,6 +419,22 @@ export default function ForwarderChatPage() {
                                 Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
                             </p>
                         )}
+                        {/* Currency converter */}
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                            <span className="text-[9px] text-zinc-700">≈</span>
+                            <select
+                                value={convTo}
+                                onChange={e => setConvTo(e.target.value)}
+                                className="bg-black border border-white/[0.06] rounded-lg text-[10px] text-zinc-500 px-1.5 py-0.5 outline-none cursor-pointer"
+                            >
+                                {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].filter(c => c !== conv.currency).map(c => (
+                                    <option key={c} value={c} className="bg-black">{c}</option>
+                                ))}
+                            </select>
+                            <span className="text-[10px] font-mono text-zinc-500">
+                                {convLoading ? '...' : convResult ? `${convTo} ${convResult}` : '—'}
+                            </span>
+                        </div>
                     </div>
 
                     {/* Close Deal button — forwarder side */}
@@ -329,7 +448,7 @@ export default function ForwarderChatPage() {
                                 <button
                                     onClick={closeDeal}
                                     disabled={closingDeal}
-                                    className="bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
+                                    className="bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
                                 >
                                     Shipper wants to close. Confirm?
                                 </button>
@@ -337,7 +456,7 @@ export default function ForwarderChatPage() {
                                 <button
                                     onClick={closeDeal}
                                     disabled={closingDeal}
-                                    className="bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                                    className="bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
                                 >
                                     {closingDeal ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Close Deal'}
                                 </button>
@@ -349,7 +468,7 @@ export default function ForwarderChatPage() {
                 {/* Closed banner */}
                 {isClosed && !isBooked && (
                     <div className="mt-3 bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-xs font-black text-zinc-400">Deal closed. This conversation is archived.</p>
+                        <p className="text-xs font-semibold text-zinc-400">Deal closed. This conversation is archived.</p>
                     </div>
                 )}
             </div>
@@ -369,33 +488,107 @@ export default function ForwarderChatPage() {
                     }
 
                     if (msg.message_type === 'OFFER') {
-                        const isPending = hasPendingOffer && msg.id === Math.max(...messages.filter(m => m.message_type === 'OFFER').map(m => m.id))
+                        const latestOfferId = Math.max(...messages.filter(m => m.message_type === 'OFFER').map(m => m.id))
+                        const isActivePending = shipperWaiting && msg.id === latestOfferId
                         return (
                             <div key={msg.id} className="flex justify-start">
-                                <div className="bg-[#0d0d0d] border border-white/10 rounded-2xl p-4 max-w-[260px]">
-                                    <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Counter Offer from Shipper</p>
-                                    <p className="text-2xl font-black font-mono text-white">
+                                <div className="bg-[#0d0d0d] border border-white/10 rounded-2xl p-4 max-w-[280px]">
+                                    <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">Shipper's Offer</p>
+                                    <p className="text-2xl font-semibold font-mono text-white">
                                         {conv.currency} {Number(msg.offer_amount).toLocaleString()}
                                     </p>
+                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">
+                                        Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
+                                    </p>
 
-                                    {isPending && !isBooked && !isClosed && (
+                                    {isActivePending && !isBooked && !isClosed && !showCounterInput && (
                                         <div className="flex gap-2 mt-3">
                                             <button
                                                 onClick={() => respondOffer('ACCEPT')}
                                                 disabled={sending}
-                                                className="flex-1 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
+                                                className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
                                             >
                                                 Accept
                                             </button>
                                             <button
+                                                onClick={() => setShowCounterInput(true)}
+                                                disabled={sending}
+                                                className="flex-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-amber-500/20 transition-all disabled:opacity-50"
+                                            >
+                                                Counter
+                                            </button>
+                                            <button
                                                 onClick={() => respondOffer('REJECT')}
                                                 disabled={sending}
-                                                className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
+                                                className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
                                             >
                                                 Reject
                                             </button>
                                         </div>
                                     )}
+
+                                    {/* Counter input panel */}
+                                    {isActivePending && !isBooked && !isClosed && showCounterInput && (
+                                        <div className="mt-3 space-y-2">
+                                            <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">Your Counter Price</p>
+                                            {/* Counter chips */}
+                                            <div className="flex gap-1.5 flex-wrap">
+                                                {getCounterChips().map(p => (
+                                                    <button
+                                                        key={p}
+                                                        onClick={() => setCounterAmount(String(p))}
+                                                        className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold font-mono transition-all ${
+                                                            counterAmount === String(p)
+                                                                ? 'bg-white text-black border-white'
+                                                                : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:border-white/20 hover:text-white'
+                                                        }`}
+                                                    >
+                                                        {p.toLocaleString()}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-zinc-500 text-xs font-mono">{conv.currency}</span>
+                                                <input
+                                                    type="number"
+                                                    value={counterAmount}
+                                                    onChange={e => setCounterAmount(e.target.value)}
+                                                    placeholder={String(Math.round(((conv.current_offer ?? conv.original_price) + conv.original_price) / 2))}
+                                                    className="flex-1 bg-transparent text-xl font-semibold font-mono text-white outline-none border-b border-white/10 focus:border-white/30 transition-colors pb-0.5"
+                                                />
+                                            </div>
+                                            <div className="flex gap-2 pt-1">
+                                                <button
+                                                    onClick={sendCounter}
+                                                    disabled={sending || !counterAmount}
+                                                    className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-30"
+                                                >
+                                                    Send Counter
+                                                </button>
+                                                <button
+                                                    onClick={() => { setShowCounterInput(false); setCounterAmount('') }}
+                                                    className="px-3 py-2 bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-semibold rounded-xl hover:bg-white/10 transition-all"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                    // COUNTER_OFFER — forwarder's own counter, shown on right
+                    if (msg.message_type === 'COUNTER_OFFER') {
+                        return (
+                            <div key={msg.id} className="flex justify-end">
+                                <div className="bg-[#0d0d0d] border border-amber-500/20 rounded-2xl p-4 max-w-[260px]">
+                                    <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest mb-2">Your Counter</p>
+                                    <p className="text-2xl font-semibold font-mono text-white">
+                                        {conv.currency} {Number(msg.offer_amount).toLocaleString()}
+                                    </p>
+                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">Waiting for shipper response</p>
                                 </div>
                             </div>
                         )
@@ -405,7 +598,7 @@ export default function ForwarderChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-center">
                                 <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-black text-emerald-400">✅ {msg.content}</p>
+                                    <p className="text-xs font-semibold text-emerald-400">✅ {msg.content}</p>
                                 </div>
                             </div>
                         )
@@ -415,7 +608,7 @@ export default function ForwarderChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-center">
                                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-black text-red-400">❌ {msg.content}</p>
+                                    <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
                                 </div>
                             </div>
                         )

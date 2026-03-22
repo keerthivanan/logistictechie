@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { apiFetch } from '@/lib/config'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Ship, ArrowRight, AlertCircle, ArrowUpDown, Zap } from 'lucide-react'
+import { Ship, ArrowRight, AlertCircle, ArrowUpDown, Zap, Loader2 } from 'lucide-react'
+import { Spinner, FullPageSpinner } from '@/components/ui/Spinner'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/context/AuthContext'
 
@@ -17,6 +18,7 @@ function ResultsContent() {
   const [quotes, setQuotes]                 = useState<any[]>([])
   const [filteredQuotes, setFilteredQuotes] = useState<any[]>([])
   const [error, setError]                   = useState('')
+  const [submitting, setSubmitting]         = useState(false)
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [maxTransitTime, setMaxTransitTime] = useState(45)
   const [sortBy, setSortBy]                 = useState<'price' | 'transit'>('price')
@@ -81,20 +83,48 @@ function ResultsContent() {
 
   const uniqueCarriers = Array.from(new Set(quotes.map(q => q.carrier_name))).filter(Boolean)
 
-  const handleSelectQuote = (quote: any) => {
-    const query = new URLSearchParams({
-      quoteId: quote.id || '',
-      carrier: quote.carrier_name,
-      price: quote.price,
-      origin: quote.origin_locode || origin,
-      destination: quote.dest_locode || destination,
-      container,
-      transit: quote.transit_time_days || quote.transit_time,
-      vessel: quote.vessel_name || 'TBD',
-      wisdom: quote.wisdom || '',
-      breakdown: JSON.stringify(quote.breakdown || {}),
-    }).toString()
-    router.push('/marketplace')
+  const handleSelectQuote = async (quote: any) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    setSubmitting(true)
+    setError('')
+    try {
+      const token = localStorage.getItem('token')
+      const mode = searchParams.get('mode') || 'FCL'
+      const units = parseInt(searchParams.get('units') || '1')
+      const cargoType = mode === 'Air' ? 'AIR' : mode === 'LCL' ? 'LCL' : 'FCL'
+      const res = await apiFetch('/api/marketplace/submit', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: 'client',
+          origin,
+          destination,
+          cargo_type: cargoType,
+          container_type: container,
+          container_count: units,
+          weight: 1000,
+          weight_unit: 'KGM',
+          commodity: isHazardous ? 'Hazardous Goods' : (value && parseFloat(value) > 50000 ? 'High Value Goods' : 'General Cargo'),
+          is_hazardous: isHazardous,
+          pickup_ready_date: readyDate || new Date().toISOString().split('T')[0],
+          vessel: quote.vessel_name || '',
+          special_requirements: '',
+        }),
+      })
+      const data = await res.json()
+      if (res.ok && data.request_id) {
+        router.push(`/marketplace/${data.request_id}`)
+      } else {
+        setError(data.detail || 'Failed to submit request. Please try again.')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -105,9 +135,9 @@ function ResultsContent() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Route</span>
-              <span className="text-white font-black font-mono text-sm tracking-tight">{origin}</span>
+              <span className="text-white font-semibold font-mono text-sm tracking-tight">{origin}</span>
               <ArrowRight className="w-3 h-3 text-zinc-600" />
-              <span className="text-white font-black font-mono text-sm tracking-tight">{destination}</span>
+              <span className="text-white font-semibold font-mono text-sm tracking-tight">{destination}</span>
               <span className="ml-2 px-2 py-0.5 rounded bg-white/[0.04] border border-white/5 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-inter">{container} · FCL</span>
             </div>
             <div className="flex items-center gap-3">
@@ -118,7 +148,7 @@ function ResultsContent() {
               ].map((step, i) => (
                 <div key={step.label} className="flex items-center gap-2">
                   {i > 0 && <div className="h-px w-8 bg-white/10" />}
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${step.done ? 'bg-white text-black' : step.active ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 border border-white/5'}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${step.done ? 'bg-white text-black' : step.active ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 border border-white/5'}`}>
                     {step.done ? '✓' : i + 1}
                   </div>
                   <span className={`text-[10px] font-bold uppercase tracking-widest font-inter ${step.active ? 'text-white' : step.done ? 'text-zinc-500' : 'text-zinc-700'}`}>{step.label}</span>
@@ -131,10 +161,9 @@ function ResultsContent() {
 
       {/* Loading */}
       {loading ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
-          <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white mb-6" />
-          <p className="text-base font-bold text-white font-outfit uppercase tracking-tight mb-2">Finding the best rates...</p>
-          <p className="text-xs text-zinc-500 font-inter">Searching live carrier rates for your route.</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 flex flex-col items-center gap-4">
+          <Spinner size="lg" />
+          <p className="text-xs text-zinc-500 font-inter uppercase tracking-widest">Finding the best rates...</p>
         </div>
 
       ) : error ? (
@@ -254,7 +283,7 @@ function ResultsContent() {
                               <Ship className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
                             </div>
                             <div>
-                              <p className="text-sm font-black text-white font-outfit uppercase tracking-tight">{quote.carrier_name}</p>
+                              <p className="text-sm font-semibold text-white font-outfit uppercase tracking-tight">{quote.carrier_name}</p>
                               <div className="flex items-center gap-2 mt-0.5">
                                 <span className="text-[9px] font-bold text-white/30 font-inter uppercase tracking-widest">{container} FCL</span>
                                 <div className="w-1 h-1 bg-white/20 rounded-full" />
@@ -265,7 +294,7 @@ function ResultsContent() {
                           {isBest && (
                             <div className="flex items-center gap-1.5 border border-emerald-500/20 px-3 py-1 rounded-full bg-emerald-500/5">
                               <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                              <span className="text-[9px] font-black font-inter text-emerald-500 uppercase tracking-widest">PROPHETIC BEAT</span>
+                              <span className="text-[9px] font-semibold font-inter text-emerald-500 uppercase tracking-widest">PROPHETIC BEAT</span>
                             </div>
                           )}
                         </div>
@@ -273,12 +302,12 @@ function ResultsContent() {
                         {/* Route Visualization */}
                         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-8 px-6 bg-white/[0.01] rounded-2xl border border-white/[0.03]">
                           <div className="space-y-1.5">
-                            <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{origin}</p>
+                            <p className="text-2xl font-semibold font-mono text-white tracking-tighter leading-none">{origin}</p>
                             <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Departure</p>
                           </div>
 
                           <div className="flex flex-col items-center gap-2 min-w-[120px]">
-                            <span className="text-[10px] font-black text-white/60 font-inter tracking-[0.1em]">{transitDays} DAYS</span>
+                            <span className="text-[10px] font-semibold text-white/60 font-inter tracking-[0.1em]">{transitDays} DAYS</span>
                             <div className="w-full h-px bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.1),transparent)] relative">
                               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                             </div>
@@ -286,7 +315,7 @@ function ResultsContent() {
                           </div>
 
                           <div className="text-right space-y-1.5">
-                            <p className="text-2xl font-black font-mono text-white tracking-tighter leading-none">{destination}</p>
+                            <p className="text-2xl font-semibold font-mono text-white tracking-tighter leading-none">{destination}</p>
                             <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Arrival</p>
                           </div>
                         </div>
@@ -310,8 +339,8 @@ function ResultsContent() {
                         <div className="text-right space-y-1">
                           <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-inter">Total Price</p>
                           <div className="flex items-baseline gap-1 justify-end">
-                            <span className="text-[14px] font-black text-white/40">$</span>
-                            <p className="text-4xl font-black font-mono text-white tracking-tighter leading-none select-all">{quote.price.toLocaleString()}</p>
+                            <span className="text-[14px] font-semibold text-white/40">$</span>
+                            <p className="text-4xl font-semibold font-mono text-white tracking-tighter leading-none select-all">{quote.price.toLocaleString()}</p>
                           </div>
                           <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] font-inter">All-In Fixed</p>
                         </div>
@@ -319,9 +348,10 @@ function ResultsContent() {
                         <div className="w-full space-y-4">
                           <button
                             onClick={() => handleSelectQuote(quote)}
-                            className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-[0.4em] text-[9px] transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(255,255,255,0.2)]"
+                            disabled={submitting}
+                            className="w-full bg-white text-black py-4 rounded-2xl font-semibold uppercase tracking-[0.4em] text-[9px] transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                           >
-                            Book Now
+                            {submitting ? <><Loader2 className="w-3 h-3 animate-spin" /> Submitting...</> : 'Book Now'}
                           </button>
                           <div className="text-center">
                             <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest">Ref: {quote.id?.slice(0, 8) || 'AUTO-VEC'}</span>
@@ -356,7 +386,7 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
       <Navbar />
-      <Suspense fallback={<div className="text-center py-32 pt-40 text-zinc-500 text-xs">Loading...</div>}>
+      <Suspense fallback={<FullPageSpinner />}>
         <ResultsContent />
       </Suspense>
     </div>

@@ -54,15 +54,15 @@ export default function SolutionsGrid() {
         <section className="py-32 bg-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-20">
-                    <h2 className="text-3xl md:text-5xl font-bold mb-6">Comprehensive Logistics Solutions</h2>
-                    <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+                    <h2 className="text-3xl md:text-4xl font-semibold mb-6 tracking-tight font-outfit">Comprehensive Logistics Solutions</h2>
+                    <p className="text-zinc-500 max-w-2xl mx-auto text-sm font-inter">
                         From raw material to final mile, CargoLink orchestrates every step of your supply chain with precision and reliability.
                     </p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {solutions.map((item, i) => (
-                        <Link href={item.href} key={i} className="group h-[400px] relative rounded-2xl overflow-hidden border border-white/10 hover:border-blue-500/50 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] block">
+                        <Link href={item.href} key={i} className="group h-[400px] relative rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-500 block">
                             {/* Background Image */}
                             <div className="absolute inset-0">
                                 <NextImage
@@ -76,12 +76,12 @@ export default function SolutionsGrid() {
 
                             <div className="absolute inset-0 p-8 flex flex-col justify-end">
                                 <div className="absolute inset-0 p-10 flex flex-col justify-end">
-                                    <h3 className="text-3xl font-bold mb-4 text-white group-hover:text-blue-400 transition-colors tracking-tighter">{item.title}</h3>
+                                    <h3 className="text-2xl font-semibold mb-4 text-white group-hover:text-white/80 transition-colors tracking-tight font-outfit">{item.title}</h3>
                                     <p className="text-zinc-400 leading-relaxed text-sm opacity-80 group-hover:opacity-100 transition-all duration-300">
                                         {item.desc}
                                     </p>
 
-                                    <div className="mt-8 flex items-center text-xs font-black uppercase tracking-[0.2em] text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                    <div className="mt-8 flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                         Learn More <ArrowRight className="ml-2 w-4 h-4" />
                                     </div>
                                 </div>

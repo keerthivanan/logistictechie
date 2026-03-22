@@ -164,7 +164,7 @@ app.add_middleware(
     allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With", "X-OMEGO-Key", "ngrok-skip-browser-warning"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With", "X-OMEGO-Key", "ngrok-skip-browser-warning", "X-Forwarder-Id", "X-Forwarder-Email"],
     expose_headers=["X-Total-Count", "X-Request-ID"],
     max_age=600,
 )

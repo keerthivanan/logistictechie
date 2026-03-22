@@ -38,7 +38,8 @@ class SendOfferIn(BaseModel):
     offer_amount: float = Field(..., gt=0)
 
 class RespondOfferIn(BaseModel):
-    action: str  # "ACCEPT" or "REJECT"
+    action: str  # "ACCEPT" | "REJECT" | "COUNTER"
+    counter_amount: Optional[float] = None
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -75,8 +76,11 @@ def _conv_dict(c: Conversation, last_message: Optional[ChatMessage] = None) -> d
         "currency": c.currency,
         "status": c.status,
         "booking_id": c.booking_id,
+        "offer_side": c.offer_side,
         "shipper_close_req": c.shipper_close_req,
         "forwarder_close_req": c.forwarder_close_req,
+        "shipper_last_seen": c.shipper_last_seen.isoformat() if c.shipper_last_seen else None,
+        "forwarder_last_seen": c.forwarder_last_seen.isoformat() if c.forwarder_last_seen else None,
         "created_at": c.created_at,
         "last_message": _msg_dict(last_message) if last_message else None,
     }
@@ -168,6 +172,8 @@ async def start_conversation(
 
     # 7. Fire WF7 — notify forwarder by email (background)
     # Link points to /forwarders/chat/{id} so portal forwarders can authenticate
+    import os as _os
+    _frontend_url = _os.getenv("FRONTEND_URL", "http://localhost:3000")
     background_tasks.add_task(
         webhook_service.trigger_new_conversation_webhook,
         {
@@ -177,7 +183,7 @@ async def start_conversation(
             "request_id": data.request_id,
             "origin": req.origin,
             "destination": req.destination,
-            "conversation_url": f"https://cargolink.sa/forwarders/chat/{conv.public_id}",
+            "conversation_url": f"{_frontend_url}/forwarders/chat/{conv.public_id}",
         }
     )
 
@@ -249,7 +255,21 @@ async def list_conversations(
             .limit(1)
         )
         last_msg = last_msg_res.scalars().first()
-        result.append(_conv_dict(conv, last_msg))
+
+        # Count unread messages (not sent by current user, not SYSTEM, not yet read)
+        unread_res = await db.execute(
+            select(func.count(ChatMessage.id)).where(
+                ChatMessage.conversation_id == conv.id,
+                ChatMessage.sender_id != current_user.sovereign_id,
+                ChatMessage.is_read == False,  # noqa: E712
+                ChatMessage.sender_role != "SYSTEM",
+            )
+        )
+        unread_count = unread_res.scalar() or 0
+
+        entry = _conv_dict(conv, last_msg)
+        entry["unread_count"] = unread_count
+        result.append(entry)
 
     return {"conversations": result}
 
@@ -291,6 +311,13 @@ async def get_messages(
     )
     messages = msgs_res.scalars().all()
 
+    # Update last_seen timestamp for the caller
+    now = _utcnow()
+    if conv.shipper_id == current_user.sovereign_id:
+        conv.shipper_last_seen = now
+    elif conv.forwarder_id == current_user.sovereign_id:
+        conv.forwarder_last_seen = now
+
     # Mark incoming messages as read (messages not sent by current user, not yet read, not SYSTEM)
     unread_ids = [
         m.id for m in messages
@@ -302,7 +329,9 @@ async def get_messages(
             .where(ChatMessage.id.in_(unread_ids))
             .values(is_read=True)
         )
-        await db.commit()
+
+    await db.commit()
+    await db.refresh(conv)
 
     return {
         "conversation": _conv_dict(conv),
@@ -335,6 +364,7 @@ async def send_message(
         content=data.content,
         is_read=False,
     )
+    conv.updated_at = _utcnow()
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
@@ -359,6 +389,10 @@ async def send_offer(
         raise HTTPException(status_code=403, detail="Only the shipper can make an offer.")
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is closed.")
+    if conv.agreed_price is not None:
+        raise HTTPException(status_code=409, detail="Price already agreed. Proceed to booking or close the deal.")
+    if conv.offer_side == "SHIPPER":
+        raise HTTPException(status_code=409, detail="You already have a pending offer. Wait for the forwarder to respond.")
 
     original = float(conv.original_price)
     min_offer = round(original * MIN_OFFER_RATIO, 2)
@@ -385,6 +419,7 @@ async def send_offer(
     )
     db.add(msg)
     conv.current_offer = data.offer_amount
+    conv.offer_side = "SHIPPER"
     await db.commit()
     await db.refresh(msg)
 
@@ -409,21 +444,39 @@ async def respond_offer(
         raise HTTPException(status_code=403, detail="Only the forwarder can respond to offers.")
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is closed.")
-    if conv.current_offer is None:
-        raise HTTPException(status_code=409, detail="No active offer to respond to.")
+    if conv.offer_side != "SHIPPER":
+        raise HTTPException(status_code=409, detail="No shipper offer to respond to.")
 
     action = data.action.upper()
-    if action not in ("ACCEPT", "REJECT"):
-        raise HTTPException(status_code=422, detail="Action must be ACCEPT or REJECT.")
+    if action not in ("ACCEPT", "REJECT", "COUNTER"):
+        raise HTTPException(status_code=422, detail="Action must be ACCEPT, REJECT, or COUNTER.")
 
     if action == "ACCEPT":
         conv.agreed_price = conv.current_offer
-        msg_content = f"Offer accepted — agreed price: {conv.currency} {float(conv.current_offer):,.2f}"
+        conv.current_offer = None
+        conv.offer_side = None
+        msg_content = f"Offer accepted — agreed price: {conv.currency} {float(conv.agreed_price):,.2f}"
         msg_type = "ACCEPTED"
-    else:
+
+    elif action == "REJECT":
+        conv.current_offer = None
+        conv.offer_side = None
         msg_content = f"Offer rejected. Original price stands: {conv.currency} {float(conv.original_price):,.2f}"
         msg_type = "REJECTED"
-        conv.current_offer = None
+
+    else:  # COUNTER
+        if not data.counter_amount:
+            raise HTTPException(status_code=422, detail="counter_amount is required for COUNTER action.")
+        shipper_offer = float(conv.current_offer)
+        original = float(conv.original_price)
+        if data.counter_amount <= shipper_offer:
+            raise HTTPException(status_code=422, detail=f"Counter must be higher than the shipper's offer ({conv.currency} {shipper_offer:,.2f}).")
+        if data.counter_amount >= original:
+            raise HTTPException(status_code=422, detail=f"Counter must be less than the original quoted price ({conv.currency} {original:,.2f}).")
+        conv.current_offer = data.counter_amount
+        conv.offer_side = "FORWARDER"
+        msg_content = f"Counter offer: {conv.currency} {data.counter_amount:,.2f}"
+        msg_type = "COUNTER_OFFER"
 
     msg = ChatMessage(
         conversation_id=conv.id,
@@ -431,6 +484,45 @@ async def respond_offer(
         sender_id=current_user.sovereign_id,
         message_type=msg_type,
         content=msg_content,
+        offer_amount=data.counter_amount if msg_type == "COUNTER_OFFER" else None,
+        is_read=False,
+    )
+    db.add(msg)
+    await db.commit()
+    await db.refresh(msg)
+
+    return _msg_dict(msg)
+
+
+@router.post("/{public_id}/accept-counter")
+async def accept_counter(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Shipper accepts the forwarder's counter-offer.
+    Only valid when offer_side == 'FORWARDER'.
+    """
+    conv = await _get_conversation(public_id, db)
+
+    if conv.shipper_id != current_user.sovereign_id:
+        raise HTTPException(status_code=403, detail="Only the shipper can accept the counter.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="This conversation is closed.")
+    if conv.offer_side != "FORWARDER":
+        raise HTTPException(status_code=409, detail="No forwarder counter-offer to accept.")
+
+    conv.agreed_price = conv.current_offer
+    conv.current_offer = None
+    conv.offer_side = None
+
+    msg = ChatMessage(
+        conversation_id=conv.id,
+        sender_role="SHIPPER",
+        sender_id=current_user.sovereign_id,
+        message_type="ACCEPTED",
+        content=f"Counter accepted — agreed price: {conv.currency} {float(conv.agreed_price):,.2f}",
         is_read=False,
     )
     db.add(msg)
@@ -477,7 +569,8 @@ async def close_deal(
         pending_msg = "Forwarder has marked this deal as closed. Waiting for shipper to confirm."
 
     if other_requested:
-        # Both confirmed — fully close
+        # Both confirmed — close this conversation, close the request,
+        # and notify all other forwarders the deal is done.
         conv.status = "CLOSED"
 
         db.add(ChatMessage(
@@ -487,7 +580,7 @@ async def close_deal(
             is_read=False,
         ))
 
-        # Close the marketplace request
+        # Close the marketplace request so no new bids are accepted
         req_res = await db.execute(
             select(MarketplaceRequest).where(MarketplaceRequest.request_id == conv.request_id)
         )
@@ -495,7 +588,7 @@ async def close_deal(
         if req and req.status != "CLOSED":
             req.status = "CLOSED"
 
-        # Cascade: close all other OPEN conversations for this request
+        # Notify all other open conversations — their chat history stays, they just see the notice
         other_convs_res = await db.execute(
             select(Conversation).where(
                 Conversation.request_id == conv.request_id,
@@ -508,7 +601,7 @@ async def close_deal(
             db.add(ChatMessage(
                 conversation_id=other_conv.id,
                 sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-                content="This request has been fulfilled through another conversation. No further action required.",
+                content="This request has been fulfilled. The shipper has closed a deal with another forwarder.",
                 is_read=False,
             ))
 
@@ -544,6 +637,10 @@ async def confirm_booking(
         raise HTTPException(status_code=403, detail="Only the shipper can confirm the booking.")
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="Booking already confirmed or conversation closed.")
+    if conv.offer_side == "FORWARDER":
+        raise HTTPException(status_code=409, detail="You have a counter-offer from the forwarder. Accept it or make a new offer before confirming booking.")
+    elif conv.current_offer is not None:
+        raise HTTPException(status_code=409, detail="Your offer is still pending. Wait for the forwarder to respond before confirming.")
 
     # Determine final price
     final_price = float(conv.agreed_price) if conv.agreed_price is not None else float(conv.original_price)
@@ -628,13 +725,16 @@ async def confirm_booking(
     background_tasks.add_task(
         webhook_service.trigger_booking_webhook,
         {
-            "booking_reference": reference,
-            "shipper_name": current_user.full_name or current_user.sovereign_id,
-            "shipper_email": current_user.email,
+            "reference": reference,
+            "user_name": current_user.full_name or current_user.sovereign_id,
+            "user_email": current_user.email,
             "forwarder_email": forwarder_email,
             "forwarder_company": conv.forwarder_company,
-            "request_id": conv.request_id,
-            "final_price": final_price,
+            "marketplace_request_id": conv.request_id,
+            "total_price": final_price,
+            "carrier_name": conv.forwarder_company,
+            "container_type": req.container_type or "FCL" if req else "FCL",
+            "transit_days": quote.transit_days if quote else 0,
             "currency": conv.currency,
             "origin": req.origin if req else "",
             "destination": req.destination if req else "",

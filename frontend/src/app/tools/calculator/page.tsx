@@ -5,10 +5,10 @@ import Navbar from '@/components/layout/Navbar'
 import { apiFetch } from '@/lib/config'
 import {
     Calculator, MapPin, ArrowRight, ChevronDown,
-    RefreshCw, TrendingUp, Clock,
-    AlertTriangle, XCircle, Info, ChevronRight
+    RefreshCw, AlertTriangle, XCircle, Info, ChevronRight
 } from 'lucide-react'
 import Link from 'next/link'
+import { useT } from '@/lib/i18n/t'
 
 // ─── Port Autocomplete ────────────────────────────────────────────────────────
 interface PortOption { name: string; code: string; country: string; country_code: string; type: string }
@@ -53,7 +53,7 @@ function PortInput({ label, value, onChange, onSelect, placeholder }: {
                     onChange={e => { onChange(e.target.value.toUpperCase()); setOpen(true) }}
                     onFocus={() => setOpen(true)}
                     placeholder={placeholder}
-                    className="w-full bg-black border border-white/5 pl-9 pr-3 py-2.5 rounded-lg text-sm font-medium text-white font-inter focus:border-white/20 outline-none"
+                    className="w-full bg-black border border-white/5 pl-9 pr-3 py-2.5 rounded-lg text-sm font-medium text-white font-inter focus:border-zinc-700 outline-none"
                 />
             </div>
             {open && (options.length > 0 || searching) && (
@@ -101,6 +101,7 @@ const QUICK_ROUTES = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CalculatorPage() {
+    const t = useT()
     const [origCode, setOrigCode] = useState('CNSHA')
     const [origName, setOrigName] = useState('Shanghai')
     const [destCode, setDestCode] = useState('USLAX')
@@ -148,9 +149,9 @@ export default function CalculatorPage() {
             {/* ─── HERO ─── */}
             <section className="relative bg-black min-h-screen flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] font-inter mb-8">CargoLink Tools</p>
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-80 mb-8" />
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-outfit uppercase mb-12 leading-[1.1] text-white max-w-4xl">
-                        Freight Calculator
+                        {t('tools.calculator.title')}
                     </h1>
                     <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-12">
                         {[{ v: '50+', l: 'Trade Lanes' }, { v: 'Q1 2025', l: 'Market Data' }, { v: 'Live', l: 'Sanctions Check' }].map(s => (
@@ -161,7 +162,7 @@ export default function CalculatorPage() {
                         ))}
                     </div>
                     <button onClick={() => calcRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                        className="inline-flex items-center px-7 py-3.5 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-colors text-xs uppercase tracking-widest font-inter">
+                        className="inline-flex items-center px-7 py-3.5 bg-white text-black font-semibold rounded-xl hover:bg-zinc-100 transition-colors text-xs uppercase tracking-widest font-inter">
                         Calculate Rate <ArrowRight className="ml-2 w-4 h-4" />
                     </button>
                 </div>
@@ -232,7 +233,7 @@ export default function CalculatorPage() {
                                     <label className="block text-xs font-medium text-zinc-500 font-inter">Commodity</label>
                                     <div className="relative">
                                         <select value={commodity} onChange={e => { setCommodity(e.target.value); setResult(null) }}
-                                            className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-sm font-medium text-white font-inter focus:border-white/20 outline-none appearance-none cursor-pointer">
+                                            className="w-full bg-black border border-white/5 rounded-lg px-3 py-2.5 text-sm font-medium text-white font-inter focus:border-zinc-700 outline-none appearance-none cursor-pointer">
                                             <option value="General" className="bg-zinc-900">General Cargo</option>
                                             <option value="Hazardous" className="bg-zinc-900">Hazardous / IMDG (+38% + DGF $350)</option>
                                             <option value="Refrigerated" className="bg-zinc-900">Refrigerated / Reefer (+88%)</option>
@@ -416,8 +417,8 @@ export default function CalculatorPage() {
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready for real rates?</h2>
                     <p className="text-xl text-zinc-400 mb-10">Post your shipment and receive live quotes from verified freight forwarders within hours.</p>
                     <div className="flex justify-center gap-4 flex-wrap">
-                        <Link href="/search" className="px-8 py-4 bg-white text-black font-black rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">Get Live Quotes</Link>
-                        <Link href="/services/ocean-freight" className="px-8 py-4 bg-transparent border border-white/20 text-white font-black rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-widest font-inter">Ocean Services</Link>
+                        <Link href="/search" className="px-8 py-4 bg-white text-black font-semibold rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">Get Live Quotes</Link>
+                        <Link href="/services/ocean-freight" className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-widest font-inter">Ocean Services</Link>
                     </div>
                 </div>
             </section>

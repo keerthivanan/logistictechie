@@ -32,7 +32,7 @@ async def get_current_user(
             is_blacklisted = await _redis_mod.redis_client.get(f"blacklist:{token}")
             if is_blacklisted:
                 raise HTTPException(status_code=401, detail="Token has been revoked/logged out")
-                
+
         payload = security.decode_token(token)
         token_data = payload.get("sub")
     except (JWTError, ValidationError):
@@ -43,6 +43,18 @@ async def get_current_user(
     user = await crud.user.get_by_email(db, email=token_data)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Reject tokens issued before the last password reset (kills all existing sessions)
+    if _redis_mod.redis_client:
+        pw_changed_at = await _redis_mod.redis_client.get(f"pw_changed_at:{user.id}")
+        if pw_changed_at:
+            token_iat = payload.get("iat", 0)
+            if token_iat < int(pw_changed_at.decode()):
+                raise HTTPException(
+                    status_code=401,
+                    detail="Session expired after a password change. Please log in again."
+                )
+
     return user
 
 def get_current_active_user(
@@ -53,7 +65,6 @@ def get_current_active_user(
     return current_user
 
 async def get_admin_user(
-    db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> User:
     """Only the configured ADMIN_EMAIL can access admin endpoints."""
@@ -63,10 +74,6 @@ async def get_admin_user(
         raise HTTPException(status_code=500, detail="ADMIN_EMAIL not configured on server.")
     if current_user.email.lower() != admin_email.lower():
         raise HTTPException(status_code=403, detail="Access denied. Admin only.")
-    # Auto-promote role to 'admin' so the frontend can use role checks
-    if current_user.role != "admin":
-        current_user.role = "admin"
-        await db.commit()
     return current_user
 
 async def get_current_user_optional(

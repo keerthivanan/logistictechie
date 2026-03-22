@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import { Mail, MapPin, Phone, CheckCircle2 } from 'lucide-react'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 const contactInfo = [
     {
@@ -27,6 +28,7 @@ const contactInfo = [
 ]
 
 export default function ContactPage() {
+    const t = useT()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [subject, setSubject] = useState('')
@@ -66,8 +68,8 @@ export default function ContactPage() {
 
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">
-                        Contact Us
+                    <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-2">
+                        {t('contact.title')}
                     </h1>
                     <p className="text-xs text-zinc-500 font-inter">No sales calls. No bots. Just real support from the team that built this — we respond within 2 business hours.</p>
                 </div>
@@ -90,6 +92,10 @@ export default function ContactPage() {
                                 </div>
                             </div>
                         ))}
+                        {/* Logo at bottom of contact info card */}
+                        <div className="p-5 flex items-center justify-center">
+                            <img src="/cargolink.png" alt="CargoLink" className="h-16 w-auto object-contain opacity-80" />
+                        </div>
                     </div>
 
                     {/* Contact form card */}
@@ -106,7 +112,7 @@ export default function ContactPage() {
                             <form onSubmit={handleSubmit} className="space-y-3">
                                 <input
                                     type="text"
-                                    placeholder="Your name"
+                                    placeholder={t('contact.name')}
                                     value={name}
                                     onChange={e => setName(e.target.value)}
                                     className="w-full bg-black border border-white/[0.08] py-3 px-4 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-all font-inter"
@@ -127,7 +133,7 @@ export default function ContactPage() {
                                     className="w-full bg-black border border-white/[0.08] py-3 px-4 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-all font-inter"
                                 />
                                 <textarea
-                                    placeholder="Your message"
+                                    placeholder={t('contact.message')}
                                     rows={4}
                                     value={message}
                                     onChange={e => setMessage(e.target.value)}
@@ -137,9 +143,9 @@ export default function ContactPage() {
                                 <button
                                     type="submit"
                                     disabled={sending || !email.trim() || !message.trim()}
-                                    className="w-full bg-white text-black py-3.5 rounded-xl text-xs font-black uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors disabled:opacity-50"
+                                    className="w-full bg-white text-black py-3.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors disabled:opacity-50"
                                 >
-                                    {sending ? 'Sending...' : 'Send Message'}
+                                    {sending ? 'Sending...' : t('contact.send')}
                                 </button>
                             </form>
                         )}

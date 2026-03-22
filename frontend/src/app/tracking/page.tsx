@@ -4,10 +4,13 @@ import { useState, useEffect, Suspense, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { Ship, MapPin, Package, Clock, Shield, Search, Globe, ChevronRight, Loader2, Anchor, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Ship, MapPin, Anchor, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Spinner, FullPageSpinner } from '@/components/ui/Spinner'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 function TrackingContent() {
+    const t = useT()
     const searchParams = useSearchParams()
     const id = searchParams.get('id')
     const [tracking, setTracking] = useState<any>(null)
@@ -35,14 +38,14 @@ function TrackingContent() {
 
     if (!id) return (
         <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-            <h2 className="text-3xl font-bold mb-4">Global Tracking</h2>
-            <p className="text-gray-400 mb-8">Enter a Booking Reference or Container ID to initialize telemetry.</p>
+            <h2 className="text-3xl font-bold mb-4">{t('track.title')}</h2>
+            <p className="text-gray-400 mb-8">{t('track.sub')}</p>
             <div className="max-w-md mx-auto flex gap-2">
                 <input
                     type="text"
                     value={inputId}
                     onChange={(e) => setInputId(e.target.value)}
-                    placeholder="BK-XXXXXXXX or MRKU1234567"
+                    placeholder={t('track.placeholder')}
                     className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-white transition-all"
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && inputId.trim()) {
@@ -54,15 +57,15 @@ function TrackingContent() {
                     onClick={() => { if (inputId.trim()) window.location.href = `/tracking?id=${encodeURIComponent(inputId.trim())}` }}
                     className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all"
                 >
-                    Track
+                    {t('track.cta')}
                 </button>
             </div>
         </div>
     )
 
     if (loading) return (
-        <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-10 h-10 animate-spin text-white" />
+        <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+            <Spinner size="lg" />
             <div className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500">Connecting to AIS Satellite Node...</div>
         </div>
     )
@@ -211,7 +214,7 @@ export default function TrackingPage() {
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
             <main className="pt-24 pb-12">
-                <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+                <Suspense fallback={<FullPageSpinner />}>
                     <TrackingContent />
                 </Suspense>
             </main>

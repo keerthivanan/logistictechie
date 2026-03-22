@@ -69,7 +69,7 @@ export default function ForwarderDirectoryPage() {
 
                 {/* Hero */}
                 <div className="text-center mb-12">
-                    <h1 className="text-2xl md:text-3xl font-black font-outfit uppercase tracking-tight text-white mb-3">
+                    <h1 className="text-2xl md:text-3xl font-semibold font-outfit uppercase tracking-tight text-white mb-3">
                         Global Logistics Directory
                     </h1>
                     <p className="text-xs text-zinc-500 font-inter mb-8">Browse verified freight forwarders from around the world.</p>
@@ -123,7 +123,7 @@ export default function ForwarderDirectoryPage() {
                                             </div>
 
                                             <div className="flex flex-col items-end gap-1.5">
-                                                <div className="text-[8px] font-black text-white/40 tracking-[0.2em] font-inter uppercase">
+                                                <div className="text-[8px] font-semibold text-white/40 tracking-[0.2em] font-inter uppercase">
                                                     {forwarder.forwarder_id || 'O-REG-7402'}
                                                 </div>
                                                 <div className="flex items-center gap-1.5 border border-white/10 px-2.5 py-1 rounded-full bg-white/[0.02]">
@@ -135,7 +135,7 @@ export default function ForwarderDirectoryPage() {
 
                                         <div className="flex-grow space-y-6">
                                             <div>
-                                                <h3 className="text-2xl font-black mb-2 tracking-tighter font-outfit uppercase group-hover:text-white transition-colors duration-300">
+                                                <h3 className="text-2xl font-semibold mb-2 tracking-tighter font-outfit uppercase group-hover:text-white transition-colors duration-300">
                                                     {forwarder.company_name}
                                                 </h3>
                                                 <div className="flex items-center text-white/40 text-[9px] font-bold uppercase tracking-[0.15em] font-inter">
@@ -150,7 +150,7 @@ export default function ForwarderDirectoryPage() {
                                                         <Globe className="w-3.5 h-3.5 mr-3 opacity-30" />
                                                         Network Status
                                                     </div>
-                                                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-0.5 rounded">Active</span>
+                                                    <span className="text-[8px] font-semibold text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-0.5 rounded">Active</span>
                                                 </div>
 
                                                 {forwarder.website && (
@@ -167,7 +167,7 @@ export default function ForwarderDirectoryPage() {
                                             </div>
                                         </div>
 
-                                        <button className="w-full mt-10 bg-white text-black py-4 rounded-2xl text-[9px] font-black uppercase tracking-[0.4em] transition-all duration-500 hover:bg-zinc-200 active:scale-[0.97] shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                                        <button className="w-full mt-10 bg-white text-black py-4 rounded-2xl text-[9px] font-semibold uppercase tracking-[0.4em] transition-all duration-500 hover:bg-zinc-200 active:scale-[0.97] shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                                             Initiate Connection
                                         </button>
                                     </div>

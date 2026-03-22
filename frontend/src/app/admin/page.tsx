@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 import {
     CheckCircle2, XCircle, Clock, Users, Building2, Globe,
-    Phone, FileText, RefreshCw, ShieldAlert, Package,
+    Phone, FileText, RefreshCw, Package,
     TrendingUp, UserCheck, UserX, Briefcase, ShoppingBag,
     AlertCircle,
 } from 'lucide-react'
@@ -42,18 +42,15 @@ interface UserRow {
 }
 
 interface AdminStats {
-    // users
     total_users: number
     active_users: number
     inactive_users: number
     forwarder_users: number
     regular_users: number
-    // forwarders
     total_forwarders: number
     pending_applications: number
     active_forwarders: number
     rejected_applications: number
-    // marketplace
     total_requests: number
     open_requests: number
     closed_requests: number
@@ -83,10 +80,16 @@ export default function AdminPage() {
     const [allForwarders, setAllForwarders] = useState<ForwarderApp[]>([])
     const [allUsers, setAllUsers] = useState<UserRow[]>([])
     const [loading, setLoading] = useState(true)
-    const [accessDenied, setAccessDenied] = useState(false)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
     const [tab, setTab] = useState<Tab>('pending')
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+
+    // GATE: redirect anyone who is not admin — no flash, no "access denied" page
+    useEffect(() => {
+        if (authLoading) return
+        if (!user) { router.replace('/login'); return }
+        if (user.role !== 'admin') { router.replace('/dashboard'); return }
+    }, [user, authLoading, router])
 
     const showToast = (msg: string, ok: boolean) => {
         setToast({ msg, ok })
@@ -95,7 +98,6 @@ export default function AdminPage() {
 
     const fetchData = async () => {
         setLoading(true)
-        setAccessDenied(false)
         try {
             const token = localStorage.getItem('token')
             const headers = { Authorization: `Bearer ${token}` }
@@ -105,7 +107,11 @@ export default function AdminPage() {
                 apiFetch('/api/admin/all-forwarders', { headers }),
                 apiFetch('/api/admin/all-users', { headers }),
             ])
-            if (statsRes.status === 403) { setAccessDenied(true); return }
+            // If somehow unauthorized (edge case), redirect silently
+            if (statsRes.status === 401 || statsRes.status === 403) {
+                router.replace('/dashboard')
+                return
+            }
             setStats(await statsRes.json())
             setPending(await pendingRes.json())
             setAllForwarders(await allRes.json())
@@ -118,8 +124,7 @@ export default function AdminPage() {
     }
 
     useEffect(() => {
-        if (authLoading) return
-        if (!user) { router.push('/login'); return }
+        if (authLoading || !user || user.role !== 'admin') return
         fetchData()
     }, [user, authLoading])
 
@@ -168,25 +173,15 @@ export default function AdminPage() {
         }
     }
 
-    if (authLoading || (loading && !accessDenied)) {
+    // Show nothing while auth is loading or user is not admin — no flash
+    if (authLoading || !user || user.role !== 'admin') {
+        return null
+    }
+
+    if (loading) {
         return (
             <div className="min-h-screen bg-black text-white flex items-center justify-center">
                 <RefreshCw className="w-6 h-6 animate-spin text-zinc-500" />
-            </div>
-        )
-    }
-
-    if (accessDenied) {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <div className="text-center space-y-4">
-                    <ShieldAlert className="w-12 h-12 text-red-500 mx-auto" />
-                    <p className="text-lg font-black uppercase tracking-tight">Access Denied</p>
-                    <p className="text-sm text-zinc-500">This panel is restricted to administrators only.</p>
-                    <button onClick={() => router.push('/dashboard')} className="text-xs text-zinc-600 hover:text-white transition-colors">
-                        ← Back to Dashboard
-                    </button>
-                </div>
             </div>
         )
     }
@@ -225,21 +220,19 @@ export default function AdminPage() {
     return (
         <div className="min-h-screen bg-[#050505] text-white font-inter">
 
-            {/* Toast */}
             {toast && (
                 <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl text-sm font-bold border shadow-2xl transition-all ${toast.ok ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                     {toast.msg}
                 </div>
             )}
 
-            {/* Header */}
             <div className="border-b border-white/5 px-8 py-5 flex items-center justify-between sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40">
-                <div>
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">CargoLink</p>
-                    <h1 className="text-lg font-black uppercase tracking-tight">Admin Control Panel</h1>
+                <div className="flex items-center gap-4">
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
+                    <h1 className="text-lg font-semibold uppercase tracking-tight">Admin Control Panel</h1>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-xs text-zinc-500 font-mono">{user?.email}</span>
+                    <span className="text-xs text-zinc-500 font-mono">{user.email}</span>
                     <div className="px-2 py-1 rounded border border-purple-500/20 bg-purple-500/5 text-purple-400 text-[10px] font-bold uppercase tracking-widest">
                         Admin
                     </div>
@@ -251,15 +244,14 @@ export default function AdminPage() {
 
             <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
 
-                {/* Stats Groups */}
                 {stats && statGroups.map(group => (
                     <div key={group.label}>
-                        <h2 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-4">{group.label}</h2>
+                        <h2 className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.3em] mb-4">{group.label}</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                             {group.items.map(({ icon: Icon, label, value, color }) => (
                                 <div key={label} className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
                                     <Icon className={`w-4 h-4 ${color} mb-3`} />
-                                    <p className="text-2xl font-black font-mono text-white">{value}</p>
+                                    <p className="text-2xl font-semibold font-mono text-white">{value}</p>
                                     <p className="text-[10px] text-zinc-600 uppercase tracking-widest mt-1">{label}</p>
                                 </div>
                             ))}
@@ -267,7 +259,6 @@ export default function AdminPage() {
                     </div>
                 ))}
 
-                {/* Tabs */}
                 <div className="flex gap-2 flex-wrap">
                     {([
                         { key: 'pending', label: `Pending Review (${pending.length})` },
@@ -281,7 +272,6 @@ export default function AdminPage() {
                     ))}
                 </div>
 
-                {/* PENDING APPLICATIONS */}
                 {tab === 'pending' && (
                     <div className="space-y-4">
                         {pending.length === 0 ? (
@@ -294,7 +284,7 @@ export default function AdminPage() {
                             <div key={fwd.forwarder_id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4 hover:border-white/10 transition-all">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-sm font-black text-white truncate">{fwd.company_name}</h3>
+                                        <h3 className="text-sm font-semibold text-white truncate">{fwd.company_name}</h3>
                                         <p className="text-xs text-zinc-500 mt-0.5">{fwd.contact_person}</p>
                                     </div>
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded border flex-shrink-0 ${statusColor(fwd.status)}`}>{fwd.status}</span>
@@ -351,14 +341,13 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* ALL FORWARDERS */}
                 {tab === 'all' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.02]">
                                     {['Company', 'Contact', 'Email', 'Country', 'Specializations', 'Status', 'Verified', 'Applied'].map(h => (
-                                        <th key={h} className="text-left px-4 py-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
+                                        <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -388,14 +377,13 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* ALL USERS */}
                 {tab === 'users' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.02]">
                                     {['Name', 'Email', 'Account ID', 'Role', 'Status', 'Joined'].map(h => (
-                                        <th key={h} className="text-left px-4 py-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
+                                        <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>
                             </thead>

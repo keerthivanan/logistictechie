@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Ship, X, Loader2, Search } from 'lucide-react';
-import { API_URL } from '@/lib/config';
+import { Ship, X, Search } from 'lucide-react';
+import { Spinner } from '@/components/ui/Spinner';
+import { apiFetch } from '@/lib/config';
 
 interface VesselAutocompleteProps {
     name: string;
@@ -41,8 +42,7 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
         }
         setIsSearching(true);
         try {
-            const url = `${API_URL}/api/references/vessels/search?q=${encodeURIComponent(q)}`;
-            const res = await fetch(url);
+            const res = await apiFetch(`/api/references/vessels/search?q=${encodeURIComponent(q)}`);
             const data = await res.json();
             setSuggestions(data.results || []);
         } catch (err) {
@@ -85,7 +85,7 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
                     onChange={handleInputChange}
                     onFocus={() => setIsOpen(true)}
                     placeholder={placeholder || "Search Global Vessel Fleet..."}
-                    className="w-full bg-black border border-white/5 rounded-2xl pl-12 pr-12 py-4 text-[10px] font-black text-white placeholder:text-white/10 focus:border-white/20 outline-none font-inter transition-all shadow-[inset_0_0_20px_rgba(255,255,255,0.01)]"
+                    className="w-full bg-black border border-white/5 rounded-xl pl-12 pr-12 py-3 text-sm font-medium text-white placeholder:text-zinc-700 focus:border-zinc-700 outline-none font-inter transition-colors"
                     autoComplete="off"
                 />
 
@@ -101,14 +101,19 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
 
                 {isSearching && (
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
-                        <Loader2 className="w-4 h-4 text-white/20 animate-spin" />
+                        <Spinner size="sm" />
                     </div>
                 )}
             </div>
 
             {isOpen && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-black border border-white/10 rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,1)] z-[100] overflow-hidden backdrop-blur-3xl">
-                    {suggestions.length > 0 ? (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-black border border-white/10 rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,1)] z-[100] overflow-hidden backdrop-blur-3xl max-h-56 overflow-y-auto">
+                    {isSearching ? (
+                        <div className="flex items-center justify-center gap-2.5 px-6 py-5">
+                            <Spinner size="sm" />
+                            <span className="text-[11px] text-zinc-500 font-inter font-semibold uppercase tracking-widest">Searching vessels...</span>
+                        </div>
+                    ) : suggestions.length > 0 ? (
                         <div className="divide-y divide-white/5">
                             {suggestions.map((item, idx) => (
                                 <button
@@ -117,7 +122,7 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
                                     className="w-full px-6 py-4 text-left hover:bg-white/[0.03] flex items-center justify-between group/item transition-colors"
                                 >
                                     <div className="flex flex-col gap-1">
-                                        <span className="text-[11px] font-black font-outfit text-white group-hover/item:text-white transition-colors uppercase tracking-tight">
+                                        <span className="text-[11px] font-semibold font-outfit text-white group-hover/item:text-white transition-colors uppercase tracking-tight">
                                             {item.name}
                                         </span>
                                         <div className="flex items-center gap-3">
@@ -134,23 +139,17 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
                                 </button>
                             ))}
                         </div>
-                    ) : !isSearching && query.length >= 2 && (
+                    ) : query.length >= 2 ? (
                         <div className="p-8 text-center">
                             <Ship className="w-8 h-8 text-white/5 mx-auto mb-3" />
-                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-black">
-                                No vessels detected in sector &quot;{query}&quot;
+                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-semibold">
+                                No vessels detected for &quot;{query}&quot;
                             </p>
                         </div>
-                    )}
-                    {query.length < 2 && !isSearching && (
+                    ) : (
                         <div className="p-8 text-center">
-                            <div className="flex justify-center gap-2 mb-3">
-                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                <div className="w-1 h-1 bg-white/20 rounded-full animate-bounce" />
-                            </div>
-                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-black">
-                                Awaiting fleet identification...
+                            <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-semibold">
+                                Type at least 2 characters to search vessels
                             </p>
                         </div>
                     )}

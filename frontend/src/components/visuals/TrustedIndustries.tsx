@@ -19,7 +19,7 @@ export default function TrustedIndustries() {
             <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
             {/* Label */}
-            <p className="text-center text-[10px] font-black text-zinc-600 uppercase tracking-[0.25em] font-inter mb-10">
+            <p className="text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.25em] font-inter mb-10">
                 Powering complex supply chains across
             </p>
 
@@ -31,7 +31,7 @@ export default function TrustedIndustries() {
                         className="flex items-center gap-2.5 text-zinc-500 hover:text-white transition-colors cursor-pointer whitespace-nowrap mx-10 group"
                     >
                         <item.icon className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
-                        <span className="text-sm font-black font-inter tracking-wide">{item.name}</span>
+                        <span className="text-sm font-semibold font-inter tracking-wide">{item.name}</span>
                     </div>
                 ))}
             </div>

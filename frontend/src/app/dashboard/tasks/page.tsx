@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { PageSpinner } from '@/components/ui/Spinner'
 import {
     CheckCircle2,
     Circle,
@@ -79,14 +80,7 @@ export default function TasksPage() {
         }
     }
 
-    if (loading || authLoading) {
-        return (
-            <div className="h-full flex flex-col items-center justify-center space-y-4">
-                <Loader2 className="w-6 h-6 animate-spin text-white opacity-10" />
-                <p className="text-xs text-zinc-600">Loading tasks...</p>
-            </div>
-        )
-    }
+    if (loading || authLoading) return <PageSpinner />
 
     const priorityMap: Record<string, number> = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 }
 

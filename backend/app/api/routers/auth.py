@@ -21,6 +21,15 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+import os as _os
+
+def _effective_role(user_email: str, db_role: str) -> str:
+    """Returns 'admin' if this email is the configured admin, otherwise the DB role."""
+    admin_email = _os.getenv("ADMIN_EMAIL", "")
+    if admin_email and user_email.lower() == admin_email.lower():
+        return "admin"
+    return db_role
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
@@ -139,22 +148,23 @@ async def social_sync(
     if not user.is_active:
         raise HTTPException(status_code=401, detail="Account Inactive")
 
+    role = _effective_role(user.email, user.role)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={
-            "sub": user.email, 
-            "user_id": user.id, 
+            "sub": user.email,
+            "user_id": user.id,
             "name": user.full_name or "User",
             "sovereign_id": user.sovereign_id,
-            "role": user.role, # ADDED: Role Visibility
-            "website": user.website # ADDED: Website Visibility
+            "role": role,
+            "website": user.website
         },
         expires_delta=access_token_expires
     )
     refresh_token = security.create_refresh_token(
         data={"sub": user.email, "user_id": user.id}
     )
-    
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -164,8 +174,8 @@ async def social_sync(
         "user_email": user.email,
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
-        "role": user.role,
-        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
+        "role": role,
+        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
         "avatar_url": user.avatar_url,
         "website": user.website
     }
@@ -246,13 +256,14 @@ async def login_for_access_token(
     if int(user.failed_login_attempts or 0) > 0:
         await crud.user.update(db, user_id=str(user.id), obj_in={"failed_login_attempts": 0})
     
+    role = _effective_role(user.email, user.role)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={
             "sub": user.email,
             "user_id": user.id,
             "name": user.full_name or "User",
-            "role": user.role,
+            "role": role,
             "website": user.website,
             "sovereign_id": user.sovereign_id,
         },
@@ -264,10 +275,10 @@ async def login_for_access_token(
     # AUDIT PILLAR: Log Login event
     login_ip = raw_request.client.host if raw_request.client else None
     await activity_service.log(
-        db, 
-        user_id=user.id, 
-        action="LOGIN", 
-        entity_type="USER", 
+        db,
+        user_id=user.id,
+        action="LOGIN",
+        entity_type="USER",
         entity_id=user.id,
         ip_address=login_ip
     )
@@ -280,8 +291,8 @@ async def login_for_access_token(
         "user_name": user.full_name or "User",
         "user_email": user.email,
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
-        "role": user.role,
-        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
+        "role": role,
+        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url,
         "website": user.website
@@ -305,12 +316,13 @@ async def refresh_access_token(
         if user.is_locked:
             raise HTTPException(status_code=401, detail="Account is locked. Contact support.")
 
+        role = _effective_role(user.email, user.role)
         access_token = security.create_access_token(
             data={
                 "sub": user.email,
                 "user_id": user.id,
                 "name": user.full_name or "User",
-                "role": user.role,
+                "role": role,
                 "website": user.website,
                 "sovereign_id": user.sovereign_id,
             }
@@ -328,8 +340,8 @@ async def refresh_access_token(
             "sovereign_id": user.sovereign_id,
             "onboarding_completed": user.onboarding_completed or False,
             "avatar_url": user.avatar_url,
-            "role": user.role,
-            "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
+            "role": role,
+            "forwarder_id": user.sovereign_id if role == "forwarder" else None,
             "website": user.website,
         }
     except Exception as e:
@@ -402,20 +414,12 @@ async def register_user(
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(
-    token: str = Depends(reusable_oauth2),
-    db: AsyncSession = Depends(deps.get_db)
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get current user profile."""
-    payload = security.decode_token(token)
-    email: str = payload.get("sub")
-    
-    if email is None:
-        raise HTTPException(status_code=401, detail="Invalid Credentials")
+    user = current_user
         
-    user = await crud.user.get_by_email(db, email=email)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-        
+    role = _effective_role(user.email, user.role)
     return {
         "id": str(user.id),
         "email": user.email,
@@ -427,8 +431,8 @@ async def read_users_me(
         "sovereign_id": user.sovereign_id,
         "onboarding_completed": user.onboarding_completed,
         "avatar_url": user.avatar_url,
-        "role": user.role,
-        "forwarder_id": user.sovereign_id if user.role == "forwarder" else None,
+        "role": role,
+        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
     }
 
 class ProfileUpdate(BaseModel):
@@ -451,7 +455,7 @@ async def update_profile(
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token")
         
-    updated_user = await crud.user.update(db, user_id=user_id, obj_in=update_data.dict(exclude_unset=True))
+    updated_user = await crud.user.update(db, user_id=user_id, obj_in=update_data.model_dump(exclude_unset=True))
     
     # AUDIT PILLAR: Log Profile Update
     await activity_service.log(
@@ -505,15 +509,13 @@ class PasswordChange(BaseModel):
 @router.post("/change-password")
 async def change_password(
     data: PasswordChange,
-    token: str = Depends(reusable_oauth2),
+    current_user: User = Depends(deps.get_current_user),
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Change user password."""
-    payload = security.decode_token(token)
-    user_id = payload.get("user_id")
-    
-    user = await crud.user.get_by_email(db, email=payload.get("sub"))
-    if not user or not security.verify_password(data.current_password, user.password_hash):
+    user_id = current_user.id
+    user = current_user
+    if not user.password_hash or not security.verify_password(data.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Invalid current password")
     
     if not security.validate_password_strength(data.new_password):
@@ -535,9 +537,123 @@ async def change_password(
 class ForgotPassword(BaseModel):
     email: str
 
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+
 @router.post("/forgot-password")
-async def forgot_password(data: ForgotPassword):
-    """Request password reset (Simulation)."""
-    # In production: Verify email, generate token, send email via SendGrid
+async def forgot_password(data: ForgotPassword, db: AsyncSession = Depends(deps.get_db)):
+    """
+    Generates a single-use signed 1-hour reset token and fires a webhook so n8n emails the link.
+    Security:
+    - Rate limited to 1 request per 2 minutes per email (prevents inbox flooding)
+    - Each new request invalidates the previous token (only latest token is valid)
+    - Always returns the same response to prevent email enumeration
+    """
+    import os, uuid, time
+    from app.services.webhook import webhook_service
+    from app.core import redis as _redis_mod
+
+    email = data.email.lower().strip()
+
+    # Rate limit: 1 reset request per email per 2 minutes
+    if _redis_mod.redis_client:
+        cooldown_key = f"reset_cooldown:{email}"
+        if await _redis_mod.redis_client.get(cooldown_key):
+            # Silent success to avoid timing attacks revealing whether email is registered
+            return {"success": True, "message": "If this email is registered, a reset link will be sent."}
+
+    user_res = await db.execute(select(User).where(User.email == email))
+    user = user_res.scalars().first()
+
+    if user:
+        jti = str(uuid.uuid4())
+        reset_token = security.create_access_token(
+            data={"sub": user.email, "purpose": "password_reset", "jti": jti},
+            expires_delta=timedelta(minutes=60),
+        )
+        if _redis_mod.redis_client:
+            # Store latest JTI — overwrites any previous token (only 1 valid at a time)
+            await _redis_mod.redis_client.setex(f"reset_jti:{user.id}", 3600, jti)
+            # Rate limit this email for 2 minutes
+            await _redis_mod.redis_client.setex(f"reset_cooldown:{email}", 120, "1")
+
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        reset_url = f"{frontend_url}/reset-password?token={reset_token}"
+        await webhook_service.trigger_password_reset_webhook({
+            "email": user.email,
+            "full_name": user.full_name or "User",
+            "reset_url": reset_url,
+        })
+
     return {"success": True, "message": "If this email is registered, a reset link will be sent."}
+
+
+@router.post("/reset-password")
+async def reset_password(data: ResetPassword, db: AsyncSession = Depends(deps.get_db)):
+    """
+    Verifies and consumes the password reset token, then sets the new password.
+    Security:
+    - Token is single-use (deleted from Redis on first use)
+    - Only the LATEST issued token is valid (replaces any older link)
+    - All existing sessions are invalidated after reset (kills attacker sessions too)
+    - Security alert fired via n8n after successful reset
+    """
+    import time
+    from app.services.webhook import webhook_service
+    from app.core import redis as _redis_mod
+
+    try:
+        payload = security.decode_token(data.token)
+    except HTTPException:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset link. Please request a new one.")
+
+    if payload.get("purpose") != "password_reset":
+        raise HTTPException(status_code=400, detail="Invalid reset token.")
+
+    email = payload.get("sub")
+    jti = payload.get("jti")
+    if not email or not jti:
+        raise HTTPException(status_code=400, detail="Invalid reset token.")
+
+    user_res = await db.execute(select(User).where(User.email == email))
+    user = user_res.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Account not found.")
+
+    # Verify JTI — ensures this is the latest token and hasn't been used yet
+    if _redis_mod.redis_client:
+        stored_jti = await _redis_mod.redis_client.get(f"reset_jti:{user.id}")
+        if not stored_jti or stored_jti.decode() != jti:
+            raise HTTPException(
+                status_code=400,
+                detail="This reset link has already been used or a newer one was requested. Please request a new link."
+            )
+
+    if not security.validate_password_strength(data.new_password):
+        raise HTTPException(
+            status_code=400,
+            detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character."
+        )
+
+    # Update password
+    await crud.user.update(db, user_id=user.id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
+
+    if _redis_mod.redis_client:
+        # Consume the token — it cannot be used again
+        await _redis_mod.redis_client.delete(f"reset_jti:{user.id}")
+        # Invalidate ALL existing sessions — tokens issued before NOW are rejected
+        # This logs out any attacker who had a live session on this account
+        await _redis_mod.redis_client.setex(f"pw_changed_at:{user.id}", 86400 * 30, str(int(time.time())))
+
+    # Fire security alert so the real user knows their password was just changed
+    await webhook_service.trigger_password_reset_webhook({
+        "email": user.email,
+        "full_name": user.full_name or "User",
+        "reset_url": "",
+        "is_confirmation": True,
+        "alert": "Your CargoLink password was just reset. If this wasn't you, contact support immediately.",
+    })
+
+    return {"success": True, "message": "Password reset successfully. You can now log in with your new password."}
 

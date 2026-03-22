@@ -12,6 +12,15 @@ html {
   scroll-padding-top: 5rem;
 }
 
+/* Remove all focus outlines / rings globally */
+*,
+*:focus,
+*:focus-visible,
+*:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);

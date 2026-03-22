@@ -26,7 +26,7 @@ export default function IntegrationEcosystem() {
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 text-xs font-inter mb-6">
                             <Workflow className="w-3.5 h-3.5" /> Seamless Integration
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight mb-5 font-outfit text-white">
+                        <h2 className="text-3xl font-semibold tracking-tight mb-5 font-outfit text-white">
                             Your Stack, Supercharged.
                         </h2>
                         <p className="text-sm text-zinc-400 mb-8 leading-relaxed font-inter">
@@ -47,7 +47,7 @@ export default function IntegrationEcosystem() {
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-black text-white font-inter">{item.title}</h4>
+                                        <h4 className="text-sm font-semibold text-white font-inter">{item.title}</h4>
                                         <p className="text-xs text-zinc-500 font-inter mt-0.5">{item.desc}</p>
                                     </div>
                                 </div>
@@ -86,7 +86,7 @@ export default function IntegrationEcosystem() {
                         <div className="relative z-10 w-28 h-28 rounded-full bg-[#0e0e0e] border border-white/[0.10] flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.08)]">
                             {/* Subtle pulse ring */}
                             <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping opacity-30" />
-                            <span className="font-black text-xl tracking-tight text-white font-outfit">CL</span>
+                            <img src="/cargolink.png" alt="CargoLink" className="h-16 w-16 object-contain opacity-90" />
                         </div>
 
                         {/* Orbiting satellites */}

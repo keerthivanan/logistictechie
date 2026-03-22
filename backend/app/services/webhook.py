@@ -20,6 +20,11 @@ class WebhookService:
         self.booking_webhook = os.getenv("N8N_BOOKING_WEBHOOK")
         self.quotes_complete_webhook = os.getenv("N8N_QUOTES_COMPLETE_WEBHOOK")
         self.new_conversation_webhook = os.getenv("N8N_NEW_CONVERSATION_WEBHOOK")
+        # WF1 handles shipper confirmation email internally (email field already in WF1 payload)
+        # WF2 handles forwarder bid confirmation — portal bids fire bid_confirmation_webhook
+        # which maps to WF2's second Webhook Trigger node in n8n
+        self.bid_confirmation_webhook = os.getenv("N8N_BID_CONFIRMATION_WEBHOOK")
+        self.password_reset_webhook = os.getenv("N8N_PASSWORD_RESET_WEBHOOK")
         if not os.getenv("OMEGO_API_SECRET", ""):
             logger.warning("[CRITICAL] OMEGO_API_SECRET is empty. Webhook authentication is bypassed!")
 
@@ -113,6 +118,33 @@ class WebhookService:
             self.booking_webhook,
             booking_data,
             "BOOKING_CONFIRMED"
+        )
+
+    async def trigger_password_reset_webhook(self, payload: dict):
+        """
+        Fires in two cases:
+        1. User requests reset link → is_confirmation=False → n8n sends reset link email
+        2. Password successfully changed → is_confirmation=True → n8n sends security alert email
+        Payload keys: email, full_name, reset_url, is_confirmation, alert
+        """
+        return await self._trigger(
+            self.password_reset_webhook,
+            payload,
+            "PASSWORD_RESET"
+        )
+
+    async def trigger_bid_confirmation_webhook(self, payload: dict):
+        """
+        Fires after a forwarder submits a quote via the portal dashboard.
+        n8n sends a confirmation email to the forwarder:
+        'Your quote of $X for request {request_id} has been submitted successfully.'
+        Payload keys: forwarder_email, forwarder_company, forwarder_id,
+                      request_id, origin, destination, price, currency, submitted_at
+        """
+        return await self._trigger(
+            self.bid_confirmation_webhook,
+            payload,
+            "BID_CONFIRMATION"
         )
 
 webhook_service = WebhookService()

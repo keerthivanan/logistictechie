@@ -8,7 +8,7 @@ but validates identity via Forwarder.email + Forwarder.forwarder_id.
 Auth model: same as /api/forwarders/portal-bid — forwarder_id + email
 checked against the forwarders table, status must be ACTIVE.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func
 from app.db.session import get_db
@@ -44,7 +44,8 @@ class PortalMessageIn(BaseModel):
 class PortalRespondIn(BaseModel):
     forwarder_id: str
     email: str
-    action: str  # ACCEPT | REJECT
+    action: str  # ACCEPT | REJECT | COUNTER
+    counter_amount: Optional[float] = None
 
 
 class PortalCloseIn(BaseModel):
@@ -111,9 +112,13 @@ def _conv_dict(c: Conversation, last_message: Optional[ChatMessage] = None) -> d
         "agreed_price": float(c.agreed_price) if c.agreed_price is not None else None,
         "currency": c.currency,
         "status": c.status,
+        "quote_id": c.quote_id,
         "booking_id": c.booking_id,
+        "offer_side": c.offer_side,
         "shipper_close_req": c.shipper_close_req,
         "forwarder_close_req": c.forwarder_close_req,
+        "shipper_last_seen": c.shipper_last_seen.isoformat() if c.shipper_last_seen else None,
+        "forwarder_last_seen": c.forwarder_last_seen.isoformat() if c.forwarder_last_seen else None,
         "created_at": c.created_at,
         "last_message": _msg_dict(last_message) if last_message else None,
     }
@@ -123,8 +128,8 @@ def _conv_dict(c: Conversation, last_message: Optional[ChatMessage] = None) -> d
 
 @router.get("/list")
 async def list_portal_conversations(
-    forwarder_id: str = Query(...),
-    email: str = Query(...),
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -133,8 +138,8 @@ async def list_portal_conversations(
     # Validate credentials (no public_id needed for list)
     fwd_res = await db.execute(
         select(Forwarder).where(
-            Forwarder.forwarder_id == forwarder_id,
-            Forwarder.email == email,
+            Forwarder.forwarder_id == x_forwarder_id,
+            Forwarder.email == x_forwarder_email,
             Forwarder.status == "ACTIVE",
         )
     )
@@ -143,7 +148,7 @@ async def list_portal_conversations(
 
     convs_res = await db.execute(
         select(Conversation)
-        .where(Conversation.forwarder_id == forwarder_id)
+        .where(Conversation.forwarder_id == x_forwarder_id)
         .order_by(Conversation.updated_at.desc())
     )
     conversations = convs_res.scalars().all()
@@ -162,7 +167,7 @@ async def list_portal_conversations(
         unread_res = await db.execute(
             select(func.count(ChatMessage.id)).where(
                 ChatMessage.conversation_id == conv.id,
-                ChatMessage.sender_id != forwarder_id,
+                ChatMessage.sender_id != x_forwarder_id,
                 ChatMessage.is_read == False,  # noqa: E712
                 ChatMessage.sender_role != "SYSTEM",
             )
@@ -179,15 +184,15 @@ async def list_portal_conversations(
 @router.get("/{public_id}/messages")
 async def get_portal_messages(
     public_id: str,
-    forwarder_id: str = Query(...),
-    email: str = Query(...),
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Poll all messages for a conversation (forwarder portal).
     Also marks messages sent by shipper as read.
     """
-    _, conv = await _verify_portal_forwarder(forwarder_id, email, public_id, db)
+    _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
     msgs_res = await db.execute(
         select(ChatMessage)
@@ -196,10 +201,13 @@ async def get_portal_messages(
     )
     messages = msgs_res.scalars().all()
 
+    # Update forwarder last_seen on every poll
+    conv.forwarder_last_seen = _utcnow()
+
     # Mark incoming messages (not from forwarder, not SYSTEM) as read
     unread_ids = [
         m.id for m in messages
-        if m.sender_id != forwarder_id and not m.is_read and m.sender_role != "SYSTEM"
+        if m.sender_id != x_forwarder_id and not m.is_read and m.sender_role != "SYSTEM"
     ]
     if unread_ids:
         await db.execute(
@@ -207,7 +215,9 @@ async def get_portal_messages(
             .where(ChatMessage.id.in_(unread_ids))
             .values(is_read=True)
         )
-        await db.commit()
+
+    await db.commit()
+    await db.refresh(conv)
 
     return {
         "conversation": _conv_dict(conv),
@@ -235,6 +245,7 @@ async def send_portal_message(
         content=data.content,
         is_read=False,
     )
+    conv.updated_at = _utcnow()
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
@@ -253,21 +264,39 @@ async def portal_respond_offer(
 
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is closed.")
-    if conv.current_offer is None:
-        raise HTTPException(status_code=409, detail="No active offer to respond to.")
+    if conv.offer_side != "SHIPPER":
+        raise HTTPException(status_code=409, detail="No shipper offer to respond to.")
 
     action = data.action.upper()
-    if action not in ("ACCEPT", "REJECT"):
-        raise HTTPException(status_code=422, detail="Action must be ACCEPT or REJECT.")
+    if action not in ("ACCEPT", "REJECT", "COUNTER"):
+        raise HTTPException(status_code=422, detail="Action must be ACCEPT, REJECT, or COUNTER.")
 
     if action == "ACCEPT":
         conv.agreed_price = conv.current_offer
-        msg_content = f"Offer accepted — agreed price: {conv.currency} {float(conv.current_offer):,.2f}"
+        conv.current_offer = None
+        conv.offer_side = None
+        msg_content = f"Offer accepted — agreed price: {conv.currency} {float(conv.agreed_price):,.2f}"
         msg_type = "ACCEPTED"
-    else:
+
+    elif action == "REJECT":
+        conv.current_offer = None
+        conv.offer_side = None
         msg_content = f"Offer rejected. Original price stands: {conv.currency} {float(conv.original_price):,.2f}"
         msg_type = "REJECTED"
-        conv.current_offer = None
+
+    else:  # COUNTER
+        if not data.counter_amount:
+            raise HTTPException(status_code=422, detail="counter_amount is required for COUNTER action.")
+        shipper_offer = float(conv.current_offer)
+        original = float(conv.original_price)
+        if data.counter_amount <= shipper_offer:
+            raise HTTPException(status_code=422, detail=f"Counter must be higher than the shipper's offer ({conv.currency} {shipper_offer:,.2f}).")
+        if data.counter_amount >= original:
+            raise HTTPException(status_code=422, detail=f"Counter must be less than the original quoted price ({conv.currency} {original:,.2f}).")
+        conv.current_offer = data.counter_amount
+        conv.offer_side = "FORWARDER"
+        msg_content = f"Counter offer: {conv.currency} {data.counter_amount:,.2f}"
+        msg_type = "COUNTER_OFFER"
 
     msg = ChatMessage(
         conversation_id=conv.id,
@@ -275,6 +304,7 @@ async def portal_respond_offer(
         sender_id=data.forwarder_id,
         message_type=msg_type,
         content=msg_content,
+        offer_amount=data.counter_amount if msg_type == "COUNTER_OFFER" else None,
         is_read=False,
     )
     db.add(msg)
@@ -304,16 +334,15 @@ async def portal_close_deal(
     conv.forwarder_close_req = True
 
     if conv.shipper_close_req:
-        # Both confirmed — close everything
+        # Both confirmed — close this conversation, the request, and notify all others.
         conv.status = "CLOSED"
 
-        system_msg = ChatMessage(
+        db.add(ChatMessage(
             conversation_id=conv.id,
             sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
             content="✅ Deal closed by both parties. This conversation is now archived.",
             is_read=False,
-        )
-        db.add(system_msg)
+        ))
 
         # Close the marketplace request
         req_res = await db.execute(
@@ -323,7 +352,7 @@ async def portal_close_deal(
         if req and req.status != "CLOSED":
             req.status = "CLOSED"
 
-        # Cascade close all other OPEN conversations for this request
+        # Notify all other open conversations for this request
         other_convs_res = await db.execute(
             select(Conversation).where(
                 Conversation.request_id == conv.request_id,
@@ -336,7 +365,7 @@ async def portal_close_deal(
             db.add(ChatMessage(
                 conversation_id=other_conv.id,
                 sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-                content="This request has been fulfilled through another conversation. No further action required.",
+                content="This request has been fulfilled. The shipper has closed a deal with another forwarder.",
                 is_read=False,
             ))
 

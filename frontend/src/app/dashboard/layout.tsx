@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 const ACTION_MAP: Record<string, string> = {
     VECTOR_SEARCH: 'Freight Search',
@@ -39,10 +40,12 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
+    const t = useT()
     const pathname = usePathname()
     const router = useRouter()
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const [stats, setStats] = useState<any>(null)
+    const [unreadCount, setUnreadCount] = useState(0)
     const [searchQuery, setSearchQuery] = useState('')
     const [sortOpen, setSortOpen] = useState(false)
     const [filterOpen, setFilterOpen] = useState(false)
@@ -68,21 +71,55 @@ export default function DashboardLayout({
         if (user) fetchDashboardSummary()
     }, [user])
 
+    // Auth guard — redirect to login if not authenticated
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login')
+        }
+    }, [user, loading, router])
+
+    // Sync unread count from initial stats fetch
+    useEffect(() => {
+        if (stats?.unread_messages_count !== undefined) {
+            setUnreadCount(stats.unread_messages_count)
+        }
+    }, [stats])
+
+    // Poll unread count every 10 seconds — keeps badge live without full stats refetch
+    useEffect(() => {
+        if (!user) return
+        const poll = async () => {
+            try {
+                const token = localStorage.getItem('token')
+                if (!token) return
+                const res = await apiFetch('/api/conversations/unread-count', {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setUnreadCount(data.unread_count)
+                }
+            } catch {}
+        }
+        const interval = setInterval(poll, 10000)
+        return () => clearInterval(interval)
+    }, [user])
+
     const mainNav = [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { name: t('dash.dashboard'), href: '/dashboard', icon: LayoutDashboard },
         {
-            name: 'Tasks',
+            name: t('dash.tasks'),
             href: '/dashboard/tasks',
             icon: ClipboardList,
             badge: stats?.pending_tasks_count > 0 ? stats.pending_tasks_count.toString() : null
         },
-        { name: 'Activity', href: '/dashboard/activity', icon: ActivityIcon },
-        { name: 'Shipments', href: '/dashboard/shipments', icon: Package },
+        { name: t('dash.activity'), href: '/dashboard/activity', icon: ActivityIcon },
+        { name: t('dash.shipments'), href: '/dashboard/shipments', icon: Package },
         {
-            name: 'Messages',
+            name: t('dash.messages'),
             href: '/dashboard/messages',
             icon: MessageSquare,
-            badge: stats?.unread_messages_count > 0 ? stats.unread_messages_count.toString() : null
+            badge: unreadCount > 0 ? unreadCount.toString() : null
         },
     ]
 
@@ -92,18 +129,17 @@ export default function DashboardLayout({
     ]
 
     const partnerNav = [
-        { name: 'Partner Center', href: '/dashboard/partner', icon: Zap },
+        { name: t('dash.partner'), href: '/dashboard/partner', icon: Zap },
     ]
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black flex">
+        <div dir="ltr" className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black flex">
             {/* Sidebar */}
             <aside className="w-64 border-r border-white/[0.04] fixed h-full bg-[#080808] z-50 hidden md:flex flex-col">
                 {/* Logo Section */}
-                <div className="flex items-center h-20 px-6 border-b border-white/[0.04]">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-black text-sm rounded-lg group-hover:bg-blue-500 transition-all duration-200 shadow-[0_0_12px_rgba(255,255,255,0.15)]">C</div>
-                        <span className="text-base font-black tracking-widest text-white uppercase">CargoLink</span>
+                <div className="flex items-center justify-center h-20 px-6 border-b border-white/[0.04]">
+                    <Link href="/" className="flex items-center group">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-12 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
                     </Link>
                 </div>
 
@@ -129,7 +165,7 @@ export default function DashboardLayout({
                                         <span className="text-[13px] font-semibold tracking-tight">{item.name}</span>
                                     </div>
                                     {item.badge && (
-                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'}`}>
+                                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'}`}>
                                             {item.badge}
                                         </span>
                                     )}
@@ -141,7 +177,7 @@ export default function DashboardLayout({
                     {/* Ecosystem — shippers only, not forwarders */}
                     {user?.role !== 'forwarder' && (
                     <div>
-                        <p className="px-3 text-[9px] font-black text-zinc-600 uppercase tracking-[0.25em] mb-2">Ecosystem</p>
+                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">Ecosystem</p>
                         <div className="space-y-0.5">
                             {ecosystemNav.map((item) => {
                                 const isActive = pathname === item.href
@@ -165,7 +201,7 @@ export default function DashboardLayout({
                     {/* Partner Section — forwarders only */}
                     {user?.role === 'forwarder' && (
                         <div>
-                            <p className="px-3 text-[9px] font-black text-emerald-500/70 uppercase tracking-[0.25em] mb-2">Partner Center</p>
+                            <p className="px-3 text-[9px] font-semibold text-emerald-500/70 uppercase tracking-[0.25em] mb-2">Partner Center</p>
                             <div className="space-y-0.5">
                                 {partnerNav.map((item) => {
                                     const isActive = pathname === item.href
@@ -192,7 +228,7 @@ export default function DashboardLayout({
                     {/* Admin Section — backend gates via ADMIN_EMAIL */}
                     {user?.role === 'admin' && (
                         <div>
-                            <p className="px-3 text-[9px] font-black text-zinc-700 uppercase tracking-[0.25em] mb-2">System</p>
+                            <p className="px-3 text-[9px] font-semibold text-zinc-700 uppercase tracking-[0.25em] mb-2">System</p>
                             <div className="space-y-0.5">
                                 <Link
                                     href="/admin"
@@ -236,14 +272,14 @@ export default function DashboardLayout({
                                         router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
                                     }
                                 }}
-                                placeholder="Search shipments, commodities, or forwarders..."
+                                placeholder={t('dash.search.placeholder')}
                                 className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
                             />
                         </div>
                     </div>
 
                     <div className="flex items-center gap-6 ml-8">
-                        <div className="hidden lg:flex items-center gap-4 text-xs font-black text-zinc-500 uppercase tracking-widest border-r border-white/5 pr-6 relative">
+                        <div className="hidden lg:flex items-center gap-4 text-xs font-semibold text-zinc-500 uppercase tracking-widest border-r border-white/5 pr-6 relative">
                             {/* Sort Dropdown */}
                             <div className="relative">
                                 <button
@@ -339,7 +375,7 @@ export default function DashboardLayout({
                                             className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl z-[60]"
                                         >
                                             <div className="flex items-center justify-between mb-6">
-                                                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-outfit">CargoLink Alerts</h3>
+                                                <h3 className="text-xs font-semibold text-white uppercase tracking-[0.2em] font-outfit">CargoLink Alerts</h3>
                                                 <button
                                                     onClick={() => setStats((s: any) => s ? { ...s, recent_activity: [] } : s)}
                                                     className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest transition-colors"
@@ -376,7 +412,7 @@ export default function DashboardLayout({
                             </div>
 
                             {user?.role !== 'forwarder' && (
-                            <Link href="/search" className="bg-white text-black text-xs font-black px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <Link href="/search" className="bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                 <Plus className="w-4 h-4" /> BOOK SHIPMENT
                             </Link>
                             )}

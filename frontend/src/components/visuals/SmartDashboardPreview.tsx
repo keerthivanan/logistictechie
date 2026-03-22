@@ -23,7 +23,7 @@ export default function SmartDashboardPreview() {
                     ))}
 
                     <div className="pt-6 pb-2">
-                        <span className="px-4 text-[10px] font-black text-zinc-700 tracking-[0.2em] uppercase">Ecosystem</span>
+                        <span className="px-4 text-[10px] font-semibold text-zinc-700 tracking-[0.2em] uppercase">Ecosystem</span>
                     </div>
 
                     {[
@@ -56,9 +56,9 @@ export default function SmartDashboardPreview() {
                         </h2>
                         <div className="h-4 w-[1px] bg-zinc-800"></div>
                         <div className="px-3 py-1 bg-zinc-900/50 rounded-full border border-white/5 flex items-center gap-2">
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Demo Account</span>
+                            <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest">Demo Account</span>
                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Online</span>
+                            <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest">Online</span>
                         </div>
                     </div>
 
@@ -72,7 +72,7 @@ export default function SmartDashboardPreview() {
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-lg font-bold text-white">{metric.value}</span>
                                 </div>
-                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">{metric.label}</span>
+                                <span className="text-[8px] font-semibold text-zinc-600 uppercase tracking-[0.2em]">{metric.label}</span>
                             </div>
                         ))}
                     </div>
@@ -84,7 +84,7 @@ export default function SmartDashboardPreview() {
                     <div className="col-span-1 bg-zinc-900/30 rounded-3xl border border-white/5 p-6 flex flex-col h-[320px]">
                         <div className="flex items-center gap-2 mb-8">
                             <Activity className="w-4 h-4 text-white" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">Activity Feed</span>
+                            <span className="text-[10px] font-semibold text-white uppercase tracking-widest">Activity Feed</span>
                         </div>
 
                         <div className="space-y-4 flex-1">
@@ -102,7 +102,7 @@ export default function SmartDashboardPreview() {
                             </div>
                         </div>
 
-                        <button className="w-full mt-auto py-3 bg-zinc-900/80 hover:bg-zinc-800 border border-white/5 rounded-xl text-[9px] font-black text-zinc-400 uppercase tracking-widest transition-all">
+                        <button className="w-full mt-auto py-3 bg-zinc-900/80 hover:bg-zinc-800 border border-white/5 rounded-xl text-[9px] font-semibold text-zinc-400 uppercase tracking-widest transition-all">
                             Access Audit Logs
                         </button>
                     </div>
@@ -110,8 +110,8 @@ export default function SmartDashboardPreview() {
                     {/* Sovereign Flow */}
                     <div className="col-span-2">
                         <div className="flex items-center gap-6 mb-8 pt-2">
-                            <h3 className="text-[11px] font-black text-white uppercase tracking-widest">Shipment Flow</h3>
-                            <div className="px-2 py-0.5 bg-zinc-900 rounded border border-white/5 text-[8px] font-black text-zinc-600 uppercase tracking-widest">
+                            <h3 className="text-[11px] font-semibold text-white uppercase tracking-widest">Shipment Flow</h3>
+                            <div className="px-2 py-0.5 bg-zinc-900 rounded border border-white/5 text-[8px] font-semibold text-zinc-600 uppercase tracking-widest">
                                 0 Active Shipments
                             </div>
                         </div>
@@ -139,7 +139,7 @@ export default function SmartDashboardPreview() {
                         {/* Empty Workspace Indicator */}
                         <div className="mt-20 flex flex-col items-center justify-center opacity-10">
                             <Package className="w-12 h-12 text-white mb-4" />
-                            <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Standby</span>
+                            <span className="text-[10px] font-semibold text-white uppercase tracking-[0.4em]">Standby</span>
                         </div>
                     </div>
                 </div>

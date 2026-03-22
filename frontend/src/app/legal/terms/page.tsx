@@ -54,7 +54,7 @@ export default function TermsPage() {
 
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">
+                    <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-2">
                         Terms of Service
                     </h1>
                     <p className="text-xs text-zinc-500 font-inter">Please read these terms carefully before using CargoLink.</p>
@@ -80,6 +80,9 @@ export default function TermsPage() {
                     Questions? Contact us at{' '}
                     <a href="mailto:legal@cargolink.io" className="text-zinc-500 hover:text-white transition-colors underline">legal@cargolink.io</a>
                 </p>
+                <div className="flex justify-center mt-8">
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                </div>
             </div>
         </div>
     )

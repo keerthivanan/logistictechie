@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
+import { FullPageSpinner } from '@/components/ui/Spinner';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
 
@@ -72,7 +73,7 @@ function SuccessContent() {
                         <CheckCircle className="w-12 h-12 text-emerald-500" />
                     </div>
 
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black font-inter tracking-[0.2em] uppercase mb-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold font-inter tracking-[0.2em] uppercase mb-6">
                         <span className="opacity-70">PORTAL</span>: Partner Network Active
                     </div>
 
@@ -99,7 +100,7 @@ function SuccessContent() {
             {status === 'error' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
                     <div className="w-24 h-24 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8">
-                        <span className="text-[12px] font-black text-red-500 uppercase tracking-[0.2em]">ERROR</span>
+                        <span className="text-[12px] font-semibold text-red-500 uppercase tracking-[0.2em]">ERROR</span>
                     </div>
                     <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Verification Error</h1>
                     <p className="text-zinc-400 font-inter mb-8">We could not verify your session. If you have already paid, please contact support.</p>
@@ -119,7 +120,7 @@ export default function PartnerSuccessPage() {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
-            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>}>
+            <Suspense fallback={<FullPageSpinner />}>
                 <SuccessContent />
             </Suspense>
         </div>

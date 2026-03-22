@@ -55,7 +55,7 @@ async def create_task(
     """
     Manually create a task (primarily used for system-generated tasks in reality).
     """
-    task = await crud.task.create(db, obj_in=task_in.dict(), user_id=str(current_user.id))
+    task = await crud.task.create(db, obj_in=task_in.model_dump(), user_id=str(current_user.id))
     
     # AUDIT PILLAR: Log Task Creation
     await activity_service.log(

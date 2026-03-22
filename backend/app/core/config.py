@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     MAERSK_INTEGRATION_ID: str = ""
     
     # DATABASE CONFIG
-    DATABASE_URL: str = "postgresql+psycopg://postgres:2003@localhost:5432/logistics_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:2003@localhost:5432/logistics_db"
     
     # AI & KNOWLEDGE
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_API_KEY: str = ""
 
-    # AUTHENTICATION
-    SECRET_KEY: str = ""
+    # AUTHENTICATION — SECRET_KEY must be set in .env (no default — startup fails if missing)
+    SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 hours
     
     # N8N SECURE HANDSHAKE KEY (must be set in .env)
@@ -39,14 +39,14 @@ class Settings(BaseSettings):
 
     # CORS & RATE LIMITING
     # We load the raw string and then parse it via property
-    ALLOWED_ORIGINS_RAW: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8000,http://127.0.0.1:8000"
+    ALLOWED_ORIGINS_RAW: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001"
     
     @property
     def ALLOWED_ORIGINS(self) -> list:
         # Split by comma and clean whitespace
         return [o.strip() for o in self.ALLOWED_ORIGINS_RAW.split(",") if o.strip()]
 
-    RATE_LIMIT_PER_MINUTE: int = 60
+    RATE_LIMIT_PER_MINUTE: int = 120
     DEBUG: bool = False
 
     # Pydantic V2 Config

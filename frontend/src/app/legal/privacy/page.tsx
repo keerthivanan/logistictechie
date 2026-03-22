@@ -54,7 +54,7 @@ export default function PrivacyPage() {
 
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-2xl font-black font-outfit uppercase tracking-tight text-white mb-2">
+                    <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-2">
                         Privacy Policy
                     </h1>
                     <p className="text-xs text-zinc-500 font-inter">How CargoLink collects, uses, and protects your personal information.</p>
@@ -80,6 +80,9 @@ export default function PrivacyPage() {
                     Questions? Contact us at{' '}
                     <a href="mailto:privacy@cargolink.io" className="text-zinc-500 hover:text-white transition-colors underline">privacy@cargolink.io</a>
                 </p>
+                <div className="flex justify-center mt-8">
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                </div>
             </div>
         </div>
     )

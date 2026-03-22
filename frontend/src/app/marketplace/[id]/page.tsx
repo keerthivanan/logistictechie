@@ -82,15 +82,15 @@ export default function MarketplaceLiveDashboard() {
                         className="inline-block"
                     >
                         {status === 'CLOSED' ? (
-                            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center shadow-lg shadow-emerald-500/5">
+                            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl text-[10px] font-semibold tracking-[0.3em] uppercase mb-10 inline-flex items-center shadow-lg shadow-emerald-500/5">
                                 <Activity className="w-4 h-4 mr-3" /> Quoting Complete
                             </div>
                         ) : (
-                            <div className="bg-white/5 text-zinc-400 border border-white/10 px-8 py-3 rounded-2xl text-[10px] font-black tracking-[0.3em] uppercase mb-10 inline-flex items-center">
+                            <div className="bg-white/5 text-zinc-400 border border-white/10 px-8 py-3 rounded-2xl text-[10px] font-semibold tracking-[0.3em] uppercase mb-10 inline-flex items-center">
                                 <BrainCircuit className="w-4 h-4 mr-3 animate-pulse text-emerald-500" /> Collecting Forwarder Quotes...
                             </div>
                         )}
-                        <h1 className="text-5xl font-black mb-6 tracking-tighter font-outfit uppercase bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
+                        <h1 className="text-5xl font-semibold mb-6 tracking-tighter font-outfit uppercase bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent">
                             Live Quote <span className="text-white">Results</span>
                         </h1>
                         <p className="text-zinc-500 font-medium max-w-xl mx-auto text-sm leading-relaxed">
@@ -110,7 +110,7 @@ export default function MarketplaceLiveDashboard() {
                             animate={{ width: `${Math.min((progress / 3) * 100, 100)}%` }}
                         />
                     </div>
-                    <div className="mt-4 flex justify-between items-center text-[9px] font-black text-zinc-700 uppercase tracking-[0.4em]">
+                    <div className="mt-4 flex justify-between items-center text-[9px] font-semibold text-zinc-700 uppercase tracking-[0.4em]">
                         <span>{status === 'CLOSED' ? 'Quoting Complete' : 'Collecting Quotes'}</span>
                         <span className={progress > 0 ? 'text-emerald-500' : 'animate-pulse'}>
                             {progress} {progress === 1 ? 'Quote' : 'Quotes'} Received
@@ -127,36 +127,36 @@ export default function MarketplaceLiveDashboard() {
                     >
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Commodity</p>
-                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.commodity || 'General Cargo'}</p>
+                            <p className="text-xs font-semibold text-white uppercase truncate">{shipmentInfo.commodity || 'General Cargo'}</p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Cargo Spec</p>
-                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.cargo_specification || 'Standard'}</p>
+                            <p className="text-xs font-semibold text-white uppercase truncate">{shipmentInfo.cargo_specification || 'Standard'}</p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Weight / Volume</p>
-                            <p className="text-xs font-black text-white uppercase">
+                            <p className="text-xs font-semibold text-white uppercase">
                                 {shipmentInfo.weight_kg}KG {shipmentInfo.total_volume_cbm ? `| ${shipmentInfo.total_volume_cbm}CBM` : ''}
                             </p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Ready Date</p>
-                            <p className="text-xs font-black text-white uppercase">
+                            <p className="text-xs font-semibold text-white uppercase">
                                 {shipmentInfo.pickup_ready_date ? new Date(shipmentInfo.pickup_ready_date).toLocaleDateString() : 'IMMEDIATE'}
                             </p>
                         </div>
                         <div className="bg-white/[0.02] border border-white/5 p-6 rounded-2xl space-y-2">
                             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Vessel Preference</p>
-                            <p className="text-xs font-black text-white uppercase truncate">{shipmentInfo.vessel || 'Any Ready'}</p>
+                            <p className="text-xs font-semibold text-white uppercase truncate">{shipmentInfo.vessel || 'Any Ready'}</p>
                         </div>
 
                         {/* Secondary Details Row */}
                         <div className="col-span-2 md:col-span-4 bg-white/[0.01] border border-dashed border-white/5 p-4 rounded-xl flex flex-col gap-4">
                             <div className="flex flex-wrap gap-6 items-center justify-between">
                                 <div className="flex gap-4">
-                                    {shipmentInfo.is_hazardous && <span className="text-[8px] font-black bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-widest">Hazardous</span>}
-                                    {shipmentInfo.is_stackable && <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Stackable</span>}
-                                    {shipmentInfo.needs_insurance && <span className="text-[8px] font-black bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 uppercase tracking-widest">Insured</span>}
+                                    {shipmentInfo.is_hazardous && <span className="text-[8px] font-semibold bg-red-500/10 text-red-500 px-2 py-0.5 rounded border border-red-500/20 uppercase tracking-widest">Hazardous</span>}
+                                    {shipmentInfo.is_stackable && <span className="text-[8px] font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest">Stackable</span>}
+                                    {shipmentInfo.needs_insurance && <span className="text-[8px] font-semibold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20 uppercase tracking-widest">Insured</span>}
                                 </div>
                                 <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
                                     Protocol: <span className="text-zinc-300 ml-1">{shipmentInfo.cargo_type} · {shipmentInfo.incoterms}</span>
@@ -179,8 +179,8 @@ export default function MarketplaceLiveDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-2 text-center"
                     >
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-2">All Quotes Received</p>
-                        <h2 className="text-2xl font-black font-outfit uppercase tracking-tight text-white">Choose Your Forwarder</h2>
+                        <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.4em] mb-2">All Quotes Received</p>
+                        <h2 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white">Choose Your Forwarder</h2>
                         <p className="text-xs text-zinc-500 mt-2 font-inter">Select the quote that best fits your timeline and budget.</p>
                     </motion.div>
                 )}
@@ -204,12 +204,12 @@ export default function MarketplaceLiveDashboard() {
                                 {(isBestPrice || isFastest) && (
                                     <div className="absolute -top-3 left-8 flex gap-2 z-10">
                                         {isBestPrice && (
-                                            <span className="text-[9px] font-black bg-emerald-500 text-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30">
+                                            <span className="text-[9px] font-semibold bg-emerald-500 text-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30">
                                                 Best Price
                                             </span>
                                         )}
                                         {isFastest && (
-                                            <span className="text-[9px] font-black bg-blue-500 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-blue-500/30">
+                                            <span className="text-[9px] font-semibold bg-blue-500 text-white px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-blue-500/30">
                                                 Fastest
                                             </span>
                                         )}
@@ -218,7 +218,7 @@ export default function MarketplaceLiveDashboard() {
                                 <div className={`bg-[#050505] border rounded-[2rem] p-10 flex flex-col lg:flex-row items-center gap-10 hover:border-white/20 transition-all shadow-2xl ${isBestPrice ? 'border-emerald-500/20' : 'border-white/5'}`}>
                                     {/* Rank */}
                                     <div className="flex-shrink-0">
-                                        <div className="w-14 h-14 rounded-2xl bg-white text-black font-black text-xl flex items-center justify-center font-outfit">
+                                        <div className="w-14 h-14 rounded-2xl bg-white text-black font-semibold text-xl flex items-center justify-center font-outfit">
                                             0{index + 1}
                                         </div>
                                     </div>
@@ -226,12 +226,12 @@ export default function MarketplaceLiveDashboard() {
                                     {/* Details */}
                                     <div className="flex-1 text-center lg:text-left space-y-4">
                                         <div className="flex flex-col md:flex-row items-center gap-4">
-                                            <h3 className="font-black text-2xl font-outfit uppercase tracking-tight text-white">{quote.forwarder_company}</h3>
+                                            <h3 className="font-semibold text-2xl font-outfit uppercase tracking-tight text-white">{quote.forwarder_company}</h3>
                                             <div className="flex gap-2">
-                                                <span className="text-[10px] font-black bg-white/5 px-3 py-1 rounded-lg text-zinc-500 uppercase tracking-widest border border-white/5">
+                                                <span className="text-[10px] font-semibold bg-white/5 px-3 py-1 rounded-lg text-zinc-500 uppercase tracking-widest border border-white/5">
                                                     {quote.carrier}
                                                 </span>
-                                                <span className="text-[10px] font-black bg-emerald-500/10 px-3 py-1 rounded-lg text-emerald-500 uppercase tracking-widest border border-emerald-500/10">
+                                                <span className="text-[10px] font-semibold bg-emerald-500/10 px-3 py-1 rounded-lg text-emerald-500 uppercase tracking-widest border border-emerald-500/10">
                                                     {quote.transit_days || 'TBD'} DAYS
                                                 </span>
                                             </div>
@@ -248,7 +248,7 @@ export default function MarketplaceLiveDashboard() {
 
                                     {/* Price */}
                                     <div className="text-center lg:text-right px-6">
-                                        <div className="text-4xl font-black text-white mb-2 font-outfit tracking-tighter">
+                                        <div className="text-4xl font-semibold text-white mb-2 font-outfit tracking-tighter">
                                             {quote.currency} {Number(quote.total_price).toLocaleString()}
                                         </div>
                                         <div className="text-[9px] text-zinc-700 font-bold uppercase tracking-[0.3em]">All-in Quote</div>
@@ -259,7 +259,7 @@ export default function MarketplaceLiveDashboard() {
                                         <button
                                             onClick={async () => {
                                                 const token = localStorage.getItem('token')
-                                                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/conversations/start`, {
+                                                const res = await apiFetch('/api/conversations/start', {
                                                     method: 'POST',
                                                     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ request_id: requestId, quote_id: quote.quotation_id }),
@@ -269,7 +269,7 @@ export default function MarketplaceLiveDashboard() {
                                                     window.open(`/dashboard/messages/${data.public_id}`, '_blank')
                                                 }
                                             }}
-                                            className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3"
+                                            className="bg-white text-black h-14 px-10 rounded-2xl text-[10px] font-semibold uppercase tracking-[0.3em] hover:bg-zinc-200 transition-all font-inter active:scale-95 shadow-xl flex items-center gap-3"
                                         >
                                             <MessageSquare className="w-4 h-4" /> Chat
                                         </button>
@@ -307,7 +307,7 @@ export default function MarketplaceLiveDashboard() {
                                 <p className="text-[10px] text-zinc-700 uppercase tracking-widest mb-4">Need quotes right now?</p>
                                 <Link
                                     href="/search"
-                                    className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
+                                    className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all"
                                 >
                                     <Search className="w-3.5 h-3.5" /> Get Instant Quote
                                 </Link>
@@ -317,7 +317,7 @@ export default function MarketplaceLiveDashboard() {
                 </div>
 
                 <div className="mt-32 pt-20 border-t border-white/5 text-center opacity-20">
-                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.8em]">CargoLink · Freight Marketplace</p>
+                    <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.8em]">CargoLink · Freight Marketplace</p>
                 </div>
             </div>
         </div>

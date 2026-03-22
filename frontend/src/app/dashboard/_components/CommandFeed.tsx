@@ -81,7 +81,7 @@ export default function CommandFeed({ activities, title = 'Recent Activity' }: {
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-all group"
                         >
                             <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${color}`} />
-                            <span className="text-xs font-black text-white font-inter flex-1 truncate group-hover:text-white/80 transition-colors">
+                            <span className="text-xs font-semibold text-white font-inter flex-1 truncate group-hover:text-white/80 transition-colors">
                                 {label}
                             </span>
                             <span className="text-[10px] text-zinc-700 font-mono flex-shrink-0">{timeAgo(act.timestamp)}</span>
