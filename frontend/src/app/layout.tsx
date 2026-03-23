@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AppProviders } from '@/components/AppProviders'
-import { ElevenLabsWidget } from '@/components/ElevenLabsWidget'
 import { Inter, Outfit, Cairo } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -60,8 +59,6 @@ export default function RootLayout({
           {children}
         </AppProviders>
 
-        {/* ElevenLabs AI Customer Support Widget */}
-        <ElevenLabsWidget />
       </body>
     </html>
   )

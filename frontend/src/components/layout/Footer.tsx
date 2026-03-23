@@ -10,44 +10,44 @@ export default function Footer() {
         {
             heading: t('footer.product'),
             links: [
-                { label: 'Shipper Portal', href: '/search' },
-                { label: 'Marketplace', href: '/marketplace' },
-                { label: 'Carrier Partners', href: '/carriers' },
-                { label: 'Enterprise', href: '/services/coming-soon' },
-                { label: 'Forwarder Portal', href: '/forwarders' },
+                { label: t('footer.shipper.portal'), href: '/search' },
+                { label: t('footer.marketplace'), href: '/marketplace' },
+                { label: t('footer.carrier.partners'), href: '/carriers' },
+                { label: t('footer.enterprise'), href: '/services/coming-soon' },
+                { label: t('footer.forwarder.portal'), href: '/forwarders' },
             ],
         },
         {
             heading: t('footer.features'),
             links: [
-                { label: 'Search Rates', href: '/search' },
-                { label: 'Dashboard', href: '/dashboard' },
-                { label: 'Freight Calculator', href: '/tools/calculator' },
-                { label: 'HS Codes', href: '/tools/hs-codes' },
-                { label: 'Shipment Tracking', href: '/tracking' },
+                { label: t('footer.search.rates'), href: '/search' },
+                { label: t('footer.dashboard'), href: '/dashboard' },
+                { label: t('footer.freight.calc'), href: '/tools/calculator' },
+                { label: t('footer.hs.codes'), href: '/tools/hs-codes' },
+                { label: t('footer.tracking'), href: '/tracking' },
             ],
         },
         {
             heading: t('footer.company'),
             links: [
-                { label: 'About Us', href: '/about' },
-                { label: 'Contact', href: '/contact' },
-                { label: 'Carriers', href: '/carriers' },
+                { label: t('footer.about'), href: '/about' },
+                { label: t('footer.contact'), href: '/contact' },
+                { label: t('footer.carriers'), href: '/carriers' },
             ],
         },
         {
             heading: t('footer.resources'),
             links: [
-                { label: 'Help Center', href: '/help' },
-                { label: 'Become a Partner', href: '/forwarders/register' },
+                { label: t('footer.help.center'), href: '/help' },
+                { label: t('footer.become.partner'), href: '/forwarders/register' },
             ],
         },
         {
             heading: t('footer.legal'),
             links: [
-                { label: 'Privacy Policy', href: '/legal/privacy' },
-                { label: 'Terms of Service', href: '/legal/terms' },
-                { label: 'Cookie Policy', href: '/legal/cookies' },
+                { label: t('footer.privacy'), href: '/legal/privacy' },
+                { label: t('footer.terms'), href: '/legal/terms' },
+                { label: t('footer.cookies'), href: '/legal/cookies' },
             ],
         },
     ]

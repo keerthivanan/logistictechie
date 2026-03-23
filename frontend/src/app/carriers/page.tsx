@@ -55,7 +55,7 @@ export default function CarriersPage() {
 
                 {/* How it works */}
                 <div className="mb-10">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4">How It Works</p>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4">{t('carriers.how')}</p>
                     <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl divide-y divide-white/[0.05]">
                         {steps.map(({ icon: Icon, title, desc }, i) => (
                             <div key={title} className="flex items-start gap-5 p-6">
@@ -76,16 +76,14 @@ export default function CarriersPage() {
 
                 {/* Performance */}
                 <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-6">
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-6">Network Performance</p>
+                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-6">{t('carriers.perf')}</p>
                     <div className="grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <ComparisonChart />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold font-inter text-white mb-2">Carriers on CargoLink Outperform the Market</p>
-                            <p className="text-xs text-zinc-500 font-inter leading-relaxed mb-6">
-                                Our demand forecasting matches your available slots with live shipping requests — so you're pricing dynamically and filling capacity before it reaches port, not after.
-                            </p>
+                            <p className="text-sm font-semibold font-inter text-white mb-2">{t('carriers.perf.title')}</p>
+                            <p className="text-xs text-zinc-500 font-inter leading-relaxed mb-6">{t('carriers.perf.sub')}</p>
                             <div className="grid grid-cols-2 gap-4">
                                 {stats.map(({ value, label }) => (
                                     <div key={label} className="bg-black border border-white/[0.08] rounded-xl p-5">
@@ -106,14 +104,14 @@ export default function CarriersPage() {
                 {/* Bottom CTA */}
                 <div className="mt-6 bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-6 flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-semibold font-inter text-white mb-1">Ready to grow your fleet utilisation?</p>
-                        <p className="text-xs text-zinc-500 font-inter">Join 100+ carriers already on the network.</p>
+                        <p className="text-sm font-semibold font-inter text-white mb-1">{t('carriers.cta.title')}</p>
+                        <p className="text-xs text-zinc-500 font-inter">{t('carriers.cta.sub')}</p>
                     </div>
                     <Link
                         href="/contact"
                         className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
                     >
-                        Apply Now
+                        {t('carriers.cta.btn')}
                     </Link>
                 </div>
 

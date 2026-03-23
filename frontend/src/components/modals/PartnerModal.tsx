@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Globe, Mail, Phone, ExternalLink, BadgeCheck, Star, Truck } from 'lucide-react';
 import Avatar from '@/components/visuals/Avatar';
+import { useT } from '@/lib/i18n/t';
 
 interface PartnerModalProps {
     isOpen: boolean;
@@ -23,6 +24,7 @@ interface PartnerModalProps {
 }
 
 export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalProps) {
+    const t = useT();
     if (!partner) return null;
 
     const specializations = partner.specializations
@@ -101,7 +103,7 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
 
                             {/* Contact info */}
                             <div className="space-y-2.5">
-                                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Contact</p>
+                                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{t('modal.contact')}</p>
                                 <div className="space-y-2">
                                     <a href={`mailto:${partner.email}`} className="flex items-center gap-3 text-sm text-zinc-300 hover:text-white transition-colors group">
                                         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
@@ -137,7 +139,7 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
                             {/* Specializations */}
                             {specializations.length > 0 && (
                                 <div className="space-y-2.5">
-                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Specializations</p>
+                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{t('modal.specializations')}</p>
                                     <div className="flex flex-wrap gap-2">
                                         {specializations.map((s) => (
                                             <span key={s} className="flex items-center gap-1.5 bg-white/5 border border-white/8 text-zinc-300 text-xs px-2.5 py-1 rounded-lg">
@@ -152,7 +154,7 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
                             {/* Routes */}
                             {routes.length > 0 && (
                                 <div className="space-y-2.5">
-                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Routes Covered</p>
+                                    <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{t('modal.routes')}</p>
                                     <div className="flex flex-wrap gap-2">
                                         {routes.map((r) => (
                                             <span key={r} className="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs px-2.5 py-1 rounded-lg">
@@ -176,7 +178,7 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
                                 className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 rounded-xl text-sm font-medium hover:bg-zinc-100 transition-colors active:scale-[0.98]"
                             >
                                 <Mail className="w-4 h-4" />
-                                Send Quote Request
+                                {t('modal.send.quote')}
                             </a>
                         </div>
                     </motion.div>

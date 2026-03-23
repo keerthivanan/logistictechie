@@ -71,7 +71,7 @@ export default function ContactPage() {
                     <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-2">
                         {t('contact.title')}
                     </h1>
-                    <p className="text-xs text-zinc-500 font-inter">No sales calls. No bots. Just real support from the team that built this — we respond within 2 business hours.</p>
+                    <p className="text-xs text-zinc-500 font-inter">{t('contact.sub')}</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
@@ -100,13 +100,13 @@ export default function ContactPage() {
 
                     {/* Contact form card */}
                     <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-5">
-                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">Send a Message</p>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-5">{t('contact.send.msg')}</p>
 
                         {sent ? (
                             <div className="flex flex-col items-center justify-center py-12 gap-4">
                                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-                                <p className="text-sm font-bold text-white font-inter">Message sent!</p>
-                                <p className="text-xs text-zinc-500 font-inter text-center">We&apos;ll get back to you within 2 business hours.</p>
+                                <p className="text-sm font-bold text-white font-inter">{t('contact.sent')}</p>
+                                <p className="text-xs text-zinc-500 font-inter text-center">{t('contact.sent.sub')}</p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-3">
@@ -119,7 +119,7 @@ export default function ContactPage() {
                                 />
                                 <input
                                     type="email"
-                                    placeholder="Email address"
+                                    placeholder={t('contact.email.placeholder')}
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     required
@@ -127,7 +127,7 @@ export default function ContactPage() {
                                 />
                                 <input
                                     type="text"
-                                    placeholder="Subject"
+                                    placeholder={t('contact.subject')}
                                     value={subject}
                                     onChange={e => setSubject(e.target.value)}
                                     className="w-full bg-black border border-white/[0.08] py-3 px-4 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-all font-inter"
@@ -145,7 +145,7 @@ export default function ContactPage() {
                                     disabled={sending || !email.trim() || !message.trim()}
                                     className="w-full bg-white text-black py-3.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors disabled:opacity-50"
                                 >
-                                    {sending ? 'Sending...' : t('contact.send')}
+                                    {sending ? t('contact.sending') : t('contact.send')}
                                 </button>
                             </form>
                         )}

@@ -6,41 +6,28 @@ import { Search, MessageCircle, FileText, HelpCircle, ArrowRight } from 'lucide-
 import Link from 'next/link'
 import { useT } from '@/lib/i18n/t'
 
-const categories = [
-    {
-        icon: FileText,
-        title: 'Getting Started',
-        desc: 'Learn how to search rates, request quotes, and manage shipments from your dashboard.',
-    },
-    {
-        icon: MessageCircle,
-        title: 'Talk to Support',
-        desc: 'Reach our logistics team directly via the contact page — we respond within 2 business hours.',
-        href: '/contact',
-    },
-    {
-        icon: HelpCircle,
-        title: 'FAQs',
-        desc: 'Quick answers to the most common questions about quotes, forwarders, and payments.',
-    },
-]
-
-const articles = [
-    { title: 'How to search for instant freight rates', tag: 'Search' },
-    { title: 'How to request quotes from forwarders', tag: 'Marketplace' },
-    { title: 'Understanding FCL, LCL, Air and Truck modes', tag: 'Shipping' },
-    { title: 'How to track a shipment', tag: 'Tracking' },
-    { title: 'Understanding customs and import duties', tag: 'Customs' },
-    { title: 'Managing your shipping documents', tag: 'Documents' },
-    { title: 'How to compare and choose a forwarder quote', tag: 'Marketplace' },
-    { title: 'How to use the freight calculator', tag: 'Tools' },
-    { title: 'Setting up your dashboard and profile', tag: 'Account' },
-    { title: 'How payments and contracts work', tag: 'Payments' },
-]
-
 export default function HelpPage() {
     const t = useT()
     const [query, setQuery] = useState('')
+
+    const categories = [
+        { icon: FileText, title: t('help.cat1.title'), desc: t('help.cat1.desc') },
+        { icon: MessageCircle, title: t('help.cat2.title'), desc: t('help.cat2.desc'), href: '/contact' },
+        { icon: HelpCircle, title: t('help.cat3.title'), desc: t('help.cat3.desc') },
+    ]
+
+    const articles = [
+        { title: t('help.art1'), tag: t('help.tag.search') },
+        { title: t('help.art2'), tag: t('help.tag.marketplace') },
+        { title: t('help.art3'), tag: t('help.tag.shipping') },
+        { title: t('help.art4'), tag: t('help.tag.tracking') },
+        { title: t('help.art5'), tag: t('help.tag.customs') },
+        { title: t('help.art6'), tag: t('help.tag.documents') },
+        { title: t('help.art7'), tag: t('help.tag.marketplace') },
+        { title: t('help.art8'), tag: t('help.tag.tools') },
+        { title: t('help.art9'), tag: t('help.tag.account') },
+        { title: t('help.art10'), tag: t('help.tag.payments') },
+    ]
 
     const filtered = query.trim()
         ? articles.filter(a => a.title.toLowerCase().includes(query.toLowerCase()))
@@ -95,16 +82,16 @@ export default function HelpPage() {
                 <div>
                     <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-4">
                         {query.trim()
-                            ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${query}"`
-                            : 'Help Articles'}
+                            ? t('help.results.count').replace('{n}', String(filtered.length)).replace('{q}', query)
+                            : t('help.articles')}
                     </p>
                     <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl divide-y divide-white/[0.05]">
                         {filtered.length === 0 ? (
                             <div className="px-5 py-8 text-center">
                                 <p className="text-xs text-zinc-600 font-inter">
-                                    No articles found.{' '}
-                                    <Link href="/contact" className="text-zinc-400 hover:text-white transition-colors underline">Contact support</Link>
-                                    {' '}for help.
+                                    {t('help.no.articles')}{' '}
+                                    <Link href="/contact" className="text-zinc-400 hover:text-white transition-colors underline">{t('help.contact.support')}</Link>
+                                    {' '}{t('help.contact.suffix')}
                                 </p>
                             </div>
                         ) : filtered.map((article, i) => (
@@ -126,14 +113,14 @@ export default function HelpPage() {
                 {/* Contact CTA */}
                 <div className="mt-8 bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-6 flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-sm font-semibold font-inter text-white mb-1">Can&apos;t find what you need?</p>
-                        <p className="text-xs text-zinc-500 font-inter">A real person on our team will respond within 2 business hours.</p>
+                        <p className="text-sm font-semibold font-inter text-white mb-1">{t('help.cta.title')}</p>
+                        <p className="text-xs text-zinc-500 font-inter">{t('help.cta.sub')}</p>
                     </div>
                     <Link
                         href="/contact"
                         className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
                     >
-                        Contact Us
+                        {t('help.cta.btn')}
                     </Link>
                 </div>
 

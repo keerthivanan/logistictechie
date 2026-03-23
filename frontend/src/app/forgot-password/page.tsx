@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { apiFetch } from '@/lib/config'
 import { Loader2, CheckCircle2 } from 'lucide-react'
+import { useT } from '@/lib/i18n/t'
 
 export default function ForgotPasswordPage() {
+    const t = useT()
     const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
     const [done, setDone] = useState(false)
@@ -25,10 +27,10 @@ export default function ForgotPasswordPage() {
                 setDone(true)
             } else {
                 const data = await res.json().catch(() => ({}))
-                setError(data.detail || 'Something went wrong. Please try again.')
+                setError(data.detail || t('forgot.err.unknown'))
             }
         } catch {
-            setError('Network error. Please try again.')
+            setError(t('forgot.err.network'))
         } finally {
             setLoading(false)
         }
@@ -46,17 +48,17 @@ export default function ForgotPasswordPage() {
                         </div>
                         <span className="text-2xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
                     </Link>
-                    <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">Forgot Password</h1>
-                    <p className="text-zinc-500 font-medium font-inter text-xs">Enter your email to receive a reset link.</p>
+                    <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">{t('forgot.title')}</h1>
+                    <p className="text-zinc-500 font-medium font-inter text-xs">{t('forgot.sub')}</p>
                 </div>
 
                 <div className="bg-zinc-950 border border-white/5 p-8 rounded-3xl shadow-2xl">
                     {done ? (
                         <div className="flex flex-col items-center gap-4 py-4 text-center">
                             <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-                            <p className="text-sm font-bold text-white font-outfit">Check your inbox</p>
-                            <p className="text-xs text-zinc-500 font-inter">If this email is registered, a reset link has been sent. Check your spam folder too.</p>
-                            <Link href="/login" className="text-[10px] text-zinc-600 hover:text-white transition-colors font-inter mt-2">Back to login</Link>
+                            <p className="text-sm font-bold text-white font-outfit">{t('forgot.done.title')}</p>
+                            <p className="text-xs text-zinc-500 font-inter">{t('forgot.done.sub')}</p>
+                            <Link href="/login" className="text-[10px] text-zinc-600 hover:text-white transition-colors font-inter mt-2">{t('forgot.back')}</Link>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,7 +68,7 @@ export default function ForgotPasswordPage() {
                                 </div>
                             )}
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">Email Address</label>
+                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">{t('forgot.email.label')}</label>
                                 <input
                                     type="email"
                                     required
@@ -81,10 +83,10 @@ export default function ForgotPasswordPage() {
                                 disabled={loading || !email}
                                 className="w-full bg-white text-black font-bold text-xs py-3.5 rounded-2xl hover:bg-zinc-200 transition-all disabled:opacity-30 flex items-center justify-center gap-2 font-inter uppercase tracking-widest mt-2"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Reset Link'}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('forgot.cta')}
                             </button>
                             <p className="text-center text-[10px] text-zinc-600 font-inter mt-2">
-                                <Link href="/login" className="hover:text-white transition-colors">Back to login</Link>
+                                <Link href="/login" className="hover:text-white transition-colors">{t('forgot.back')}</Link>
                             </p>
                         </form>
                     )}

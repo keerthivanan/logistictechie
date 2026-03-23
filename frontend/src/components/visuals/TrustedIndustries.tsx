@@ -1,17 +1,20 @@
 'use client';
 
 import { Factory, Cog, ShoppingBag, Stethoscope, Car, Plane } from 'lucide-react';
-
-const industries = [
-    { name: 'Automotive', icon: Car },
-    { name: 'Pharma & Healthcare', icon: Stethoscope },
-    { name: 'Retail & E-commerce', icon: ShoppingBag },
-    { name: 'Manufacturing', icon: Factory },
-    { name: 'Aerospace', icon: Plane },
-    { name: 'Industrial', icon: Cog },
-];
+import { useT } from '@/lib/i18n/t';
 
 export default function TrustedIndustries() {
+    const t = useT();
+
+    const industries = [
+        { name: t('industry.automotive'), icon: Car },
+        { name: t('industry.pharma'), icon: Stethoscope },
+        { name: t('industry.retail'), icon: ShoppingBag },
+        { name: t('industry.manufacturing'), icon: Factory },
+        { name: t('industry.aerospace'), icon: Plane },
+        { name: t('industry.industrial'), icon: Cog },
+    ];
+
     return (
         <section className="py-16 bg-black overflow-hidden relative">
             {/* Fade edges */}
@@ -20,7 +23,7 @@ export default function TrustedIndustries() {
 
             {/* Label */}
             <p className="text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.25em] font-inter mb-10">
-                Powering complex supply chains across
+                {t('industries.label')}
             </p>
 
             {/* Marquee */}

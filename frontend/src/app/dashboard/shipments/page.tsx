@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/config'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useT } from '@/lib/i18n/t'
 
 interface Quotation {
     quotation_id: string
@@ -37,6 +38,7 @@ interface ShipmentRequest {
 }
 
 export default function ShipmentsPage() {
+    const t = useT()
     const { user, logout, loading: authLoading } = useAuth()
     const router = useRouter()
     const [requests, setRequests] = useState<ShipmentRequest[]>([])
@@ -120,14 +122,14 @@ export default function ShipmentsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4 flex-shrink-0">
                 <div>
-                    <h1 className="text-lg font-bold tracking-tight text-white font-outfit">My Shipments</h1>
-                    <p className="text-zinc-500 text-xs font-inter mt-0.5">Review received quotes and confirm your booking.</p>
+                    <h1 className="text-lg font-bold tracking-tight text-white font-outfit">{t('shipments.title')}</h1>
+                    <p className="text-zinc-500 text-xs font-inter mt-0.5">{t('shipments.start')}</p>
                 </div>
                 <Link
                     href="/marketplace"
                     className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all font-inter self-start md:self-auto"
                 >
-                    + New Request
+                    {t('shipments.new')}
                 </Link>
             </div>
 
@@ -138,7 +140,7 @@ export default function ShipmentsPage() {
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Search by route, cargo, or request ID..."
+                    placeholder={t('shipments.search.placeholder')}
                     className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-zinc-700 focus:border-white/15 outline-none transition-colors font-inter"
                 />
             </div>
@@ -151,11 +153,11 @@ export default function ShipmentsPage() {
                             <Package className="w-7 h-7 text-zinc-700" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">No shipments yet</h3>
-                            <p className="text-xs text-zinc-600 font-inter max-w-xs">Submit a freight request to get quotes from verified forwarders.</p>
+                            <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">{t('shipments.empty.title')}</h3>
+                            <p className="text-xs text-zinc-600 font-inter max-w-xs">{t('shipments.empty.sub')}</p>
                         </div>
                         <Link href="/marketplace" className="bg-white text-black px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all">
-                            Request a Quote
+                            {t('shipments.request.quote')}
                         </Link>
                     </div>
                 ) : (

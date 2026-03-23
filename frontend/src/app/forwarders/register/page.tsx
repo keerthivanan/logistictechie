@@ -172,11 +172,11 @@ export default function ForwarderRegisterPage() {
                     <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Check className="w-6 h-6 text-emerald-400" />
                     </div>
-                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">Already a Partner</h2>
-                    <p className="text-sm text-zinc-500 font-inter mb-2">Your company is a verified CargoLink partner.</p>
+                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">{t('reg.already.title')}</h2>
+                    <p className="text-sm text-zinc-500 font-inter mb-2">{t('reg.already.sub')}</p>
                     <p className="text-xs text-zinc-600 font-mono mb-8">{user?.email}</p>
                     <Link href="/dashboard/partner" className="inline-flex items-center justify-center w-full bg-white text-black font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl hover:bg-zinc-200 transition-all font-inter">
-                        Go to Partner Dashboard
+                        {t('reg.already.btn')}
                     </Link>
                 </motion.div>
             </div>
@@ -193,12 +193,12 @@ export default function ForwarderRegisterPage() {
                     <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
                     </div>
-                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">Application Under Review</h2>
-                    <p className="text-sm text-zinc-400 font-inter mb-2">Your partner application has been submitted and is awaiting admin approval.</p>
-                    <p className="text-xs text-zinc-600 font-inter mb-8">You will receive an email once your account is approved. This usually takes 24–48 hours.</p>
+                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">{t('reg.pending.title')}</h2>
+                    <p className="text-sm text-zinc-400 font-inter mb-2">{t('reg.pending.sub')}</p>
+                    <p className="text-xs text-zinc-600 font-inter mb-8">{t('reg.pending.sub2')}</p>
                     <p className="text-xs text-zinc-700 font-mono mb-6">{user?.email}</p>
                     <Link href="/dashboard" className="inline-flex items-center justify-center w-full bg-white text-black font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl hover:bg-zinc-200 transition-all font-inter">
-                        Go to Dashboard
+                        {t('reg.pending.btn')}
                     </Link>
                 </motion.div>
             </div>
@@ -220,11 +220,11 @@ export default function ForwarderRegisterPage() {
                     <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Check className="w-7 h-7 text-amber-400" />
                     </div>
-                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">Application Submitted</h2>
-                    <p className="text-sm text-zinc-400 font-inter mb-2">Your application is under review by our team.</p>
-                    <p className="text-xs text-zinc-600 font-inter mb-8">You'll receive an email once your account is approved. This usually takes 24–48 hours.</p>
+                    <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">{t('reg.submitted.title')}</h2>
+                    <p className="text-sm text-zinc-400 font-inter mb-2">{t('reg.submitted.sub')}</p>
+                    <p className="text-xs text-zinc-600 font-inter mb-8">{t('reg.submitted.sub2')}</p>
                     <Link href="/dashboard" className="inline-flex items-center justify-center w-full bg-white text-black font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl hover:bg-zinc-200 transition-all font-inter">
-                        Go to Dashboard
+                        {t('reg.submitted.btn')}
                     </Link>
                 </motion.div>
             </div>
@@ -239,7 +239,7 @@ export default function ForwarderRegisterPage() {
 
                 {/* ── Header ── */}
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-                    <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-[0.2em] mb-3 font-inter">Partner Registration</p>
+                    <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-[0.2em] mb-3 font-inter">{t('reg.label')}</p>
                     <h1 className="text-3xl font-bold tracking-tight font-outfit mb-2">{t('fwd.register.title')}</h1>
                     <p className="text-sm text-zinc-500 font-inter">{t('fwd.register.sub')}</p>
                 </motion.div>
@@ -254,18 +254,18 @@ export default function ForwarderRegisterPage() {
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
                             <Building2 className="w-3.5 h-3.5 text-emerald-500" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">Company Info</h2>
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('reg.company.section')}</h2>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Company Name *</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.name')}</label>
                             <input name="company_name" required value={formData.company_name} onChange={handleChange}
                                 placeholder="Global Logistics Co."
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Contact Person *</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.contact.person')}</label>
                             <input name="contact_person" required value={formData.contact_person} onChange={handleChange}
                                 placeholder="John Doe"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -273,12 +273,12 @@ export default function ForwarderRegisterPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Personal Email</label>
+                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.personal.email')}</label>
                                 <input name="email" type="email" value={formData.email} readOnly
                                     className="w-full bg-zinc-900/60 border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-zinc-600 cursor-not-allowed font-inter" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Company Email *</label>
+                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.email')}</label>
                                 <input name="company_email" type="email" required value={formData.company_email} onChange={handleChange}
                                     placeholder="ops@company.com"
                                     className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -290,14 +290,14 @@ export default function ForwarderRegisterPage() {
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
                             <Globe className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">Location & Contact</h2>
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('reg.location.section')}</h2>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Operating Country *</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.country')}</label>
                             <select name="country" required value={formData.country} onChange={handleChange}
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white appearance-none cursor-pointer font-inter">
-                                <option value="">Select country...</option>
+                                <option value="">{t('reg.country.placeholder')}</option>
                                 {countries.map((c: Country) => (
                                     <option key={c.code} value={c.code} className="bg-zinc-900">{c.name} ({c.dial_code})</option>
                                 ))}
@@ -305,7 +305,7 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div className="relative">
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Phone Number</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.phone')}</label>
                             <input name="phone" type="tel" value={formData.phone} onChange={handleChange}
                                 placeholder="+1 555 000 0000"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -322,12 +322,12 @@ export default function ForwarderRegisterPage() {
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
                             <Mail className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">Specializations & Routes</h2>
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('reg.spec.section')}</h2>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">Cargo Types *</label>
-                            <p className="text-[10px] text-zinc-600 font-inter mb-3">Select all types you handle — this determines which requests you receive.</p>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">{t('reg.cargo.types')}</label>
+                            <p className="text-[10px] text-zinc-600 font-inter mb-3">{t('reg.cargo.hint')}</p>
                             <div className="grid grid-cols-3 gap-2">
                                 {SPECIALIZATION_OPTIONS.map(spec => {
                                     const sel = formData.specializations.includes(spec);
@@ -344,16 +344,16 @@ export default function ForwarderRegisterPage() {
                                 })}
                             </div>
                             {formData.specializations.length === 0 && (
-                                <p className="text-[10px] text-amber-500 font-inter mt-2">Select at least one specialization.</p>
+                                <p className="text-[10px] text-amber-500 font-inter mt-2">{t('reg.spec.min')}</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Trade Lanes / Routes</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.routes')}</label>
                             <input name="routes" value={formData.routes} onChange={handleChange}
                                 placeholder="e.g. Asia-Europe, Trans-Pacific"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
-                            <p className="text-[10px] text-zinc-600 font-inter mt-1.5">Enter primary operating routes, comma-separated.</p>
+                            <p className="text-[10px] text-zinc-600 font-inter mt-1.5">{t('reg.routes.hint')}</p>
                         </div>
                     </div>
 
@@ -361,57 +361,57 @@ export default function ForwarderRegisterPage() {
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
                             <Upload className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">Business Verification</h2>
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('reg.verification.section')}</h2>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Tax ID / Business Reg Number *</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.tax.id')}</label>
                             <input name="tax_id" required value={formData.tax_id} onChange={handleChange}
                                 placeholder="e.g. VAT-123456"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Company Website</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.website')}</label>
                             <input name="website" value={formData.website} onChange={handleChange}
                                 placeholder="www.yourcompany.com"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Business License (PDF / Image)</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.license')}</label>
                             <div onClick={() => document.getElementById('license-upload')?.click()}
                                 className="w-full bg-black border border-dashed border-white/[0.08] rounded-xl px-4 py-6 text-center cursor-pointer hover:border-white/15 transition-colors">
                                 <input id="license-upload" type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'document_url')} accept=".pdf,image/*" />
                                 {uploadingField === 'document_url' ? (
                                     <div className="flex flex-col items-center gap-2">
                                         <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
-                                        <span className="text-xs text-zinc-500 font-inter">Uploading...</span>
+                                        <span className="text-xs text-zinc-500 font-inter">{t('reg.uploading')}</span>
                                     </div>
                                 ) : formData.document_url ? (
                                     <div className="flex flex-col items-center gap-1">
                                         <Check className="w-5 h-5 text-emerald-400" />
-                                        <span className="text-xs text-emerald-400 font-inter">Document uploaded</span>
+                                        <span className="text-xs text-emerald-400 font-inter">{t('reg.doc.uploaded')}</span>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center gap-2">
                                         <Upload className="w-5 h-5 text-zinc-600" />
-                                        <span className="text-xs text-zinc-500 font-inter">Click to upload</span>
-                                        <span className="text-[10px] text-zinc-700 font-inter">PDF or image file</span>
+                                        <span className="text-xs text-zinc-500 font-inter">{t('reg.click.upload')}</span>
+                                        <span className="text-[10px] text-zinc-700 font-inter">{t('reg.pdf.hint')}</span>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">Company Logo</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.logo')}</label>
                             <div onClick={() => document.getElementById('logo-upload')?.click()}
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:border-white/15 transition-colors">
                                 <input id="logo-upload" type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'logo_url')} accept="image/*" />
                                 <div className="flex items-center gap-3">
                                     <Avatar src={formData.logo_url} name={formData.company_name} size="md" shape="square" className="border-white/10" />
                                     <span className="text-sm text-zinc-500 font-inter">
-                                        {uploadingField === 'logo_url' ? 'Uploading...' : 'Upload company logo'}
+                                        {uploadingField === 'logo_url' ? t('reg.uploading') : t('reg.logo.upload')}
                                     </span>
                                 </div>
                                 <Upload className="w-4 h-4 text-zinc-600 flex-shrink-0" />
@@ -424,7 +424,7 @@ export default function ForwarderRegisterPage() {
                         className="w-full bg-white text-black py-4 rounded-xl text-sm font-bold uppercase tracking-wide hover:bg-zinc-100 transition-all font-inter active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xl">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('fwd.register.cta')}
                     </button>
-                    <p className="text-center text-[10px] text-zinc-700 font-inter">By joining, you agree to our Code of Conduct.</p>
+                    <p className="text-center text-[10px] text-zinc-700 font-inter">{t('reg.conduct')}</p>
                 </motion.form>
 
                 {/* ── Content Below Form ── */}
@@ -432,9 +432,9 @@ export default function ForwarderRegisterPage() {
                     {/* Stats */}
                     <div className="grid grid-cols-3 gap-4">
                         {[
-                            { value: '100+', label: 'Active Forwarders' },
-                            { value: '195',  label: 'Countries' },
-                            { value: 'Free', label: 'To Join' },
+                            { value: '100+', label: t('reg.stat1.label') },
+                            { value: '195',  label: t('reg.stat2.label') },
+                            { value: 'Free', label: t('reg.stat3.label') },
                         ].map(stat => (
                             <div key={stat.label} className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-5 text-center">
                                 <p className="text-2xl font-bold text-white font-mono">{stat.value}</p>
@@ -445,14 +445,14 @@ export default function ForwarderRegisterPage() {
 
                     {/* Benefits */}
                     <div>
-                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-6 font-inter">Why join CargoLink</p>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-6 font-inter">{t('reg.why')}</p>
                         <div className="grid grid-cols-1 gap-3">
                             {[
-                                { title: 'Instant email alerts',   desc: 'Get notified the moment a matching shipment request is posted.' },
-                                { title: 'Quote by email reply',   desc: 'Submit competitive bids directly — no complex portal required.' },
-                                { title: 'Matched to your lanes',  desc: 'Only receive requests that match your specializations and routes.' },
-                                { title: 'KYC-verified shippers',  desc: 'Every shipper is identity-verified. No fake leads.' },
-                                { title: 'Partner dashboard',      desc: 'Track all your bids, contracts, and earnings in one place.' },
+                                { title: t('reg.benefit1.title'), desc: t('reg.benefit1.desc') },
+                                { title: t('reg.benefit2.title'), desc: t('reg.benefit2.desc') },
+                                { title: t('reg.benefit3.title'), desc: t('reg.benefit3.desc') },
+                                { title: t('reg.benefit4.title'), desc: t('reg.benefit4.desc') },
+                                { title: t('reg.benefit5.title'), desc: t('reg.benefit5.desc') },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-4 bg-[#0a0a0a] border border-white/[0.06] rounded-xl p-4">
                                     <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 flex-shrink-0 mt-0.5">
@@ -470,20 +470,20 @@ export default function ForwarderRegisterPage() {
                     {/* Testimonial */}
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-4">
                         <p className="text-sm text-zinc-300 font-inter leading-relaxed">
-                            &ldquo;CargoLink doubled our quote volume in the first month. The lead quality is far better than cold outreach.&rdquo;
+                            &ldquo;{t('reg.testimonial.quote')}&rdquo;
                         </p>
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-white">R</div>
                             <div>
-                                <p className="text-xs font-bold text-white font-inter">Rajan M.</p>
-                                <p className="text-[10px] text-zinc-600 font-inter">Operations Director, Chennai Freight Co.</p>
+                                <p className="text-xs font-bold text-white font-inter">{t('reg.testimonial.name')}</p>
+                                <p className="text-[10px] text-zinc-600 font-inter">{t('reg.testimonial.role')}</p>
                             </div>
                         </div>
                     </div>
 
                     <p className="text-center text-xs text-zinc-700 font-inter">
-                        Already registered?{' '}
-                        <a href="/login" className="text-zinc-400 hover:text-white transition-colors underline">Sign in to your account</a>
+                        {t('reg.already.signin')}{' '}
+                        <a href="/login" className="text-zinc-400 hover:text-white transition-colors underline">{t('reg.signin.link')}</a>
                     </p>
                     <div className="flex justify-center mt-6">
                         <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />

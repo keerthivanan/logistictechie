@@ -10,8 +10,10 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/config';
 import Navbar from '@/components/layout/Navbar';
+import { useT } from '@/lib/i18n/t';
 
 export default function ForwarderPortal() {
+    const t = useT();
     const { user } = useAuth();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -26,12 +28,10 @@ export default function ForwarderPortal() {
     const [bidSuccess, setBidSuccess] = useState(false);
     const [bidError, setBidError] = useState('');
 
-    // Conversations tab state
     const [activeTab, setActiveTab] = useState<'requests' | 'conversations' | 'performance'>('requests');
     const [conversations, setConversations] = useState<any[]>([]);
     const [convLoading, setConvLoading] = useState(false);
 
-    // Currency converter state
     const [cvAmount, setCvAmount] = useState('');
     const [cvFrom, setCvFrom] = useState('USD');
     const [cvTo, setCvTo] = useState('EUR');
@@ -86,7 +86,7 @@ export default function ForwarderPortal() {
                 setDashboardData(data);
             }
         } catch {
-            // silent — dashboard reloads on next action
+            // silent
         }
     }, []);
 
@@ -201,13 +201,12 @@ export default function ForwarderPortal() {
                 <Navbar />
                 <div className="flex items-center justify-center min-h-screen px-4">
                     <div className="w-full max-w-sm">
-                        {/* Logo mark */}
                         <div className="text-center mb-8">
                             <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <BarChart3 className="w-5 h-5 text-emerald-400" />
                             </div>
-                            <h1 className="text-xl font-bold font-outfit text-white mb-1">Partner Portal</h1>
-                            <p className="text-xs text-zinc-500">Sign in with your Partner ID and email</p>
+                            <h1 className="text-xl font-bold font-outfit text-white mb-1">{t('portal.title')}</h1>
+                            <p className="text-xs text-zinc-500">{t('portal.sign.in.sub')}</p>
                         </div>
 
                         <form onSubmit={handleLoginSubmit} className="bg-zinc-950 border border-white/5 rounded-2xl p-6 space-y-4">
@@ -217,7 +216,7 @@ export default function ForwarderPortal() {
                                 </div>
                             )}
                             <div>
-                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Partner ID</label>
+                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('portal.partner.id')}</label>
                                 <input
                                     type="text"
                                     placeholder="REG-OMEGO-XXXX"
@@ -228,7 +227,7 @@ export default function ForwarderPortal() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Email Address</label>
+                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('portal.email')}</label>
                                 <input
                                     type="email"
                                     placeholder="company@email.com"
@@ -245,7 +244,7 @@ export default function ForwarderPortal() {
                             >
                                 {loading
                                     ? <Loader2 className="w-4 h-4 animate-spin" />
-                                    : <>Sign In <ArrowRight className="w-3.5 h-3.5" /></>
+                                    : <>{t('portal.sign.in')} <ArrowRight className="w-3.5 h-3.5" /></>
                                 }
                             </button>
                         </form>
@@ -260,6 +259,12 @@ export default function ForwarderPortal() {
     const quotes = dashboardData?.quotes || [];
     const companyName = dashboardData?.company_name || user?.name || '—';
     const fwdId = localStorage.getItem('cl_fwd_id') || user?.sovereign_id || '';
+
+    const tabLabels: Record<string, string> = {
+        requests: t('portal.tab.requests'),
+        conversations: t('portal.tab.messages'),
+        performance: t('portal.tab.performance'),
+    };
 
     return (
         <div className="h-screen bg-[#080808] text-white flex flex-col overflow-hidden">
@@ -276,7 +281,7 @@ export default function ForwarderPortal() {
                             <span className="w-1 h-1 rounded-full bg-zinc-700" />
                             <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                Active
+                                {t('portal.active')}
                             </span>
                         </div>
                     </div>
@@ -294,7 +299,7 @@ export default function ForwarderPortal() {
                                     activeTab === tab ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'
                                 }`}
                             >
-                                {tab === 'conversations' ? 'Messages' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                {tabLabels[tab]}
                                 {hasUnread && (
                                     <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
                                 )}
@@ -309,10 +314,10 @@ export default function ForwarderPortal() {
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <MessageSquare className="w-3.5 h-3.5 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Conversations</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.active.conv')}</span>
                             </div>
                             <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
-                                {conversations.length} {conversations.length === 1 ? 'chat' : 'chats'}
+                                {conversations.length} {conversations.length === 1 ? t('portal.chat') : t('portal.chats')}
                             </span>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
@@ -324,8 +329,8 @@ export default function ForwarderPortal() {
                                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
                                     <MessageSquare className="w-8 h-8 text-zinc-600" />
                                     <div>
-                                        <p className="text-sm font-bold text-white mb-1">No conversations yet</p>
-                                        <p className="text-xs text-zinc-600">Shippers will open chats after reviewing your quotes.</p>
+                                        <p className="text-sm font-bold text-white mb-1">{t('portal.no.conv')}</p>
+                                        <p className="text-xs text-zinc-600">{t('portal.no.conv.sub')}</p>
                                     </div>
                                 </div>
                             ) : (
@@ -347,16 +352,16 @@ export default function ForwarderPortal() {
                                                 : conv.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500'
                                                 : 'bg-white/5 text-zinc-500'
                                             }`}>
-                                                {conv.status === 'BOOKED' ? 'Booked' : conv.status === 'CLOSED' ? 'Closed' : 'Open'}
+                                                {conv.status === 'BOOKED' ? t('portal.booked') : conv.status === 'CLOSED' ? t('portal.closed') : t('portal.open')}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <p className="text-xs text-zinc-400 truncate max-w-[180px]">
-                                                {conv.last_message?.content || 'No messages yet'}
+                                                {conv.last_message?.content || t('portal.no.messages')}
                                             </p>
                                             <div className="text-right flex-shrink-0 ml-3">
                                                 <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">
-                                                    {conv.agreed_price ? 'Agreed' : conv.current_offer ? 'Offer' : 'Quoted'}
+                                                    {conv.agreed_price ? t('portal.agreed') : conv.current_offer ? t('portal.offer') : t('portal.quoted')}
                                                 </p>
                                                 <p className="text-sm font-bold font-mono text-white">
                                                     {conv.currency} {Number(conv.agreed_price ?? conv.current_offer ?? conv.original_price).toLocaleString()}
@@ -375,25 +380,23 @@ export default function ForwarderPortal() {
 
                     {/* LEFT — Open Requests */}
                     <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
-                        {/* Panel header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <Package className="w-3.5 h-3.5 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Open Requests</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.open.requests')}</span>
                             </div>
                             <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
-                                {quotes.length} {quotes.length === 1 ? 'request' : 'requests'}
+                                {quotes.length} {quotes.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}
                             </span>
                         </div>
 
-                        {/* Request list */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
                             {quotes.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
                                     <Clock className="w-8 h-8 text-zinc-600" />
                                     <div>
-                                        <p className="text-sm font-bold text-white mb-1">No requests yet</p>
-                                        <p className="text-xs text-zinc-600">Requests will appear here once broadcasted to you.</p>
+                                        <p className="text-sm font-bold text-white mb-1">{t('portal.no.requests')}</p>
+                                        <p className="text-xs text-zinc-600">{t('portal.no.requests.sub')}</p>
                                     </div>
                                 </div>
                             ) : (
@@ -430,7 +433,7 @@ export default function ForwarderPortal() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right flex-shrink-0">
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">Your Quote</p>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">{t('portal.your.quote')}</p>
                                                     <p className={`text-sm font-bold font-mono ${quote.your_price > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
                                                         {quote.your_price > 0 ? `USD ${quote.your_price.toLocaleString()}` : '—'}
                                                     </p>
@@ -450,26 +453,26 @@ export default function ForwarderPortal() {
                         <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
                             <div className="flex items-center gap-2 mb-5">
                                 <TrendingUp className="w-3.5 h-3.5 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Performance</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.performance')}</span>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Total Bids</p>
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.total.bids')}</p>
                                     <p className="text-xl font-bold text-white font-mono">{metrics?.total_quotes_submitted ?? '—'}</p>
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Won</p>
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.won')}</p>
                                     <p className="text-xl font-bold text-emerald-400 font-mono">{metrics?.won_bids ?? '—'}</p>
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Reliability</p>
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.reliability')}</p>
                                     <p className="text-xl font-bold text-white font-mono">{metrics?.reliability_score ?? 4.9}<span className="text-xs text-zinc-600">/5</span></p>
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Status</p>
+                                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.status')}</p>
                                     <p className="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        Active
+                                        {t('portal.active')}
                                     </p>
                                 </div>
                             </div>
@@ -479,12 +482,12 @@ export default function ForwarderPortal() {
                         <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4">
                             <div className="flex items-center gap-2 mb-3">
                                 <DollarSign className="w-3 h-3 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Currency Converter</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.currency.conv')}</span>
                             </div>
                             <div className="space-y-2">
                                 <input
                                     type="number"
-                                    placeholder="Enter amount"
+                                    placeholder={t('portal.enter.amount')}
                                     value={cvAmount}
                                     onChange={e => setCvAmount(e.target.value)}
                                     className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm font-mono text-white placeholder-zinc-700 outline-none focus:border-white/10 transition-colors"
@@ -500,11 +503,11 @@ export default function ForwarderPortal() {
                                 </div>
                                 <div className="bg-black border border-white/[0.04] rounded-xl px-3 py-2 text-center min-h-[36px] flex items-center justify-center">
                                     {cvLoading ? (
-                                        <span className="text-[10px] text-zinc-600">Converting...</span>
+                                        <span className="text-[10px] text-zinc-600">{t('portal.converting')}</span>
                                     ) : cvResult ? (
                                         <span className="text-sm font-semibold font-mono text-emerald-400">{cvTo} {cvResult}</span>
                                     ) : (
-                                        <span className="text-[10px] text-zinc-700">Enter an amount above</span>
+                                        <span className="text-[10px] text-zinc-700">{t('portal.enter.amount.above')}</span>
                                     )}
                                 </div>
                             </div>
@@ -515,7 +518,7 @@ export default function ForwarderPortal() {
                             {!selectedRequest ? (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 opacity-25">
                                     <CheckCircle2 className="w-8 h-8 text-zinc-600" />
-                                    <p className="text-xs text-zinc-500">Select a request to submit your quote</p>
+                                    <p className="text-xs text-zinc-500">{t('portal.select.request')}</p>
                                 </div>
                             ) : bidSuccess ? (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
@@ -523,15 +526,15 @@ export default function ForwarderPortal() {
                                         <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-white mb-1">Quote Submitted</p>
-                                        <p className="text-xs text-zinc-500">Your bid has been sent successfully.</p>
+                                        <p className="text-sm font-bold text-white mb-1">{t('portal.quote.submitted')}</p>
+                                        <p className="text-xs text-zinc-500">{t('portal.bid.sent')}</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="flex flex-col h-full gap-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Submit Quote</span>
-                                        <button onClick={() => setSelectedRequest(null)} className="text-[10px] text-zinc-600 hover:text-white transition-colors">Cancel</button>
+                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.submit.quote')}</span>
+                                        <button onClick={() => setSelectedRequest(null)} className="text-[10px] text-zinc-600 hover:text-white transition-colors">{t('portal.cancel')}</button>
                                     </div>
 
                                     {/* Request summary */}
@@ -553,7 +556,7 @@ export default function ForwarderPortal() {
                                     {/* Price input */}
                                     <div className="flex-1 flex flex-col justify-end gap-3">
                                         <div>
-                                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Your Price (USD)</label>
+                                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('portal.your.price')}</label>
                                             <div className="relative">
                                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                                                 <input
@@ -575,7 +578,7 @@ export default function ForwarderPortal() {
                                         >
                                             {submittingBid
                                                 ? <Loader2 className="w-4 h-4 animate-spin" />
-                                                : <>Submit Quote <ArrowRight className="w-3.5 h-3.5" /></>
+                                                : <>{t('portal.submit.quote')} <ArrowRight className="w-3.5 h-3.5" /></>
                                             }
                                         </button>
                                     </div>

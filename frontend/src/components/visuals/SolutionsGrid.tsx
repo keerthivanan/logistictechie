@@ -3,60 +3,63 @@
 import Link from 'next/link';
 import NextImage from 'next/image';
 import { Ship, Plane, Box, Warehouse, Anchor, Globe, BarChart, FileCheck, ArrowRight } from 'lucide-react';
-
-const solutions = [
-    {
-        icon: Ship,
-        title: 'Ocean Freight',
-        desc: 'FCL & LCL shipping with guaranteed capacity on all major trade lanes. Real-time tracking down to the container level.',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
-        href: '/services/ocean-freight'
-    },
-    {
-        icon: Plane,
-        title: 'Air Freight',
-        desc: 'Time-critical air cargo solutions. Next-flight-out options and chartered services for urgent global deliveries.',
-        image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop',
-        href: '/services/air-freight'
-    },
-    {
-        icon: FileCheck,
-        title: 'Customs Compliance',
-        desc: 'AI-powered clearance reduces documentation errors by 99%. Automated HS code classification and duty optimization.',
-        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
-        href: '/services/customs-compliance'
-    },
-    {
-        icon: Warehouse,
-        title: 'Smart Warehousing',
-        desc: 'Network of 500+ tech-enabled fulfillment centers. On-demand storage and automated picking/packing.',
-        image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop',
-        href: '/services/smart-warehousing'
-    },
-    {
-        icon: Anchor,
-        title: 'Port Drayage',
-        desc: 'Seamless first/last mile port connections. Digital booking for chassis and drayage trucks to avoid demurrage.',
-        image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop',
-        href: '/services/port-drayage'
-    },
-    {
-        icon: BarChart,
-        title: 'Supply Chain Tower',
-        desc: 'End-to-end visibility control tower. Predictive analytics to foresee disruptions before they impact inventory.',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
-        href: '/services/supply-chain-tower'
-    }
-];
+import { useT } from '@/lib/i18n/t';
 
 export default function SolutionsGrid() {
+    const t = useT()
+
+    const solutions = [
+        {
+            icon: Ship,
+            title: t('sol.ocean.title'),
+            desc: t('sol.ocean.desc'),
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
+            href: '/services/ocean-freight'
+        },
+        {
+            icon: Plane,
+            title: t('sol.air.title'),
+            desc: t('sol.air.desc'),
+            image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop',
+            href: '/services/air-freight'
+        },
+        {
+            icon: FileCheck,
+            title: t('sol.customs.title'),
+            desc: t('sol.customs.desc'),
+            image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
+            href: '/services/customs-compliance'
+        },
+        {
+            icon: Warehouse,
+            title: t('sol.warehouse.title'),
+            desc: t('sol.warehouse.desc'),
+            image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop',
+            href: '/services/smart-warehousing'
+        },
+        {
+            icon: Anchor,
+            title: t('sol.drayage.title'),
+            desc: t('sol.drayage.desc'),
+            image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop',
+            href: '/services/port-drayage'
+        },
+        {
+            icon: BarChart,
+            title: t('sol.supply.title'),
+            desc: t('sol.supply.desc'),
+            image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
+            href: '/services/supply-chain-tower'
+        }
+    ]
+
     return (
         <section className="py-32 bg-black">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-20">
-                    <h2 className="text-3xl md:text-4xl font-semibold mb-6 tracking-tight font-outfit">Comprehensive Logistics Solutions</h2>
+                    <h2 className="text-3xl md:text-4xl font-semibold mb-6 tracking-tight font-outfit">{t('sol.title')}</h2>
                     <p className="text-zinc-500 max-w-2xl mx-auto text-sm font-inter">
-                        From raw material to final mile, CargoLink orchestrates every step of your supply chain with precision and reliability.
+                        {t('sol.sub')}
                     </p>
                 </div>
 
@@ -82,7 +85,7 @@ export default function SolutionsGrid() {
                                     </p>
 
                                     <div className="mt-8 flex items-center text-xs font-semibold uppercase tracking-[0.2em] text-blue-500 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                        Learn More <ArrowRight className="ml-2 w-4 h-4" />
+                                        {t('sol.learn')} <ArrowRight className="ml-2 w-4 h-4" />
                                     </div>
                                 </div>
                             </div>
@@ -93,4 +96,3 @@ export default function SolutionsGrid() {
         </section>
     );
 }
-

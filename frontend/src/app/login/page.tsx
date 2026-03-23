@@ -67,13 +67,13 @@ function LoginContent() {
                 setIsLoading(false)
             }
         },
-        onError: () => setError('Google Sign-In failed. Try again.'),
+        onError: () => setError(t('login.err.google.fail')),
     })
 
     // ── Manual Login ──────────────────────────────────────────────────────────
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!loginEmail || !loginPassword) { setError('Enter your email and password.'); return }
+        if (!loginEmail || !loginPassword) { setError(t('login.err.credentials')); return }
         setIsLoading(true)
         setError('')
         try {
@@ -100,12 +100,12 @@ function LoginContent() {
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
-        if (!signupName.trim()) { setError('Full name is required.'); return }
-        if (!signupEmail.trim()) { setError('Email is required.'); return }
-        if (signupPassword.length < 10) { setError('Password must be at least 10 characters.'); return }
-        if (!/[A-Z]/.test(signupPassword) || !/[a-z]/.test(signupPassword) || !/[0-9]/.test(signupPassword)) { setError('Password must contain uppercase, lowercase, and a number.'); return }
-        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/.test(signupPassword)) { setError('Password must contain at least one special character (e.g. !@#$%).'); return }
-        if (signupPassword !== signupConfirm) { setError('Passwords do not match.'); return }
+        if (!signupName.trim()) { setError(t('login.err.name')); return }
+        if (!signupEmail.trim()) { setError(t('login.err.email')); return }
+        if (signupPassword.length < 10) { setError(t('login.err.pw.length')); return }
+        if (!/[A-Z]/.test(signupPassword) || !/[a-z]/.test(signupPassword) || !/[0-9]/.test(signupPassword)) { setError(t('login.err.pw.strength')); return }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/.test(signupPassword)) { setError(t('login.err.pw.special')); return }
+        if (signupPassword !== signupConfirm) { setError(t('login.err.pw.match')); return }
 
         setIsLoading(true)
         try {
@@ -199,14 +199,14 @@ function LoginContent() {
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
                         <span className="font-bold text-black text-xs uppercase tracking-[0.15em] font-inter">
-                            {isLoading ? 'Connecting...' : t('login.google')}
+                            {isLoading ? t('login.connecting') : t('login.google')}
                         </span>
                     </button>
 
                     {/* Divider */}
                     <div className="flex items-center gap-3 mb-5">
                         <div className="flex-1 h-px bg-white/5" />
-                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">or</span>
+                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">{t('login.or')}</span>
                         <div className="flex-1 h-px bg-white/5" />
                     </div>
 
@@ -265,7 +265,7 @@ function LoginContent() {
                             />
                             <input
                                 type="password"
-                                placeholder="Password (min 10 chars, include !@#$%)"
+                                placeholder={t('signup.password.placeholder')}
                                 value={signupPassword}
                                 onChange={e => setSignupPassword(e.target.value)}
                                 required
@@ -273,7 +273,7 @@ function LoginContent() {
                             />
                             <input
                                 type="password"
-                                placeholder="Confirm password"
+                                placeholder={t('signup.confirm.placeholder')}
                                 value={signupConfirm}
                                 onChange={e => setSignupConfirm(e.target.value)}
                                 required
@@ -311,8 +311,8 @@ function LoginContent() {
                     {/* Footer */}
                     <div className="mt-6 pt-6 border-t border-white/5 text-center">
                         <p className="text-zinc-700 text-[9px] font-bold uppercase tracking-widest leading-loose font-inter">
-                            By continuing, you agree to{' '}
-                            <Link href="/legal/terms" className="text-zinc-500 hover:text-white transition-colors underline decoration-white/5">Terms of Service</Link>
+                            {t('login.agree')}{' '}
+                            <Link href="/legal/terms" className="text-zinc-500 hover:text-white transition-colors underline decoration-white/5">{t('login.terms')}</Link>
                         </p>
                     </div>
                 </div>

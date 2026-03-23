@@ -9,6 +9,7 @@ import {
 import { apiFetch } from '@/lib/config'
 import { Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
+import { useT } from '@/lib/i18n/t'
 
 interface Quotation {
     quotation_id: string
@@ -52,6 +53,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function OpenRequestsPanel() {
+    const t = useT()
     const [requests, setRequests] = useState<FreightRequest[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
@@ -113,11 +115,11 @@ export default function OpenRequestsPanel() {
             {/* ── Panel Header ── */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">My Requests</h3>
+                    <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit">{t('panel.title')}</h3>
                     {openCount > 0 && (
                         <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
                             <div className="w-1 h-1 bg-amber-500 rounded-full animate-pulse" />
-                            <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest font-inter">{openCount} Open</span>
+                            <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest font-inter">{openCount} {t('panel.open')}</span>
                         </div>
                     )}
                 </div>
@@ -125,13 +127,13 @@ export default function OpenRequestsPanel() {
                     href="/search"
                     className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-colors"
                 >
-                    <Plus className="w-3 h-3" /> New
+                    <Plus className="w-3 h-3" /> {t('panel.new')}
                 </Link>
             </div>
 
             {/* ── Filter Tabs ── */}
             <div className="flex items-center gap-1 mb-3 flex-shrink-0">
-                {(['ALL', 'OPEN', 'CLOSED'] as Filter[]).map(f => (
+                {([['ALL', t('panel.all')], ['OPEN', t('panel.open')], ['CLOSED', t('panel.closed')]] as [Filter, string][]).map(([f, label]) => (
                     <button
                         key={f}
                         onClick={() => setFilter(f)}
@@ -140,7 +142,7 @@ export default function OpenRequestsPanel() {
                             : 'text-zinc-600 hover:text-zinc-400'
                             }`}
                     >
-                        {f}
+                        {label}
                         <span className="ml-1.5 text-[9px]">
                             {f === 'ALL' ? requests.length : f === 'OPEN' ? openCount : closedCount}
                         </span>
@@ -156,7 +158,7 @@ export default function OpenRequestsPanel() {
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center h-32 gap-2">
-                        <p className="text-xs text-red-400">Failed to load requests. Please refresh.</p>
+                        <p className="text-xs text-red-400">{t('panel.failed')}</p>
                     </div>
                 ) : filtered.length === 0 ? (
                     <EmptyState filter={filter} />
@@ -184,6 +186,7 @@ function RequestAccordion({
     isExpanded: boolean
     onToggle: () => void
 }) {
+    const t = useT()
     const isOpen = request.status === 'OPEN'
     const sortedQuotes = [...(request.quotations || [])].sort((a, b) => a.total_price - b.total_price)
 
@@ -214,9 +217,9 @@ function RequestAccordion({
                             {request.origin} → {request.destination}
                         </p>
                         {isOpen ? (
-                            <span className="flex-shrink-0 text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-lg uppercase tracking-widest font-inter">Open</span>
+                            <span className="flex-shrink-0 text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-lg uppercase tracking-widest font-inter">{t('panel.open')}</span>
                         ) : (
-                            <span className="flex-shrink-0 text-[9px] font-bold text-zinc-600 bg-white/[0.03] border border-white/[0.05] px-1.5 py-0.5 rounded-lg uppercase tracking-widest font-inter">Closed</span>
+                            <span className="flex-shrink-0 text-[9px] font-bold text-zinc-600 bg-white/[0.03] border border-white/[0.05] px-1.5 py-0.5 rounded-lg uppercase tracking-widest font-inter">{t('panel.closed')}</span>
                         )}
                     </div>
                     <p className="text-[10px] text-zinc-500 font-inter truncate">
@@ -229,7 +232,7 @@ function RequestAccordion({
                     {request.quotation_count > 0 && (
                         <div className="text-right">
                             <p className="text-sm font-semibold text-white font-inter leading-none">{request.quotation_count}</p>
-                            <p className="text-[9px] text-zinc-600 font-inter uppercase tracking-widest">quotes</p>
+                            <p className="text-[9px] text-zinc-600 font-inter uppercase tracking-widest">{t('panel.quotes')}</p>
                         </div>
                     )}
                     <ChevronDown className={`w-4 h-4 text-zinc-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
@@ -278,7 +281,7 @@ function RequestAccordion({
                                     <>
                                         <div className="px-4 pt-3 pb-1 flex items-center justify-between">
                                             <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">
-                                                Forwarder Quotes · Sorted Cheapest First
+                                                {t('panel.quotes.sorted')}
                                             </p>
                                         </div>
                                         <div className="divide-y divide-white/[0.04]">
@@ -291,8 +294,8 @@ function RequestAccordion({
                                     <div className="px-4 py-5 flex items-center gap-3">
                                         <Clock className="w-4 h-4 text-zinc-700 flex-shrink-0" />
                                         <div>
-                                            <p className="text-xs font-bold text-zinc-500 font-inter">Awaiting forwarder quotes</p>
-                                            <p className="text-[9px] text-zinc-700 font-inter mt-0.5">Verified forwarders on CargoLink are reviewing your request</p>
+                                            <p className="text-xs font-bold text-zinc-500 font-inter">{t('panel.awaiting')}</p>
+                                            <p className="text-[9px] text-zinc-700 font-inter mt-0.5">{t('panel.awaiting.sub')}</p>
                                         </div>
                                     </div>
                                 )}
@@ -304,7 +307,7 @@ function RequestAccordion({
                                 className="flex items-center justify-between px-4 py-3 border-t border-white/[0.05] hover:bg-white/[0.03] transition-colors group"
                             >
                                 <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter group-hover:text-white transition-colors">
-                                    Open full request
+                                    {t('panel.open.full')}
                                 </span>
                                 <ArrowRight className="w-3 h-3 text-zinc-700 group-hover:text-white transition-colors" />
                             </Link>
@@ -317,6 +320,7 @@ function RequestAccordion({
 }
 
 function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; requestId: string }) {
+    const t = useT()
     const isBest = rank === 1
     return (
         <div className={`px-4 py-3 transition-colors ${isBest ? 'bg-emerald-500/[0.03]' : 'hover:bg-white/[0.02]'}`}>
@@ -333,12 +337,12 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                         <div className="flex items-center gap-2">
                             <p className="text-xs font-semibold text-white font-inter truncate">{quote.forwarder_company}</p>
                             {isBest && (
-                                <span className="flex-shrink-0 text-[8px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">Best</span>
+                                <span className="flex-shrink-0 text-[8px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">{t('panel.best')}</span>
                             )}
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
                             <span className="text-[9px] text-zinc-600 font-inter flex items-center gap-1">
-                                <Clock className="w-2.5 h-2.5" />{quote.transit_days} days transit
+                                <Clock className="w-2.5 h-2.5" />{quote.transit_days} {t('panel.transit')}
                             </span>
                             <span className="text-[9px] text-zinc-700 font-inter">{timeAgo(quote.received_at)}</span>
                         </div>
@@ -370,16 +374,17 @@ function Chip({ icon, label, className = '' }: { icon: React.ReactNode; label: s
 }
 
 function EmptyState({ filter }: { filter: Filter }) {
+    const t = useT()
     return (
         <div className="h-40 border border-dashed border-white/5 rounded-2xl flex flex-col items-center justify-center gap-3 opacity-50">
             <Package className="w-5 h-5 text-zinc-600" />
             <div className="text-center">
                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">
-                    {filter === 'OPEN' ? 'No open requests' : filter === 'CLOSED' ? 'No closed requests' : 'No requests yet'}
+                    {filter === 'OPEN' ? t('panel.no.open') : filter === 'CLOSED' ? t('panel.no.closed') : t('panel.no.requests')}
                 </p>
                 {filter !== 'CLOSED' && (
                     <Link href="/search" className="text-[10px] text-zinc-600 font-inter hover:text-white transition-colors underline underline-offset-4 mt-1 block">
-                        Get an instant quote
+                        {t('panel.get.quote')}
                     </Link>
                 )}
             </div>

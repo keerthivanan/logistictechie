@@ -7,6 +7,7 @@ import { apiFetch } from '@/lib/config'
 import { MessageSquare, ArrowRight, CheckCircle2, Clock, X } from 'lucide-react'
 import { PageSpinner } from '@/components/ui/Spinner'
 import { motion } from 'framer-motion'
+import { useT } from '@/lib/i18n/t'
 
 interface ConversationSummary {
     public_id: string
@@ -27,6 +28,7 @@ interface ConversationSummary {
 }
 
 export default function MessagesPage() {
+    const t = useT()
     const { user, logout, loading: authLoading } = useAuth()
     const router = useRouter()
     const [conversations, setConversations] = useState<ConversationSummary[]>([])
@@ -58,9 +60,9 @@ export default function MessagesPage() {
     }, [user, authLoading, router, fetchConversations])
 
     const displayPrice = (conv: ConversationSummary) => {
-        if (conv.agreed_price) return { label: 'Agreed', price: conv.agreed_price, color: 'text-emerald-400' }
-        if (conv.current_offer) return { label: 'Offer', price: conv.current_offer, color: 'text-amber-400' }
-        return { label: 'Quoted', price: conv.original_price, color: 'text-white' }
+        if (conv.agreed_price) return { label: t('msg.agreed'), price: conv.agreed_price, color: 'text-emerald-400' }
+        if (conv.current_offer) return { label: t('msg.offer'), price: conv.current_offer, color: 'text-amber-400' }
+        return { label: t('msg.quoted'), price: conv.original_price, color: 'text-white' }
     }
 
     if (loading || authLoading) {
@@ -72,11 +74,9 @@ export default function MessagesPage() {
     return (
         <div className="h-full flex flex-col gap-4 overflow-hidden">
             <div className="border-b border-white/5 pb-4 flex-shrink-0">
-                <h1 className="text-lg font-bold tracking-tight text-white font-outfit">Messages</h1>
+                <h1 className="text-lg font-bold tracking-tight text-white font-outfit">{t('msg.title')}</h1>
                 <p className="text-zinc-500 text-xs font-inter mt-0.5">
-                    {user?.role === 'forwarder'
-                        ? 'Shippers who are interested in your quotes.'
-                        : 'Your negotiations with forwarders.'}
+                    {user?.role === 'forwarder' ? t('msg.sub.fwd') : t('msg.sub.shipper')}
                 </p>
             </div>
 
@@ -87,11 +87,9 @@ export default function MessagesPage() {
                             <MessageSquare className="w-7 h-7 text-zinc-700" />
                         </div>
                         <div>
-                            <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">No conversations yet</h3>
+                            <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">{t('msg.empty.title')}</h3>
                             <p className="text-xs text-zinc-600 font-inter max-w-xs">
-                                {user?.role === 'forwarder'
-                                    ? 'When shippers express interest in your quotes, conversations appear here.'
-                                    : 'Click "Chat with Forwarder" on any quote in your Shipments page.'}
+                                {user?.role === 'forwarder' ? t('msg.empty.fwd') : t('msg.empty.shipper')}
                             </p>
                         </div>
                     </div>

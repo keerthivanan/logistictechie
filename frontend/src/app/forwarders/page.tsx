@@ -7,6 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import Avatar from '@/components/visuals/Avatar';
 import PartnerModal from '@/components/modals/PartnerModal';
 import { apiFetch } from '@/lib/config';
+import { useT } from '@/lib/i18n/t';
 
 interface Forwarder {
     id: string;
@@ -23,6 +24,7 @@ interface Forwarder {
 }
 
 export default function ForwarderDirectoryPage() {
+    const t = useT()
     const [forwarders, setForwarders] = useState<Forwarder[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
@@ -70,16 +72,16 @@ export default function ForwarderDirectoryPage() {
                 {/* Hero */}
                 <div className="text-center mb-12">
                     <h1 className="text-2xl md:text-3xl font-semibold font-outfit uppercase tracking-tight text-white mb-3">
-                        Global Logistics Directory
+                        {t('fwd.dir.title')}
                     </h1>
-                    <p className="text-xs text-zinc-500 font-inter mb-8">Browse verified freight forwarders from around the world.</p>
+                    <p className="text-xs text-zinc-500 font-inter mb-8">{t('fwd.dir.sub')}</p>
 
                     <div className="max-w-2xl mx-auto relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                         <input
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            placeholder="Search by company name or country..."
+                            placeholder={t('fwd.dir.search')}
                             className="w-full bg-[#0a0a0a] border border-white/[0.08] rounded-xl pl-12 pr-6 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-all font-inter"
                         />
                     </div>
@@ -128,7 +130,7 @@ export default function ForwarderDirectoryPage() {
                                                 </div>
                                                 <div className="flex items-center gap-1.5 border border-white/10 px-2.5 py-1 rounded-full bg-white/[0.02]">
                                                     <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                                                    <span className="text-[8px] font-bold text-white/60 tracking-widest font-inter">VERIFIED</span>
+                                                    <span className="text-[8px] font-bold text-white/60 tracking-widest font-inter">{t('fwd.dir.verified')}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -140,7 +142,7 @@ export default function ForwarderDirectoryPage() {
                                                 </h3>
                                                 <div className="flex items-center text-white/40 text-[9px] font-bold uppercase tracking-[0.15em] font-inter">
                                                     <MapPin className="w-3 h-3 mr-2 opacity-50" />
-                                                    {forwarder.country} • GLOBAL REGISTRY
+                                                    {forwarder.country} • {t('fwd.global.registry')}
                                                 </div>
                                             </div>
 
@@ -148,16 +150,16 @@ export default function ForwarderDirectoryPage() {
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center text-[9px] text-white/30 font-bold uppercase tracking-widest font-inter">
                                                         <Globe className="w-3.5 h-3.5 mr-3 opacity-30" />
-                                                        Network Status
+                                                        {t('fwd.dir.status')}
                                                     </div>
-                                                    <span className="text-[8px] font-semibold text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-0.5 rounded">Active</span>
+                                                    <span className="text-[8px] font-semibold text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-0.5 rounded">{t('fwd.dir.active')}</span>
                                                 </div>
 
                                                 {forwarder.website && (
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center text-[9px] text-white/30 font-bold uppercase tracking-widest font-inter">
                                                             <ExternalLink className="w-3.5 h-3.5 mr-3 opacity-30" />
-                                                            Public Node
+                                                            {t('fwd.public.node')}
                                                         </div>
                                                         <span className="text-[8px] font-bold text-white/50 group-hover:text-white/80 transition-colors max-w-[140px] truncate">
                                                             {forwarder.website.replace(/^https?:\/\//, '')}
@@ -168,7 +170,7 @@ export default function ForwarderDirectoryPage() {
                                         </div>
 
                                         <button className="w-full mt-10 bg-white text-black py-4 rounded-2xl text-[9px] font-semibold uppercase tracking-[0.4em] transition-all duration-500 hover:bg-zinc-200 active:scale-[0.97] shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                                            Initiate Connection
+                                            {t('fwd.dir.connect')}
                                         </button>
                                     </div>
 
@@ -182,7 +184,7 @@ export default function ForwarderDirectoryPage() {
 
                 {!loading && filteredForwarders.length === 0 && (
                     <div className="text-center py-20 text-zinc-500 text-xs font-inter">
-                        No forwarders found matching &quot;{filter}&quot;
+                        {t('fwd.no.match')} &quot;{filter}&quot;
                     </div>
                 )}
 

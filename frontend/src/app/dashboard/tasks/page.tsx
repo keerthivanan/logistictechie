@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useT } from '@/lib/i18n/t'
 
 interface Task {
     id: string
@@ -27,6 +28,7 @@ interface Task {
 }
 
 export default function TasksPage() {
+    const t = useT()
     const { user, loading: authLoading } = useAuth()
     const router = useRouter()
     const [tasks, setTasks] = useState<Task[]>([])
@@ -101,40 +103,40 @@ export default function TasksPage() {
                 <div className="space-y-1">
                     <div className="flex items-center gap-4">
                         <h1 className="text-lg font-bold tracking-tight text-white font-outfit">
-                            Tasks
+                            {t('tasks.title')}
                         </h1>
                     </div>
-                    <p className="text-zinc-500 font-inter text-xs">Manage and track your pending action items.</p>
+                    <p className="text-zinc-500 font-inter text-xs">{t('tasks.sub')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
-                        <span className="text-lg font-bold font-inter text-white">{tasks.filter(t => t.status === 'PENDING').length}</span>
-                        <span className="text-xs text-zinc-600 font-inter">Active</span>
+                        <span className="text-lg font-bold font-inter text-white">{tasks.filter(tk => tk.status === 'PENDING').length}</span>
+                        <span className="text-xs text-zinc-600 font-inter">{t('tasks.active.tab')}</span>
                     </div>
                     <div className="bg-white/[0.02] border border-white/5 px-5 py-3 rounded-2xl flex flex-col items-center">
-                        <span className="text-lg font-bold font-inter text-zinc-500">{tasks.filter(t => t.status === 'COMPLETED').length}</span>
-                        <span className="text-xs text-zinc-600 font-inter">Done</span>
+                        <span className="text-lg font-bold font-inter text-zinc-500">{tasks.filter(tk => tk.status === 'COMPLETED').length}</span>
+                        <span className="text-xs text-zinc-600 font-inter">{t('tasks.done.tab')}</span>
                     </div>
                 </div>
             </div>
 
             {/* Controls */}
             <div className="flex items-center justify-between flex-shrink-0">
-                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">Pending</h3>
+                <h3 className="text-xs font-bold text-white tracking-widest uppercase font-outfit px-3 py-1 bg-white/5 rounded-lg border border-white/5">{t('tasks.pending.badge')}</h3>
                 <div className="flex items-center gap-3">
                     <div className="flex bg-white/5 border border-white/5 rounded-xl p-1">
-                        {(['NEWEST', 'PRIORITY'] as const).map(o => (
-                            <button key={o} onClick={() => setSortOrder(o)}
-                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${sortOrder === o ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
-                                {o}
+                        {([['NEWEST', t('tasks.sort.newest')], ['PRIORITY', t('tasks.sort.priority')]] as const).map(([val, label]) => (
+                            <button key={val} onClick={() => setSortOrder(val)}
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${sortOrder === val ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                {label}
                             </button>
                         ))}
                     </div>
                     <div className="flex bg-white/5 border border-white/5 rounded-xl p-1">
-                        {(['ALL', 'HIGH', 'CRITICAL'] as const).map(p => (
-                            <button key={p} onClick={() => setFilterPriority(p)}
-                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${filterPriority === p ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
-                                {p}
+                        {([['ALL', t('tasks.filter.all')], ['HIGH', t('tasks.filter.high')], ['CRITICAL', t('tasks.filter.critical')]] as const).map(([val, label]) => (
+                            <button key={val} onClick={() => setFilterPriority(val)}
+                                className={`text-xs font-semibold uppercase px-4 py-1.5 rounded-xl transition-all ${filterPriority === val ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}>
+                                {label}
                             </button>
                         ))}
                     </div>
@@ -152,7 +154,7 @@ export default function TasksPage() {
                             )) : (
                                 <div className="col-span-full py-16 border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-20">
                                     <CheckCircle2 className="w-8 h-8 mb-3" />
-                                    <p className="text-xs font-semibold uppercase tracking-widest">All tasks complete</p>
+                                    <p className="text-xs font-semibold uppercase tracking-widest">{t('tasks.all.complete')}</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -162,7 +164,7 @@ export default function TasksPage() {
                 {/* Completed tasks */}
                 {completedTasks.length > 0 && (
                     <div className="xl:col-span-1 overflow-y-auto custom-scrollbar pr-1">
-                        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider font-inter mb-3">Completed</h2>
+                        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider font-inter mb-3">{t('tasks.completed.label')}</h2>
                         <div className="space-y-2">
                             {completedTasks.map(task => (
                                 <motion.div layout key={task.id}
@@ -175,7 +177,7 @@ export default function TasksPage() {
                                         <div className="overflow-hidden">
                                             <p className="text-[10px] font-bold text-zinc-400 tracking-tight line-through decoration-zinc-800 truncate">{task.title}</p>
                                             <p className="text-[10px] text-zinc-700 mt-0.5">
-                                                Done {new Date(task.created_at).toLocaleDateString()}
+                                                {t('tasks.completed.label')} {new Date(task.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
@@ -191,6 +193,7 @@ export default function TasksPage() {
 }
 
 function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: string) => void; isToggling: boolean }) {
+    const t = useT()
     return (
         <motion.div layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
             className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 hover:border-white/20 transition-all overflow-hidden">
@@ -213,12 +216,12 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: s
                     <div className="flex items-center gap-1.5 text-zinc-600">
                         <Calendar className="w-3 h-3" />
                         <span className="text-[10px] font-medium font-inter">
-                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
+                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : t('tasks.no.due')}
                         </span>
                     </div>
                     <button onClick={() => onToggle(task.id)} disabled={isToggling}
                         className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-600 group-hover:text-white transition-colors font-inter disabled:opacity-40">
-                        Mark done <ArrowRight className="w-3 h-3" />
+                        {t('tasks.mark.done')} <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>
             </div>

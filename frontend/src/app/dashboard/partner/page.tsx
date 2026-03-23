@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
+import { useT } from '@/lib/i18n/t'
 
 interface Quote {
     request_id: string
@@ -28,6 +29,7 @@ interface Metrics {
 }
 
 export default function PartnerDashboard() {
+    const t = useT()
     const { user } = useAuth()
     const [quotes, setQuotes] = useState<Quote[]>([])
     const [metrics, setMetrics] = useState<Metrics | null>(null)
@@ -121,10 +123,10 @@ export default function PartnerDashboard() {
                         <Clock className="w-6 h-6 text-amber-400" />
                     </div>
                     <div>
-                        <h2 className="text-base font-bold text-white mb-1">Application Under Review</h2>
-                        <p className="text-zinc-500 text-sm max-w-sm mx-auto">Your partner registration is being reviewed. You'll be notified once approved.</p>
+                        <h2 className="text-base font-bold text-white mb-1">{t('partner.under.review')}</h2>
+                        <p className="text-zinc-500 text-sm max-w-sm mx-auto">{t('partner.under.review.sub')}</p>
                     </div>
-                    <span className="px-4 py-1.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-bold uppercase tracking-widest">Pending Approval</span>
+                    <span className="px-4 py-1.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-bold uppercase tracking-widest">{t('partner.pending.badge')}</span>
                 </div>
             )
         }
@@ -134,11 +136,11 @@ export default function PartnerDashboard() {
                     <AlertCircle className="w-6 h-6 text-red-400" />
                 </div>
                 <div>
-                    <h2 className="text-base font-bold text-white mb-1">Partner Access Only</h2>
-                    <p className="text-zinc-500 text-sm max-w-sm mx-auto">This section is reserved for registered CargoLink freight partners.</p>
+                    <h2 className="text-base font-bold text-white mb-1">{t('partner.access.only')}</h2>
+                    <p className="text-zinc-500 text-sm max-w-sm mx-auto">{t('partner.access.only.sub')}</p>
                 </div>
                 <Link href="/forwarders/register" className="bg-white text-black px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-all">
-                    Apply as Partner
+                    {t('partner.apply')}
                 </Link>
             </div>
         )
@@ -177,10 +179,10 @@ export default function PartnerDashboard() {
             {/* Stats */}
             <div className="grid grid-cols-4 gap-3 flex-shrink-0">
                 {[
-                    { label: 'Total Bids', value: metrics?.total_quotes_submitted ?? 0, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/[0.07]', border: 'border-blue-500/10' },
-                    { label: 'Active', value: metrics?.active_bids ?? 0, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/[0.07]', border: 'border-amber-500/10' },
-                    { label: 'Won', value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/[0.07]', border: 'border-emerald-500/10' },
-                    { label: 'Reliability', value: metrics?.reliability_score ? `${metrics.reliability_score}/5` : '—', icon: Star, color: 'text-purple-400', bg: 'bg-purple-500/[0.07]', border: 'border-purple-500/10' },
+                    { label: t('partner.metrics.total'), value: metrics?.total_quotes_submitted ?? 0, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/[0.07]', border: 'border-blue-500/10' },
+                    { label: t('partner.metrics.active'), value: metrics?.active_bids ?? 0, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/[0.07]', border: 'border-amber-500/10' },
+                    { label: t('partner.metrics.won'), value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/[0.07]', border: 'border-emerald-500/10' },
+                    { label: t('partner.metrics.score'), value: metrics?.reliability_score ? `${metrics.reliability_score}/5` : '—', icon: Star, color: 'text-purple-400', bg: 'bg-purple-500/[0.07]', border: 'border-purple-500/10' },
                 ].map(s => (
                     <div key={s.label} className="bg-zinc-950 border border-white/5 rounded-xl p-4 flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg ${s.bg} border ${s.border} flex items-center justify-center flex-shrink-0`}>
@@ -208,7 +210,7 @@ export default function PartnerDashboard() {
                                 type="text"
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Search by route, cargo type, or ID..."
+                                placeholder={t('partner.search')}
                                 className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-700 focus:border-white/15 outline-none transition-colors"
                             />
                             {search && (
@@ -241,10 +243,10 @@ export default function PartnerDashboard() {
                                 <Clock className="w-8 h-8 text-zinc-600" />
                                 <div>
                                     <p className="text-sm font-bold text-white mb-1">
-                                        {search ? 'No results found' : 'No open requests'}
+                                        {search ? t('partner.no.results') : t('partner.no.requests')}
                                     </p>
                                     <p className="text-xs text-zinc-600">
-                                        {search ? 'Try a different search term' : 'New requests will appear here once assigned to you'}
+                                        {search ? t('partner.no.results.sub') : t('partner.no.requests.sub')}
                                     </p>
                                 </div>
                             </div>
@@ -320,7 +322,7 @@ export default function PartnerDashboard() {
                             <div className="flex flex-col h-full gap-4">
                                 {/* Form header */}
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Submit Quote</span>
+                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('partner.bid')}</span>
                                     <button onClick={() => setSelectedRequest(null)} className="text-zinc-600 hover:text-white transition-colors">
                                         <X className="w-3.5 h-3.5" />
                                     </button>
@@ -345,7 +347,7 @@ export default function PartnerDashboard() {
                                 {/* Price input */}
                                 <div className="flex-1 flex flex-col justify-end gap-3">
                                     <div>
-                                        <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Your Price (USD)</label>
+                                        <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('partner.bid.price')}</label>
                                         <div className="relative">
                                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
                                             <input
@@ -369,7 +371,7 @@ export default function PartnerDashboard() {
                                     >
                                         {submittingBid
                                             ? <Loader2 className="w-4 h-4 animate-spin" />
-                                            : <>Submit Quote <ArrowRight className="w-3.5 h-3.5" /></>
+                                            : <>{t('partner.bid.submit')} <ArrowRight className="w-3.5 h-3.5" /></>
                                         }
                                     </button>
                                 </div>

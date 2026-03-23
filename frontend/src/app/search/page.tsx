@@ -78,18 +78,18 @@ export default function SearchPage() {
     const handleSearch = () => {
         setError('')
         if (isSubmitting) return
-        if (!originCity.trim()) { setError('Please select an origin port or city.'); return }
-        if (!destCity.trim()) { setError('Please select a destination port or city.'); return }
+        if (!originCity.trim()) { setError(t('search.err.origin')); return }
+        if (!destCity.trim()) { setError(t('search.err.dest')); return }
 
         // Same location check
         const normalize = (s: string) => s.toLowerCase().replace(/\s*\(.*?\)/g, '').trim()
         if (originCountry === destCountry && normalize(originCity) === normalize(destCity)) {
-            setError('Origin and destination cannot be the same location.')
+            setError(t('search.err.same'))
             return
         }
 
-        if (mode === 'FCL' && !containerType) { setError('Please select a container type.'); return }
-        if ((mode === 'LCL' || mode === 'Air') && !weight) { setError('Please enter the total weight.'); return }
+        if (mode === 'FCL' && !containerType) { setError(t('search.err.container')); return }
+        if ((mode === 'LCL' || mode === 'Air') && !weight) { setError(t('search.err.weight')); return }
 
         const params: Record<string, string> = {
             origin: originCity,
@@ -235,10 +235,10 @@ export default function SearchPage() {
                         {/* Mode tabs */}
                         <div className="grid grid-cols-4 gap-2 mb-6">
                             {([
-                                { value: 'FCL', label: 'FCL', sub: 'Full Container', Icon: Ship },
-                                { value: 'LCL', label: 'LCL', sub: 'Shared Container', Icon: Package },
-                                { value: 'Air', label: 'Air', sub: 'Air Freight', Icon: Plane },
-                                { value: 'Truck', label: 'Road', sub: 'FTL / LTL', Icon: Truck },
+                                { value: 'FCL', label: 'FCL', sub: t('search.mode.fcl.sub'), Icon: Ship },
+                                { value: 'LCL', label: 'LCL', sub: t('search.mode.lcl.sub'), Icon: Package },
+                                { value: 'Air', label: 'Air', sub: t('search.mode.air.sub'), Icon: Plane },
+                                { value: 'Truck', label: 'Road', sub: t('search.mode.truck.sub'), Icon: Truck },
                             ] as const).map(({ value, label, sub, Icon }) => (
                                 <button
                                     key={value}
@@ -257,7 +257,7 @@ export default function SearchPage() {
                         {mode === 'FCL' && (
                             <div className="space-y-5">
                                 <div>
-                                    <label className={lbl}>Container Type *</label>
+                                    <label className={lbl}>{t('search.container.type')}</label>
                                     <div className="grid grid-cols-4 gap-2">
                                         {CONTAINER_TYPES.map(ct => (
                                             <button key={ct.value} type="button"
@@ -270,13 +270,13 @@ export default function SearchPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className={lbl}>Number of Containers</label>
+                                        <label className={lbl}>{t('search.num.containers')}</label>
                                         <input type="number" min="1" value={units}
                                             onChange={e => setUnits(Math.max(1, parseInt(e.target.value) || 1))}
                                             className={inp} />
                                     </div>
                                     <div>
-                                        <label className={lbl}>Gross Weight (per container)</label>
+                                        <label className={lbl}>{t('search.gross.weight')}</label>
                                         <div className="flex">
                                             <input type="number" min="0" value={weight} placeholder="e.g. 18000"
                                                 onChange={e => setWeight(e.target.value)}
@@ -297,13 +297,13 @@ export default function SearchPage() {
                             <div className="space-y-5">
                                 <div className="grid grid-cols-3 gap-4">
                                     <div>
-                                        <label className={lbl}>Units</label>
+                                        <label className={lbl}>{t('search.units')}</label>
                                         <input type="number" min="1" value={units}
                                             onChange={e => setUnits(Math.max(1, parseInt(e.target.value) || 1))}
                                             className={inp} />
                                     </div>
                                     <div>
-                                        <label className={lbl}>Total Weight *</label>
+                                        <label className={lbl}>{t('search.total.weight')}</label>
                                         <div className="flex">
                                             <input type="number" min="0" value={weight} placeholder="e.g. 500"
                                                 onChange={e => setWeight(e.target.value)}
@@ -316,14 +316,14 @@ export default function SearchPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className={lbl}>Volume (CBM)</label>
+                                        <label className={lbl}>{t('search.volume')}</label>
                                         <input type="number" step="0.01" min="0" value={volume} placeholder="e.g. 3.5"
                                             onChange={e => setVolume(e.target.value)}
                                             className={inp} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className={lbl}>Dimensions per Piece (L × W × H)</label>
+                                    <label className={lbl}>{t('search.dims')}</label>
                                     <div className="flex gap-2">
                                         {[{ v: dimL, s: setDimL, p: 'L' }, { v: dimW, s: setDimW, p: 'W' }, { v: dimH, s: setDimH, p: 'H' }].map(({ v, s, p }) => (
                                             <input key={p} type="number" min="0" placeholder={p} value={v}
@@ -344,13 +344,13 @@ export default function SearchPage() {
                         {mode === 'Truck' && (
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className={lbl}>Number of Trucks</label>
+                                    <label className={lbl}>{t('search.num.trucks')}</label>
                                     <input type="number" min="1" value={units}
                                         onChange={e => setUnits(Math.max(1, parseInt(e.target.value) || 1))}
                                         className={inp} />
                                 </div>
                                 <div>
-                                    <label className={lbl}>Total Weight</label>
+                                    <label className={lbl}>{t('search.total.weight.opt')}</label>
                                     <div className="flex">
                                         <input type="number" min="0" value={weight} placeholder="e.g. 5000"
                                             onChange={e => setWeight(e.target.value)}

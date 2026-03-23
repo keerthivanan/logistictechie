@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Bot, User, Sparkles, Send, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 interface Message {
     role: 'user' | 'assistant'
@@ -12,11 +13,12 @@ interface Message {
 }
 
 export default function AiChatVisual() {
+    const t = useT()
     const router = useRouter()
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'assistant',
-            content: "CARGOLINK AI IS ONLINE. I can navigate the CargoLink platform for you. Ask me to 'Track', 'Get Rates', or 'View Dashboard'."
+            content: t('ai.welcome')
         }
     ])
     const [input, setInput] = useState('')
@@ -62,7 +64,7 @@ export default function AiChatVisual() {
             }
         } catch (err) {
             console.error(err)
-            setMessages(prev => [...prev, { role: 'assistant', content: "Something went wrong. Please try again." }])
+            setMessages(prev => [...prev, { role: 'assistant', content: t('ai.error') }])
         } finally {
             setLoading(false)
         }
@@ -77,11 +79,11 @@ export default function AiChatVisual() {
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/50">
                 <div className="flex items-center gap-2">
                     <Bot className="w-5 h-5 text-zinc-400" />
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">CargoLink AI Assistant</span>
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{t('ai.header')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-[10px] font-bold text-green-500 uppercase">Live</span>
+                    <span className="text-[10px] font-bold text-green-500 uppercase">{t('ai.live')}</span>
                 </div>
             </div>
 
@@ -107,13 +109,13 @@ export default function AiChatVisual() {
                             {m.role === 'assistant' && i === messages.length - 1 && loading && (
                                 <div className="flex items-center gap-2 mb-2">
                                     <Sparkles className="w-3 h-3 text-zinc-400 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Analyzing...</span>
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{t('ai.analyzing')}</span>
                                 </div>
                             )}
                             {m.content}
                             {m.action && m.action.type === 'NAVIGATE' && (
                                 <div className="mt-3 p-2 bg-white/[0.04] border border-white/10 rounded-lg text-[10px] font-bold text-zinc-400 uppercase flex items-center gap-2">
-                                    <Loader2 className="w-3 h-3 animate-spin" /> Auto-navigating to {m.action.payload}
+                                    <Loader2 className="w-3 h-3 animate-spin" /> {t('ai.navigating')} {m.action.payload}
                                 </div>
                             )}
                         </div>
@@ -132,7 +134,7 @@ export default function AiChatVisual() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask me to track a shipment, get rates, or open your dashboard..."
+                    placeholder={t('ai.placeholder')}
                     className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-white/30 outline-none transition-colors"
                     disabled={loading}
                 />

@@ -1,31 +1,34 @@
 'use client'
 
 import { motion } from 'framer-motion'
-
-const metrics = [
-    {
-        label: 'Quote Speed',
-        cargolink: { value: 'Real-time', pct: 97 },
-        industry: { value: '6 hrs avg', pct: 18 },
-    },
-    {
-        label: 'Route Accuracy',
-        cargolink: { value: '99.9%', pct: 98 },
-        industry: { value: '45%', pct: 45 },
-    },
-    {
-        label: 'Data Coverage',
-        cargolink: { value: '200+ signals', pct: 92 },
-        industry: { value: '~40 signals', pct: 22 },
-    },
-    {
-        label: 'Cost Savings',
-        cargolink: { value: '22% avg', pct: 82 },
-        industry: { value: 'None', pct: 4 },
-    },
-]
+import { useT } from '@/lib/i18n/t'
 
 export default function ComparisonChart() {
+    const t = useT()
+
+    const metrics = [
+        {
+            label: t('chart.metric1'),
+            cargolink: { value: t('chart.realtime'), pct: 97 },
+            industry: { value: t('chart.6hrs'), pct: 18 },
+        },
+        {
+            label: t('chart.metric2'),
+            cargolink: { value: '99.9%', pct: 98 },
+            industry: { value: '45%', pct: 45 },
+        },
+        {
+            label: t('chart.metric3'),
+            cargolink: { value: t('chart.signals200'), pct: 92 },
+            industry: { value: t('chart.signals40'), pct: 22 },
+        },
+        {
+            label: t('chart.metric4'),
+            cargolink: { value: t('chart.saving'), pct: 82 },
+            industry: { value: t('chart.none'), pct: 4 },
+        },
+    ]
+
     return (
         <div className="bg-[#0a0a0a] border border-white/[0.07] rounded-2xl p-8 relative overflow-hidden">
             <div className="relative z-10">
@@ -33,19 +36,19 @@ export default function ComparisonChart() {
                 <div className="flex items-start justify-between mb-10">
                     <div>
                         <h3 className="text-2xl font-semibold tracking-tight font-outfit text-white mb-1">
-                            Outperforming the industry.
+                            {t('chart.title')}
                         </h3>
                         <p className="text-xs text-zinc-500 font-inter">
-                            CargoLink <span className="text-zinc-700 mx-1.5">vs</span> Legacy Freight Tools
+                            {t('chart.cargolink')} <span className="text-zinc-700 mx-1.5">vs</span> {t('chart.industry.label')}
                         </p>
                     </div>
                     <div className="flex flex-col gap-2 text-right">
                         <div className="flex items-center gap-2 justify-end">
-                            <span className="text-[10px] font-medium text-white font-inter uppercase tracking-widest">CargoLink</span>
+                            <span className="text-[10px] font-medium text-white font-inter uppercase tracking-widest">{t('chart.cargolink')}</span>
                             <div className="w-2 h-2 rounded-full bg-white" />
                         </div>
                         <div className="flex items-center gap-2 justify-end">
-                            <span className="text-[10px] font-medium text-zinc-600 font-inter uppercase tracking-widest">Industry Avg.</span>
+                            <span className="text-[10px] font-medium text-zinc-600 font-inter uppercase tracking-widest">{t('chart.avg')}</span>
                             <div className="w-2 h-2 rounded-full bg-zinc-700" />
                         </div>
                     </div>
@@ -90,7 +93,7 @@ export default function ComparisonChart() {
 
                 {/* Bottom note */}
                 <p className="text-[10px] text-zinc-700 font-inter mt-8 border-t border-white/[0.04] pt-4">
-                    Based on independent industry benchmarks across ocean, air, and road freight segments.
+                    {t('chart.note')}
                 </p>
             </div>
         </div>

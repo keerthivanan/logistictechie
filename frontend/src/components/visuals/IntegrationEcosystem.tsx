@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Database, Server, Smartphone, Globe, Lock, Workflow } from 'lucide-react';
+import { useT } from '@/lib/i18n/t';
 
 const integrationNodes = [
     { icon: Database, label: 'SAP' },
@@ -16,6 +17,7 @@ const ICON_SIZE = 56;
 const TOTAL = integrationNodes.length;
 
 export default function IntegrationEcosystem() {
+    const t = useT()
     return (
         <section className="py-24 bg-black border-y border-white/[0.05] overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,21 +26,20 @@ export default function IntegrationEcosystem() {
                     {/* Left — text */}
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 text-xs font-inter mb-6">
-                            <Workflow className="w-3.5 h-3.5" /> Seamless Integration
+                            <Workflow className="w-3.5 h-3.5" /> {t('integ.badge')}
                         </div>
                         <h2 className="text-3xl font-semibold tracking-tight mb-5 font-outfit text-white">
-                            Your Stack, Supercharged.
+                            {t('integ.title')}
                         </h2>
                         <p className="text-sm text-zinc-400 mb-8 leading-relaxed font-inter">
-                            CargoLink isn&apos;t just another tool — it&apos;s the connective tissue of your logistics operations.
-                            We integrate natively with your existing ERPs, WMS, and TMS platforms.
+                            {t('integ.desc')}
                         </p>
 
                         <div className="space-y-3">
                             {[
-                                { title: 'Two-Way Sync', desc: 'Push orders and pull tracking data automatically.' },
-                                { title: 'EDI & API Ready', desc: 'Support for all major EDI standards (X12, EDIFACT) and REST API.' },
-                                { title: 'Legacy Compatible', desc: 'Works with on-premise Oracle/SAP instances via secure gateway.' },
+                                { title: t('integ.feat1.title'), desc: t('integ.feat1.desc') },
+                                { title: t('integ.feat2.title'), desc: t('integ.feat2.desc') },
+                                { title: t('integ.feat3.title'), desc: t('integ.feat3.desc') },
                             ].map((item, i) => (
                                 <div key={i} className="flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-white/[0.06] hover:border-white/[0.10] transition-all">
                                     <div className="mt-0.5 shrink-0">

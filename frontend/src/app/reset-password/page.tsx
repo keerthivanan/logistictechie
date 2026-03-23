@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import { Loader2, CheckCircle2 } from 'lucide-react'
 import { FullPageSpinner } from '@/components/ui/Spinner'
+import { useT } from '@/lib/i18n/t'
 
 function ResetPasswordContent() {
+    const t = useT()
     const router = useRouter()
     const searchParams = useSearchParams()
     const token = searchParams.get('token') || ''
@@ -23,11 +25,11 @@ function ResetPasswordContent() {
         setError('')
 
         if (!token) {
-            setError('Invalid reset link. Please request a new one.')
+            setError(t('reset.err.invalid'))
             return
         }
         if (password !== confirm) {
-            setError('Passwords do not match.')
+            setError(t('reset.err.mismatch'))
             return
         }
 
@@ -43,10 +45,10 @@ function ResetPasswordContent() {
                 setDone(true)
                 setTimeout(() => router.push('/login'), 2500)
             } else {
-                setError(data.detail || 'Failed to reset password. The link may have expired.')
+                setError(data.detail || t('reset.err.expired'))
             }
         } catch {
-            setError('Network error. Please try again.')
+            setError(t('reset.err.network'))
         } finally {
             setLoading(false)
         }
@@ -64,16 +66,16 @@ function ResetPasswordContent() {
                         </div>
                         <span className="text-2xl font-bold tracking-tight text-white font-outfit uppercase">CargoLink</span>
                     </Link>
-                    <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">Reset Password</h1>
-                    <p className="text-zinc-500 font-medium font-inter text-xs">Enter your new password below.</p>
+                    <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">{t('reset.title')}</h1>
+                    <p className="text-zinc-500 font-medium font-inter text-xs">{t('reset.sub')}</p>
                 </div>
 
                 <div className="bg-zinc-950 border border-white/5 p-8 rounded-3xl shadow-2xl">
                     {done ? (
                         <div className="flex flex-col items-center gap-4 py-4 text-center">
                             <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-                            <p className="text-sm font-bold text-white font-outfit">Password reset successfully!</p>
-                            <p className="text-xs text-zinc-500 font-inter">Redirecting you to login…</p>
+                            <p className="text-sm font-bold text-white font-outfit">{t('reset.done.title')}</p>
+                            <p className="text-xs text-zinc-500 font-inter">{t('reset.done.sub')}</p>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,25 +86,25 @@ function ResetPasswordContent() {
                             )}
 
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">New Password</label>
+                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">{t('reset.new.password')}</label>
                                 <input
                                     type="password"
                                     required
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
-                                    placeholder="10+ chars, upper, lower, number, symbol"
+                                    placeholder={t('reset.placeholder')}
                                     className="w-full bg-black border border-white/5 rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-700 focus:border-white/20 outline-none transition-colors font-inter"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">Confirm Password</label>
+                                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 font-inter">{t('reset.confirm')}</label>
                                 <input
                                     type="password"
                                     required
                                     value={confirm}
                                     onChange={e => setConfirm(e.target.value)}
-                                    placeholder="Repeat new password"
+                                    placeholder={t('reset.confirm.placeholder')}
                                     className="w-full bg-black border border-white/5 rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-700 focus:border-white/20 outline-none transition-colors font-inter"
                                 />
                             </div>
@@ -112,11 +114,11 @@ function ResetPasswordContent() {
                                 disabled={loading || !password || !confirm}
                                 className="w-full bg-white text-black font-bold text-xs py-3.5 rounded-2xl hover:bg-zinc-200 transition-all disabled:opacity-30 flex items-center justify-center gap-2 font-inter uppercase tracking-widest mt-2"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Set New Password'}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('reset.cta')}
                             </button>
 
                             <p className="text-center text-[10px] text-zinc-600 font-inter mt-2">
-                                <Link href="/login" className="hover:text-white transition-colors">Back to login</Link>
+                                <Link href="/login" className="hover:text-white transition-colors">{t('reset.back')}</Link>
                             </p>
                         </form>
                     )}

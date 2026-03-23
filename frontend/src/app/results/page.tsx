@@ -4,92 +4,87 @@ import { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { apiFetch } from '@/lib/config'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Ship, ArrowRight, AlertCircle, ArrowUpDown, Zap, Loader2 } from 'lucide-react'
-import { Spinner, FullPageSpinner } from '@/components/ui/Spinner'
+import {
+  Ship, ArrowRight, AlertCircle, Zap, Loader2,
+  X, CheckCircle2, ChevronRight, Clock, DollarSign,
+  Shield, TrendingDown, SlidersHorizontal
+} from 'lucide-react'
+import { FullPageSpinner } from '@/components/ui/Spinner'
 import Navbar from '@/components/layout/Navbar'
 import { useAuth } from '@/context/AuthContext'
+import { useT } from '@/lib/i18n/t'
 
 function ResultsContent() {
+  const t = useT()
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
 
-  const [loading, setLoading]               = useState(true)
-  const [quotes, setQuotes]                 = useState<any[]>([])
-  const [filteredQuotes, setFilteredQuotes] = useState<any[]>([])
-  const [error, setError]                   = useState('')
-  const [submitting, setSubmitting]         = useState(false)
-  const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
-  const [maxTransitTime, setMaxTransitTime] = useState(45)
-  const [sortBy, setSortBy]                 = useState<'price' | 'transit'>('price')
+  const [loading, setLoading]           = useState(true)
+  const [quotes, setQuotes]             = useState<any[]>([])
+  const [filteredQuotes, setFilteredQ]  = useState<any[]>([])
+  const [error, setError]               = useState('')
+  const [submitting, setSubmitting]     = useState(false)
+  const [bookingIdx, setBookingIdx]     = useState<number | null>(null)
+  const [sortBy, setSortBy]             = useState<'price' | 'transit'>('price')
+  const [maxTransit, setMaxTransit]     = useState(45)
+  const [selCarriers, setSelCarriers]   = useState<string[]>([])
+  const [showFilters, setShowFilters]   = useState(false)
 
   useEffect(() => {
     if (!authLoading && user?.role === 'forwarder') router.push('/dashboard')
   }, [user, authLoading, router])
 
-  const origin      = searchParams.get('origin')    || 'CNSHA'
+  const origin      = searchParams.get('origin')      || 'CNSHA'
   const destination = searchParams.get('destination') || 'USNYC'
-  const container   = searchParams.get('container')  || '40FT'
+  const container   = searchParams.get('container')   || '40FT'
   const value       = searchParams.get('value')
   const readyDate   = searchParams.get('readyDate')
   const isHazardous = searchParams.get('hazardous') === 'true'
 
+  const shortOrigin = origin.includes('(') ? origin.split('(')[1]?.replace(')', '') || origin : origin
+  const shortDest   = destination.includes('(') ? destination.split('(')[1]?.replace(')', '') || destination : destination
+  const cityOrigin  = origin.includes('(') ? origin.split('(')[0].trim() : origin
+  const cityDest    = destination.includes('(') ? destination.split('(')[0].trim() : destination
+
   useEffect(() => {
-    async function fetchQuotes() {
+    async function load() {
       try {
         setLoading(true)
         let commodity = 'General Cargo'
         if (isHazardous) commodity = 'Hazardous Goods'
         else if (value && parseFloat(value) > 50000) commodity = 'High Value Goods'
-
         const token = localStorage.getItem('token')
         const res = await apiFetch('/api/quotes/', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({
-            origin, destination, container, commodity,
-            ready_date: readyDate || new Date().toISOString().split('T')[0],
-            goods_value: value ? parseFloat(value) : null,
-          }),
+          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ origin, destination, container, commodity, ready_date: readyDate || new Date().toISOString().split('T')[0], goods_value: value ? parseFloat(value) : null }),
         })
-        if (!res.ok) {
-          const err = await res.json().catch(() => null)
-          throw new Error(err?.detail || 'Failed to fetch rates')
-        }
+        if (!res.ok) { const e = await res.json().catch(() => null); throw new Error(e?.detail || 'Failed') }
         const data = await res.json()
         const list = data.quotes || []
-        setQuotes(list)
-        setFilteredQuotes(list)
-      } catch (err: any) {
-        setError(err?.message || 'Unable to fetch rates. Please try again.')
-      } finally {
-        setLoading(false)
-      }
+        setQuotes(list); setFilteredQ(list)
+      } catch (e: any) { setError(e?.message || 'Unable to fetch rates.') }
+      finally { setLoading(false) }
     }
-    if (origin && destination) fetchQuotes()
+    if (origin && destination) load()
   }, [origin, destination, container, isHazardous, readyDate, value])
 
   useEffect(() => {
     let f = [...quotes]
-    if (selectedCarriers.length > 0) f = f.filter(q => selectedCarriers.includes(q.carrier_name))
-    f = f.filter(q => (q.transit_time_days || q.transit_time) <= maxTransitTime)
-    if (sortBy === 'price') f.sort((a, b) => a.price - b.price)
-    else f.sort((a, b) => (a.transit_time_days || a.transit_time) - (b.transit_time_days || b.transit_time))
-    setFilteredQuotes(f)
-  }, [selectedCarriers, maxTransitTime, sortBy, quotes])
+    if (selCarriers.length) f = f.filter(q => selCarriers.includes(q.carrier_name))
+    f = f.filter(q => (q.transit_time_days || q.transit_time) <= maxTransit)
+    f.sort((a, b) => sortBy === 'price' ? a.price - b.price : (a.transit_time_days || a.transit_time) - (b.transit_time_days || b.transit_time))
+    setFilteredQ(f)
+  }, [selCarriers, maxTransit, sortBy, quotes])
 
-  const uniqueCarriers = Array.from(new Set(quotes.map(q => q.carrier_name))).filter(Boolean)
+  const carriers     = Array.from(new Set(quotes.map(q => q.carrier_name))).filter(Boolean)
+  const lowestPrice  = quotes.length ? Math.min(...quotes.map(q => q.price)) : 0
+  const fastestDay   = quotes.length ? Math.min(...quotes.map(q => q.transit_time_days || q.transit_time)) : 0
 
-  const handleSelectQuote = async (quote: any) => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    setSubmitting(true)
-    setError('')
+  const handleBook = async (quote: any, idx: number) => {
+    if (!user) { router.push('/login'); return }
+    setSubmitting(true); setBookingIdx(idx); setError('')
     try {
       const token = localStorage.getItem('token')
       const mode = searchParams.get('mode') || 'FCL'
@@ -99,286 +94,293 @@ function ResultsContent() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: 'client',
-          origin,
-          destination,
-          cargo_type: cargoType,
-          container_type: container,
-          container_count: units,
-          weight: 1000,
-          weight_unit: 'KGM',
+          user_id: 'client', origin, destination, cargo_type: cargoType,
+          container_type: container, container_count: units, weight: 1000, weight_unit: 'KGM',
           commodity: isHazardous ? 'Hazardous Goods' : (value && parseFloat(value) > 50000 ? 'High Value Goods' : 'General Cargo'),
-          is_hazardous: isHazardous,
-          pickup_ready_date: readyDate || new Date().toISOString().split('T')[0],
-          vessel: quote.vessel_name || '',
-          special_requirements: '',
+          is_hazardous: isHazardous, pickup_ready_date: readyDate || new Date().toISOString().split('T')[0],
+          vessel: quote.vessel_name || '', special_requirements: '',
         }),
       })
       const data = await res.json()
-      if (res.ok && data.request_id) {
-        router.push(`/marketplace/${data.request_id}`)
-      } else {
-        setError(data.detail || 'Failed to submit request. Please try again.')
-      }
-    } catch {
-      setError('Network error. Please try again.')
-    } finally {
-      setSubmitting(false)
-    }
+      if (res.ok && data.request_id) router.push(`/marketplace/${data.request_id}`)
+      else setError(data.detail || 'Failed to submit.')
+    } catch { setError('Network error.') }
+    finally { setSubmitting(false); setBookingIdx(null) }
   }
 
+  const lbl = 'block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter'
+
   return (
-    <>
-      {/* Header bar */}
-      <div className="bg-black border-b border-white/5 pt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter">Route</span>
-              <span className="text-white font-semibold font-mono text-sm tracking-tight">{origin}</span>
+    <div className="min-h-screen bg-black text-white">
+
+      {/* ── Top breadcrumb bar — matches search page navbar section ── */}
+      <div className="sticky top-16 z-40 bg-black/80 backdrop-blur-2xl border-b border-white/[0.06]">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-xs font-inter">
+              ← {t('res.step.search')}
+            </button>
+            <div className="w-px h-4 bg-white/10" />
+            <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-1.5">
+              <span className="text-[11px] font-black font-mono text-white">{shortOrigin}</span>
               <ArrowRight className="w-3 h-3 text-zinc-600" />
-              <span className="text-white font-semibold font-mono text-sm tracking-tight">{destination}</span>
-              <span className="ml-2 px-2 py-0.5 rounded bg-white/[0.04] border border-white/5 text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-inter">{container} · FCL</span>
+              <span className="text-[11px] font-black font-mono text-white">{shortDest}</span>
             </div>
-            <div className="flex items-center gap-3">
-              {[
-                { label: 'Search', done: true },
-                { label: 'Results', done: false, active: true },
-                { label: 'Booking', done: false },
-              ].map((step, i) => (
-                <div key={step.label} className="flex items-center gap-2">
-                  {i > 0 && <div className="h-px w-8 bg-white/10" />}
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${step.done ? 'bg-white text-black' : step.active ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-600 border border-white/5'}`}>
-                    {step.done ? '✓' : i + 1}
-                  </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest font-inter ${step.active ? 'text-white' : step.done ? 'text-zinc-500' : 'text-zinc-700'}`}>{step.label}</span>
-                </div>
-              ))}
-            </div>
+            <span className="hidden sm:block text-[10px] font-bold text-zinc-700 uppercase tracking-widest">{container} · FCL</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5">
+            {[
+              { label: t('res.step.search'), done: true },
+              { label: t('res.step.results'), active: true },
+              { label: t('res.step.booking') },
+            ].map((s, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                {i > 0 && <div className="w-5 h-px bg-white/[0.08]" />}
+                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                  s.done ? 'text-emerald-600' : (s as any).active ? 'bg-white text-black' : 'text-zinc-800'
+                }`}>
+                  {s.done && <CheckCircle2 className="w-2.5 h-2.5 inline mr-1" />}
+                  {s.label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Loading */}
+      {/* ── Loading ── */}
       {loading ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-xs text-zinc-500 font-inter uppercase tracking-widest">Finding the best rates...</p>
+        <div className="max-w-4xl mx-auto px-4 py-32 flex flex-col items-center gap-6">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+            className="w-20 h-20 rounded-3xl bg-[#0a0a0a] border border-white/[0.08] flex items-center justify-center relative">
+            <Ship className="w-8 h-8 text-zinc-500" />
+            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <Loader2 className="w-3.5 h-3.5 text-black animate-spin" />
+            </div>
+          </motion.div>
+          <div className="text-center">
+            <p className="text-lg font-bold text-white font-outfit mb-1">{t('res.scanning')}</p>
+            <p className="text-xs text-zinc-600 uppercase tracking-[0.25em] font-inter animate-pulse">{t('res.scanning.sub')}</p>
+          </div>
         </div>
 
-      ) : error ? (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <AlertCircle className="w-12 h-12 text-red-500/60 mx-auto mb-4" />
-          <p className="text-base font-bold text-white mb-2">Something went wrong</p>
-          <p className="text-xs text-zinc-500 font-inter mb-6">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-xs font-bold uppercase tracking-widest text-white underline font-inter">Retry</button>
+      ) : error && !quotes.length ? (
+        <div className="max-w-4xl mx-auto px-4 py-28 flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] border border-red-500/20 flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-red-500/60" />
+          </div>
+          <p className="font-semibold text-white">{t('res.error.title')}</p>
+          <p className="text-sm text-zinc-500 font-inter">{error}</p>
+          <button onClick={() => window.location.reload()}
+            className="mt-2 px-6 py-2.5 bg-white text-black text-sm font-bold rounded-xl hover:bg-zinc-100 transition-all">
+            {t('res.retry')}
+          </button>
         </div>
 
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <section className="px-4 py-10">
+          <div className="max-w-4xl mx-auto space-y-4">
 
-            {/* Sidebar */}
-            <div className="w-full lg:w-56 flex-shrink-0 hidden lg:block">
-              <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 p-5 sticky top-24 space-y-6">
-
-                {/* Sort */}
-                <div>
-                  <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-3">Sort By</p>
-                  <div className="space-y-1.5">
-                    {([
-                      { key: 'price', label: 'Lowest Price', icon: ArrowUpDown },
-                      { key: 'transit', label: 'Fastest Transit', icon: Zap },
-                    ] as const).map(({ key, label, icon: Icon }) => (
-                      <button
-                        key={key}
-                        onClick={() => setSortBy(key)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold font-inter transition-all ${sortBy === key ? 'bg-white text-black' : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'}`}
-                      >
-                        <Icon className="w-3 h-3" />
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Carrier filter */}
-                {uniqueCarriers.length > 0 && (
+            {/* ── Header ── */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-2 font-inter">{t('res.quotes.found')}</p>
+              <div className="flex items-end gap-6 flex-wrap">
+                <h1 className="text-4xl font-bold font-outfit tracking-tight text-white">{filteredQuotes.length} {t('res.step.results')}</h1>
+                <div className="flex items-center gap-5 pb-1">
                   <div>
-                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-3">Carrier</p>
-                    <div className="space-y-2">
-                      {uniqueCarriers.map(c => (
-                        <label key={c} className="flex items-center gap-2.5 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={selectedCarriers.includes(c)}
-                            onChange={e => {
-                              if (e.target.checked) setSelectedCarriers([...selectedCarriers, c])
-                              else setSelectedCarriers(selectedCarriers.filter(x => x !== c))
-                            }}
-                            className="w-3.5 h-3.5 rounded border-white/10 bg-black checked:bg-white focus:ring-0 cursor-pointer"
-                          />
-                          <span className={`text-[11px] font-medium font-inter transition-colors ${selectedCarriers.includes(c) ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`}>{c}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <span className="text-[9px] text-zinc-600 uppercase tracking-widest block mb-0.5">{t('res.lowest.rate')}</span>
+                    <span className="text-xl font-black font-mono text-emerald-400">${lowestPrice.toLocaleString()}</span>
                   </div>
-                )}
-
-                {/* Transit filter */}
-                <div>
-                  <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter mb-3">Max Transit: {maxTransitTime}d</p>
-                  <input
-                    type="range" min="15" max="45" value={maxTransitTime}
-                    onChange={e => setMaxTransitTime(parseInt(e.target.value))}
-                    className="w-full h-px bg-white/10 rounded appearance-none cursor-pointer accent-white"
-                  />
-                  <div className="flex justify-between text-[10px] text-zinc-700 mt-1.5 font-inter">
-                    <span>15d</span><span>45d</span>
+                  <div className="w-px h-6 bg-white/[0.08]" />
+                  <div>
+                    <span className="text-[9px] text-zinc-600 uppercase tracking-widest block mb-0.5">{t('res.fastest')}</span>
+                    <span className="text-xl font-black font-mono text-white">{fastestDay}d</span>
                   </div>
                 </div>
+              </div>
+            </motion.div>
 
-                {(selectedCarriers.length > 0 || maxTransitTime < 45) && (
-                  <button
-                    onClick={() => { setSelectedCarriers([]); setMaxTransitTime(45) }}
-                    className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-widest font-inter"
-                  >
-                    Clear filters
+            {/* ── Main card — same style as search card ── */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+              className="bg-[#0a0a0a] border border-white/[0.08] rounded-3xl overflow-hidden">
+
+              {/* Filter strip */}
+              <div className="p-6 flex items-center gap-3 flex-wrap border-b border-white/[0.06]">
+                <div className="flex items-center gap-2 mr-2">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" />
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] font-inter">{t('res.sort')}</span>
+                </div>
+                {([
+                  { key: 'price',   label: t('res.sort.price'),   icon: DollarSign },
+                  { key: 'transit', label: t('res.sort.transit'), icon: Zap },
+                ] as const).map(({ key, label, icon: Icon }) => (
+                  <button key={key} onClick={() => setSortBy(key)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      sortBy === key ? 'bg-white text-black' : 'border border-white/[0.08] text-zinc-500 hover:text-white hover:border-white/20'
+                    }`}>
+                    <Icon className="w-3 h-3" /> {label}
+                  </button>
+                ))}
+
+                <div className="w-px h-5 bg-white/[0.08] mx-1" />
+
+                {/* Carrier filters */}
+                {carriers.map(c => (
+                  <button key={c} onClick={() => setSelCarriers(p => p.includes(c) ? p.filter(x => x !== c) : [...p, c])}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
+                      selCarriers.includes(c) ? 'bg-white text-black' : 'border border-white/[0.08] text-zinc-500 hover:text-white hover:border-white/20'
+                    }`}>
+                    {selCarriers.includes(c) && <CheckCircle2 className="w-3 h-3" />}
+                    {c}
+                  </button>
+                ))}
+
+                {(selCarriers.length > 0 || maxTransit < 45) && (
+                  <button onClick={() => { setSelCarriers([]); setMaxTransit(45) }}
+                    className="flex items-center gap-1 text-[10px] font-bold text-zinc-600 hover:text-zinc-300 ml-auto transition-colors">
+                    <X className="w-3 h-3" /> {t('res.clear')}
                   </button>
                 )}
               </div>
-            </div>
 
-            {/* Quote list */}
-            <div className="flex-1 space-y-3">
-              {filteredQuotes.length > 0 && (
-                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest font-inter pb-2">
-                  {filteredQuotes.length} {filteredQuotes.length === 1 ? 'quote' : 'quotes'} found
-                </p>
-              )}
+              {/* Quote rows */}
+              {filteredQuotes.length > 0 ? (
+                <div className="divide-y divide-white/[0.05]">
+                  {filteredQuotes.map((quote, idx) => {
+                    const isBest    = quote.price === lowestPrice
+                    const isFastest = (quote.transit_time_days || quote.transit_time) === fastestDay
+                    const transit   = quote.transit_time_days || quote.transit_time
+                    const isLoading = bookingIdx === idx && submitting
+                    const initials  = (quote.carrier_name || 'CL').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
 
-              {filteredQuotes.length > 0 ? filteredQuotes.map((quote, idx) => {
-                const isBest = quote.wisdom?.includes('PROPHETIC')
-                const transitDays = quote.transit_time_days || quote.transit_time
-                return (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.04, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                    className="bg-black border border-white/5 rounded-3xl group hover:border-white/10 transition-all duration-500 hover:bg-zinc-950 relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.01)]"
-                  >
-                    {/* Premium Shimmer Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.01)_50%,transparent_75%)] bg-[length:250%_250%] animate-shimmer" />
-
-                    <div className="p-8 flex flex-col md:flex-row md:items-stretch gap-8 relative z-10">
-
-                      {/* Left: carrier + route + insight */}
-                      <div className="flex-1 space-y-8">
-
-                        {/* Carrier row */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:border-white/10 transition-colors">
-                              <Ship className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-semibold text-white font-outfit uppercase tracking-tight">{quote.carrier_name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[9px] font-bold text-white/30 font-inter uppercase tracking-widest">{container} FCL</span>
-                                <div className="w-1 h-1 bg-white/20 rounded-full" />
-                                <span className="text-[9px] font-bold text-white/30 font-inter uppercase tracking-widest">Verified Fleet</span>
-                              </div>
-                            </div>
-                          </div>
-                          {isBest && (
-                            <div className="flex items-center gap-1.5 border border-emerald-500/20 px-3 py-1 rounded-full bg-emerald-500/5">
-                              <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                              <span className="text-[9px] font-semibold font-inter text-emerald-500 uppercase tracking-widest">PROPHETIC BEAT</span>
-                            </div>
-                          )}
+                    return (
+                      <motion.div key={idx}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        transition={{ delay: idx * 0.06 }}
+                        className={`p-6 flex items-center gap-6 transition-colors group ${isBest ? 'bg-emerald-500/[0.04] hover:bg-emerald-500/[0.07]' : 'hover:bg-white/[0.02]'}`}
+                      >
+                        {/* Carrier avatar */}
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm font-mono flex-shrink-0 transition-all ${
+                          isBest
+                            ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
+                            : 'bg-black border border-white/[0.08] text-zinc-500 group-hover:border-white/20 group-hover:text-zinc-300'
+                        }`}>
+                          {initials}
                         </div>
 
-                        {/* Route Visualization */}
-                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-8 px-6 bg-white/[0.01] rounded-2xl border border-white/[0.03]">
-                          <div className="space-y-1.5">
-                            <p className="text-2xl font-semibold font-mono text-white tracking-tighter leading-none">{origin}</p>
-                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Departure</p>
-                          </div>
-
-                          <div className="flex flex-col items-center gap-2 min-w-[120px]">
-                            <span className="text-[10px] font-semibold text-white/60 font-inter tracking-[0.1em]">{transitDays} DAYS</span>
-                            <div className="w-full h-px bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.1),transparent)] relative">
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                            </div>
-                            <span className="text-[8px] font-bold text-white/10 uppercase tracking-widest font-inter">Transit Period</span>
-                          </div>
-
-                          <div className="text-right space-y-1.5">
-                            <p className="text-2xl font-semibold font-mono text-white tracking-tighter leading-none">{destination}</p>
-                            <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-inter">Arrival</p>
+                        {/* Carrier name + badges */}
+                        <div className="w-40 flex-shrink-0">
+                          <p className="text-sm font-black text-white uppercase tracking-tight leading-tight">{quote.carrier_name}</p>
+                          <p className="text-[9px] text-zinc-700 font-mono mt-0.5 uppercase">{container}</p>
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {isBest && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-[8px] font-black text-emerald-400 uppercase">
+                                <TrendingDown className="w-2 h-2" /> {t('res.best')}
+                              </span>
+                            )}
+                            {isFastest && (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-[8px] font-black text-blue-400 uppercase">
+                                <Zap className="w-2 h-2" /> {t('res.fastest.badge')}
+                              </span>
+                            )}
                           </div>
                         </div>
 
-                        {/* Insight */}
-                        {quote.wisdom && (
-                          <div className="flex items-start gap-4 pt-4">
-                            <Zap className={`w-4 h-4 mt-0.5 ${isBest ? 'text-emerald-500' : 'text-white/20'}`} />
-                            <p className="text-[11px] text-white/40 font-inter leading-relaxed italic group-hover:text-white/60 transition-colors">
-                              &ldquo;{quote.wisdom}&rdquo;
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Divider */}
-                      <div className="hidden md:block w-px bg-white/5" />
-
-                      {/* Right: price + CTA */}
-                      <div className="md:w-56 flex flex-col justify-between items-end pt-8 md:pt-0">
-                        <div className="text-right space-y-1">
-                          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-inter">Total Price</p>
-                          <div className="flex items-baseline gap-1 justify-end">
-                            <span className="text-[14px] font-semibold text-white/40">$</span>
-                            <p className="text-4xl font-semibold font-mono text-white tracking-tighter leading-none select-all">{quote.price.toLocaleString()}</p>
-                          </div>
-                          <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] font-inter">All-In Fixed</p>
-                        </div>
-
-                        <div className="w-full space-y-4">
-                          <button
-                            onClick={() => handleSelectQuote(quote)}
-                            disabled={submitting}
-                            className="w-full bg-white text-black py-4 rounded-2xl font-semibold uppercase tracking-[0.4em] text-[9px] transition-all hover:bg-zinc-200 active:scale-[0.98] shadow-[0_20px_40px_-15px_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                          >
-                            {submitting ? <><Loader2 className="w-3 h-3 animate-spin" /> Submitting...</> : 'Book Now'}
-                          </button>
+                        {/* Route */}
+                        <div className="flex-1 flex items-center justify-center gap-4">
                           <div className="text-center">
-                            <span className="text-[8px] font-mono text-white/10 uppercase tracking-widest">Ref: {quote.id?.slice(0, 8) || 'AUTO-VEC'}</span>
+                            <p className={`text-xl font-black font-mono tracking-tight leading-none ${isBest ? 'text-emerald-300' : 'text-white'}`}>{shortOrigin}</p>
+                            <p className="text-[10px] text-zinc-500 font-inter mt-1 truncate max-w-[90px]">{cityOrigin}</p>
+                            <p className="text-[8px] text-zinc-700 uppercase tracking-[0.18em] mt-0.5 font-inter">{t('res.departure')}</p>
+                          </div>
+
+                          <div className="flex-1 flex flex-col items-center gap-1.5">
+                            <span className={`text-[10px] font-bold font-mono flex items-center gap-1 ${isBest ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                              <Clock className="w-2.5 h-2.5" /> {transit}d
+                            </span>
+                            <div className="w-full flex items-center">
+                              <div className={`flex-1 h-px ${isBest ? 'bg-emerald-500/25' : 'bg-white/[0.08]'}`} />
+                              <div className={`w-1.5 h-1.5 rounded-full mx-1 ${isBest ? 'bg-emerald-500/50' : 'bg-white/20'}`} />
+                              <div className={`flex-1 h-px ${isBest ? 'bg-emerald-500/25' : 'bg-white/[0.08]'}`} />
+                            </div>
+                            <p className="text-[8px] text-zinc-700 uppercase tracking-[0.18em] font-inter">{t('res.transit.label')}</p>
+                          </div>
+
+                          <div className="text-center">
+                            <p className="text-xl font-black font-mono text-white tracking-tight leading-none">{shortDest}</p>
+                            <p className="text-[10px] text-zinc-500 font-inter mt-1 truncate max-w-[90px]">{cityDest}</p>
+                            <p className="text-[8px] text-zinc-700 uppercase tracking-[0.18em] mt-0.5 font-inter">{t('res.arrival')}</p>
                           </div>
                         </div>
-                      </div>
 
-                    </div>
-                  </motion.div>
-                )
-              }) : (
-                <div className="py-20 text-center bg-[#0a0a0a] rounded-2xl border border-dashed border-white/5">
-                  <AlertCircle className="w-10 h-10 text-zinc-700 mx-auto mb-4" />
-                  <p className="text-sm text-zinc-500 font-inter mb-4">No quotes match the current filters.</p>
-                  <button
-                    onClick={() => { setSelectedCarriers([]); setMaxTransitTime(45) }}
-                    className="text-xs font-bold uppercase tracking-widest text-white underline font-inter"
-                  >
-                    Clear filters
+                        {/* Price + CTA */}
+                        <div className="flex items-center gap-4 flex-shrink-0">
+                          <div className="text-right">
+                            <p className="text-[8px] text-zinc-600 uppercase tracking-widest font-inter mb-1">{t('res.all.in')}</p>
+                            <p className={`text-2xl font-black font-mono tracking-tight ${isBest ? 'text-emerald-400' : 'text-white'}`}>
+                              <span className="text-sm font-bold text-zinc-500 mr-0.5">$</span>{quote.price.toLocaleString()}
+                            </p>
+                            <div className="flex items-center gap-1 justify-end mt-1">
+                              <Shield className="w-2.5 h-2.5 text-zinc-700" />
+                              <p className="text-[8px] text-zinc-700 uppercase tracking-wider">{t('res.all.inclusive')}</p>
+                            </div>
+                          </div>
+
+                          <button onClick={() => handleBook(quote, idx)} disabled={submitting}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 whitespace-nowrap font-inter ${
+                              isBest
+                                ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_4px_24px_rgba(16,185,129,0.35)]'
+                                : 'bg-white text-black hover:bg-zinc-100 shadow-[0_2px_16px_rgba(255,255,255,0.08)]'
+                            }`}>
+                            {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>{t('res.book')} <ChevronRight className="w-3 h-3" /></>}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="p-16 text-center">
+                  <AlertCircle className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                  <p className="text-sm text-zinc-500 font-inter mb-4">{t('res.no.quotes')}</p>
+                  <button onClick={() => { setSelCarriers([]); setMaxTransit(45) }}
+                    className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors border border-white/10 rounded-xl px-5 py-2.5 hover:border-white/25">
+                    {t('res.clear')}
                   </button>
                 </div>
               )}
-            </div>
+
+              {/* Wisdom strip for best quote */}
+              {filteredQuotes[0]?.wisdom && (
+                <div className="px-6 py-3 border-t border-white/[0.05] flex items-start gap-2">
+                  <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-0.5 flex-shrink-0">AI</span>
+                  <p className="text-[10px] text-zinc-600 font-inter italic leading-relaxed">&ldquo;{filteredQuotes[0].wisdom}&rdquo;</p>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Error */}
+            {error && quotes.length > 0 && (
+              <p className="text-xs text-red-400 text-center font-inter py-1">{error}</p>
+            )}
+
+            {/* Refine search */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+              className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-white font-inter mb-0.5">{t('res.not.right')}</p>
+                <p className="text-[10px] text-zinc-500 font-inter">{t('res.refine.desc')}</p>
+              </div>
+              <button onClick={() => router.back()}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/[0.10] text-[10px] font-bold text-zinc-400 hover:text-white hover:border-white/25 transition-all whitespace-nowrap font-inter">
+                ← {t('res.modify.search')}
+              </button>
+            </motion.div>
+
           </div>
-        </div>
+        </section>
       )}
-    </>
+    </div>
   )
 }
 
@@ -386,9 +388,11 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
       <Navbar />
-      <Suspense fallback={<FullPageSpinner />}>
-        <ResultsContent />
-      </Suspense>
+      <div className="pt-16">
+        <Suspense fallback={<FullPageSpinner />}>
+          <ResultsContent />
+        </Suspense>
+      </div>
     </div>
   )
 }

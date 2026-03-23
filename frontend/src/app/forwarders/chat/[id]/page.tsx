@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import { Loader2, Send, ArrowLeft, X, BarChart3, ArrowRight } from 'lucide-react'
 import { FullPageSpinner } from '@/components/ui/Spinner'
+import { useT, TKey } from '@/lib/i18n/t'
 
 interface Message {
     id: number
@@ -33,18 +34,19 @@ interface ConvMeta {
     forwarder_last_seen: string | null
 }
 
-function lastSeenLabel(isoString: string | null): string {
-    if (!isoString) return 'Not yet active'
+function lastSeenLabel(isoString: string | null, t: (key: TKey) => string): string {
+    if (!isoString) return t('chat.not.yet.active')
     const diff = Math.floor((Date.now() - new Date(isoString + 'Z').getTime()) / 1000)
-    if (diff < 30) return 'Online now'
-    if (diff < 3600) return `Last seen ${Math.floor(diff / 60)}m ago`
-    if (diff < 86400) return `Last seen ${Math.floor(diff / 3600)}h ago`
-    return `Last seen ${Math.floor(diff / 86400)}d ago`
+    if (diff < 30) return t('chat.online.now')
+    if (diff < 3600) return t('chat.last.seen.m').replace('{n}', String(Math.floor(diff / 60)))
+    if (diff < 86400) return t('chat.last.seen.h').replace('{n}', String(Math.floor(diff / 3600)))
+    return t('chat.last.seen.d').replace('{n}', String(Math.floor(diff / 86400)))
 }
 
 export default function ForwarderChatPage() {
     const { id } = useParams<{ id: string }>()
     const router = useRouter()
+    const t = useT()
 
     // Portal auth state
     const [fwdId, setFwdId] = useState('')
@@ -170,10 +172,10 @@ export default function ForwarderChatPage() {
                 setFwdId(normalizedId)
                 setIsAuthenticated(true)
             } else {
-                setAuthError(data.detail || 'Invalid credentials. Check your Partner ID and email.')
+                setAuthError(data.detail || t('chat.invalid.creds'))
             }
         } catch {
-            setAuthError('Network error. Please try again.')
+            setAuthError(t('chat.network.error'))
         } finally {
             setAuthLoading(false)
         }
@@ -193,7 +195,7 @@ export default function ForwarderChatPage() {
             })
             setText('')
         } catch {
-            setError('Failed to send.')
+            setError(t('chat.send.failed'))
         } finally {
             setSending(false)
         }
@@ -210,10 +212,10 @@ export default function ForwarderChatPage() {
             })
             if (!res.ok) {
                 const data = await res.json()
-                setError(data.detail || 'Failed.')
+                setError(data.detail || t('chat.action.failed'))
             }
         } catch {
-            setError('Request failed.')
+            setError(t('chat.request.failed'))
         } finally {
             setSending(false)
         }
@@ -235,10 +237,10 @@ export default function ForwarderChatPage() {
                 setCounterAmount('')
             } else {
                 const data = await res.json()
-                setError(data.detail || 'Counter failed.')
+                setError(data.detail || t('chat.counter.failed'))
             }
         } catch {
-            setError('Counter failed.')
+            setError(t('chat.counter.failed'))
         } finally {
             setSending(false)
         }
@@ -273,10 +275,10 @@ export default function ForwarderChatPage() {
             })
             if (!res.ok) {
                 const data = await res.json()
-                setError(data.detail || 'Could not close deal.')
+                setError(data.detail || t('chat.close.failed'))
             }
         } catch {
-            setError('Failed to close deal.')
+            setError(t('chat.close.deal.failed'))
         } finally {
             setClosingDeal(false)
         }
@@ -304,8 +306,8 @@ export default function ForwarderChatPage() {
                         <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                             <BarChart3 className="w-5 h-5 text-emerald-400" />
                         </div>
-                        <h1 className="text-xl font-bold text-white mb-1">Partner Chat</h1>
-                        <p className="text-xs text-zinc-500">Sign in to access this conversation</p>
+                        <h1 className="text-xl font-bold text-white mb-1">{t('chat.partner.chat')}</h1>
+                        <p className="text-xs text-zinc-500">{t('chat.signin.desc')}</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="bg-zinc-950 border border-white/5 rounded-2xl p-6 space-y-4">
@@ -315,7 +317,7 @@ export default function ForwarderChatPage() {
                             </div>
                         )}
                         <div>
-                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Partner ID</label>
+                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('chat.partner.id')}</label>
                             <input
                                 type="text"
                                 placeholder="REG-OMEGO-XXXX"
@@ -326,7 +328,7 @@ export default function ForwarderChatPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Email Address</label>
+                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('chat.email')}</label>
                             <input
                                 type="email"
                                 placeholder="company@email.com"
@@ -341,7 +343,7 @@ export default function ForwarderChatPage() {
                             disabled={authLoading}
                             className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
                         >
-                            {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Access Chat <ArrowRight className="w-3.5 h-3.5" /></>}
+                            {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t('chat.access')} <ArrowRight className="w-3.5 h-3.5" /></>}
                         </button>
                     </form>
                 </div>
@@ -360,7 +362,7 @@ export default function ForwarderChatPage() {
     if (!conv) {
         return (
             <div className="h-screen bg-[#050505] flex items-center justify-center text-zinc-500 text-sm">
-                Conversation not found or you don&apos;t have access.
+                {t('chat.not.found')}
             </div>
         )
     }
@@ -382,7 +384,7 @@ export default function ForwarderChatPage() {
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-white font-outfit truncate">{conv.forwarder_company}</span>
                         <span className="text-zinc-700">↔</span>
-                        <span className="text-xs font-mono text-zinc-600 truncate">Shipper</span>
+                        <span className="text-xs font-mono text-zinc-600 truncate">{t('chat.shipper')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
@@ -390,7 +392,7 @@ export default function ForwarderChatPage() {
                                 ? 'bg-emerald-400'
                                 : 'bg-zinc-700'
                         }`} />
-                        <p className="text-[10px] text-zinc-600 font-mono">{lastSeenLabel(conv.shipper_last_seen)}</p>
+                        <p className="text-[10px] text-zinc-600 font-mono">{lastSeenLabel(conv.shipper_last_seen, t)}</p>
                     </div>
                 </div>
                 <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
@@ -398,7 +400,7 @@ export default function ForwarderChatPage() {
                     : isClosed ? 'bg-zinc-800 text-zinc-500'
                     : 'bg-white/5 text-zinc-500'
                 }`}>
-                    {isBooked ? 'Booked' : isClosed ? 'Closed' : 'Open'}
+                    {isBooked ? t('chat.booked') : isClosed ? t('chat.closed') : t('chat.open')}
                 </span>
             </div>
 
@@ -442,7 +444,7 @@ export default function ForwarderChatPage() {
                         <div className="flex-shrink-0">
                             {iAlreadyRequested ? (
                                 <span className="text-[9px] text-zinc-600 font-inter italic">
-                                    Waiting for shipper to confirm...
+                                    {t('chat.waiting.shipper')}
                                 </span>
                             ) : otherRequested ? (
                                 <button
@@ -450,7 +452,7 @@ export default function ForwarderChatPage() {
                                     disabled={closingDeal}
                                     className="bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
                                 >
-                                    Shipper wants to close. Confirm?
+                                    {t('chat.shipper.wants.close')}
                                 </button>
                             ) : (
                                 <button
@@ -458,7 +460,7 @@ export default function ForwarderChatPage() {
                                     disabled={closingDeal}
                                     className="bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
                                 >
-                                    {closingDeal ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Close Deal'}
+                                    {closingDeal ? <Loader2 className="w-3 h-3 animate-spin" /> : t('chat.close.deal')}
                                 </button>
                             )}
                         </div>
@@ -468,7 +470,7 @@ export default function ForwarderChatPage() {
                 {/* Closed banner */}
                 {isClosed && !isBooked && (
                     <div className="mt-3 bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-xs font-semibold text-zinc-400">Deal closed. This conversation is archived.</p>
+                        <p className="text-xs font-semibold text-zinc-400">{t('chat.deal.archived')}</p>
                     </div>
                 )}
             </div>
@@ -493,7 +495,7 @@ export default function ForwarderChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-start">
                                 <div className="bg-[#0d0d0d] border border-white/10 rounded-2xl p-4 max-w-[280px]">
-                                    <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">Shipper's Offer</p>
+                                    <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">{t('chat.shipper.offer')}</p>
                                     <p className="text-2xl font-semibold font-mono text-white">
                                         {conv.currency} {Number(msg.offer_amount).toLocaleString()}
                                     </p>
@@ -508,21 +510,21 @@ export default function ForwarderChatPage() {
                                                 disabled={sending}
                                                 className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
                                             >
-                                                Accept
+                                                {t('chat.accept')}
                                             </button>
                                             <button
                                                 onClick={() => setShowCounterInput(true)}
                                                 disabled={sending}
                                                 className="flex-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-amber-500/20 transition-all disabled:opacity-50"
                                             >
-                                                Counter
+                                                {t('chat.counter')}
                                             </button>
                                             <button
                                                 onClick={() => respondOffer('REJECT')}
                                                 disabled={sending}
                                                 className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
                                             >
-                                                Reject
+                                                {t('chat.reject')}
                                             </button>
                                         </div>
                                     )}
@@ -530,7 +532,7 @@ export default function ForwarderChatPage() {
                                     {/* Counter input panel */}
                                     {isActivePending && !isBooked && !isClosed && showCounterInput && (
                                         <div className="mt-3 space-y-2">
-                                            <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">Your Counter Price</p>
+                                            <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">{t('chat.your.counter.price')}</p>
                                             {/* Counter chips */}
                                             <div className="flex gap-1.5 flex-wrap">
                                                 {getCounterChips().map(p => (
@@ -563,13 +565,13 @@ export default function ForwarderChatPage() {
                                                     disabled={sending || !counterAmount}
                                                     className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-30"
                                                 >
-                                                    Send Counter
+                                                    {t('chat.send.counter')}
                                                 </button>
                                                 <button
                                                     onClick={() => { setShowCounterInput(false); setCounterAmount('') }}
                                                     className="px-3 py-2 bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-semibold rounded-xl hover:bg-white/10 transition-all"
                                                 >
-                                                    Cancel
+                                                    {t('chat.cancel')}
                                                 </button>
                                             </div>
                                         </div>
@@ -584,11 +586,11 @@ export default function ForwarderChatPage() {
                         return (
                             <div key={msg.id} className="flex justify-end">
                                 <div className="bg-[#0d0d0d] border border-amber-500/20 rounded-2xl p-4 max-w-[260px]">
-                                    <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest mb-2">Your Counter</p>
+                                    <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest mb-2">{t('chat.your.counter')}</p>
                                     <p className="text-2xl font-semibold font-mono text-white">
                                         {conv.currency} {Number(msg.offer_amount).toLocaleString()}
                                     </p>
-                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">Waiting for shipper response</p>
+                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">{t('chat.waiting.resp')}</p>
                                 </div>
                             </div>
                         )
@@ -650,7 +652,7 @@ export default function ForwarderChatPage() {
                             value={text}
                             onChange={e => setText(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText() } }}
-                            placeholder="Type a message..."
+                            placeholder={t('chat.type.message')}
                             className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/15 transition-colors font-inter"
                         />
                         <button
@@ -665,7 +667,7 @@ export default function ForwarderChatPage() {
             ) : (
                 <div className="flex-shrink-0 border-t border-white/[0.06] px-4 py-4 bg-[#080808] text-center">
                     <p className="text-xs text-zinc-600 font-inter">
-                        {isBooked ? 'This conversation is closed — booking confirmed.' : 'This deal has been closed.'}
+                        {isBooked ? t('chat.booking.confirmed') : t('chat.deal.closed')}
                     </p>
                 </div>
             )}

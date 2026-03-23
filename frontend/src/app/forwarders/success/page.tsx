@@ -8,10 +8,12 @@ import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
+import { useT } from '@/lib/i18n/t';
 
 import { Suspense } from 'react';
 
 function SuccessContent() {
+    const t = useT();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user, refreshProfile } = useAuth();
@@ -62,8 +64,8 @@ function SuccessContent() {
             {status === 'loading' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
                     <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
-                    <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Upgrading Clearance</h1>
-                    <p className="text-zinc-400 font-inter">Securely activating your CargoLink Partner account...</p>
+                    <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">{t('success.upgrading')}</h1>
+                    <p className="text-zinc-400 font-inter">{t('success.upgrading.sub')}</p>
                 </motion.div>
             )}
 
@@ -74,17 +76,17 @@ function SuccessContent() {
                     </div>
 
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold font-inter tracking-[0.2em] uppercase mb-6">
-                        <span className="opacity-70">PORTAL</span>: Partner Network Active
+                        {t('fwd.success.portal')}
                     </div>
 
-                    <h1 className="text-4xl font-bold font-outfit uppercase tracking-tight mb-4">Welcome to the Network</h1>
+                    <h1 className="text-4xl font-bold font-outfit uppercase tracking-tight mb-4">{t('success.welcome')}</h1>
 
                     <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full mb-8 text-left">
-                        <p className="text-zinc-400 font-inter text-sm mb-2 uppercase tracking-widest font-bold text-[10px]">Your New Identity Badge:</p>
+                        <p className="text-zinc-400 font-inter text-sm mb-2 uppercase tracking-widest font-bold text-[10px]">{t('success.badge.label')}</p>
                         <p className="text-2xl font-mono text-emerald-400 font-bold">{user?.sovereign_id?.startsWith('REG-') ? user.sovereign_id : `REG-${user?.sovereign_id}`}</p>
                         <div className="h-px bg-white/5 my-4" />
                         <p className="text-zinc-400 font-inter text-sm leading-relaxed">
-                            Your partner verification is complete and your company profile is now being processed by our system. You will receive an email shortly with your private <strong className="text-white">Partner ID (REG-CL-XXXX)</strong> and instructions on how to access the CargoLink Partner Portal.
+                            {t('success.badge.desc')}
                         </p>
                     </div>
 
@@ -92,7 +94,7 @@ function SuccessContent() {
                         onClick={() => router.push('/forwarders/portal')}
                         className="bg-white text-black font-bold h-14 px-8 rounded-xl hover:bg-zinc-200 transition-all flex items-center justify-center text-xs tracking-widest font-inter uppercase w-full"
                     >
-                        Enter Secure Portal <ArrowRight className="w-4 h-4 ml-2" />
+                        {t('success.enter')} <ArrowRight className="w-4 h-4 ml-2" />
                     </button>
                 </motion.div>
             )}
@@ -102,13 +104,13 @@ function SuccessContent() {
                     <div className="w-24 h-24 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-8">
                         <span className="text-[12px] font-semibold text-red-500 uppercase tracking-[0.2em]">ERROR</span>
                     </div>
-                    <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Verification Error</h1>
-                    <p className="text-zinc-400 font-inter mb-8">We could not verify your session. If you have already paid, please contact support.</p>
+                    <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">{t('success.error.title')}</h1>
+                    <p className="text-zinc-400 font-inter mb-8">{t('success.error.sub')}</p>
                     <button
                         onClick={() => router.push('/forwarders/register')}
                         className="bg-white/5 border border-white/10 text-white font-bold h-14 px-8 rounded-xl hover:bg-white/10 transition-all flex items-center text-xs tracking-widest font-inter uppercase"
                     >
-                        Return to Dashboard
+                        {t('success.error.btn')}
                     </button>
                 </motion.div>
             )}

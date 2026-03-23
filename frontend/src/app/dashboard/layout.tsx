@@ -22,17 +22,17 @@ import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
 
-const ACTION_MAP: Record<string, string> = {
-    VECTOR_SEARCH: 'Freight Search',
-    QUOTE_REQUESTED: 'Quote Requested',
-    QUOTE_ACCEPTED: 'Quote Accepted',
-    BOOKING_CREATED: 'Booking Created',
-    SHIPMENT_UPDATED: 'Shipment Updated',
-    TASK_COMPLETED: 'Task Completed',
-    BID_SUBMITTED: 'Bid Submitted',
-    BID_ACCEPTED: 'Bid Accepted',
-    LOGIN: 'Signed In',
-    LOGOUT: 'Signed Out',
+const ACTION_KEYS: Record<string, string> = {
+    VECTOR_SEARCH: 'act.freight.search',
+    QUOTE_REQUESTED: 'act.quote.requested',
+    QUOTE_ACCEPTED: 'act.quote.accepted',
+    BOOKING_CREATED: 'act.booking.created',
+    SHIPMENT_UPDATED: 'act.shipment.updated',
+    TASK_COMPLETED: 'act.task.completed',
+    BID_SUBMITTED: 'act.bid.submitted',
+    BID_ACCEPTED: 'act.bid.accepted',
+    LOGIN: 'act.login',
+    LOGOUT: 'act.logout',
 }
 
 export default function DashboardLayout({
@@ -124,8 +124,8 @@ export default function DashboardLayout({
     ]
 
     const ecosystemNav = [
-        { name: 'Marketplace', href: '/marketplace', icon: Zap },
-        { name: 'Forwarders', href: '/forwarders', icon: Users },
+        { name: t('dash.marketplace'), href: '/marketplace', icon: Zap },
+        { name: t('dash.forwarders'), href: '/forwarders', icon: Users },
     ]
 
     const partnerNav = [
@@ -177,7 +177,7 @@ export default function DashboardLayout({
                     {/* Ecosystem — shippers only, not forwarders */}
                     {user?.role !== 'forwarder' && (
                     <div>
-                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">Ecosystem</p>
+                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">{t('dash.ecosystem')}</p>
                         <div className="space-y-0.5">
                             {ecosystemNav.map((item) => {
                                 const isActive = pathname === item.href
@@ -201,7 +201,7 @@ export default function DashboardLayout({
                     {/* Partner Section — forwarders only */}
                     {user?.role === 'forwarder' && (
                         <div>
-                            <p className="px-3 text-[9px] font-semibold text-emerald-500/70 uppercase tracking-[0.25em] mb-2">Partner Center</p>
+                            <p className="px-3 text-[9px] font-semibold text-emerald-500/70 uppercase tracking-[0.25em] mb-2">{t('dash.partner.center')}</p>
                             <div className="space-y-0.5">
                                 {partnerNav.map((item) => {
                                     const isActive = pathname === item.href
@@ -228,7 +228,7 @@ export default function DashboardLayout({
                     {/* Admin Section — backend gates via ADMIN_EMAIL */}
                     {user?.role === 'admin' && (
                         <div>
-                            <p className="px-3 text-[9px] font-semibold text-zinc-700 uppercase tracking-[0.25em] mb-2">System</p>
+                            <p className="px-3 text-[9px] font-semibold text-zinc-700 uppercase tracking-[0.25em] mb-2">{t('dash.system')}</p>
                             <div className="space-y-0.5">
                                 <Link
                                     href="/admin"
@@ -237,7 +237,7 @@ export default function DashboardLayout({
                                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${pathname === '/admin' ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
                                         <ShieldCheck className={`w-3.5 h-3.5 ${pathname === '/admin' ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
                                     </div>
-                                    <span className="text-[13px] font-semibold tracking-tight">Admin Panel</span>
+                                    <span className="text-[13px] font-semibold tracking-tight">{t('dash.admin.panel')}</span>
                                 </Link>
                             </div>
                         </div>
@@ -290,7 +290,7 @@ export default function DashboardLayout({
                                     }}
                                     className={`hover:text-white transition-colors ${sortOpen ? 'text-white' : ''}`}
                                 >
-                                    Sort by
+                                    {t('dash.sort.by')}
                                 </button>
                                 <AnimatePresence>
                                     {sortOpen && (
@@ -300,7 +300,7 @@ export default function DashboardLayout({
                                             exit={{ opacity: 0, y: 10 }}
                                             className="absolute top-full right-0 mt-4 w-48 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
                                         >
-                                            {['Newest First', 'Oldest First', 'Priority: High', 'Priority: Low'].map((opt) => (
+                                            {[t('dash.sort.newest'), t('dash.sort.oldest'), t('dash.sort.priority.high'), t('dash.sort.priority.low')].map((opt) => (
                                                 <button
                                                     key={opt}
                                                     onClick={() => setSortOpen(false)}
@@ -324,7 +324,7 @@ export default function DashboardLayout({
                                     }}
                                     className={`hover:text-white transition-colors ${filterOpen ? 'text-white' : ''}`}
                                 >
-                                    Filters
+                                    {t('dash.filters')}
                                 </button>
                                 <AnimatePresence>
                                     {filterOpen && (
@@ -335,9 +335,9 @@ export default function DashboardLayout({
                                             className="absolute top-full right-0 mt-4 w-56 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
                                         >
                                             <div className="px-4 py-2 border-b border-white/5 mb-1">
-                                                <span className="text-[11px] text-zinc-600">Status</span>
+                                                <span className="text-[11px] text-zinc-600">{t('dash.filter.status')}</span>
                                             </div>
-                                            {['All Active', 'In Transit', 'Pending Review', 'Critical Only'].map((opt) => (
+                                            {[t('dash.filter.all'), t('dash.filter.transit'), t('dash.filter.pending'), t('dash.filter.critical')].map((opt) => (
                                                 <button
                                                     key={opt}
                                                     onClick={() => setFilterOpen(false)}
@@ -375,12 +375,12 @@ export default function DashboardLayout({
                                             className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl z-[60]"
                                         >
                                             <div className="flex items-center justify-between mb-6">
-                                                <h3 className="text-xs font-semibold text-white uppercase tracking-[0.2em] font-outfit">CargoLink Alerts</h3>
+                                                <h3 className="text-xs font-semibold text-white uppercase tracking-[0.2em] font-outfit">{t('dash.alerts')}</h3>
                                                 <button
                                                     onClick={() => setStats((s: any) => s ? { ...s, recent_activity: [] } : s)}
                                                     className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest transition-colors"
                                                 >
-                                                    Clear All
+                                                    {t('dash.clear.all')}
                                                 </button>
                                             </div>
                                             <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
@@ -388,7 +388,7 @@ export default function DashboardLayout({
                                                     <div key={act.id} className="flex gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
                                                         <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
                                                         <div className="space-y-1">
-                                                            <p className="text-xs font-medium text-white">{ACTION_MAP[act.action] ?? act.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
+                                                            <p className="text-xs font-medium text-white">{ACTION_KEYS[act.action] ? t(ACTION_KEYS[act.action] as Parameters<typeof t>[0]) : act.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
                                                             <p className="text-[11px] text-zinc-500 leading-relaxed">
                                                                 {act.entity || 'System'}
                                                             </p>
@@ -399,12 +399,12 @@ export default function DashboardLayout({
                                                 {(!stats?.recent_activity || stats.recent_activity.length === 0) && (
                                                     <div className="py-10 text-center opacity-20">
                                                         <Bell className="w-6 h-6 mx-auto mb-2 text-zinc-500" />
-                                                        <p className="text-xs">No alerts</p>
+                                                        <p className="text-xs">{t('dash.no.alerts')}</p>
                                                     </div>
                                                 )}
                                             </div>
                                             <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-6 pt-4 border-t border-white/5 text-center text-xs text-zinc-500 hover:text-white transition-colors">
-                                                View all activity
+                                                {t('dash.view.activity')}
                                             </Link>
                                         </motion.div>
                                     )}
@@ -413,7 +413,7 @@ export default function DashboardLayout({
 
                             {user?.role !== 'forwarder' && (
                             <Link href="/search" className="bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                                <Plus className="w-4 h-4" /> BOOK SHIPMENT
+                                <Plus className="w-4 h-4" /> {t('dash.book')}
                             </Link>
                             )}
                         </div>

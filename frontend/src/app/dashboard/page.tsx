@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'
 import { apiFetch } from '@/lib/config'
 
 import DashboardHeader from './_components/DashboardHeader'
+import { useT } from '@/lib/i18n/t'
 import MetricCards from './_components/MetricCards'
 import CommandFeed from './_components/CommandFeed'
 import SovereignFlow from './_components/SovereignFlow'
@@ -14,6 +15,7 @@ import OpenRequestsPanel from './_components/OpenRequestsPanel'
 import { DashboardStats } from './_components/types'
 
 export default function DashboardPage() {
+    const t = useT()
     const { user, loading: authLoading, logout } = useAuth()
     const router = useRouter()
 
@@ -67,7 +69,7 @@ export default function DashboardPage() {
                     onClick={() => window.location.reload()}
                     className="text-xs font-semibold uppercase tracking-[0.2em] text-white border-b border-white px-2 py-1"
                 >
-                    Retry
+                    {t('dash.retry.btn')}
                 </button>
             </div>
         )
@@ -88,7 +90,7 @@ export default function DashboardPage() {
                 <div className="xl:col-span-1 min-h-0 overflow-hidden">
                     <CommandFeed
                         activities={stats?.recent_activity || []}
-                        title="Recent Activity"
+                        title={t('act.recent')}
                     />
                 </div>
                 <div className="xl:col-span-3 min-h-0 overflow-hidden">
@@ -96,7 +98,7 @@ export default function DashboardPage() {
                         <SovereignFlow
                             shipments={stats?.kanban_shipments || []}
                             activeCount={stats?.active_shipments || 0}
-                            title="Live Market Bids"
+                            title={t('dash.live.bids')}
                         />
                     ) : (
                         <OpenRequestsPanel />

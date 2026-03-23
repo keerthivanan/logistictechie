@@ -3,40 +3,7 @@
 import Link from 'next/link'
 import { Search, CheckCircle2, History, Package, FileText, Globe, ArrowUpRight, Activity as ActivityIcon, LogIn, LogOut, UserPlus, User, ShieldCheck, Send, Store, Zap } from 'lucide-react'
 import { Activity } from './types'
-
-const ACTION_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-    // Auth
-    LOGIN:              { label: 'Signed In',          icon: LogIn,        color: 'text-blue-400' },
-    LOGOUT:             { label: 'Signed Out',          icon: LogOut,       color: 'text-zinc-500' },
-    SIGNUP:             { label: 'Account Created',     icon: UserPlus,     color: 'text-emerald-400' },
-    SOCIAL_LINK:        { label: 'Google Sign-In',      icon: Globe,        color: 'text-blue-400' },
-    // Profile
-    PROFILE_UPDATE:     { label: 'Profile Updated',     icon: User,         color: 'text-purple-400' },
-    SECURITY_UPDATE:    { label: 'Password Changed',    icon: ShieldCheck,  color: 'text-amber-400' },
-    // Marketplace
-    MARKETPLACE_SUBMIT: { label: 'Shipment Requested',  icon: Store,        color: 'text-emerald-400' },
-    SEARCH:             { label: 'Freight Search',      icon: Search,       color: 'text-blue-400' },
-    VECTOR_SEARCH:      { label: 'Freight Search',      icon: Search,       color: 'text-blue-400' },
-    // Forwarder
-    PARTNER_APPLIED:    { label: 'Partner Application', icon: Send,         color: 'text-amber-400' },
-    BID_SUBMITTED:      { label: 'Bid Submitted',       icon: Zap,          color: 'text-emerald-400' },
-    // Tasks
-    TASK_CREATED:       { label: 'Task Created',        icon: FileText,     color: 'text-zinc-400' },
-    TASK_COMPLETED:     { label: 'Task Completed',      icon: CheckCircle2, color: 'text-emerald-400' },
-    TASK_REOPENED:      { label: 'Task Reopened',       icon: History,      color: 'text-yellow-400' },
-    // Bookings
-    BOOKING_CREATED:    { label: 'Booking Created',     icon: CheckCircle2, color: 'text-emerald-400' },
-    BOOKING_UPDATED:    { label: 'Booking Updated',     icon: Package,      color: 'text-yellow-400' },
-    DOCUMENT_UPLOAD:    { label: 'Document Uploaded',   icon: FileText,     color: 'text-zinc-400' },
-}
-
-function getConfig(action: string) {
-    return ACTION_CONFIG[action] ?? {
-        label: action.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase()),
-        icon: History,
-        color: 'text-zinc-500',
-    }
-}
+import { useT } from '@/lib/i18n/t'
 
 function timeAgo(ts: string) {
     const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
@@ -59,15 +26,44 @@ function dedupe(activities: Activity[], max = 5): Activity[] {
     return out
 }
 
-export default function CommandFeed({ activities, title = 'Recent Activity' }: { activities: Activity[], title?: string }) {
+export default function CommandFeed({ activities, title }: { activities: Activity[], title?: string }) {
+    const t = useT()
     const items = dedupe(activities, 5)
+
+    const ACTION_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
+        LOGIN:              { label: t('act.signed.in'),           icon: LogIn,        color: 'text-blue-400' },
+        LOGOUT:             { label: t('act.signed.out'),          icon: LogOut,       color: 'text-zinc-500' },
+        SIGNUP:             { label: t('act.account.created'),     icon: UserPlus,     color: 'text-emerald-400' },
+        SOCIAL_LINK:        { label: t('act.google.signin'),       icon: Globe,        color: 'text-blue-400' },
+        PROFILE_UPDATE:     { label: t('act.profile.updated'),     icon: User,         color: 'text-purple-400' },
+        SECURITY_UPDATE:    { label: t('act.password.changed'),    icon: ShieldCheck,  color: 'text-amber-400' },
+        MARKETPLACE_SUBMIT: { label: t('act.shipment.requested'),  icon: Store,        color: 'text-emerald-400' },
+        SEARCH:             { label: t('act.freight.search'),      icon: Search,       color: 'text-blue-400' },
+        VECTOR_SEARCH:      { label: t('act.freight.search'),      icon: Search,       color: 'text-blue-400' },
+        PARTNER_APPLIED:    { label: t('act.partner.app'),         icon: Send,         color: 'text-amber-400' },
+        BID_SUBMITTED:      { label: t('act.bid.submitted'),       icon: Zap,          color: 'text-emerald-400' },
+        TASK_CREATED:       { label: t('act.task.created'),        icon: FileText,     color: 'text-zinc-400' },
+        TASK_COMPLETED:     { label: t('act.task.completed'),      icon: CheckCircle2, color: 'text-emerald-400' },
+        TASK_REOPENED:      { label: t('act.task.reopened'),       icon: History,      color: 'text-yellow-400' },
+        BOOKING_CREATED:    { label: t('act.booking.created'),     icon: CheckCircle2, color: 'text-emerald-400' },
+        BOOKING_UPDATED:    { label: t('act.booking.updated'),     icon: Package,      color: 'text-yellow-400' },
+        DOCUMENT_UPLOAD:    { label: t('act.doc.uploaded'),        icon: FileText,     color: 'text-zinc-400' },
+    }
+
+    function getConfig(action: string) {
+        return ACTION_CONFIG[action] ?? {
+            label: action.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase()),
+            icon: History,
+            color: 'text-zinc-500',
+        }
+    }
 
     return (
         <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl p-5 h-full flex flex-col">
             {/* Header */}
             <div className="flex items-center gap-2 mb-4">
                 <ActivityIcon className="w-3.5 h-3.5 text-zinc-600" />
-                <h3 className="text-[10px] font-bold text-zinc-600 tracking-widest uppercase font-inter">{title}</h3>
+                <h3 className="text-[10px] font-bold text-zinc-600 tracking-widest uppercase font-inter">{title ?? t('act.recent')}</h3>
             </div>
 
             {/* List — fixed, no scroll */}
@@ -91,7 +87,7 @@ export default function CommandFeed({ activities, title = 'Recent Activity' }: {
                 }) : (
                     <div className="flex-1 flex flex-col items-center justify-center opacity-20 py-8">
                         <History className="w-5 h-5 text-zinc-600 mb-2" />
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 font-inter">No activity yet</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 font-inter">{t('act.no.activity')}</p>
                     </div>
                 )}
             </div>
@@ -99,7 +95,7 @@ export default function CommandFeed({ activities, title = 'Recent Activity' }: {
             {/* Footer */}
             <Link href="/dashboard/activity"
                 className="mt-4 block w-full py-2.5 border border-white/[0.05] rounded-xl text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter hover:bg-white hover:text-black transition-all text-center">
-                View All Activity
+                {t('act.view.all')}
             </Link>
         </div>
     )

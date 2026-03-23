@@ -13,46 +13,14 @@ import {
     Calculator, BookOpen,
     Info, MessageSquare,
 } from 'lucide-react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from '@/components/visuals/Avatar';
 
-const navItems = [
-    {
-        label: 'Services',
-        children: [
-            { label: 'Ocean Freight', href: '/services/ocean-freight', desc: 'Global FCL & LCL', icon: Ship },
-            { label: 'Air Freight', href: '/services/air-freight', desc: 'Express Cargo', icon: Plane },
-            { label: 'Road Freight', href: '/services/road-freight', desc: 'FTL & LTL Network', icon: Truck },
-            { label: 'Warehousing', href: '/services/smart-warehousing', desc: '3PL Solutions', icon: Warehouse },
-            { label: 'Customs', href: '/services/customs-compliance', desc: 'Clearance & Brokerage', icon: FileCheck },
-        ],
-    },
-    {
-        label: 'Ecosystem',
-        children: [
-            { label: 'Marketplace', href: '/marketplace', desc: 'Live Freight Bids & Quotes', icon: Store },
-            { label: 'Partner Directory', href: '/forwarders', desc: 'Global Logistics Network', icon: Users },
-            { label: 'Carrier Registration', href: '/forwarders/register', desc: 'Join the CargoLink Network', icon: UserPlus },
-            { label: 'Shipper Tools', href: '/search', desc: 'Search & Book Shipments', icon: SearchIcon },
-        ],
-    },
-    {
-        label: 'Tools',
-        children: [
-            { label: 'Freight Calculator', href: '/tools/calculator', desc: 'Instant Cost Estimates', icon: Calculator },
-            { label: 'HS Code Lookup', href: '/tools/hs-codes', desc: 'Classification Engine', icon: BookOpen },
-        ],
-    },
-    {
-        label: 'Company',
-        children: [
-            { label: 'About Us', href: '/about', desc: 'Our Mission & Team', icon: Info },
-            { label: 'Contact', href: '/contact', desc: '24/7 Support', icon: MessageSquare },
-        ],
-    },
-];
 
-function DropdownMenu({ items }: { items: typeof navItems[0]['children'] }) {
+interface NavChild { label: string; href: string; desc: string; icon: React.ElementType }
+
+function DropdownMenu({ items }: { items: NavChild[] }) {
     return (
         <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] p-2 min-w-[220px]">
             {items.map((child) => (
@@ -83,6 +51,42 @@ export default function Navbar() {
     const router = useRouter();
     const { lang, setLang } = useLanguage();
     const t = useT();
+
+    const navItems = [
+        {
+            label: t('nav.services'),
+            children: [
+                { label: t('nav.ocean'), href: '/services/ocean-freight', desc: t('nav.ocean.desc'), icon: Ship },
+                { label: t('nav.air'), href: '/services/air-freight', desc: t('nav.air.desc'), icon: Plane },
+                { label: t('nav.road'), href: '/services/road-freight', desc: t('nav.road.desc'), icon: Truck },
+                { label: t('nav.warehouse'), href: '/services/smart-warehousing', desc: t('nav.warehouse.desc'), icon: Warehouse },
+                { label: t('nav.customs.svc'), href: '/services/customs-compliance', desc: t('nav.customs.desc'), icon: FileCheck },
+            ],
+        },
+        {
+            label: t('nav.ecosystem'),
+            children: [
+                { label: t('nav.marketplace'), href: '/marketplace', desc: t('nav.marketplace.desc'), icon: Store },
+                { label: t('nav.partner.dir'), href: '/forwarders', desc: t('nav.partner.dir.desc'), icon: Users },
+                { label: t('nav.carrier.reg'), href: '/forwarders/register', desc: t('nav.carrier.reg.desc'), icon: UserPlus },
+                { label: t('nav.shipper.tools'), href: '/search', desc: t('nav.shipper.tools.desc'), icon: SearchIcon },
+            ],
+        },
+        {
+            label: t('nav.tools'),
+            children: [
+                { label: t('nav.calculator'), href: '/tools/calculator', desc: t('nav.calculator.desc'), icon: Calculator },
+                { label: t('nav.hs'), href: '/tools/hs-codes', desc: t('nav.hs.desc'), icon: BookOpen },
+            ],
+        },
+        {
+            label: t('nav.company'),
+            children: [
+                { label: t('nav.about'), href: '/about', desc: t('nav.about.desc'), icon: Info },
+                { label: t('nav.contact'), href: '/contact', desc: t('nav.contact.desc'), icon: MessageSquare },
+            ],
+        },
+    ];
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -137,13 +141,13 @@ export default function Navbar() {
 
                     {user && (
                         <Link href="/dashboard" className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-emerald-400 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
-                            {user?.role === 'forwarder' ? 'Partner Dashboard' : t('nav.dashboard')}
+                            {user?.role === 'forwarder' ? t('nav.partner.dashboard') : t('nav.dashboard')}
                         </Link>
                     )}
 
                     {user?.role === 'forwarder' && (
                         <Link href="/forwarders/portal" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
-                            Portal
+                            {t('nav.portal')}
                         </Link>
                     )}
 
@@ -268,21 +272,21 @@ export default function Navbar() {
                                             {user?.role === 'forwarder' && (
                                                 <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all">
                                                     <Store className="w-3.5 h-3.5 opacity-70" />
-                                                    <span className="text-xs font-semibold font-inter">Partner Portal</span>
+                                                    <span className="text-xs font-semibold font-inter">{t('nav.partner.portal')}</span>
                                                 </Link>
                                             )}
                                             <Link href="/profile" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all">
                                                 <UserIcon className="w-3.5 h-3.5 opacity-60" />
-                                                <span className="text-xs font-semibold font-inter">Profile</span>
+                                                <span className="text-xs font-semibold font-inter">{t('nav.profile')}</span>
                                             </Link>
                                             <Link href="/settings" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all">
                                                 <SettingsIcon className="w-3.5 h-3.5 opacity-60" />
-                                                <span className="text-xs font-semibold font-inter">Settings</span>
+                                                <span className="text-xs font-semibold font-inter">{t('nav.settings')}</span>
                                             </Link>
                                             <div className="h-px bg-white/[0.05] my-1 mx-1" />
                                             <button onClick={() => { logout(); setActiveDropdown(null); }} className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-red-500/10 rounded-xl text-zinc-500 hover:text-red-400 transition-all">
                                                 <LogOut className="w-3.5 h-3.5 opacity-60" />
-                                                <span className="text-xs font-semibold font-inter">Sign Out</span>
+                                                <span className="text-xs font-semibold font-inter">{t('nav.signout')}</span>
                                             </button>
                                         </motion.div>
                                     </>
@@ -315,15 +319,15 @@ export default function Navbar() {
                         <div className="px-6 py-8 space-y-6">
                             <div className="space-y-4">
                                 {user?.role !== 'forwarder' && (
-                                    <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">Instant Search</Link>
+                                    <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">{t('nav.search')}</Link>
                                 )}
                                 {user && (
                                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">
-                                        {user?.role === 'forwarder' ? 'Partner Dashboard' : 'Dashboard'}
+                                        {user?.role === 'forwarder' ? t('nav.partner.dashboard') : t('nav.dashboard')}
                                     </Link>
                                 )}
                                 {user?.role === 'forwarder' && (
-                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-emerald-400 font-inter">Partner Portal</Link>
+                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-emerald-400 font-inter">{t('nav.partner.portal')}</Link>
                                 )}
                                 {user?.role !== 'forwarder' && (
                                     <>
@@ -339,14 +343,14 @@ export default function Navbar() {
                             <div className="h-px bg-white/10" />
                             {user ? (
                                 <div className="space-y-3">
-                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">Profile</Link>
-                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">Settings</Link>
-                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="block w-full text-center text-red-500 font-semibold py-3 border border-red-500/20 bg-red-500/5 rounded-xl text-sm font-inter">Sign Out</button>
+                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">{t('nav.profile')}</Link>
+                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center text-white font-semibold py-3 border border-white/10 rounded-xl text-sm font-inter">{t('nav.settings')}</Link>
+                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="block w-full text-center text-red-500 font-semibold py-3 border border-red-500/20 bg-red-500/5 rounded-xl text-sm font-inter">{t('nav.signout')}</button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-semibold text-sm font-inter">Log In</Link>
-                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-semibold text-sm font-inter">Sign Up</Link>
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center border border-white/10 rounded-xl text-white font-semibold text-sm font-inter">{t('nav.login')}</Link>
+                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-3 text-center bg-white text-black rounded-xl font-semibold text-sm font-inter">{t('nav.signup')}</Link>
                                 </div>
                             )}
                         </div>

@@ -66,7 +66,7 @@ function TrackingContent() {
     if (loading) return (
         <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
             <Spinner size="lg" />
-            <div className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500">Connecting to AIS Satellite Node...</div>
+            <div className="text-xs font-bold uppercase tracking-[0.3em] text-gray-500">{t('track.connecting')}</div>
         </div>
     )
 
@@ -82,9 +82,9 @@ function TrackingContent() {
 
                         <div className="flex items-center gap-4 mb-8">
                             <div className="px-3 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-full border border-blue-500/30 uppercase tracking-widest">
-                                Live AIS Signal
+                                {t('track.live.signal')}
                             </div>
-                            <span className="text-gray-500 text-xs">Last updated: Just now</span>
+                            <span className="text-gray-500 text-xs">{t('track.last.updated')}</span>
                         </div>
 
                         <h1 className="text-4xl font-bold mb-2">{tracking?.vessel_name || 'NEO-PANAMAX CLASS'}</h1>
@@ -92,22 +92,22 @@ function TrackingContent() {
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Status</div>
-                                <div className="text-green-400 font-bold">{tracking?.status || 'Active Transit'}</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.status')}</div>
+                                <div className="text-green-400 font-bold">{tracking?.status || t('track.active.transit')}</div>
                             </div>
                             <div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Position</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.position')}</div>
                                 <div className="text-white font-bold">
-                                    {tracking?.telemetry?.lat ? `${tracking.telemetry.lat}° N, ${tracking.telemetry.lon}° E` : 'Searching AIS...'}
+                                    {tracking?.telemetry?.lat ? `${tracking.telemetry.lat}° N, ${tracking.telemetry.lon}° E` : t('track.searching')}
                                 </div>
                             </div>
                             <div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Speed</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.speed')}</div>
                                 <div className="text-white font-bold">{tracking?.telemetry?.speed || '14.0'} knots</div>
                             </div>
                             <div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">ETA</div>
-                                <div className="text-white font-bold">{tracking?.eta || 'CALCULATING...'}</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.eta')}</div>
+                                <div className="text-white font-bold">{tracking?.eta || t('track.calculating')}</div>
                             </div>
                         </div>
                     </div>
@@ -135,7 +135,7 @@ function TrackingContent() {
                                     <MapPin className="w-6 h-6" />
                                 </div>
                                 <div className="text-xs font-bold text-gray-500 uppercase">{tracking?.destination || 'ROTTERDAM'}</div>
-                                <div className="text-[10px] text-gray-500 italic">Expected 27d</div>
+                                <div className="text-[10px] text-gray-500 italic">{t('track.expected')}</div>
                             </div>
                         </div>
 
@@ -144,15 +144,15 @@ function TrackingContent() {
                             <div className="flex gap-4">
                                 <div className="w-2 h-2 rounded-full bg-blue-500 mt-2 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
                                 <div>
-                                    <div className="text-sm font-bold text-white">Vessel passing Jebel Ali Corridor</div>
-                                    <div className="text-xs text-gray-500">Live Telemetry Report • 2 hours ago</div>
+                                    <div className="text-sm font-bold text-white">{t('track.event1.title')}</div>
+                                    <div className="text-xs text-gray-500">{t('track.event1.sub')}</div>
                                 </div>
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-2 h-2 rounded-full bg-zinc-700 mt-2"></div>
                                 <div>
-                                    <div className="text-sm font-bold text-gray-400">Cargo Handover - CNSHA Base Node</div>
-                                    <div className="text-xs text-gray-600">Authenticated Transaction • Feb 16, 2026</div>
+                                    <div className="text-sm font-bold text-gray-400">{t('track.event2.title')}</div>
+                                    <div className="text-xs text-gray-600">{t('track.event2.sub')}</div>
                                 </div>
                             </div>
                         </div>
@@ -164,15 +164,15 @@ function TrackingContent() {
                     <div className="bg-zinc-900 border border-white/10 rounded-3xl p-6">
                         <h3 className="font-bold flex items-center gap-2 mb-4">
                             <CheckCircle className="w-5 h-5 text-green-500" />
-                            Sentinel Health Scan
+                            {t('track.sentinel')}
                         </h3>
                         <div className="space-y-4">
                             <div className="p-4 bg-black/50 rounded-xl border border-white/5">
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Route Security</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.route.security')}</div>
                                 <div className="text-sm text-green-400 font-bold">OPTIMAL (98/100)</div>
                             </div>
                             <div className="p-4 bg-black/50 rounded-xl border border-white/5">
-                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Weather Prediction</div>
+                                <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.weather')}</div>
                                 <div className="text-sm text-white font-bold">Stable Current (2.4m Swells)</div>
                             </div>
                         </div>
@@ -181,26 +181,26 @@ function TrackingContent() {
                     <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-6">
                         <h3 className="font-bold flex items-center gap-2 mb-2 text-orange-500">
                             <AlertTriangle className="w-5 h-5" />
-                            Suez Advisory
+                            {t('track.advisory')}
                         </h3>
                         <p className="text-xs text-orange-400 leading-relaxed">
-                            Awaiting verification for Suez convoy. Current congestion index at Port Said is High. Possible +12h delay.
+                            {t('track.advisory.text')}
                         </p>
                     </div>
 
                     <div className="bg-white text-black rounded-3xl p-6">
-                        <h3 className="font-bold mb-4">Actions</h3>
+                        <h3 className="font-bold mb-4">{t('track.actions')}</h3>
                         <button
                             onClick={() => window.print()}
                             className="w-full bg-black text-white py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 transition-all mb-3"
                         >
-                            Request Inspection Report
+                            {t('track.inspect.btn')}
                         </button>
                         <a
                             href={`mailto:support@cargolink.io?subject=Tracking Inquiry: ${id || 'N/A'}`}
                             className="w-full border border-black/10 text-black py-3 rounded-xl font-bold text-sm hover:bg-black/5 transition-all flex items-center justify-center"
                         >
-                            Contact Agent
+                            {t('track.contact.agent')}
                         </a>
                     </div>
                 </div>

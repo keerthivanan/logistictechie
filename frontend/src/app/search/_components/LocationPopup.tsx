@@ -6,6 +6,7 @@ import { MapPin, Search as SearchIcon, X, Globe, Loader2 } from 'lucide-react'
 import { Location } from './types'
 import { countries } from '@/lib/countries'
 import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
 
 interface LocationPopupProps {
     title: string
@@ -29,7 +30,8 @@ function getFlagEmoji(countryCode: string) {
     )
 }
 
-export function LocationPopup({ title, data, setData, type }: LocationPopupProps) {
+export function LocationPopup({ title, data, setData }: LocationPopupProps) {
+    const t = useT()
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [portResults, setPortResults] = useState<PortResult[]>([])
@@ -104,12 +106,12 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-white tracking-tighter">
-                            {data.city || 'Select Port'}
+                            {data.city || t('loc.select.port')}
                         </h3>
                         <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
                             {data.country
                                 ? `${getFlagEmoji(countries.find(c => c.name === data.country)?.code || 'US')} ${data.country}`
-                                : 'Global Network'}
+                                : t('loc.global.network')}
                         </p>
                     </div>
                 </div>
@@ -142,7 +144,7 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
                                     }
                                     <input
                                         type="text"
-                                        placeholder="Search port, city, or UNLOCODE…"
+                                        placeholder={t('loc.search.placeholder')}
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
                                         className="w-full bg-black border border-white/[0.06] rounded-xl py-3 pl-11 pr-4 text-sm font-medium text-white placeholder-zinc-600 font-inter"
@@ -153,7 +155,7 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
                                 {/* Port results from Maersk API */}
                                 {portResults.length > 0 && (
                                     <div className="space-y-1 max-h-[280px] overflow-y-auto">
-                                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest px-1 mb-2">Ports & Terminals</p>
+                                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest px-1 mb-2">{t('loc.ports.terminals')}</p>
                                         {portResults.map((p, i) => (
                                             <button key={i} onClick={() => selectPort(p)}
                                                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-left group">
@@ -176,14 +178,14 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
 
                                 {/* No results message */}
                                 {search.length >= 2 && !searching && portResults.length === 0 && (
-                                    <p className="text-xs text-zinc-600 text-center py-2 font-inter">No ports found — try typing a city name</p>
+                                    <p className="text-xs text-zinc-600 text-center py-2 font-inter">{t('loc.no.ports')}</p>
                                 )}
 
                                 {/* Country filter (shown when no port search active) */}
                                 {showCountries && (
                                     <div className="space-y-2">
                                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
-                                            {search.length < 2 ? 'Select Country' : 'Countries'}
+                                            {search.length < 2 ? t('loc.select.country') : t('loc.countries')}
                                         </p>
                                         <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
                                             {filteredCountries.slice(0, 20).map(c => (
@@ -201,10 +203,10 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
 
                                 {/* Manual city entry */}
                                 <div className="space-y-2 pt-3 border-t border-white/[0.06]">
-                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Or enter city manually</label>
+                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{t('loc.enter.manually')}</label>
                                     <input
                                         type="text"
-                                        placeholder="e.g. Shanghai"
+                                        placeholder={t('loc.city.placeholder')}
                                         value={data.city}
                                         onChange={e => setData({ ...data, city: e.target.value })}
                                         className="w-full bg-black border border-white/[0.06] rounded-xl py-3 px-4 text-sm font-semibold text-white placeholder-zinc-700 font-inter"
@@ -215,7 +217,7 @@ export function LocationPopup({ title, data, setData, type }: LocationPopupProps
                                     onClick={() => { setIsOpen(false); setSearch(''); setPortResults([]) }}
                                     className="w-full bg-white text-black py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-zinc-100 active:scale-[0.98] transition-all"
                                 >
-                                    Confirm Location
+                                    {t('loc.confirm')}
                                 </button>
                             </div>
                         </motion.div>
