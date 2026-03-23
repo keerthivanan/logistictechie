@@ -1,45 +1,32 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: omego-postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: logistics_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - omego-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
+  # ─── Backend (FastAPI + Neon DB) ─────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: omego-backend
+    container_name: cargolink-backend
     restart: always
     ports:
       - "8000:8000"
     env_file:
       - ./backend/.env
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - redis
     networks:
-      - omego-network
+      - cargolink-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # ─── Frontend (Next.js) ───────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: omego-frontend
+    container_name: cargolink-frontend
     restart: always
     ports:
       - "3000:3000"
@@ -48,40 +35,19 @@ services:
     depends_on:
       - backend
     networks:
-      - omego-network
+      - cargolink-network
 
+  # ─── Redis (caching) ──────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: omego-redis
+    container_name: cargolink-redis
     restart: always
-    # No host port exposure — only reachable inside Docker network
     networks:
-      - omego-network
+      - cargolink-network
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: omego-n8n
-    restart: always
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_ADMIN_USER:-admin}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_ADMIN_PASSWORD:-changeme}
-      - N8N_HOST=${N8N_DOMAIN:-localhost}
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=https
-      - NODE_ENV=production
-      - WEBHOOK_URL=https://${N8N_DOMAIN:-localhost}/
-    volumes:
-      - n8n_data:/home/node/.n8n
-    networks:
-      - omego-network
+# NOTE: n8n is hosted separately by your VPS provider
+# Access at: https://n8n.srv1520651.hstgr.cloud
 
 networks:
-  omego-network:
+  cargolink-network:
     driver: bridge
-
-volumes:
-  postgres_data:
-  n8n_data:
