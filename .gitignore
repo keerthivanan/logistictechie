@@ -73,20 +73,18 @@ Thumbs.db
 *.tmp
 *.bak
 
-# === N8N AUTOMATION (CONFIDENTIAL — NEVER PUSH) ===
-n8n_plan/
+# === N8N AUTOMATION — JSON workflows are committed so VPS can pull them ===
+# Ignore only the planning/guide docs, keep the JSON workflow files
+n8n_plan/*.md
 
 # === PROJECT PLANS & AGENT METADATA (CONFIDENTIAL) ===
 plan/
 tmp/
 .agent/
 .gemini/
-# Shielding internal agent logs/tasks, but allowing project docs
 .agent/logs/
 .agent/tasks/
-# Specific confidential markdown files
 plan/*.md
-n8n_plan/*.md
 !README.md
 !backend/README.md
 !frontend/README.md

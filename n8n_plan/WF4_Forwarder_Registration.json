@@ -1,0 +1,249 @@
+{
+  "name": "WF4 - CargoLink Forwarder Registration Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "forwarder-register",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - New Registration",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "cargolink-forwarder-register"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $json;\n\nif (!d.email || !d.company_name) throw new Error('Missing required fields: email or company_name');\n\nreturn {\n  json: {\n    forwarder_id: d.forwarder_id || '',\n    company_name: d.company_name,\n    contact_person: d.contact_person || 'N/A',\n    email: d.email,\n    company_email: d.company_email || d.email,\n    phone: d.phone || 'N/A',\n    whatsapp: d.whatsapp || d.phone || 'N/A',\n    country: d.country || 'N/A',\n    specializations: Array.isArray(d.specializations) ? d.specializations.join(', ') : (d.specializations || 'N/A'),\n    routes: Array.isArray(d.routes) ? d.routes.join(', ') : (d.routes || 'N/A'),\n    tax_id: d.tax_id || 'N/A',\n    website: d.website || 'N/A',\n    document_url: d.document_url || '',\n    logo_url: d.logo_url || '',\n    registered_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "parse-payload",
+      "name": "Code - Parse & Normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.GOOGLE_SHEETS_FORWARDERS_DOC_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Registrations"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            { "id": "forwarder_id", "displayName": "forwarder_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "company_name", "displayName": "company_name", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "contact_person", "displayName": "contact_person", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "country", "displayName": "country", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "specializations", "displayName": "specializations", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "routes", "displayName": "routes", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "tax_id", "displayName": "tax_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "website", "displayName": "website", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
+            { "id": "registered_at", "displayName": "registered_at", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "save-to-sheets",
+      "name": "Google Sheets - Log Registration",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [680, 160],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "2",
+          "name": "Google Sheets OAuth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $('Code - Parse & Normalize').first().json;\n\nconst message = `*New Partner Application*\\n\\n*Company:* ${d.company_name}\\n*Contact:* ${d.contact_person}\\n*Email:* ${d.email}\\n*Phone:* ${d.phone}\\n*WhatsApp:* ${d.whatsapp}\\n*Country:* ${d.country}\\n*Specializations:* ${d.specializations}\\n*Routes:* ${d.routes}\\n*Tax ID:* ${d.tax_id}\\n*Partner ID:* ${d.forwarder_id}\\n\\nReview in admin panel: https://cargolink.sa/admin`;\n\nreturn { json: { message, phone: d.whatsapp } };"
+      },
+      "id": "build-whatsapp",
+      "name": "Code - Build WhatsApp Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.whatsapp.com/send",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $env.ADMIN_WHATSAPP_NUMBER }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": {{ JSON.stringify($json.message) }} }\n}",
+        "options": {
+          "headers": {
+            "parameter": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $env.WHATSAPP_API_TOKEN }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "send-whatsapp",
+      "name": "HTTP - Send WhatsApp to Admin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const d = $('Code - Parse & Normalize').first().json;\n\nconst emailBody = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; margin: 0; padding: 0; }\n    .container { max-width: 640px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }\n    .header { background: linear-gradient(135deg, #2E75B6 0%, #1A5490 100%); color: white; padding: 40px 30px; text-align: center; }\n    .header h1 { margin: 0 0 10px 0; font-size: 28px; }\n    .content { padding: 40px 30px; }\n    .info-box { background: #E8F4F8; border-left: 4px solid #2E75B6; border-radius: 4px; padding: 20px; margin: 24px 0; }\n    .info-box p { margin: 6px 0; font-size: 14px; }\n    .steps { background: #f9f9f9; border-radius: 6px; padding: 20px 20px 20px 36px; margin: 20px 0; }\n    .steps li { margin-bottom: 10px; }\n    .footer { background: #f0f0f0; padding: 20px; text-align: center; font-size: 12px; color: #888; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>Application Received</h1>\n      <p style=\"margin:0;font-size:16px;opacity:0.9;\">CargoLink Partner Network</p>\n    </div>\n    <div class=\"content\">\n      <p>Dear <strong>${d.contact_person}</strong>,</p>\n      <p>Thank you for applying to join the <strong>CargoLink freight partner network</strong>. We have received your application for <strong>${d.company_name}</strong> and it is currently under review.</p>\n\n      <div class=\"info-box\">\n        <p><strong>Application Reference:</strong> ${d.forwarder_id}</p>\n        <p><strong>Company:</strong> ${d.company_name}</p>\n        <p><strong>Country:</strong> ${d.country}</p>\n        <p><strong>Submitted:</strong> ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>\n      </div>\n\n      <h3 style=\"color:#2E75B6;\">What happens next?</h3>\n      <ol class=\"steps\">\n        <li>Our team will verify your company details and documentation.</li>\n        <li>You will receive a decision by email within 2–3 business days.</li>\n        <li>If approved, you will get your Partner ID and access to the Forwarder Portal.</li>\n        <li>If we need additional information, we will reach out directly.</li>\n      </ol>\n\n      <p style=\"font-size:13px;color:#666;margin-top:30px;\">If you have any questions in the meantime, reply to this email or visit our <a href=\"https://cargolink.sa/help\" style=\"color:#2E75B6;\">Help Center</a>.</p>\n    </div>\n    <div class=\"footer\">\n      <p><strong>CargoLink Platform</strong> — Connecting shippers with the world's best freight forwarders</p>\n      <p>© 2025 CargoLink. All rights reserved.</p>\n    </div>\n  </div>\n</body>\n</html>`;\n\nreturn { json: { ...d, email_body: emailBody } };"
+      },
+      "id": "build-confirmation-email",
+      "name": "Code - Build Confirmation Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 440]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Application Received — {{ $json.company_name }} | CargoLink",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "send-confirmation-email",
+      "name": "Gmail - Send Confirmation to Forwarder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [900, 440],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Registration logged, admin notified, confirmation email sent.\", \"forwarder_id\": \"{{ $('Code - Parse & Normalize').first().json.forwarder_id }}\" }"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - New Registration": {
+      "main": [
+        [
+          {
+            "node": "Code - Parse & Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parse & Normalize": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Log Registration",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code - Build WhatsApp Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code - Build Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Log Registration": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Send WhatsApp to Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Send WhatsApp to Admin": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Confirmation to Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send Confirmation to Forwarder": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-03-17T00:00:00.000Z",
+  "versionId": "1"
+}
