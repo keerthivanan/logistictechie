@@ -30,6 +30,8 @@ interface ConvMeta {
     offer_side: 'SHIPPER' | 'FORWARDER' | null
     shipper_close_req: boolean
     forwarder_close_req: boolean
+    shipper_book_req: boolean
+    forwarder_book_req: boolean
     shipper_last_seen: string | null
     forwarder_last_seen: string | null
 }
@@ -351,15 +353,36 @@ export default function ChatPage() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        {/* Confirm Booking — shipper only, OPEN, no pending offer */}
-                        {isShipper && !isBooked && !isClosed && !hasPendingOffer && !bookingResult && (
-                            <button
-                                onClick={confirmBooking}
-                                disabled={sending}
-                                className="bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
-                            >
-                                {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm Booking'}
-                            </button>
+                        {/* Booking confirmation — mutual consent required */}
+                        {isShipper && !isBooked && !isClosed && !bookingResult && (
+                            <>
+                                {/* Shipper already confirmed, waiting for forwarder */}
+                                {conv.shipper_book_req && !conv.forwarder_book_req && (
+                                    <span className="text-[9px] text-zinc-500 italic animate-pulse">
+                                        Waiting for forwarder to confirm...
+                                    </span>
+                                )}
+                                {/* Forwarder confirmed first — shipper's turn */}
+                                {conv.forwarder_book_req && !conv.shipper_book_req && !hasPendingOffer && (
+                                    <button
+                                        onClick={confirmBooking}
+                                        disabled={sending}
+                                        className="bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse"
+                                    >
+                                        {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Forwarder confirmed — Lock Deal'}
+                                    </button>
+                                )}
+                                {/* Neither confirmed yet */}
+                                {!conv.shipper_book_req && !conv.forwarder_book_req && !hasPendingOffer && (
+                                    <button
+                                        onClick={confirmBooking}
+                                        disabled={sending}
+                                        className="bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
+                                    >
+                                        {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm Booking'}
+                                    </button>
+                                )}
+                            </>
                         )}
 
                         {/* Close Deal — shipper only, OPEN */}

@@ -44,6 +44,10 @@ class Conversation(Base):
     shipper_close_req = Column(Boolean, default=False, nullable=False)
     forwarder_close_req = Column(Boolean, default=False, nullable=False)
 
+    # Mutual booking flags — both must be True to create a Booking record
+    shipper_book_req = Column(Boolean, default=False, nullable=False)
+    forwarder_book_req = Column(Boolean, default=False, nullable=False)
+
     # Last seen — updated on every message poll. Used to show Online / Last seen X min ago
     shipper_last_seen = Column(DateTime, nullable=True)
     forwarder_last_seen = Column(DateTime, nullable=True)

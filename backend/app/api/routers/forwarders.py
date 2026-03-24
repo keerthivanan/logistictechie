@@ -40,8 +40,8 @@ async def save_forwarder(f_in: ForwarderSave, db: AsyncSession = Depends(get_db)
     Secure endpoint for n8n Cloud to save a verified partner.
     Called after partner verification succeeds.
     """
-    # Check if already exists (idempotent)
-    existing = await db.execute(select(Forwarder).where(Forwarder.email == f_in.email))
+    # Check if already exists (idempotent) — case-insensitive email match
+    existing = await db.execute(select(Forwarder).where(func.lower(Forwarder.email) == f_in.email.lower().strip()))
     if existing.scalars().first():
         # Role Sync: If profile exists, ensure User record also has forwarder role
         user_stmt = select(User).where(User.email == f_in.email)
@@ -313,25 +313,22 @@ async def forwarder_auth(req: LoginRequest, request: Request, db: AsyncSession =
         raise AUTH_FAIL
 
     # Lockout check
-    failed = int(f.failed_auth_attempts or 0) if hasattr(f, 'failed_auth_attempts') else 0
-    locked_until = getattr(f, 'auth_locked_until', None)
+    failed = int(f.failed_auth_attempts or 0)
+    locked_until = f.auth_locked_until
     if locked_until and locked_until > datetime.now(timezone.utc).replace(tzinfo=None):
         raise AUTH_FAIL
 
-    if f.email != req.email or f.status != "ACTIVE":
-        # Increment fail counter
-        if hasattr(f, 'failed_auth_attempts'):
-            f.failed_auth_attempts = failed + 1
-            if f.failed_auth_attempts >= 5 and hasattr(f, 'auth_locked_until'):
-                f.auth_locked_until = (datetime.now(timezone.utc) + timedelta(minutes=15)).replace(tzinfo=None)
-            await db.commit()
+    if f.email.lower() != req.email.lower() or f.status != "ACTIVE":
+        f.failed_auth_attempts = failed + 1
+        if f.failed_auth_attempts >= 5:
+            f.auth_locked_until = (datetime.now(timezone.utc) + timedelta(minutes=15)).replace(tzinfo=None)
+        await db.commit()
         raise AUTH_FAIL
 
     # Success — reset counter
-    if hasattr(f, 'failed_auth_attempts') and failed > 0:
+    if failed > 0:
         f.failed_auth_attempts = 0
-        if hasattr(f, 'auth_locked_until'):
-            f.auth_locked_until = None
+        f.auth_locked_until = None
         await db.commit()
 
     return {
@@ -567,6 +564,13 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
         raise HTTPException(
             status_code=409,
             detail="This request is no longer accepting quotes — it has been fulfilled."
+        )
+
+    # Hard-enforce max 3 quotes per request
+    if (req.quotation_count or 0) >= 3:
+        raise HTTPException(
+            status_code=409,
+            detail="This request already has 3 quotes and is no longer accepting new submissions."
         )
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)

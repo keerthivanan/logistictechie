@@ -8,13 +8,14 @@ but validates identity via Forwarder.email + Forwarder.forwarder_id.
 Auth model: same as /api/forwarders/portal-bid — forwarder_id + email
 checked against the forwarders table, status must be ACTIVE.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func
 from app.db.session import get_db
 from app.models.conversation import Conversation, ChatMessage
 from app.models.forwarder import Forwarder
 from app.models.marketplace import MarketplaceRequest
+from app.models.user import User
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime, timezone
@@ -49,6 +50,11 @@ class PortalRespondIn(BaseModel):
 
 
 class PortalCloseIn(BaseModel):
+    forwarder_id: str
+    email: str
+
+
+class PortalBookingConfirmIn(BaseModel):
     forwarder_id: str
     email: str
 
@@ -117,6 +123,8 @@ def _conv_dict(c: Conversation, last_message: Optional[ChatMessage] = None) -> d
         "offer_side": c.offer_side,
         "shipper_close_req": c.shipper_close_req,
         "forwarder_close_req": c.forwarder_close_req,
+        "shipper_book_req": c.shipper_book_req,
+        "forwarder_book_req": c.forwarder_book_req,
         "shipper_last_seen": c.shipper_last_seen.isoformat() if c.shipper_last_seen else None,
         "forwarder_last_seen": c.forwarder_last_seen.isoformat() if c.forwarder_last_seen else None,
         "created_at": c.created_at,
@@ -381,3 +389,51 @@ async def portal_close_deal(
         db.add(system_msg)
         await db.commit()
         return {"status": "PENDING_CLOSE", "message": "Waiting for shipper to confirm closure."}
+
+
+@router.post("/{public_id}/confirm-booking")
+async def portal_confirm_booking(
+    public_id: str,
+    data: PortalBookingConfirmIn,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Forwarder signals they want to confirm the booking.
+    Booking is only created when BOTH shipper and forwarder have confirmed.
+    Imports _finalize_booking from conversations router to share logic.
+    """
+    from app.api.routers.conversations import _finalize_booking
+    from app.models.booking import Booking
+    import secrets
+
+    _, conv = await _verify_portal_forwarder(data.forwarder_id, data.email, public_id, db)
+
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Conversation is not open.")
+    if conv.forwarder_book_req:
+        raise HTTPException(status_code=409, detail="You already confirmed. Waiting for the shipper.")
+
+    conv.forwarder_book_req = True
+
+    if conv.shipper_book_req:
+        # Both confirmed — fetch shipper user and finalize booking
+        shipper_res = await db.execute(
+            select(User).where(User.sovereign_id == conv.shipper_id)
+        )
+        shipper = shipper_res.scalars().first()
+        if not shipper:
+            raise HTTPException(status_code=404, detail="Shipper account not found.")
+        return await _finalize_booking(conv, db, shipper, background_tasks)
+
+    # Only forwarder confirmed — wait for shipper
+    db.add(ChatMessage(
+        conversation_id=conv.id,
+        sender_role="SYSTEM",
+        sender_id="SYSTEM",
+        message_type="SYSTEM",
+        content="Forwarder confirmed — waiting for shipper to lock the deal.",
+        is_read=False,
+    ))
+    await db.commit()
+    return {"status": "PENDING_BOOKING", "message": "Waiting for shipper to confirm."}

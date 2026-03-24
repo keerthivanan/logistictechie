@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, func
 from app.db.session import get_db
@@ -79,6 +79,8 @@ def _conv_dict(c: Conversation, last_message: Optional[ChatMessage] = None) -> d
         "offer_side": c.offer_side,
         "shipper_close_req": c.shipper_close_req,
         "forwarder_close_req": c.forwarder_close_req,
+        "shipper_book_req": c.shipper_book_req,
+        "forwarder_book_req": c.forwarder_book_req,
         "shipper_last_seen": c.shipper_last_seen.isoformat() if c.shipper_last_seen else None,
         "forwarder_last_seen": c.forwarder_last_seen.isoformat() if c.forwarder_last_seen else None,
         "created_at": c.created_at,
@@ -294,9 +296,11 @@ async def get_messages(
     public_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
 ):
     """
-    Returns all messages for a conversation. Frontend polls this every 1 second.
+    Returns messages for a conversation with pagination. Frontend polls this every 1 second.
     Also marks messages from the other party as read on each poll.
     """
     conv = await _get_conversation(public_id, db)
@@ -308,6 +312,8 @@ async def get_messages(
         select(ChatMessage)
         .where(ChatMessage.conversation_id == conv.id)
         .order_by(ChatMessage.created_at.asc())
+        .offset(offset)
+        .limit(limit)
     )
     messages = msgs_res.scalars().all()
 
@@ -618,31 +624,16 @@ async def close_deal(
         return {"status": "PENDING_CLOSE", "message": pending_msg}
 
 
-@router.post("/{public_id}/confirm-booking")
-async def confirm_booking(
-    public_id: str,
+async def _finalize_booking(
+    conv: Conversation,
+    db: AsyncSession,
+    shipper_user: User,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
+) -> dict:
     """
-    Shipper confirms booking inside the chat.
-    Final price = agreed_price (if negotiated) or original_price.
-    Forwarder email is ONLY revealed here — injected as a SYSTEM message.
-    All other open conversations for this request are auto-closed.
+    Shared helper — called when BOTH shipper_book_req and forwarder_book_req are True.
+    Creates the Booking record, closes all other conversations, fires WF6 webhook.
     """
-    conv = await _get_conversation(public_id, db)
-
-    if conv.shipper_id != current_user.sovereign_id:
-        raise HTTPException(status_code=403, detail="Only the shipper can confirm the booking.")
-    if conv.status != "OPEN":
-        raise HTTPException(status_code=409, detail="Booking already confirmed or conversation closed.")
-    if conv.offer_side == "FORWARDER":
-        raise HTTPException(status_code=409, detail="You have a counter-offer from the forwarder. Accept it or make a new offer before confirming booking.")
-    elif conv.current_offer is not None:
-        raise HTTPException(status_code=409, detail="Your offer is still pending. Wait for the forwarder to respond before confirming.")
-
-    # Determine final price
     final_price = float(conv.agreed_price) if conv.agreed_price is not None else float(conv.original_price)
 
     # Fetch forwarder email from the original quote
@@ -650,10 +641,7 @@ async def confirm_booking(
         select(MarketplaceBid).where(MarketplaceBid.quotation_id == conv.quote_id)
     )
     quote = quote_res.scalars().first()
-    if not quote:
-        raise HTTPException(status_code=404, detail="Original quote not found.")
-
-    forwarder_email = quote.forwarder_email
+    forwarder_email = quote.forwarder_email if quote else None
 
     # Generate booking reference
     reference = "BK-" + secrets.token_hex(3).upper()
@@ -667,11 +655,11 @@ async def confirm_booking(
     # Create Booking record
     booking = Booking(
         reference=reference,
-        user_sovereign_id=current_user.sovereign_id,
+        user_sovereign_id=shipper_user.sovereign_id,
         carrier_name=conv.forwarder_company,
         origin_locode=req.origin if req else "",
         destination_locode=req.destination if req else "",
-        container_type=req.container_type or "FCL",
+        container_type=req.container_type or "FCL" if req else "FCL",
         transit_days=quote.transit_days if quote else None,
         total_price=final_price,
         currency=conv.currency,
@@ -688,17 +676,13 @@ async def confirm_booking(
     conv.status = "BOOKED"
     conv.booking_id = reference
 
-    # Inject SYSTEM message revealing forwarder contact
+    # Inject SYSTEM message
     db.add(ChatMessage(
         conversation_id=conv.id,
         sender_role="SYSTEM",
         sender_id="SYSTEM",
         message_type="SYSTEM",
-        content=(
-            f"✅ Booking Confirmed — {reference} | "
-            f"Final Price: {conv.currency} {final_price:,.2f} | "
-            f"Forwarder Contact: {forwarder_email}"
-        ),
+        content=f"✅ Booking Confirmed — {reference} | Final Price: {conv.currency} {final_price:,.2f}",
         is_read=False,
     ))
 
@@ -726,8 +710,8 @@ async def confirm_booking(
         webhook_service.trigger_booking_webhook,
         {
             "reference": reference,
-            "user_name": current_user.full_name or current_user.sovereign_id,
-            "user_email": current_user.email,
+            "user_name": shipper_user.full_name or shipper_user.sovereign_id,
+            "user_email": shipper_user.email,
             "forwarder_email": forwarder_email,
             "forwarder_company": conv.forwarder_company,
             "marketplace_request_id": conv.request_id,
@@ -747,4 +731,48 @@ async def confirm_booking(
         "forwarder_company": conv.forwarder_company,
         "final_price": final_price,
         "currency": conv.currency,
+        "status": "BOOKED",
     }
+
+
+@router.post("/{public_id}/confirm-booking")
+async def confirm_booking(
+    public_id: str,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Shipper signals they want to confirm the booking.
+    Booking is only created when BOTH shipper and forwarder have confirmed.
+    """
+    conv = await _get_conversation(public_id, db)
+
+    if conv.shipper_id != current_user.sovereign_id:
+        raise HTTPException(status_code=403, detail="Only the shipper can confirm the booking.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Booking already confirmed or conversation closed.")
+    if conv.shipper_book_req:
+        raise HTTPException(status_code=409, detail="You already confirmed. Waiting for the forwarder.")
+    if conv.offer_side == "FORWARDER":
+        raise HTTPException(status_code=409, detail="You have a counter-offer from the forwarder. Respond to it before confirming booking.")
+    elif conv.current_offer is not None:
+        raise HTTPException(status_code=409, detail="Your offer is still pending. Wait for the forwarder to respond before confirming.")
+
+    conv.shipper_book_req = True
+
+    if conv.forwarder_book_req:
+        # Both confirmed — finalize booking now
+        return await _finalize_booking(conv, db, current_user, background_tasks)
+
+    # Only shipper confirmed — wait for forwarder
+    db.add(ChatMessage(
+        conversation_id=conv.id,
+        sender_role="SYSTEM",
+        sender_id="SYSTEM",
+        message_type="SYSTEM",
+        content="Shipper confirmed — waiting for forwarder to lock the deal.",
+        is_read=False,
+    ))
+    await db.commit()
+    return {"status": "PENDING_BOOKING", "message": "Waiting for forwarder to confirm."}

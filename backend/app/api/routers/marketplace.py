@@ -243,15 +243,22 @@ async def get_my_requests(
     ).order_by(MarketplaceRequest.submitted_at.desc())
     result = await db.execute(stmt)
     requests = result.scalars().all()
-    
+
+    # Batch load ALL quotes in one query — eliminates N+1
+    request_ids = [r.request_id for r in requests]
+    quotes_map: dict = {}
+    if request_ids:
+        all_quotes_res = await db.execute(
+            select(MarketplaceBid)
+            .where(MarketplaceBid.request_id.in_(request_ids))
+            .order_by(MarketplaceBid.total_price.asc())
+        )
+        for q in all_quotes_res.scalars().all():
+            quotes_map.setdefault(q.request_id, []).append(q)
+
     response = []
     for r in requests:
-        # Fetch quotes for this request
-        quote_stmt = select(MarketplaceBid).where(
-            MarketplaceBid.request_id == r.request_id
-        ).order_by(MarketplaceBid.total_price.asc())
-        quote_res = await db.execute(quote_stmt)
-        quotes = quote_res.scalars().all()
+        quotes = quotes_map.get(r.request_id, [])
         
         response.append({
             "request_id": r.request_id,
@@ -547,7 +554,20 @@ async def n8n_quote_sync(
     """
     High-performance upsert for WF2 results.
     """
-    # 1. Upsert the Quotation
+    # 1. Hard-enforce max 3 quotes — check before upsert (allow updates to existing quotes)
+    req_check_res = await db.execute(
+        select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id)
+    )
+    req_check = req_check_res.scalars().first()
+    if req_check and (req_check.quotation_count or 0) >= 3:
+        # Only block if this is a truly NEW quotation (not an update)
+        existing_bid_res = await db.execute(
+            select(MarketplaceBid).where(MarketplaceBid.quotation_id == sync_in.quotation_id)
+        )
+        if not existing_bid_res.scalars().first():
+            raise HTTPException(status_code=409, detail="MAX_QUOTES_REACHED")
+
+    # 2. Upsert the Quotation
     stmt = pg_insert(MarketplaceBid).values(
         quotation_id=sync_in.quotation_id,
         request_id=sync_in.request_id,
@@ -586,7 +606,7 @@ async def n8n_quote_sync(
     
     await db.execute(stmt)
     
-    # 2. Increment Quotation Count on the Request
+    # 3. Increment Quotation Count on the Request
     update_stmt = select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id)
     req_res = await db.execute(update_stmt)
     req = req_res.scalars().first()
