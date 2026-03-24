@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /forwarders/portal
+Disallow: /forwarders/chat/
 
-Sitemap: https://omego.logistics/sitemap.xml
+Sitemap: https://cargolink.sa/sitemap.xml
