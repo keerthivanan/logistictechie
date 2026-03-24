@@ -309,7 +309,7 @@ export default function ForwarderChatPage() {
 
     // ── Derived state ─────────────────────────────────────────────────────────
 
-    const isBooked = conv?.status === 'BOOKED'
+    const isLocked = conv?.status === 'BOOKED'
     const isClosed = conv?.status === 'CLOSED'
     const shipperWaiting = conv?.offer_side === 'SHIPPER'   // shipper sent offer → forwarder must respond
     const activePriceLabel = conv?.agreed_price ? 'Agreed' : conv?.current_offer ? 'Counter Offer' : 'Quoted'
@@ -419,11 +419,11 @@ export default function ForwarderChatPage() {
                     </div>
                 </div>
                 <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    isBooked ? 'bg-emerald-500/10 text-emerald-400'
+                    isLocked ? 'bg-emerald-500/10 text-emerald-400'
                     : isClosed ? 'bg-zinc-800 text-zinc-500'
                     : 'bg-white/5 text-zinc-500'
                 }`}>
-                    {isBooked ? t('chat.booked') : isClosed ? t('chat.closed') : t('chat.open')}
+                    {isLocked ? t('chat.booked') : isClosed ? t('chat.closed') : t('chat.open')}
                 </span>
             </div>
 
@@ -463,7 +463,7 @@ export default function ForwarderChatPage() {
                     </div>
 
                     {/* Booking confirmation + Close Deal — forwarder side */}
-                    {!isBooked && !isClosed && (
+                    {!isLocked && !isClosed && (
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
                             {/* Mutual booking confirm */}
                             {conv.forwarder_book_req && !conv.shipper_book_req && (
@@ -517,7 +517,7 @@ export default function ForwarderChatPage() {
                 </div>
 
                 {/* Closed banner */}
-                {isClosed && !isBooked && (
+                {isClosed && !isLocked && (
                     <div className="mt-3 bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3">
                         <p className="text-xs font-semibold text-zinc-400">{t('chat.deal.archived')}</p>
                     </div>
@@ -552,7 +552,7 @@ export default function ForwarderChatPage() {
                                         Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
                                     </p>
 
-                                    {isActivePending && !isBooked && !isClosed && !showCounterInput && (
+                                    {isActivePending && !isLocked && !isClosed && !showCounterInput && (
                                         <div className="flex gap-2 mt-3">
                                             <button
                                                 onClick={() => respondOffer('ACCEPT')}
@@ -579,7 +579,7 @@ export default function ForwarderChatPage() {
                                     )}
 
                                     {/* Counter input panel */}
-                                    {isActivePending && !isBooked && !isClosed && showCounterInput && (
+                                    {isActivePending && !isLocked && !isClosed && showCounterInput && (
                                         <div className="mt-3 space-y-2">
                                             <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">{t('chat.your.counter.price')}</p>
                                             {/* Counter chips */}
@@ -693,7 +693,7 @@ export default function ForwarderChatPage() {
             )}
 
             {/* ── Input Area ────────────────────────────── */}
-            {!isBooked && !isClosed ? (
+            {!isLocked && !isClosed ? (
                 <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
                     <div className="flex items-center gap-3 px-4 py-3">
                         <input
@@ -716,7 +716,7 @@ export default function ForwarderChatPage() {
             ) : (
                 <div className="flex-shrink-0 border-t border-white/[0.06] px-4 py-4 bg-[#080808] text-center">
                     <p className="text-xs text-zinc-600 font-inter">
-                        {isBooked ? t('chat.booking.confirmed') : t('chat.deal.closed')}
+                        {isLocked ? t('chat.booking.confirmed') : t('chat.deal.closed')}
                     </p>
                 </div>
             )}

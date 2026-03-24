@@ -64,7 +64,7 @@ export default function ChatPage() {
     const [text, setText] = useState('')
     const [offerAmount, setOfferAmount] = useState<string>('')
     const [sending, setSending] = useState(false)
-    const [bookingResult, setBookingResult] = useState<{ reference: string; forwarder_email: string } | null>(null)
+    const [dealLocked, setDealLocked] = useState(false)
     const [closingDeal, setClosingDeal] = useState(false)
     const [error, setError] = useState('')
     const bottomRef = useRef<HTMLDivElement>(null)
@@ -229,13 +229,13 @@ export default function ChatPage() {
                 headers: { Authorization: `Bearer ${token}` },
             })
             const data = await res.json()
-            if (res.ok) {
-                setBookingResult({ reference: data.reference, forwarder_email: data.forwarder_email })
-            } else {
-                setError(data.detail || 'Booking failed.')
+            if (res.ok && data.status === 'LOCKED') {
+                setDealLocked(true)
+            } else if (!res.ok) {
+                setError(data.detail || 'Failed to lock deal.')
             }
         } catch {
-            setError('Booking failed.')
+            setError('Failed to lock deal.')
         } finally {
             setSending(false)
         }
@@ -278,7 +278,7 @@ export default function ChatPage() {
         return { text: 'Fair offer — forwarder may counter', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' }
     }
 
-    const isBooked = conv?.status === 'BOOKED'
+    const isLocked = conv?.status === 'BOOKED' || dealLocked
     const isClosed = conv?.status === 'CLOSED'
     const hasPendingOffer = !!conv?.current_offer && !conv?.agreed_price
     // offer_side tells whose turn it is
@@ -329,11 +329,11 @@ export default function ChatPage() {
                     </div>
                 </div>
                 <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    isBooked ? 'bg-emerald-500/10 text-emerald-400'
+                    isLocked ? 'bg-emerald-500/10 text-emerald-400'
                     : isClosed ? 'bg-zinc-800 text-zinc-500'
                     : 'bg-white/5 text-zinc-500'
                 }`}>
-                    {isBooked ? 'Booked' : isClosed ? 'Closed' : 'Open'}
+                    {isLocked ? 'Locked' : isClosed ? 'Closed' : 'Open'}
                 </span>
             </div>
 
@@ -353,13 +353,13 @@ export default function ChatPage() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        {/* Booking confirmation — mutual consent required */}
-                        {isShipper && !isBooked && !isClosed && !bookingResult && (
+                        {/* Deal lock — mutual consent required */}
+                        {isShipper && !isLocked && !isClosed && (
                             <>
                                 {/* Shipper already confirmed, waiting for forwarder */}
                                 {conv.shipper_book_req && !conv.forwarder_book_req && (
                                     <span className="text-[9px] text-zinc-500 italic animate-pulse">
-                                        Waiting for forwarder to confirm...
+                                        Waiting for forwarder to lock...
                                     </span>
                                 )}
                                 {/* Forwarder confirmed first — shipper's turn */}
@@ -379,14 +379,14 @@ export default function ChatPage() {
                                         disabled={sending}
                                         className="bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50"
                                     >
-                                        {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm Booking'}
+                                        {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Lock Deal'}
                                     </button>
                                 )}
                             </>
                         )}
 
                         {/* Close Deal — shipper only, OPEN */}
-                        {isShipper && !isBooked && !isClosed && !bookingResult && (
+                        {isShipper && !isLocked && !isClosed && (
                             iAlreadyRequestedClose ? (
                                 <span className="text-[9px] text-zinc-600 italic">Waiting for forwarder to confirm close...</span>
                             ) : otherRequestedClose ? (
@@ -410,18 +410,17 @@ export default function ChatPage() {
                     </div>
                 </div>
 
-                {/* Booking success banner */}
-                {bookingResult && (
+                {/* Deal locked banner */}
+                {isLocked && (
                     <div className="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-                        <p className="text-xs font-semibold text-emerald-400">✅ Booking Confirmed — {bookingResult.reference}</p>
-                        <p className="text-[10px] text-emerald-300/70 mt-0.5">Forwarder: {bookingResult.forwarder_email}</p>
+                        <p className="text-xs font-semibold text-emerald-400">🔒 Deal Locked — contact details sent to your email.</p>
                     </div>
                 )}
 
-                {/* Deal closed banner (off-platform close, not booking) */}
-                {isClosed && !isBooked && !bookingResult && (
+                {/* Off-platform close banner */}
+                {isClosed && !isLocked && (
                     <div className="mt-3 bg-zinc-800/60 border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-xs font-semibold text-zinc-400">Deal closed by both parties. This conversation is archived.</p>
+                        <p className="text-xs font-semibold text-zinc-400">This conversation has been closed.</p>
                     </div>
                 )}
             </div>
@@ -472,7 +471,7 @@ export default function ChatPage() {
                                     <p className="text-[9px] text-zinc-600 font-inter mt-1">{conv.forwarder_company} wants this price</p>
 
                                     {/* Shipper: Accept counter OR counter lower (switch to offer tab) */}
-                                    {isShipper && isActivePending && !isBooked && !isClosed && (
+                                    {isShipper && isActivePending && !isLocked && !isClosed && (
                                         <div className="flex gap-2 mt-3">
                                             <button
                                                 onClick={acceptCounter}
@@ -546,7 +545,7 @@ export default function ChatPage() {
             )}
 
             {/* ── Bottom Input Area ──────────────────────── */}
-            {!isBooked && !isClosed && !bookingResult && (
+            {!isLocked && !isClosed && (
                 <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
 
                     {/* Tab switcher — shipper only, hidden once price is agreed */}
@@ -650,10 +649,10 @@ export default function ChatPage() {
             )}
 
             {/* Closed — inputs disabled */}
-            {(isBooked || isClosed || bookingResult) && (
+            {(isLocked || isClosed) && (
                 <div className="flex-shrink-0 border-t border-white/[0.06] px-4 py-4 bg-[#080808] text-center">
                     <p className="text-xs text-zinc-600 font-inter">
-                        {isBooked || bookingResult ? 'This conversation is closed — booking confirmed.' : 'This deal has been closed by both parties.'}
+                        {isLocked ? '🔒 Deal locked — this conversation is now archived.' : 'This conversation is closed.'}
                     </p>
                 </div>
             )}

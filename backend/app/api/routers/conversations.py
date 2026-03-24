@@ -676,13 +676,13 @@ async def _finalize_booking(
     conv.status = "BOOKED"
     conv.booking_id = reference
 
-    # Inject SYSTEM message
+    # Inject SYSTEM message — no contact details exposed in chat
     db.add(ChatMessage(
         conversation_id=conv.id,
         sender_role="SYSTEM",
         sender_id="SYSTEM",
         message_type="SYSTEM",
-        content=f"✅ Booking Confirmed — {reference} | Final Price: {conv.currency} {final_price:,.2f}",
+        content=f"🔒 Deal Locked at {conv.currency} {final_price:,.2f}. Both parties have confirmed. Contact details have been sent to both of you via email.",
         is_read=False,
     ))
 
@@ -699,13 +699,13 @@ async def _finalize_booking(
         db.add(ChatMessage(
             conversation_id=other_conv.id,
             sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-            content="This request has been booked through another conversation. No further action required.",
+            content="This request has been fulfilled. The shipper has locked a deal with another forwarder.",
             is_read=False,
         ))
 
     await db.commit()
 
-    # Fire WF6 — email both parties
+    # Fire WF6 — sends contact details to both parties via email (off-platform, private)
     background_tasks.add_task(
         webhook_service.trigger_booking_webhook,
         {
@@ -725,13 +725,11 @@ async def _finalize_booking(
         }
     )
 
+    # Return only what the UI needs — no contact details exposed
     return {
-        "reference": reference,
-        "forwarder_email": forwarder_email,
-        "forwarder_company": conv.forwarder_company,
+        "status": "LOCKED",
         "final_price": final_price,
         "currency": conv.currency,
-        "status": "BOOKED",
     }
 
 
