@@ -7,14 +7,20 @@ services:
       dockerfile: Dockerfile
     container_name: cargolink-backend
     restart: always
-    ports:
-      - "8000:8000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cargolink-api.rule=Host(`api.cargolink.sa`)
+      - traefik.http.routers.cargolink-api.entrypoints=web,websecure
+      - traefik.http.routers.cargolink-api.tls=true
+      - traefik.http.routers.cargolink-api.tls.certresolver=mytlschallenge
+      - traefik.http.services.cargolink-api.loadbalancer.server.port=8000
     env_file:
       - ./backend/.env
     depends_on:
       - redis
     networks:
       - cargolink-network
+      - n8n_default
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -28,14 +34,20 @@ services:
       dockerfile: Dockerfile
     container_name: cargolink-frontend
     restart: always
-    ports:
-      - "3000:3000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cargolink-web.rule=Host(`cargolink.sa`) || Host(`www.cargolink.sa`)
+      - traefik.http.routers.cargolink-web.entrypoints=web,websecure
+      - traefik.http.routers.cargolink-web.tls=true
+      - traefik.http.routers.cargolink-web.tls.certresolver=mytlschallenge
+      - traefik.http.services.cargolink-web.loadbalancer.server.port=3000
     env_file:
       - ./frontend/.env.local
     depends_on:
       - backend
     networks:
       - cargolink-network
+      - n8n_default
 
   # ─── Redis (caching) ──────────────────────────────────────────────────────
   redis:
@@ -45,9 +57,8 @@ services:
     networks:
       - cargolink-network
 
-# NOTE: n8n is hosted separately by your VPS provider
-# Access at: https://n8n.srv1520651.hstgr.cloud
-
 networks:
   cargolink-network:
     driver: bridge
+  n8n_default:
+    external: true
