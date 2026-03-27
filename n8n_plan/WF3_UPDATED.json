@@ -1,0 +1,303 @@
+{
+  "name": "WF3 — CargoLink Auto-Close After 3 Quotes (UPDATED)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf3-exec-trigger",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [240, 280]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "quotes-complete",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wf3-webhook",
+      "name": "Webhook: Portal Quotes Complete",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 520],
+      "webhookId": "cargolink-quotes-complete"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Normalize request_id from either trigger source using $input (works for both):\n// - Execute Workflow Trigger: item.json = { request_id: '...' }\n// - Webhook (portal path):    item.json = { body: { request_id: '...' }, headers: {...} }\nconst item = $input.first().json;\nconst request_id = item.request_id || (item.body && item.body.request_id);\nif (!request_id) throw new Error('No request_id found in trigger payload.');\nreturn { json: { request_id } };"
+      },
+      "id": "wf3-normalize",
+      "name": "Code: Normalize Request ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE requests SET status = 'CLOSED', closed_reason = 'MAX_QUOTES_REACHED', closed_at = NOW(), updated_at = NOW() WHERE request_id = '{{ $json.request_id }}' AND status = 'OPEN' RETURNING request_id, origin, destination, cargo_type, container_type, quantity, weight_kg, incoterms, currency",
+        "options": {}
+      },
+      "id": "wf3-close-request",
+      "name": "PostgreSQL: Close Request",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [760, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT q.quotation_id, q.forwarder_company, q.total_price, q.currency, q.transit_days, q.carrier, q.service_type, q.is_hazardous, q.needs_insurance FROM quotations q WHERE q.request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}' ORDER BY q.total_price ASC",
+        "options": {}
+      },
+      "id": "wf3-get-quotes",
+      "name": "PostgreSQL: Get All Quotations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1000, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.email, u.full_name FROM requests r JOIN users u ON u.sovereign_id = r.user_sovereign_id WHERE r.request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}'",
+        "options": {}
+      },
+      "id": "wf3-get-user",
+      "name": "PostgreSQL: Get User",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1240, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const quotations = $('PostgreSQL: Get All Quotations').all().map(i => i.json);\nconst requestData = $('PostgreSQL: Close Request').first().json;\nconst userData = $('PostgreSQL: Get User').first().json;\nconst requestId = $('Code: Normalize Request ID').first().json.request_id;\n\nif (!quotations.length) throw new Error('No quotations found for ' + requestId);\n\nconst sorted = [...quotations].sort((a, b) => Number(a.total_price) - Number(b.total_price));\nconst cheapest = sorted[0];\nconst fastest = sorted.reduce((p, c) => (Number(c.transit_days) || 999) < (Number(p.transit_days) || 999) ? c : p);\n\nlet quoteRows = '';\nsorted.forEach((q, i) => {\n  const isCheapest = q.quotation_id === cheapest.quotation_id;\n  const isFastest = q.quotation_id === fastest.quotation_id;\n  let badges = '';\n  if (isCheapest) badges += '<span style=\"background:#16a34a;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;margin-right:4px\">🏆 BEST PRICE</span>';\n  if (isFastest && q.quotation_id !== cheapest.quotation_id) badges += '<span style=\"background:#d97706;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px\">⚡ FASTEST</span>';\n  const rowBg = isCheapest ? 'background:#f0fdf4;' : '';\n  quoteRows += `<tr style=\"${rowBg}\">\n    <td style=\"padding:12px;border-bottom:1px solid #e5e7eb\"><strong>${q.forwarder_company}</strong><br><small style=\"color:#6b7280\">${q.service_type || 'FCL'}</small></td>\n    <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;text-align:right\"><strong style=\"font-size:18px;color:#1e3a5f\">${q.currency} ${Number(q.total_price).toLocaleString()}</strong></td>\n    <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;text-align:center\">${q.transit_days || 'TBD'} days</td>\n    <td style=\"padding:12px;border-bottom:1px solid #e5e7eb;text-align:center\">${q.carrier || '—'}</td>\n    <td style=\"padding:12px;border-bottom:1px solid #e5e7eb\">${badges}</td>\n  </tr>`;\n});\n\nconst savings = Number(sorted[sorted.length - 1].total_price) - Number(cheapest.total_price);\n\nconst emailBody = `<!DOCTYPE html><html><head><meta charset='UTF-8'></head>\n<body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\">\n<div style=\"max-width:700px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb\">\n  <div style=\"background:#1e3a5f;color:#fff;padding:36px;text-align:center\">\n    <h1 style=\"margin:0;font-size:26px;font-weight:900\">🎯 Your 3 Quotes Are Ready!</h1>\n    <p style=\"margin:10px 0 0;opacity:0.7;font-size:14px\">CargoLink Marketplace · Request Closed</p>\n  </div>\n  <div style=\"padding:36px\">\n    <p style=\"font-size:15px;font-weight:700;color:#111\">Hello ${userData.full_name},</p>\n    <p style=\"color:#555;font-size:14px;line-height:1.6\">Your freight request <b>${requestId}</b> has received 3 competitive quotations and is now closed. Compare below and choose your forwarder in the dashboard.</p>\n    <div style=\"background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin:20px 0\">\n      <p style=\"margin:0;color:#92400e;font-size:13px\">💰 Best price: <b>${cheapest.currency} ${Number(cheapest.total_price).toLocaleString()}</b> from <b>${cheapest.forwarder_company}</b> · Potential savings: <b>${cheapest.currency} ${savings.toLocaleString()}</b></p>\n    </div>\n    <table style=\"width:100%;border-collapse:collapse;margin:24px 0\">\n      <thead><tr style=\"background:#1e3a5f;color:#fff\">\n        <th style=\"padding:12px;text-align:left\">Forwarder</th>\n        <th style=\"padding:12px;text-align:right\">Price</th>\n        <th style=\"padding:12px;text-align:center\">Transit</th>\n        <th style=\"padding:12px;text-align:center\">Carrier</th>\n        <th style=\"padding:12px\"></th>\n      </tr></thead>\n      <tbody>${quoteRows}</tbody>\n    </table>\n    <div style=\"text-align:center;margin:32px 0\">\n      <a href=\"https://logistictechie.vercel.app/dashboard/shipments\" style=\"background:#16a34a;color:#fff;padding:16px 40px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px\">Compare Quotes &amp; Choose →</a>\n    </div>\n    <div style=\"background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px\">\n      <p style=\"margin:0;font-size:13px;color:#0369a1\">💬 <b>Tip:</b> Click \"Chat\" next to any quote in your dashboard to negotiate directly with the forwarder before locking the deal.</p>\n    </div>\n  </div>\n  <div style=\"background:#f9fafb;padding:16px;text-align:center;font-size:11px;color:#9ca3af\">CargoLink · Freight Marketplace · <a href=\"https://logistictechie.vercel.app\" style=\"color:#9ca3af\">logistictechie.vercel.app</a></div>\n</div>\n</body></html>`;\n\nreturn {\n  json: {\n    user_email: userData.email,\n    user_name: userData.full_name,\n    request_id: requestId,\n    email_body: emailBody\n  }\n};"
+      },
+      "id": "wf3-build-email",
+      "name": "Code: Build Comparison Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1480, 400]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.user_email }}",
+        "subject": "=🎯 3 Quotes Ready — {{ $json.request_id }} | Choose Your Forwarder",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "wf3-send-comparison",
+      "name": "Gmail: Send Comparison to Shipper",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1720, 400],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth - Support"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT f.forwarder_id, f.email, f.company_name FROM n8n_broadcast_logs bl JOIN forwarders f ON f.forwarder_id = bl.forwarder_id WHERE bl.request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}' AND bl.forwarder_id NOT IN (SELECT forwarder_id FROM quotations WHERE request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}')",
+        "options": {}
+      },
+      "id": "wf3-get-non-quoters",
+      "name": "PostgreSQL: Get Non-Quoting Forwarders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1960, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "has-email",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "wf3-check-non-quoters",
+      "name": "Non-Quoters Exist?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2200, 400]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Request {{ $('Code: Normalize Request ID').first().json.request_id }} is now closed",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\"><div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb\"><div style=\"background:#6b7280;color:#fff;padding:28px;text-align:center\"><h1 style=\"margin:0;font-size:20px;font-weight:900\">📪 Request Closed</h1></div><div style=\"padding:28px\"><p style=\"font-size:14px;color:#111\">Dear {{ $json.company_name }},</p><p style=\"color:#555;font-size:14px;line-height:1.6\">Freight request <b>{{ $('Code: Normalize Request ID').first().json.request_id }}</b> has been closed after receiving 3 quotations. No further quotes are accepted.</p><p style=\"color:#555;font-size:14px\">You'll continue to receive notifications for new requests that match your profile. Respond quickly — first 3 always win!</p></div><div style=\"background:#f9fafb;padding:14px;text-align:center;font-size:11px;color:#9ca3af\">CargoLink · Freight Marketplace</div></div></body></html>",
+        "options": {}
+      },
+      "id": "wf3-notify-non-quoters",
+      "name": "Gmail: Notify Non-Quoters",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2440, 280],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE forwarder_bid_status SET status = 'COMPLETED' WHERE request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}' AND status = 'ANSWERED'; UPDATE forwarder_bid_status SET status = 'EXPIRED' WHERE request_id = '{{ $('Code: Normalize Request ID').first().json.request_id }}' AND status IN ('PENDING')",
+        "options": {}
+      },
+      "id": "wf3-update-statuses",
+      "name": "PostgreSQL: Update Forwarder Statuses",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2680, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_events_logs (event_type, request_id, description) VALUES ('REQUEST_CLOSED', '{{ $('Code: Normalize Request ID').first().json.request_id }}', 'Auto-closed after 3 quotes received') ON CONFLICT DO NOTHING",
+        "options": {}
+      },
+      "id": "wf3-log-closure",
+      "name": "PostgreSQL: Log Closure",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [2920, 400],
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_analytics (date, requests_closed, total_quotations) VALUES (CURRENT_DATE, 1, 3) ON CONFLICT (date) DO UPDATE SET requests_closed = n8n_analytics.requests_closed + 1, total_quotations = n8n_analytics.total_quotations + 3",
+        "options": {}
+      },
+      "id": "wf3-analytics",
+      "name": "PostgreSQL: Update Analytics",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [3160, 400],
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Request closed and comparison email sent\" }",
+        "options": {}
+      },
+      "id": "wf3-respond",
+      "name": "Respond: OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [3400, 400],
+      "executeOnce": true
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [[{ "node": "Code: Normalize Request ID", "type": "main", "index": 0 }]]
+    },
+    "Webhook: Portal Quotes Complete": {
+      "main": [[{ "node": "Code: Normalize Request ID", "type": "main", "index": 0 }]]
+    },
+    "Code: Normalize Request ID": {
+      "main": [[{ "node": "PostgreSQL: Close Request", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Close Request": {
+      "main": [[{ "node": "PostgreSQL: Get All Quotations", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Get All Quotations": {
+      "main": [[{ "node": "PostgreSQL: Get User", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Get User": {
+      "main": [[{ "node": "Code: Build Comparison Email", "type": "main", "index": 0 }]]
+    },
+    "Code: Build Comparison Email": {
+      "main": [[{ "node": "Gmail: Send Comparison to Shipper", "type": "main", "index": 0 }]]
+    },
+    "Gmail: Send Comparison to Shipper": {
+      "main": [[{ "node": "PostgreSQL: Get Non-Quoting Forwarders", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Get Non-Quoting Forwarders": {
+      "main": [[{ "node": "Non-Quoters Exist?", "type": "main", "index": 0 }]]
+    },
+    "Non-Quoters Exist?": {
+      "main": [
+        [{ "node": "Gmail: Notify Non-Quoters", "type": "main", "index": 0 }],
+        [{ "node": "PostgreSQL: Update Forwarder Statuses", "type": "main", "index": 0 }]
+      ]
+    },
+    "Gmail: Notify Non-Quoters": {
+      "main": [[{ "node": "PostgreSQL: Update Forwarder Statuses", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Update Forwarder Statuses": {
+      "main": [[{ "node": "PostgreSQL: Log Closure", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Log Closure": {
+      "main": [[{ "node": "PostgreSQL: Update Analytics", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Update Analytics": {
+      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "cargolink-wf3-updated"
+  }
+}

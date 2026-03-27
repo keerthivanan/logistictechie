@@ -1,0 +1,197 @@
+{
+  "name": "WF1 — CargoLink Broadcast Request to Forwarders (UPDATED)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "broadcast-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wf1-webhook",
+      "name": "Webhook: New Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "cargolink-broadcast-request"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// n8n webhook typeVersion 1.1 wraps POST body as { body: {...}, headers: {...} }\n// All request + user fields are already in the webhook payload — no DB re-query needed.\nconst b = $input.first().json.body;\nif (!b || !b.request_id) throw new Error('Missing request_id in webhook body.');\n\nreturn {\n  json: {\n    request_id: b.request_id,\n    user_name: b.name || 'Client',\n    user_email: b.email,\n    origin: b.origin,\n    destination: b.destination,\n    cargo_type: b.cargo_type || '',\n    commodity: b.commodity || 'General Merchandise',\n    cargo_specification: b.cargo_specification || '',\n    packing_type: b.packing_type || 'PALLETS',\n    quantity: b.quantity || 1,\n    weight_kg: b.weight_kg,\n    incoterms: b.incoterms || 'FOB',\n    container_type: b.container_type || '',\n    is_hazardous: b.is_hazardous || false,\n    needs_insurance: b.needs_insurance || false,\n    vessel: b.vessel || '',\n    special_requirements: b.special_requirements || ''\n  }\n};"
+      },
+      "id": "wf1-extract",
+      "name": "Code: Extract Request Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT forwarder_id, company_name, email, specializations FROM forwarders WHERE status = 'ACTIVE'",
+        "options": {}
+      },
+      "id": "wf1-get-forwarders",
+      "name": "PostgreSQL: Get Active Forwarders",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [680, 400],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Filter forwarders by specialization, then build one email object per match.\n// Returns array — n8n splits array into individual items for the Gmail node.\nconst req = $('Code: Extract Request Data').first().json;\nconst cargoType = (req.cargo_type || '').toLowerCase();\nconst allForwarders = $input.all();\n\nconst matched = allForwarders.filter(f => {\n  const specs = (f.json.specializations || '').toLowerCase();\n  return specs.includes(cargoType) || specs.includes('all') || specs === '' || !f.json.specializations;\n});\n\nreturn matched.map(f => {\n  const emailSubject = `🚢 [NEW REQUEST] ${req.request_id} — ${req.origin} → ${req.destination}`;\n  const emailBody = `<!DOCTYPE html><html><head><meta charset='UTF-8'></head>\n<body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\">\n<div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb\">\n  <div style=\"background:#1e3a5f;color:#fff;padding:32px;text-align:center\">\n    <h1 style=\"margin:0;font-size:24px;font-weight:900;letter-spacing:1px\">🚢 New Freight Request</h1>\n    <p style=\"margin:8px 0 0;opacity:0.7;font-size:13px\">CargoLink Marketplace</p>\n  </div>\n  <div style=\"padding:32px\">\n    <div style=\"background:#eef4fb;border:2px solid #1e3a5f;border-radius:8px;padding:16px;text-align:center;margin-bottom:24px\">\n      <span style=\"font-family:monospace;font-size:20px;font-weight:900;color:#1e3a5f\">${req.request_id}</span>\n    </div>\n    <p style=\"font-size:15px;font-weight:700;color:#111\">Dear ${f.json.company_name},</p>\n    <p style=\"color:#555;font-size:14px;line-height:1.6\">A new freight request matching your profile has been posted. Only the first 3 quotations are accepted.</p>\n    <div style=\"background:#f9f9f9;border:1px solid #e5e7eb;border-radius:10px;padding:20px;margin:20px 0\">\n      <table style=\"width:100%;border-collapse:collapse\">\n        <tr><td style=\"padding:7px 0;color:#6b7280;width:160px\">Route</td><td style=\"font-weight:700\">${req.origin} → ${req.destination}</td></tr>\n        <tr><td style=\"padding:7px 0;color:#6b7280\">Cargo Type</td><td style=\"font-weight:700\">${req.cargo_type}</td></tr>\n        <tr><td style=\"padding:7px 0;color:#6b7280\">Commodity</td><td>${req.commodity}</td></tr>\n        <tr><td style=\"padding:7px 0;color:#6b7280\">Weight</td><td>${req.weight_kg} kg</td></tr>\n        <tr><td style=\"padding:7px 0;color:#6b7280\">Container</td><td>${req.container_type || 'TBD'}</td></tr>\n        <tr><td style=\"padding:7px 0;color:#6b7280\">Incoterms</td><td>${req.incoterms}</td></tr>\n        ${req.is_hazardous ? '<tr><td colspan=\"2\" style=\"color:#dc2626;font-weight:700\">⚠️ Hazardous Cargo</td></tr>' : ''}\n        ${req.needs_insurance ? '<tr><td colspan=\"2\" style=\"color:#1d4ed8;font-weight:700\">🛡️ Insurance Required</td></tr>' : ''}\n      </table>\n    </div>\n    <div style=\"background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:24px\">\n      <p style=\"margin:0;color:#92400e;font-size:13px\">⏰ <b>First 3 quotes only.</b> Reply to this email with your rate. Keep <b>${req.request_id}</b> in the subject line.</p>\n    </div>\n    <div style=\"background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px\">\n      <p style=\"margin:0;color:#166534;font-size:13px;font-weight:700\">📧 Include in your reply:</p>\n      <ul style=\"margin:8px 0 0;color:#166534;font-size:13px\">\n        <li>Total price (e.g. USD 2,500)</li>\n        <li>Transit time in days</li>\n        <li>Carrier / shipping line</li>\n        <li>Quote validity (e.g. 7 days)</li>\n      </ul>\n    </div>\n  </div>\n  <div style=\"background:#f9fafb;padding:16px;text-align:center;font-size:11px;color:#9ca3af\">CargoLink · Freight Marketplace · Automated Broadcast</div>\n</div>\n</body></html>`;\n  return {\n    json: {\n      forwarder_id: f.json.forwarder_id,\n      forwarder_email: f.json.email,\n      forwarder_company: f.json.company_name,\n      request_id: req.request_id,\n      user_name: req.user_name,\n      user_email: req.user_email,\n      email_subject: emailSubject,\n      email_body: emailBody\n    }\n  };\n});"
+      },
+      "id": "wf1-build-email",
+      "name": "Code: Filter + Build Emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.forwarder_email }}",
+        "subject": "={{ $json.email_subject }}",
+        "emailType": "html",
+        "message": "={{ $json.email_body }}",
+        "options": {}
+      },
+      "id": "wf1-send-gmail",
+      "name": "Gmail: Send to Forwarder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1120, 280],
+      "continueOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3",
+          "name": "Gmail OAuth - Quotes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_broadcast_logs (request_id, forwarder_id, forwarder_company, email_sent, whatsapp_sent, sent_at) VALUES ('{{ $json.request_id }}', '{{ $json.forwarder_id }}', '{{ $json.forwarder_company }}', true, false, NOW()) ON CONFLICT DO NOTHING",
+        "options": {}
+      },
+      "id": "wf1-log-broadcast",
+      "name": "PostgreSQL: Log Broadcast",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1120, 520],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO forwarder_bid_status (forwarder_id, request_id, status, attempted_at) VALUES ('{{ $json.forwarder_id }}', '{{ $json.request_id }}', 'PENDING', NOW()) ON CONFLICT (forwarder_id, request_id) DO UPDATE SET status = 'PENDING', attempted_at = NOW()",
+        "options": {}
+      },
+      "id": "wf1-log-bid-status",
+      "name": "PostgreSQL: Log Bid Status",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1340, 520],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "CargoLink PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const req = $('Code: Extract Request Data').first().json;\nconst sent = $('Gmail: Send to Forwarder').all();\nreturn {\n  json: {\n    request_id: req.request_id,\n    user_name: req.user_name,\n    user_email: req.user_email,\n    total_notified: sent.length\n  }\n};"
+      },
+      "id": "wf1-summary",
+      "name": "Code: Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 400],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.user_email }}",
+        "subject": "=✅ Your request {{ $json.request_id }} is live — {{ $json.total_notified }} forwarders notified!",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body style=\"font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0\"><div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb\"><div style=\"background:#16a34a;color:#fff;padding:32px;text-align:center\"><h1 style=\"margin:0;font-size:24px;font-weight:900\">✅ Request Live!</h1><p style=\"margin:8px 0 0;opacity:0.8;font-size:13px\">CargoLink Marketplace</p></div><div style=\"padding:32px\"><p style=\"font-size:15px;font-weight:700;color:#111\">Hello {{ $json.user_name }},</p><p style=\"color:#555;font-size:14px;line-height:1.6\">Your freight request <b>{{ $json.request_id }}</b> is now live on CargoLink.</p><div style=\"background:#f0fdf4;border:2px solid #22c55e;border-radius:10px;padding:20px;text-align:center;margin:20px 0\"><div style=\"font-size:48px;font-weight:900;color:#16a34a\">{{ $json.total_notified }}</div><p style=\"margin:4px 0 0;color:#166534\">Forwarders Notified</p></div><p style=\"color:#555;font-size:14px\">You will receive quotations shortly. Log in to your dashboard to compare quotes and chat with forwarders.</p><div style=\"text-align:center;margin:24px 0\"><a href=\"https://logistictechie.vercel.app/dashboard/shipments\" style=\"background:#16a34a;color:#fff;padding:14px 32px;text-decoration:none;border-radius:8px;font-weight:700;font-size:14px\">View Your Request →</a></div></div><div style=\"background:#f9fafb;padding:16px;text-align:center;font-size:11px;color:#9ca3af\">CargoLink · Freight Marketplace · <a href=\"https://logistictechie.vercel.app\" style=\"color:#9ca3af\">logistictechie.vercel.app</a></div></div></body></html>",
+        "options": {}
+      },
+      "id": "wf1-confirm-user",
+      "name": "Gmail: Confirm to Shipper",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1780, 400],
+      "executeOnce": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth - Support"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"request_id\": \"{{ $('Code: Extract Request Data').first().json.request_id }}\", \"forwarders_notified\": {{ $('Code: Summary').first().json.total_notified }}, \"message\": \"Broadcast complete\" }",
+        "options": {}
+      },
+      "id": "wf1-respond",
+      "name": "Respond: OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2000, 400],
+      "executeOnce": true
+    }
+  ],
+  "connections": {
+    "Webhook: New Request": {
+      "main": [[{ "node": "Code: Extract Request Data", "type": "main", "index": 0 }]]
+    },
+    "Code: Extract Request Data": {
+      "main": [[{ "node": "PostgreSQL: Get Active Forwarders", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Get Active Forwarders": {
+      "main": [[{ "node": "Code: Filter + Build Emails", "type": "main", "index": 0 }]]
+    },
+    "Code: Filter + Build Emails": {
+      "main": [[
+        { "node": "Gmail: Send to Forwarder", "type": "main", "index": 0 },
+        { "node": "PostgreSQL: Log Broadcast", "type": "main", "index": 0 }
+      ]]
+    },
+    "Gmail: Send to Forwarder": {
+      "main": [[{ "node": "PostgreSQL: Log Bid Status", "type": "main", "index": 0 }]]
+    },
+    "PostgreSQL: Log Bid Status": {
+      "main": [[{ "node": "Code: Summary", "type": "main", "index": 0 }]]
+    },
+    "Code: Summary": {
+      "main": [[{ "node": "Gmail: Confirm to Shipper", "type": "main", "index": 0 }]]
+    },
+    "Gmail: Confirm to Shipper": {
+      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "cargolink-wf1-updated"
+  }
+}
