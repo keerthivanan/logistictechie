@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Search, MapPin, AlertCircle } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
-import { apiFetch } from '@/lib/config';
+
 
 export interface PortResult {
     name: string;       // display name (terminal name or city)
@@ -57,7 +57,7 @@ export default function PortAutocomplete({
             let path = `/api/references/ports/search?q=${encodeURIComponent(q)}`;
             if (countryCode) path += `&country=${encodeURIComponent(countryCode)}`;
             if (termType)    path += `&term_type=${encodeURIComponent(termType)}`;
-            const res = await apiFetch(path);
+            const res = await fetch(path);
             const data = await res.json();
             setSuggestions(data.results || []);
         } catch { setSuggestions([]); }

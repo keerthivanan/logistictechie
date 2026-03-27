@@ -36,7 +36,7 @@ function PortInput({ label, value, onChange, onSelect, placeholder }: {
         const id = setTimeout(async () => {
             setSearching(true)
             try {
-                const res = await apiFetch(`/api/references/ports/search?q=${encodeURIComponent(value)}`)
+                const res = await fetch(`/api/references/ports/search?q=${encodeURIComponent(value)}`)
                 const data = await res.json()
                 setOptions(data.results || [])
             } catch { setOptions([]) }

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Ship, X, Search } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
-import { apiFetch } from '@/lib/config';
+
 
 interface VesselAutocompleteProps {
     name: string;
@@ -42,7 +42,7 @@ export default function VesselAutocomplete({ name, value, onChange, placeholder 
         }
         setIsSearching(true);
         try {
-            const res = await apiFetch(`/api/references/vessels/search?q=${encodeURIComponent(q)}`);
+            const res = await fetch(`/api/references/vessels/search?q=${encodeURIComponent(q)}`);
             const data = await res.json();
             setSuggestions(data.results || []);
         } catch (err) {

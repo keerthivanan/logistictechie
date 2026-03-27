@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Search as SearchIcon, X, Globe, Loader2 } from 'lucide-react'
 import { Location } from './types'
 import { countries } from '@/lib/countries'
-import { apiFetch } from '@/lib/config'
+
 import { useT } from '@/lib/i18n/t'
 
 interface LocationPopupProps {
@@ -50,7 +50,7 @@ export function LocationPopup({ title, data, setData }: LocationPopupProps) {
                     : ''
                 let path = `/api/references/ports/search?q=${encodeURIComponent(search)}`
                 if (selectedCountryCode) path += `&country=${encodeURIComponent(selectedCountryCode)}`
-                const res = await apiFetch(path)
+                const res = await fetch(path)
                 const json = await res.json()
                 setPortResults(json.results || [])
             } catch { setPortResults([]) }
@@ -76,7 +76,7 @@ export function LocationPopup({ title, data, setData }: LocationPopupProps) {
         setSearching(true)
         try {
             const code = countries.find(c => c.name === countryName)?.code || ''
-            const res = await apiFetch(`/api/references/ports/search?q=&country=${encodeURIComponent(code)}`)
+            const res = await fetch(`/api/references/ports/search?q=&country=${encodeURIComponent(code)}`)
             const json = await res.json()
             setPortResults(json.results || [])
         } catch { setPortResults([]) }
