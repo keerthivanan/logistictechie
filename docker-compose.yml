@@ -9,6 +9,7 @@ services:
     restart: always
     labels:
       - traefik.enable=true
+      - traefik.docker.network=n8n_default
       - traefik.http.routers.cargolink-api.rule=Host(`api.cargolink.sa`)
       - traefik.http.routers.cargolink-api.entrypoints=web,websecure
       - traefik.http.routers.cargolink-api.tls=true
@@ -36,6 +37,7 @@ services:
     restart: always
     labels:
       - traefik.enable=true
+      - traefik.docker.network=n8n_default
       - traefik.http.routers.cargolink-web.rule=Host(`cargolink.sa`) || Host(`www.cargolink.sa`)
       - traefik.http.routers.cargolink-web.entrypoints=web,websecure
       - traefik.http.routers.cargolink-web.tls=true
