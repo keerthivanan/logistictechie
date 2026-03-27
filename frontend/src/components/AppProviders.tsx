@@ -4,7 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const CLIENT_ID = "852578606600-ml0l805q3ptsrrrj57gu24jjifpfnjkj.apps.googleusercontent.com";
+const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
     return (
