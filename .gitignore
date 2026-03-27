@@ -116,3 +116,4 @@ maersk/
 !frontend/.vercel/
 !frontend/.vercelignore
 !frontend/vercel.json
+DEPLOY_VPS.md
