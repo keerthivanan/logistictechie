@@ -117,3 +117,13 @@ maersk/
 !frontend/.vercelignore
 !frontend/vercel.json
 DEPLOY_VPS.md
+.git-rewrite/
+
+# === NEVER COMMIT THESE — DEPLOYMENT/SECRET FILES ===
+*DEPLOY*.md
+*DEPLOY*.txt
+*_SECRETS*
+*_CREDENTIALS*
+*_KEYS*
+backend/scripts/
+
