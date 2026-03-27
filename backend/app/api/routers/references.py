@@ -221,7 +221,7 @@ async def search_vessels(q: str = ""):
 async def get_market_indices():
     return {
         "success": True,
-        "indices": [
+        "results": [
             {"id": "01", "name": "SCFI_INDEX", "value": "2,143.50", "change": "+0.45%", "status": "BULLISH"},
             {"id": "03", "name": "FBXI_INDEX", "value": "1,840.20", "change": "-0.12%", "status": "NEUTRAL"},
         ],
