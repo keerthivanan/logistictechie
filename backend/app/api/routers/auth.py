@@ -8,6 +8,7 @@ from app.schemas import Token, UserLogin, UserResponse
 from app.core import security
 from app import crud
 from datetime import timedelta
+import asyncio
 from app.core.config import settings
 from typing import Optional
 from pydantic import BaseModel, EmailStr
@@ -236,7 +237,9 @@ async def login_for_access_token(
             detail="This account was created with Google. Please use 'Sign in with Google' to login."
         )
 
-    if not security.verify_password(form_data.password, user.password_hash):
+    loop = asyncio.get_event_loop()
+    pw_ok = await loop.run_in_executor(None, security.verify_password, form_data.password, user.password_hash)
+    if not pw_ok:
         # Increment failed attempts
         current_attempts = int(user.failed_login_attempts or 0)
         new_attempts = current_attempts + 1
@@ -515,7 +518,9 @@ async def change_password(
     """Change user password."""
     user_id = current_user.id
     user = current_user
-    if not user.password_hash or not security.verify_password(data.current_password, user.password_hash):
+    loop = asyncio.get_event_loop()
+    pw_ok = await loop.run_in_executor(None, security.verify_password, data.current_password, user.password_hash or "")
+    if not user.password_hash or not pw_ok:
         raise HTTPException(status_code=400, detail="Invalid current password")
     
     if not security.validate_password_strength(data.new_password):
