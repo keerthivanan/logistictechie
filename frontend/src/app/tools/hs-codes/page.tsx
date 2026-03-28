@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
 
 const QUICK_SEARCHES = ['smartphone', 'cotton shirt', 'steel plates', 'laptop', 'tyre', 'battery', 'furniture', 'coffee']
@@ -22,19 +21,20 @@ export default function HSCodesPage() {
         setLoading(true)
         setApiError('')
         try {
-            const res = await apiFetch(`/api/tools/hs-code-classify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: term })
-            })
+            const res = await fetch(`/api/references/commodities/search?q=${encodeURIComponent(term.trim())}`)
             if (!res.ok) {
-                const err = await res.json().catch(() => ({}))
-                setApiError(err.detail || 'Classification service temporarily unavailable.')
+                setApiError('Classification service temporarily unavailable.')
                 setResults([])
                 return
             }
             const data = await res.json()
-            setResults(data.results || [])
+            const mapped = (data.results || []).map((r: any) => ({
+                code: r.hs_code,
+                title: r.name,
+                desc: r.cargo_types?.length ? `Cargo types: ${r.cargo_types.join(', ')}` : r.name,
+                prob: '—',
+            }))
+            setResults(mapped)
         } catch (e) {
             setApiError('Network error. Please check your connection and try again.')
             setResults([])
