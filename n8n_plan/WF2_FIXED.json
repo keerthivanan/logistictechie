@@ -277,7 +277,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a freight quotation extraction AI. Extract structured data from forwarder quotation emails.\\n\\nExtract these fields:\\n- total_price: numeric price only (no currency symbols)\\n- currency: currency code (USD, EUR, etc.)\\n- transit_days: transit time in days (number only)\\n- validity_days: quote validity in days (default 7 if not mentioned)\\n- carrier: shipping line name\\n- service_type: FCL, LCL, Air Freight, etc.\\n- surcharges: JSON object of extra costs or null\\n- is_hazardous: boolean\\n- is_stackable: boolean (true by default)\\n- needs_insurance: boolean\\n- notes: any additional info\\n\\nRespond ONLY with a valid JSON object. No markdown, no explanation.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Code - Extract Request ID').first().json.email_body) }}\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
+          "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a freight quotation extraction AI. Extract structured data from forwarder quotation emails.\\n\\nExtract these fields:\\n- total_price: numeric price only (no currency symbols)\\n- currency: currency code (USD, EUR, etc.)\\n- transit_days: transit time in days (number only)\\n- validity_days: quote validity in days (default 7 if not mentioned)\\n- carrier: shipping line name\\n- service_type: FCL, LCL, Air Freight, etc.\\n- surcharges: JSON object of extra costs or null\\n- is_hazardous: boolean\\n- is_stackable: boolean (true by default)\\n- needs_insurance: boolean\\n- notes: any additional info\\n\\nRespond ONLY with a valid JSON object. No markdown, no explanation.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Code - Extract Request ID').first().json.email_body) }}\n    }\n  ],\n  \"temperature\": 0.3,\n  \"response_format\": { \"type\": \"json_object\" }\n}",
           "options": {}
         },
         "id": "ai-extract",
@@ -674,7 +674,7 @@
         "parameters": {
           "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
           "subject": "❌ Registration Required - CargoLink Platform",
-          "message": "=Your email ({{ $('Code - Extract Request ID').first().json.sender_email }}) is not registered in our CargoLink partner network.\n\nPlease register at: https://www.omegoonline.com/forwarders/register\n\nCargoLink Platform",
+          "message": "=Your email ({{ $('Code - Extract Request ID').first().json.sender_email }}) is not registered in our CargoLink partner network.\n\nPlease register at: https://cargolink.sa/forwarders/register\n\nCargoLink Platform",
           "options": {}
         },
         "id": "send-unknown-sender",
