@@ -12,7 +12,10 @@
       "name": "Webhook: New Conversation",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "wf7-new-conversation"
     },
     {
@@ -27,7 +30,10 @@
       "name": "Gmail: Notify Forwarder",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
-      "position": [520, 300],
+      "position": [
+        520,
+        300
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "YOUR_GMAIL_CREDENTIAL_ID",
@@ -45,18 +51,38 @@
       "name": "Respond: OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [800, 300]
+      "position": [
+        800,
+        300
+      ]
     }
   ],
   "connections": {
     "Webhook: New Conversation": {
-      "main": [[{ "node": "Gmail: Notify Forwarder", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Gmail: Notify Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gmail: Notify Forwarder": {
-      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond: OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
-  }
+  },
+  "id": "E1pCGQ86TfUe7hmq"
 }

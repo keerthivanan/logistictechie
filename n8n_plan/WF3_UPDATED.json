@@ -7,7 +7,10 @@
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
-      "position": [240, 280]
+      "position": [
+        240,
+        280
+      ]
     },
     {
       "parameters": {
@@ -20,7 +23,10 @@
       "name": "Webhook: Portal Quotes Complete",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 520],
+      "position": [
+        240,
+        520
+      ],
       "webhookId": "cargolink-quotes-complete"
     },
     {
@@ -32,7 +38,10 @@
       "name": "Code: Normalize Request ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 400]
+      "position": [
+        520,
+        400
+      ]
     },
     {
       "parameters": {
@@ -44,7 +53,10 @@
       "name": "PostgreSQL: Close Request",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [760, 400],
+      "position": [
+        760,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -62,7 +74,10 @@
       "name": "PostgreSQL: Get All Quotations",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [1000, 400],
+      "position": [
+        1000,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -80,7 +95,10 @@
       "name": "PostgreSQL: Get User",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [1240, 400],
+      "position": [
+        1240,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -97,7 +115,10 @@
       "name": "Code: Build Comparison Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1480, 400]
+      "position": [
+        1480,
+        400
+      ]
     },
     {
       "parameters": {
@@ -111,7 +132,10 @@
       "name": "Gmail: Send Comparison to Shipper",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [1720, 400],
+      "position": [
+        1720,
+        400
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "4",
@@ -129,7 +153,10 @@
       "name": "PostgreSQL: Get Non-Quoting Forwarders",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [1960, 400],
+      "position": [
+        1960,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -145,7 +172,10 @@
               "id": "has-email",
               "leftValue": "={{ $json.email }}",
               "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty" }
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
             }
           ],
           "combinator": "and"
@@ -155,7 +185,10 @@
       "name": "Non-Quoters Exist?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [2200, 400]
+      "position": [
+        2200,
+        400
+      ]
     },
     {
       "parameters": {
@@ -169,7 +202,10 @@
       "name": "Gmail: Notify Non-Quoters",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [2440, 280],
+      "position": [
+        2440,
+        280
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -187,7 +223,10 @@
       "name": "PostgreSQL: Update Forwarder Statuses",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [2680, 400],
+      "position": [
+        2680,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -205,7 +244,10 @@
       "name": "PostgreSQL: Log Closure",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [2920, 400],
+      "position": [
+        2920,
+        400
+      ],
       "executeOnce": true,
       "credentials": {
         "postgres": {
@@ -224,7 +266,10 @@
       "name": "PostgreSQL: Update Analytics",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [3160, 400],
+      "position": [
+        3160,
+        400
+      ],
       "executeOnce": true,
       "credentials": {
         "postgres": {
@@ -243,55 +288,174 @@
       "name": "Respond: OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [3400, 400],
+      "position": [
+        3400,
+        400
+      ],
       "executeOnce": true
     }
   ],
   "connections": {
     "Execute Workflow Trigger": {
-      "main": [[{ "node": "Code: Normalize Request ID", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Normalize Request ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Webhook: Portal Quotes Complete": {
-      "main": [[{ "node": "Code: Normalize Request ID", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Normalize Request ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Normalize Request ID": {
-      "main": [[{ "node": "PostgreSQL: Close Request", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Close Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Close Request": {
-      "main": [[{ "node": "PostgreSQL: Get All Quotations", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Get All Quotations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Get All Quotations": {
-      "main": [[{ "node": "PostgreSQL: Get User", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Get User": {
-      "main": [[{ "node": "Code: Build Comparison Email", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Build Comparison Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Build Comparison Email": {
-      "main": [[{ "node": "Gmail: Send Comparison to Shipper", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Gmail: Send Comparison to Shipper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gmail: Send Comparison to Shipper": {
-      "main": [[{ "node": "PostgreSQL: Get Non-Quoting Forwarders", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Get Non-Quoting Forwarders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Get Non-Quoting Forwarders": {
-      "main": [[{ "node": "Non-Quoters Exist?", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Non-Quoters Exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Non-Quoters Exist?": {
       "main": [
-        [{ "node": "Gmail: Notify Non-Quoters", "type": "main", "index": 0 }],
-        [{ "node": "PostgreSQL: Update Forwarder Statuses", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Gmail: Notify Non-Quoters",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PostgreSQL: Update Forwarder Statuses",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Gmail: Notify Non-Quoters": {
-      "main": [[{ "node": "PostgreSQL: Update Forwarder Statuses", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Update Forwarder Statuses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Update Forwarder Statuses": {
-      "main": [[{ "node": "PostgreSQL: Log Closure", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Log Closure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Log Closure": {
-      "main": [[{ "node": "PostgreSQL: Update Analytics", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Update Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Update Analytics": {
-      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond: OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -299,5 +463,6 @@
   },
   "meta": {
     "instanceId": "cargolink-wf3-updated"
-  }
+  },
+  "id": "ZuzxW0OO0UNwa8hE"
 }

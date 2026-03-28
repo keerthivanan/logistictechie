@@ -11,170 +11,168 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-
-// --- MAGNUM OPUS DATA DICTIONARY ---
-const services: Record<string, any> = {
-    'ocean-freight': {
-        title: 'Ocean Freight Control',
-        subtitle: 'Dominate the global trade lanes with guaranteed capacity and AI-driven routing.',
-        icon: Ship,
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
-        desc: "The ocean is unpredictable. Your supply chain shouldn’t be. CargoLink aggregates volume across the world’s most efficient tier-one carriers to secure spot rates that beat the market index by an average of 12%.",
-        stats: [
-            { label: 'Global Carriers', value: '50+' },
-            { label: 'Daily TEUs', value: '12k' },
-            { label: 'On-Time Rate', value: '98%' }
-        ],
-        features: [
-            { title: 'AIS Satellite Tracking', desc: 'Real-time visibility down to the container level, powered by localized satellite telemetry.', icon: Globe },
-            { title: 'Guaranteed Allocation', desc: 'Secure space during peak season with our locked-in block space agreements.', icon: CheckCircle },
-            { title: 'Green Channels', desc: 'Carbon-neutral shipping options to meet your ESG sustainability targets.', icon: FileCheck }
-        ],
-        workflow: ['Quote', 'Book', 'Gate-In', 'Sail', 'Release'],
-        cta: 'Search Ocean Rates',
-        ctaLink: '/search?mode=FCL'
-    },
-    'air-freight': {
-        title: 'Air Freight Precision',
-        subtitle: 'Mach-speed logistics for high-value, time-critical cargo.',
-        icon: Plane,
-        image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop',
-        desc: 'When "tomorrow" is too late. Our NFO (Next Flight Out) and chartered solutions ensure your cargo lands before your competitors even take off. We bypass congestion with direct tarmac access.',
-        stats: [
-            { label: 'Airports Served', value: '250+' },
-            { label: 'Transit Time', value: '<24h' },
-            { label: 'Success Rate', value: '99.9%' }
-        ],
-        features: [
-            { title: 'NFO (Next Flight Out)', desc: 'Immediate dispatch on the next available commercial or cargo flight.', icon: Zap },
-            { title: 'Cold Chain Pharma', desc: 'Temperature-controlled logistics for sensitive medical and perishable goods.', icon: Activity },
-            { title: 'DDP Express', desc: 'Delivered Duty Paid options for seamless door-to-door execution.', icon: Truck }
-        ],
-        workflow: ['Pickup', 'Tarmac', 'Flight', 'Clearance', 'Delivery'],
-        cta: 'Get Air Quote',
-        ctaLink: '/search?mode=AIR'
-    },
-    'customs-compliance': {
-        title: 'AI Customs Clearance',
-        subtitle: 'Zero-friction border crossings powered by generative AI.',
-        icon: CheckCircle,
-        image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Stop letting paperwork delay your supply chain. Our AI engine classifies HS codes with 99.9% accuracy and auto-files entry documents with CBP, FDA, and global customs authorities.',
-        stats: [
-            { label: 'Clearance Time', value: '<2h' },
-            { label: 'Penalty Save', value: '$15M+' },
-            { label: 'Countries', value: '180+' }
-        ],
-        features: [
-            { title: 'Auto-Classification', desc: 'AI automatically detects the correct HS Code for your products.', icon: FileCheck },
-            { title: 'Duty Drawback', desc: 'Recover overpaid duties with our automated audit and refund engine.', icon: TrendingUp },
-            { title: 'Risk Shield', desc: 'Proactive alerts for regulatory changes and trade restriction updates.', icon: CheckCircle }
-        ],
-        workflow: ['Upload', 'Analyze', 'Classify', 'File', 'Release'],
-        cta: 'Find HS Codes',
-        ctaLink: '/tools/hs-codes'
-    },
-    'smart-warehousing': {
-        title: 'Smart Warehousing',
-        subtitle: 'On-demand fulfillment network powered by robotics.',
-        icon: Warehouse,
-        image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Scale your footprint without the CapEx. Access 500+ tech-enabled fulfillment centers worldwide. Pay only for the space you use and let our robots handle the picking.',
-        stats: [
-            { label: 'Global Nodes', value: '500+' },
-            { label: 'Pick Speed', value: '2s' },
-            { label: 'Accuracy', value: '99.99%' }
-        ],
-        features: [
-            { title: 'Robotic Fulfillment', desc: 'Automated picking arms and AMRs ensure 100% order accuracy.', icon: Zap },
-            { title: 'Inventory Optimization', desc: 'AI distributes stock closer to your customers to cut delivery costs.', icon: TrendingUp },
-            { title: 'Same-Day Delivery', desc: 'Enable Amazon-like delivery speeds for your own brand.', icon: Truck }
-        ],
-        workflow: ['Inbound', 'Store', 'Order', 'Pick', 'Ship'],
-        cta: 'Join Network',
-        ctaLink: '/signup'
-    },
-    'road-freight': {
-        title: 'Road Freight Control',
-        subtitle: 'Unrivaled FTL and LTL connectivity across the continental logistics grid.',
-        icon: Truck,
-        image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Trucking is the pulse of commerce. CargoLink connects you to a verified fleet of 10,000+ carriers, offering real-time visibility and instant dynamic pricing for every lane. From last-mile delivery to heavy-haul FTL.',
-        stats: [
-            { label: 'Carrier Network', value: '10k+' },
-            { label: 'Weekly Loads', value: '25k' },
-            { label: 'On-Time Rate', value: '97.5%' }
-        ],
-        features: [
-            { title: 'Dynamic FTL Routing', desc: 'AI-optimized routes that reduce fuel consumption and transit times by 15%.', icon: Zap },
-            { title: 'LTL Consolidation', desc: 'Smarter cargo pooling to cut costs for smaller shipments without sacrificing speed.', icon: Package },
-            { title: 'ELD Integration', desc: 'Direct data feed from electronic logging devices for 100% accurate tracking.', icon: Activity }
-        ],
-        workflow: ['Quote', 'Book', 'Dispatch', 'Transit', 'Delivered'],
-        cta: 'Check Trucking Rates',
-        ctaLink: '/search?mode=FTL'
-    },
-    'port-drayage': {
-        title: 'Port Drayage & Trucking',
-        subtitle: 'Seamless first-mile connectivity to eliminate demurrage.',
-        icon: Anchor,
-        image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop',
-        desc: 'The gap between port and warehouse is where money is lost. We bridge it with a digital fleet of 10,000+ chassis and drayage trucks, all trackable in real-time.',
-        stats: [
-            { label: 'Truck Network', value: '10k+' },
-            { label: 'Demurrage Saved', value: '$40M' },
-            { label: 'On-time Gate', value: '97%' }
-        ],
-        features: [
-            { title: 'Instant Chassis', desc: 'Never miss a container pickup due to chassis shortages again.', icon: Truck },
-            { title: 'Gate Automation', desc: 'Digital appointment booking with all major terminals (LA/LB, NY/NJ).', icon: Clock },
-            { title: 'Street Turns', desc: 'Optimize empty container returns to save money and reduce emissions.', icon: Globe }
-        ],
-        workflow: ['Vessel Arrival', 'Discharge', 'Pickup', 'Dray', 'Drop'],
-        cta: 'Track Fleet',
-        ctaLink: '/tracking'
-    },
-    'supply-chain-tower': {
-        title: 'Supply Chain Control Tower',
-        subtitle: 'The centralized operating system for global trade.',
-        icon: BarChart,
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
-        desc: 'Visibility is not enough. You need control. CargoLink unifies your ERP, Carriers, and Customs data into a single source of truth, giving you the power to predict and prevent disruptions.',
-        stats: [
-            { label: 'Data Points', value: '1B+' },
-            { label: 'Integrations', value: '50+' },
-            { label: 'ROI', value: '10x' }
-        ],
-        features: [
-            { title: 'Predictive ETAs', desc: 'Machine learning algorithms that predict delays 3 days before they happen.', icon: Activity },
-            { title: 'Landed Cost', desc: 'Calculate the true profitability of every SKU in your inventory.', icon: TrendingUp },
-            { title: 'Supplier Scorecards', desc: 'Rate your vendors based on real-world performance data.', icon: CheckCircle }
-        ],
-        workflow: ['Connect', 'Visualize', 'Analyze', 'Predict', 'Act'],
-        cta: 'View Dashboard',
-        ctaLink: '/dashboard'
-    }
-};
-
-
+import { useT } from '@/lib/i18n/t';
 
 export default function ServicePage() {
     const params = useParams();
     const slug = params.slug as string;
+    const t = useT();
+
+    const services: Record<string, any> = {
+        'ocean-freight': {
+            title: t('service.ocean.title'),
+            subtitle: t('service.ocean.subtitle'),
+            icon: Ship,
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2070&auto=format&fit=crop',
+            desc: t('service.ocean.desc'),
+            stats: [
+                { label: t('service.ocean.stat1'), value: '50+' },
+                { label: t('service.ocean.stat2'), value: '12k' },
+                { label: t('service.ocean.stat3'), value: '98%' }
+            ],
+            features: [
+                { title: t('service.ocean.feat1.title'), desc: t('service.ocean.feat1.desc'), icon: Globe },
+                { title: t('service.ocean.feat2.title'), desc: t('service.ocean.feat2.desc'), icon: CheckCircle },
+                { title: t('service.ocean.feat3.title'), desc: t('service.ocean.feat3.desc'), icon: FileCheck }
+            ],
+            workflow: [t('service.ocean.step1'), t('service.ocean.step2'), t('service.ocean.step3'), t('service.ocean.step4'), t('service.ocean.step5')],
+            cta: t('service.ocean.cta'),
+            ctaLink: '/search?mode=FCL'
+        },
+        'air-freight': {
+            title: t('service.air.title'),
+            subtitle: t('service.air.subtitle'),
+            icon: Plane,
+            image: 'https://images.unsplash.com/photo-1524592714635-d77511a4834d?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.air.desc'),
+            stats: [
+                { label: t('service.air.stat1'), value: '250+' },
+                { label: t('service.air.stat2'), value: '<24h' },
+                { label: t('service.air.stat3'), value: '99.9%' }
+            ],
+            features: [
+                { title: t('service.air.feat1.title'), desc: t('service.air.feat1.desc'), icon: Zap },
+                { title: t('service.air.feat2.title'), desc: t('service.air.feat2.desc'), icon: Activity },
+                { title: t('service.air.feat3.title'), desc: t('service.air.feat3.desc'), icon: Truck }
+            ],
+            workflow: [t('service.air.step1'), t('service.air.step2'), t('service.air.step3'), t('service.air.step4'), t('service.air.step5')],
+            cta: t('service.air.cta'),
+            ctaLink: '/search?mode=AIR'
+        },
+        'customs-compliance': {
+            title: t('service.customs.title'),
+            subtitle: t('service.customs.subtitle'),
+            icon: CheckCircle,
+            image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.customs.desc'),
+            stats: [
+                { label: t('service.customs.stat1'), value: '<2h' },
+                { label: t('service.customs.stat2'), value: '$15M+' },
+                { label: t('service.customs.stat3'), value: '180+' }
+            ],
+            features: [
+                { title: t('service.customs.feat1.title'), desc: t('service.customs.feat1.desc'), icon: FileCheck },
+                { title: t('service.customs.feat2.title'), desc: t('service.customs.feat2.desc'), icon: TrendingUp },
+                { title: t('service.customs.feat3.title'), desc: t('service.customs.feat3.desc'), icon: CheckCircle }
+            ],
+            workflow: [t('service.customs.step1'), t('service.customs.step2'), t('service.customs.step3'), t('service.customs.step4'), t('service.customs.step5')],
+            cta: t('service.customs.cta'),
+            ctaLink: '/tools/hs-codes'
+        },
+        'smart-warehousing': {
+            title: t('service.warehouse.title'),
+            subtitle: t('service.warehouse.subtitle'),
+            icon: Warehouse,
+            image: 'https://images.unsplash.com/photo-1589792923962-537704632910?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.warehouse.desc'),
+            stats: [
+                { label: t('service.warehouse.stat1'), value: '500+' },
+                { label: t('service.warehouse.stat2'), value: '2s' },
+                { label: t('service.warehouse.stat3'), value: '99.99%' }
+            ],
+            features: [
+                { title: t('service.warehouse.feat1.title'), desc: t('service.warehouse.feat1.desc'), icon: Zap },
+                { title: t('service.warehouse.feat2.title'), desc: t('service.warehouse.feat2.desc'), icon: TrendingUp },
+                { title: t('service.warehouse.feat3.title'), desc: t('service.warehouse.feat3.desc'), icon: Truck }
+            ],
+            workflow: [t('service.warehouse.step1'), t('service.warehouse.step2'), t('service.warehouse.step3'), t('service.warehouse.step4'), t('service.warehouse.step5')],
+            cta: t('service.warehouse.cta'),
+            ctaLink: '/signup'
+        },
+        'road-freight': {
+            title: t('service.road.title'),
+            subtitle: t('service.road.subtitle'),
+            icon: Truck,
+            image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.road.desc'),
+            stats: [
+                { label: t('service.road.stat1'), value: '10k+' },
+                { label: t('service.road.stat2'), value: '25k' },
+                { label: t('service.road.stat3'), value: '97.5%' }
+            ],
+            features: [
+                { title: t('service.road.feat1.title'), desc: t('service.road.feat1.desc'), icon: Zap },
+                { title: t('service.road.feat2.title'), desc: t('service.road.feat2.desc'), icon: Package },
+                { title: t('service.road.feat3.title'), desc: t('service.road.feat3.desc'), icon: Activity }
+            ],
+            workflow: [t('service.road.step1'), t('service.road.step2'), t('service.road.step3'), t('service.road.step4'), t('service.road.step5')],
+            cta: t('service.road.cta'),
+            ctaLink: '/search?mode=FTL'
+        },
+        'port-drayage': {
+            title: t('service.port.title'),
+            subtitle: t('service.port.subtitle'),
+            icon: Anchor,
+            image: 'https://images.unsplash.com/photo-1605745341112-85968b19335b?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.port.desc'),
+            stats: [
+                { label: t('service.port.stat1'), value: '10k+' },
+                { label: t('service.port.stat2'), value: '$40M' },
+                { label: t('service.port.stat3'), value: '97%' }
+            ],
+            features: [
+                { title: t('service.port.feat1.title'), desc: t('service.port.feat1.desc'), icon: Truck },
+                { title: t('service.port.feat2.title'), desc: t('service.port.feat2.desc'), icon: Clock },
+                { title: t('service.port.feat3.title'), desc: t('service.port.feat3.desc'), icon: Globe }
+            ],
+            workflow: [t('service.port.step1'), t('service.port.step2'), t('service.port.step3'), t('service.port.step4'), t('service.port.step5')],
+            cta: t('service.port.cta'),
+            ctaLink: '/tracking'
+        },
+        'supply-chain-tower': {
+            title: t('service.tower.title'),
+            subtitle: t('service.tower.subtitle'),
+            icon: BarChart,
+            image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=3870&auto=format&fit=crop',
+            desc: t('service.tower.desc'),
+            stats: [
+                { label: t('service.tower.stat1'), value: '1B+' },
+                { label: t('service.tower.stat2'), value: '50+' },
+                { label: t('service.tower.stat3'), value: '10x' }
+            ],
+            features: [
+                { title: t('service.tower.feat1.title'), desc: t('service.tower.feat1.desc'), icon: Activity },
+                { title: t('service.tower.feat2.title'), desc: t('service.tower.feat2.desc'), icon: TrendingUp },
+                { title: t('service.tower.feat3.title'), desc: t('service.tower.feat3.desc'), icon: CheckCircle }
+            ],
+            workflow: [t('service.tower.step1'), t('service.tower.step2'), t('service.tower.step3'), t('service.tower.step4'), t('service.tower.step5')],
+            cta: t('service.tower.cta'),
+            ctaLink: '/dashboard'
+        }
+    };
+
     const service = services[slug];
 
     if (!service) {
         return (
             <div className="min-h-screen bg-black text-white flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold mb-4">Service Not Found</h1>
-                    <Link href="/" className="text-blue-500 hover:underline">Return Home</Link>
+                    <h1 className="text-4xl font-bold mb-4">{t('service.not.found')}</h1>
+                    <Link href="/" className="text-blue-500 hover:underline">{t('service.return.home')}</Link>
                 </div>
             </div>
         );
     }
-
-    const Icon = service.icon;
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500 selection:text-white">
@@ -184,14 +182,7 @@ export default function ServicePage() {
             <section className="relative bg-black min-h-screen flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
                     <h1 className="text-4xl md:text-6xl font-bold text-white max-w-4xl mb-12 leading-[1.1] tracking-tighter mx-auto">
-                        {slug === 'ocean-freight' ? (
-                            <>
-                                Dominate the global trade<br />
-                                lanes with guaranteed<br />
-                                capacity and AI-driven<br />
-                                routing.
-                            </>
-                        ) : service.subtitle}
+                        {service.subtitle}
                     </h1>
 
                     {/* Stats Row */}
@@ -217,7 +208,7 @@ export default function ServicePage() {
 
                     <div className="grid md:grid-cols-2 gap-20 mb-32 items-center">
                         <div className="space-y-8">
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Why the market <br /> is switching.</h2>
+                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{t('service.why.switch')}</h2>
                             <p className="text-lg text-zinc-400 leading-relaxed max-w-xl">
                                 {service.desc}
                             </p>
@@ -231,7 +222,7 @@ export default function ServicePage() {
                     <div className={slug === 'ocean-freight' ? '' : 'mb-32'}>
                         {slug === 'ocean-freight' && (
                             <div className="mb-12 text-center">
-                                <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 mb-8">Intelligence Protocol</h2>
+                                <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 mb-8">{t('service.intel.protocol')}</h2>
                             </div>
                         )}
                         <div className="grid md:grid-cols-3 gap-12 text-center">
@@ -249,7 +240,7 @@ export default function ServicePage() {
                     {/* --- WORKFLOW STEPS --- */}
                     <div className="border-t border-white/5 pt-24">
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl font-bold mb-4">The Protocol</h2>
+                            <h2 className="text-3xl font-bold mb-4">{t('service.the.protocol')}</h2>
                         </div>
 
                         <div className="flex flex-wrap justify-center items-center gap-6">
@@ -271,16 +262,16 @@ export default function ServicePage() {
             {/* --- CTA SECTION --- */}
             <section className="py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to upgrade your logistics?</h2>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('service.upgrade.title')}</h2>
                     <p className="text-xl text-gray-400 mb-10">
-                        Join 2,000+ forward-thinking shippers who have switched to CargoLink.
+                        {t('service.upgrade.sub')}
                     </p>
                     <div className="flex justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all">
-                            Get Started Now
+                            {t('service.upgrade.cta1')}
                         </Link>
                         <Link href="/contact" className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-all">
-                            Talk to Sales
+                            {t('service.upgrade.cta2')}
                         </Link>
                     </div>
                 </div>

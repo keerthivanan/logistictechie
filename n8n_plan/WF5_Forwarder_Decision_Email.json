@@ -12,7 +12,10 @@
       "name": "Webhook - Decision from Admin",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "cargolink-forwarder-decision"
     },
     {
@@ -24,7 +27,10 @@
       "name": "Code - Parse Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
@@ -51,7 +57,10 @@
       "name": "Approved or Rejected?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -65,7 +74,10 @@
       "name": "Gmail - Send Approval Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [1120, 160],
+      "position": [
+        1120,
+        160
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -85,7 +97,10 @@
       "name": "Gmail - Send Rejection Email",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [1120, 440],
+      "position": [
+        1120,
+        440
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -102,7 +117,10 @@
       "name": "Code - Build Approval Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 160]
+      "position": [
+        900,
+        160
+      ]
     },
     {
       "parameters": {
@@ -113,7 +131,10 @@
       "name": "Code - Build Rejection Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 440]
+      "position": [
+        900,
+        440
+      ]
     },
     {
       "parameters": {
@@ -124,7 +145,10 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1340, 300]
+      "position": [
+        1340,
+        300
+      ]
     }
   ],
   "connections": {
@@ -220,5 +244,6 @@
   "tags": [],
   "triggerCount": 1,
   "updatedAt": "2026-03-17T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "1",
+  "id": "FDiPoswoP18EeU8e"
 }

@@ -12,7 +12,10 @@
       "name": "Webhook: Deal Locked",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "webhookId": "cargolink-booking-confirmed"
     },
     {
@@ -25,7 +28,10 @@
       "name": "PostgreSQL: Get Forwarder Contact",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [480, 400],
+      "position": [
+        480,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -42,7 +48,10 @@
       "name": "Code: Merge Shipper + Forwarder Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 400]
+      "position": [
+        720,
+        400
+      ]
     },
     {
       "parameters": {
@@ -56,7 +65,10 @@
       "name": "Gmail: Email Shipper (Forwarder Contacts)",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [960, 280],
+      "position": [
+        960,
+        280
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "4",
@@ -76,7 +88,10 @@
       "name": "Gmail: Email Forwarder (Shipper Contacts)",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [960, 520],
+      "position": [
+        960,
+        520
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "4",
@@ -94,29 +109,72 @@
       "name": "Respond: OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1200, 400]
+      "position": [
+        1200,
+        400
+      ]
     }
   ],
   "connections": {
     "Webhook: Deal Locked": {
-      "main": [[{ "node": "PostgreSQL: Get Forwarder Contact", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Get Forwarder Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Get Forwarder Contact": {
-      "main": [[{ "node": "Code: Merge Shipper + Forwarder Data", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Merge Shipper + Forwarder Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Merge Shipper + Forwarder Data": {
       "main": [
         [
-          { "node": "Gmail: Email Shipper (Forwarder Contacts)", "type": "main", "index": 0 },
-          { "node": "Gmail: Email Forwarder (Shipper Contacts)", "type": "main", "index": 0 }
+          {
+            "node": "Gmail: Email Shipper (Forwarder Contacts)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail: Email Forwarder (Shipper Contacts)",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "Gmail: Email Shipper (Forwarder Contacts)": {
-      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond: OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gmail: Email Forwarder (Shipper Contacts)": {
-      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond: OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -124,5 +182,6 @@
   },
   "meta": {
     "instanceId": "cargolink-wf6-updated"
-  }
+  },
+  "id": "t5LL2Q0Pi1BxDjZZ"
 }

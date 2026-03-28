@@ -12,7 +12,10 @@
       "name": "Webhook: Bid Submitted",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "webhookId": "cargolink-bid-confirmation"
     },
     {
@@ -24,7 +27,10 @@
       "name": "Code: Extract Bid Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 400]
+      "position": [
+        460,
+        400
+      ]
     },
     {
       "parameters": {
@@ -38,7 +44,10 @@
       "name": "Gmail: Confirm to Forwarder",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [700, 400],
+      "position": [
+        700,
+        400
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -56,7 +65,10 @@
       "name": "PostgreSQL: Log Bid Confirmation",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
-      "position": [940, 400],
+      "position": [
+        940,
+        400
+      ],
       "credentials": {
         "postgres": {
           "id": "1",
@@ -74,21 +86,56 @@
       "name": "Respond: OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1180, 400]
+      "position": [
+        1180,
+        400
+      ]
     }
   ],
   "connections": {
     "Webhook: Bid Submitted": {
-      "main": [[{ "node": "Code: Extract Bid Data", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Code: Extract Bid Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Code: Extract Bid Data": {
-      "main": [[{ "node": "Gmail: Confirm to Forwarder", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Gmail: Confirm to Forwarder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Gmail: Confirm to Forwarder": {
-      "main": [[{ "node": "PostgreSQL: Log Bid Confirmation", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "PostgreSQL: Log Bid Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "PostgreSQL: Log Bid Confirmation": {
-      "main": [[{ "node": "Respond: OK", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Respond: OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -96,5 +143,6 @@
   },
   "meta": {
     "instanceId": "cargolink-wf-bid-confirm"
-  }
+  },
+  "id": "CPMxMb6Yz7ynHgHw"
 }

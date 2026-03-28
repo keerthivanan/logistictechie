@@ -2,33 +2,27 @@
 
 import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
-import { Mail, MapPin, Phone, CheckCircle2 } from 'lucide-react'
+import { Mail, MapPin, CheckCircle2 } from 'lucide-react'
 import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
 
-const contactInfo = [
-    {
-        icon: MapPin,
-        label: 'Headquarters',
-        lines: ['King Abdullah Financial District', 'Riyadh, Saudi Arabia 13519'],
-        sub: 'Innovation Hub: San Francisco, CA',
-    },
-    {
-        icon: Phone,
-        label: '24/7 Support Line',
-        lines: ['+966 11 460 0000', '+1 (415) 999-0101 (US)'],
-        sub: null,
-    },
-    {
-        icon: Mail,
-        label: 'Email',
-        lines: ['support@cargolink.io'],
-        sub: null,
-    },
-]
-
 export default function ContactPage() {
     const t = useT()
+
+    const contactInfo = [
+        {
+            icon: MapPin,
+            label: t('contact.hq'),
+            lines: [t('contact.hq.line1'), t('contact.hq.line2')],
+            sub: null,
+        },
+        {
+            icon: Mail,
+            label: t('contact.email.label'),
+            lines: ['support@cargolink.sa', 'quotes@cargolink.sa'],
+            sub: null,
+        },
+    ]
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [subject, setSubject] = useState('')

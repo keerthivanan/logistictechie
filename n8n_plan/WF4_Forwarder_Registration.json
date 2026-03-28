@@ -12,7 +12,10 @@
       "name": "Webhook - New Registration",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "cargolink-forwarder-register"
     },
     {
@@ -24,7 +27,10 @@
       "name": "Code - Parse & Normalize",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
@@ -44,17 +50,105 @@
           "value": {},
           "matchingColumns": [],
           "schema": [
-            { "id": "forwarder_id", "displayName": "forwarder_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "company_name", "displayName": "company_name", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "contact_person", "displayName": "contact_person", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "country", "displayName": "country", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "specializations", "displayName": "specializations", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "routes", "displayName": "routes", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "tax_id", "displayName": "tax_id", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "website", "displayName": "website", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" },
-            { "id": "registered_at", "displayName": "registered_at", "required": false, "defaultMatch": false, "canBeUsedToMatch": true, "display": true, "type": "string" }
+            {
+              "id": "forwarder_id",
+              "displayName": "forwarder_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "contact_person",
+              "displayName": "contact_person",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "country",
+              "displayName": "country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "specializations",
+              "displayName": "specializations",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "routes",
+              "displayName": "routes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "tax_id",
+              "displayName": "tax_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "registered_at",
+              "displayName": "registered_at",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string"
+            }
           ]
         },
         "options": {}
@@ -63,7 +157,10 @@
       "name": "Google Sheets - Log Registration",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [680, 160],
+      "position": [
+        680,
+        160
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "2",
@@ -80,7 +177,10 @@
       "name": "Code - Build WhatsApp Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -103,7 +203,10 @@
       "name": "HTTP - Send WhatsApp to Admin",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 300],
+      "position": [
+        900,
+        300
+      ],
       "continueOnFail": true
     },
     {
@@ -115,7 +218,10 @@
       "name": "Code - Build Confirmation Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 440]
+      "position": [
+        680,
+        440
+      ]
     },
     {
       "parameters": {
@@ -129,7 +235,10 @@
       "name": "Gmail - Send Confirmation to Forwarder",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [900, 440],
+      "position": [
+        900,
+        440
+      ],
       "credentials": {
         "gmailOAuth2": {
           "id": "3",
@@ -146,7 +255,10 @@
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1120, 300]
+      "position": [
+        1120,
+        300
+      ]
     }
   ],
   "connections": {
@@ -245,5 +357,6 @@
   "tags": [],
   "triggerCount": 1,
   "updatedAt": "2026-03-17T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "1",
+  "id": "OGaa9J0wlk1NBAT0"
 }
