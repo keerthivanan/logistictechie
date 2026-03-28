@@ -28,12 +28,12 @@ if _is_neon:
     }
 
 engine = create_async_engine(
-    DATABASE_URL, 
-    echo=settings.DEBUG, 
-    pool_pre_ping=True, 
-    pool_recycle=300,
-    pool_size=5,
-    max_overflow=10,
+    DATABASE_URL,
+    echo=settings.DEBUG,
+    pool_pre_ping=True,
+    pool_recycle=240,      # Recycle before Neon's 5-min sleep threshold
+    pool_size=10,          # More warm connections ready
+    max_overflow=20,
     pool_timeout=30,
     connect_args=_connect_args
 )

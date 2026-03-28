@@ -24,16 +24,41 @@ from app.api.deps import get_current_user
 import redis.asyncio as aioredis
 from app.core import redis as redis_mod
 
+async def _db_keepalive():
+    """Ping Neon DB every 4 minutes so it never cold-starts."""
+    from app.db.session import engine
+    from sqlalchemy import text
+    while True:
+        await asyncio.sleep(240)
+        try:
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+        except Exception as e:
+            print(f"[KEEPALIVE] DB ping failed: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         redis_mod.redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+        # Pre-warm DB connection pool on startup
+        from app.db.session import engine
+        from sqlalchemy import text
+        try:
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            print("[SYSTEM] DB connection pool warmed up.")
+        except Exception as e:
+            print(f"[SYSTEM] DB warmup warning: {e}")
+        # Start background keep-alive so Neon never sleeps
+        keepalive_task = asyncio.create_task(_db_keepalive())
         print(f"[SYSTEM] CargoLink Logistics OS Backend Initialized.")
         print(f"[SYSTEM] CORS WHITELIST: {settings.ALLOWED_ORIGINS}")
         yield
     except asyncio.CancelledError:
         print(f"[SYSTEM] CargoLink Logistics OS: Shutdown Signal Received.")
     finally:
+        keepalive_task.cancel()
         if redis_mod.redis_client:
             await redis_mod.redis_client.aclose()
         print(f"[SYSTEM] CargoLink Logistics OS: Securely Offline.")
