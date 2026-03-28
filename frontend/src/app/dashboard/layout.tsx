@@ -22,18 +22,6 @@ import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
 
-const ACTION_KEYS: Record<string, string> = {
-    VECTOR_SEARCH: 'act.freight.search',
-    QUOTE_REQUESTED: 'act.quote.requested',
-    QUOTE_ACCEPTED: 'act.quote.accepted',
-    BOOKING_CREATED: 'act.booking.created',
-    SHIPMENT_UPDATED: 'act.shipment.updated',
-    TASK_COMPLETED: 'act.task.completed',
-    BID_SUBMITTED: 'act.bid.submitted',
-    BID_ACCEPTED: 'act.bid.accepted',
-    LOGIN: 'act.login',
-    LOGOUT: 'act.logout',
-}
 
 export default function DashboardLayout({
     children,
@@ -46,6 +34,8 @@ export default function DashboardLayout({
     const { user, loading } = useAuth()
     const [stats, setStats] = useState<any>(null)
     const [unreadCount, setUnreadCount] = useState(0)
+    const [notifications, setNotifications] = useState<any[]>([])
+    const [notifUnread, setNotifUnread] = useState(0)
     const [searchQuery, setSearchQuery] = useState('')
     const [sortOpen, setSortOpen] = useState(false)
     const [filterOpen, setFilterOpen] = useState(false)
@@ -69,6 +59,28 @@ export default function DashboardLayout({
         }
 
         if (user) fetchDashboardSummary()
+    }, [user])
+
+    // Poll structured notifications every 15s
+    useEffect(() => {
+        if (!user) return
+        const fetchNotifications = async () => {
+            try {
+                const token = localStorage.getItem('token')
+                if (!token) return
+                const res = await apiFetch('/api/dashboard/notifications/', {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setNotifications(data.notifications || [])
+                    setNotifUnread(data.unread_count || 0)
+                }
+            } catch {}
+        }
+        fetchNotifications()
+        const iv = setInterval(fetchNotifications, 15000)
+        return () => clearInterval(iv)
     }, [user])
 
     // Auth guard — redirect to login if not authenticated
@@ -364,7 +376,14 @@ export default function DashboardLayout({
                                     className={`relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors group ${notifOpen ? 'bg-white/10 text-white' : ''}`}
                                 >
                                     <Bell className={`w-5 h-5 ${notifOpen ? 'text-white' : 'text-zinc-500'} group-hover:text-white transition-colors`} />
-                                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-[#050505]"></span>
+                                    {notifUnread > 0 && (
+                                        <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-emerald-500 rounded-full border-2 border-[#050505] flex items-center justify-center text-[9px] font-bold text-black px-0.5">
+                                            {notifUnread > 9 ? '9+' : notifUnread}
+                                        </span>
+                                    )}
+                                    {notifUnread === 0 && (
+                                        <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-zinc-700 rounded-full border-2 border-[#050505]" />
+                                    )}
                                 </button>
                                 <AnimatePresence>
                                     {notifOpen && (
@@ -374,36 +393,40 @@ export default function DashboardLayout({
                                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                                             className="absolute top-full right-0 mt-4 w-80 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl z-[60]"
                                         >
-                                            <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-xs font-semibold text-white uppercase tracking-[0.2em] font-outfit">{t('dash.alerts')}</h3>
-                                                <button
-                                                    onClick={() => setStats((s: any) => s ? { ...s, recent_activity: [] } : s)}
-                                                    className="text-[8px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest transition-colors"
-                                                >
-                                                    {t('dash.clear.all')}
-                                                </button>
+                                                {notifUnread > 0 && (
+                                                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                                        {notifUnread} new
+                                                    </span>
+                                                )}
                                             </div>
-                                            <div className="space-y-4 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                                                {stats?.recent_activity?.slice(0, 5).map((act: any) => (
-                                                    <div key={act.id} className="flex gap-4 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all cursor-pointer">
-                                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
-                                                        <div className="space-y-1">
-                                                            <p className="text-xs font-medium text-white">{ACTION_KEYS[act.action] ? t(ACTION_KEYS[act.action] as Parameters<typeof t>[0]) : act.action.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase())}</p>
-                                                            <p className="text-[11px] text-zinc-500 leading-relaxed">
-                                                                {act.entity || 'System'}
+                                            <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
+                                                {notifications.length > 0 ? notifications.map((n: any, i: number) => (
+                                                    <Link
+                                                        key={i}
+                                                        href={n.type === 'NEW_QUOTE' ? '/dashboard/shipments' : n.link ? n.link : '/dashboard/messages'}
+                                                        onClick={() => setNotifOpen(false)}
+                                                        className="flex gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all"
+                                                    >
+                                                        <span className="text-base flex-shrink-0">{n.type === 'NEW_QUOTE' ? '📦' : '💬'}</span>
+                                                        <div className="min-w-0 space-y-0.5">
+                                                            <p className="text-xs font-semibold text-white leading-snug">
+                                                                {n.type === 'NEW_QUOTE' ? 'New quote received' : n.title || 'New message'}
                                                             </p>
-                                                            <p className="text-[10px] text-zinc-700">{new Date(act.timestamp).toLocaleTimeString()}</p>
+                                                            {n.body && <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2">{n.body}</p>}
+                                                            <p className="text-[9px] text-zinc-700">{n.time_ago || (n.timestamp ? new Date(n.timestamp).toLocaleTimeString() : '')}</p>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                                {(!stats?.recent_activity || stats.recent_activity.length === 0) && (
-                                                    <div className="py-10 text-center opacity-20">
+                                                        <span className="text-[9px] text-emerald-400 font-semibold flex-shrink-0 self-center">View →</span>
+                                                    </Link>
+                                                )) : (
+                                                    <div className="py-10 text-center opacity-30">
                                                         <Bell className="w-6 h-6 mx-auto mb-2 text-zinc-500" />
-                                                        <p className="text-xs">{t('dash.no.alerts')}</p>
+                                                        <p className="text-xs text-zinc-500">{t('dash.no.alerts')}</p>
                                                     </div>
                                                 )}
                                             </div>
-                                            <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-6 pt-4 border-t border-white/5 text-center text-xs text-zinc-500 hover:text-white transition-colors">
+                                            <Link href="/dashboard/activity" onClick={() => setNotifOpen(false)} className="block mt-4 pt-4 border-t border-white/5 text-center text-xs text-zinc-500 hover:text-white transition-colors">
                                                 {t('dash.view.activity')}
                                             </Link>
                                         </motion.div>

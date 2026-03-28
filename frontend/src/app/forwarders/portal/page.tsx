@@ -119,17 +119,23 @@ export default function ForwarderPortal() {
     }, [fetchDashboardData]);
 
     useEffect(() => {
+        let id: string | null = null;
         if (user && user.role === 'forwarder' && user.sovereign_id?.startsWith('REG-')) {
             localStorage.setItem('cl_fwd_id', user.sovereign_id);
             setIsAuthenticated(true);
-            fetchDashboardData(user.sovereign_id);
+            id = user.sovereign_id;
+            fetchDashboardData(id);
         } else {
             const storedId = localStorage.getItem('cl_fwd_id');
             const storedEmail = localStorage.getItem('cl_fwd_email');
             if (storedId && storedEmail) {
                 handleAuth(storedId, storedEmail);
+                id = storedId;
             }
         }
+        if (!id) return;
+        const iv = setInterval(() => fetchDashboardData(id), 15000);
+        return () => clearInterval(iv);
     }, [user, fetchDashboardData, handleAuth]);
 
     const handleLoginSubmit = (e: React.FormEvent) => {

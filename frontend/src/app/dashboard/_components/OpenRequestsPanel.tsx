@@ -11,6 +11,21 @@ import { Spinner } from '@/components/ui/Spinner'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n/t'
 
+function isOnline(lastSeen: string | null): boolean {
+    if (!lastSeen) return false
+    return (Date.now() - new Date(lastSeen + 'Z').getTime()) < 120000
+}
+
+function lastSeenLabel(lastSeen: string | null): string {
+    if (!lastSeen) return ''
+    const diff = Date.now() - new Date(lastSeen + 'Z').getTime()
+    const h = Math.floor(diff / 3600000)
+    const m = Math.floor(diff / 60000)
+    if (diff < 120000) return 'Online now'
+    if (h < 1) return `${m}m ago`
+    return `${h}h ago`
+}
+
 interface Quotation {
     quotation_id: string
     forwarder_company: string
@@ -19,6 +34,8 @@ interface Quotation {
     transit_days: number
     ai_summary: string
     received_at: string
+    forwarder_last_seen: string | null
+    conv_public_id: string | null
 }
 
 interface FreightRequest {
@@ -322,6 +339,7 @@ function RequestAccordion({
 function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; requestId: string }) {
     const t = useT()
     const isBest = rank === 1
+    const online = isOnline(quote.forwarder_last_seen)
     return (
         <div className={`px-4 py-3 transition-colors ${isBest ? 'bg-emerald-500/[0.03]' : 'hover:bg-white/[0.02]'}`}>
             {/* Top row: rank + company + price */}
@@ -330,8 +348,11 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                     <span className={`text-[9px] font-semibold font-mono flex-shrink-0 w-5 text-center py-0.5 rounded ${isBest ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-700'}`}>
                         {String(rank).padStart(2, '0')}
                     </span>
-                    <div className="w-6 h-6 bg-white/[0.03] border border-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="relative w-6 h-6 bg-white/[0.03] border border-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
                         <Building2 className="w-3 h-3 text-zinc-500" />
+                        {quote.forwarder_last_seen && (
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0c0c0c] ${online ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+                        )}
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2">
@@ -344,7 +365,13 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                             <span className="text-[9px] text-zinc-600 font-inter flex items-center gap-1">
                                 <Clock className="w-2.5 h-2.5" />{quote.transit_days} {t('panel.transit')}
                             </span>
-                            <span className="text-[9px] text-zinc-700 font-inter">{timeAgo(quote.received_at)}</span>
+                            {quote.forwarder_last_seen ? (
+                                <span className={`text-[9px] font-inter ${online ? 'text-emerald-500' : 'text-zinc-700'}`}>
+                                    {lastSeenLabel(quote.forwarder_last_seen)}
+                                </span>
+                            ) : (
+                                <span className="text-[9px] text-zinc-700 font-inter">{timeAgo(quote.received_at)}</span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -353,6 +380,14 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                         ${quote.total_price.toLocaleString()}
                     </p>
                     <p className="text-[9px] text-zinc-600 font-inter uppercase">{quote.currency}</p>
+                    {quote.conv_public_id && (
+                        <Link
+                            href={`/dashboard/messages/${quote.conv_public_id}`}
+                            className="text-[9px] text-zinc-500 hover:text-white font-inter underline underline-offset-2 transition-colors"
+                        >
+                            Open chat
+                        </Link>
+                    )}
                 </div>
             </div>
             {/* AI summary */}

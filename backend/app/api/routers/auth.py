@@ -255,10 +255,20 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Reset on success
+    # Reset on success + silently re-hash if using old slow params
+    update_fields: dict = {}
     if int(user.failed_login_attempts or 0) > 0:
-        await crud.user.update(db, user_id=str(user.id), obj_in={"failed_login_attempts": 0})
-    
+        update_fields["failed_login_attempts"] = 0
+
+    # Detect old argon2 params (m=65536) and upgrade to fast params on the fly
+    if security.pwd_context.needs_update(user.password_hash):
+        new_hash = await loop.run_in_executor(None, security.get_password_hash, form_data.password)
+        update_fields["password_hash"] = new_hash
+        logger.info(f"[SECURITY] Upgraded argon2 hash params for user {user.id}")
+
+    if update_fields:
+        await crud.user.update(db, user_id=str(user.id), obj_in=update_fields)
+
     role = _effective_role(user.email, user.role)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(

@@ -56,7 +56,11 @@ export default function DashboardPage() {
             }
         }
 
-        if (user) fetchDashboardData()
+        if (user) {
+            fetchDashboardData()
+            const iv = setInterval(fetchDashboardData, 30000)
+            return () => clearInterval(iv)
+        }
     }, [user, authLoading, router, logout])
 
     if (authLoading) return <PageSpinner />

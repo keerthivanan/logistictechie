@@ -28,29 +28,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # ─── Frontend (Next.js) ───────────────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: cargolink-frontend
-    restart: always
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=n8n_default
-      - traefik.http.routers.cargolink-web.rule=Host(`cargolink.sa`) || Host(`www.cargolink.sa`)
-      - traefik.http.routers.cargolink-web.entrypoints=web,websecure
-      - traefik.http.routers.cargolink-web.tls=true
-      - traefik.http.routers.cargolink-web.tls.certresolver=mytlschallenge
-      - traefik.http.services.cargolink-web.loadbalancer.server.port=3000
-    env_file:
-      - ./frontend/.env.local
-    depends_on:
-      - backend
-    networks:
-      - cargolink-network
-      - n8n_default
-
   # ─── Redis (caching) ──────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine

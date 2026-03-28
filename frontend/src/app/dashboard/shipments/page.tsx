@@ -10,6 +10,21 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useT } from '@/lib/i18n/t'
 
+function isOnline(lastSeen: string | null): boolean {
+    if (!lastSeen) return false
+    return (Date.now() - new Date(lastSeen + 'Z').getTime()) < 120000
+}
+
+function lastSeenLabel(lastSeen: string | null): string {
+    if (!lastSeen) return ''
+    const diff = Date.now() - new Date(lastSeen + 'Z').getTime()
+    const m = Math.floor(diff / 60000)
+    const h = Math.floor(diff / 3600000)
+    if (diff < 120000) return 'Online now'
+    if (h < 1) return `Last seen ${m}m ago`
+    return `Last seen ${h}h ago`
+}
+
 interface Quotation {
     quotation_id: string
     forwarder_company: string
@@ -19,6 +34,8 @@ interface Quotation {
     ai_summary: string | null
     carrier: string | null
     received_at: string
+    forwarder_last_seen: string | null
+    conv_public_id: string | null
 }
 
 interface ShipmentRequest {
@@ -71,6 +88,8 @@ export default function ShipmentsPage() {
         if (!user) { router.push('/login'); return }
         if (user.role === 'forwarder') { router.push('/dashboard/partner'); return }
         fetchRequests()
+        const iv = setInterval(fetchRequests, 10000)
+        return () => clearInterval(iv)
     }, [user, authLoading, router, fetchRequests])
 
     const openChat = async (quote: Quotation, req: ShipmentRequest) => {
@@ -312,12 +331,30 @@ export default function ShipmentsPage() {
                                                                     <span className="text-[9px] font-semibold uppercase tracking-widest">Booked</span>
                                                                 </div>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() => openChat(quote, req)}
-                                                                    className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
-                                                                >
-                                                                    <MessageSquare className="w-3 h-3" /> Chat
-                                                                </button>
+                                                                <div className="flex flex-col items-end gap-1">
+                                                                    {quote.forwarder_last_seen && (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <span className={`w-1.5 h-1.5 rounded-full ${isOnline(quote.forwarder_last_seen) ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
+                                                                            <span className="text-[9px] text-zinc-600 font-inter">{lastSeenLabel(quote.forwarder_last_seen)}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {quote.conv_public_id ? (
+                                                                        <a
+                                                                            href={`/dashboard/messages/${quote.conv_public_id}`}
+                                                                            target="_blank"
+                                                                            className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
+                                                                        >
+                                                                            <MessageSquare className="w-3 h-3" /> Open Chat
+                                                                        </a>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => openChat(quote, req)}
+                                                                            className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
+                                                                        >
+                                                                            <MessageSquare className="w-3 h-3" /> Chat
+                                                                        </button>
+                                                                    )}
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>

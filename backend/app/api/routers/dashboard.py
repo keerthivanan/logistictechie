@@ -260,6 +260,105 @@ async def get_full_activity_history(
         raise HTTPException(status_code=500, detail="Failed to load activity history. Please try again.")
 
 
+@router.get("/notifications/", response_model=Dict)
+async def get_notifications(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_active_user)
+):
+    """
+    Structured notification feed — unread messages + new quotes received.
+    Polled every 15s by the dashboard layout.
+    """
+    from app.models.conversation import Conversation, ChatMessage
+    from app.models.marketplace import MarketplaceBid
+    from datetime import datetime, timezone, timedelta
+
+    notifications = []
+
+    try:
+        # ── 1. Unread messages ────────────────────────────────────────────────
+        if current_user.role == "forwarder":
+            conv_filter = Conversation.forwarder_id == current_user.sovereign_id
+        else:
+            conv_filter = Conversation.shipper_id == current_user.sovereign_id
+
+        convs_res = await db.execute(
+            select(Conversation.id, Conversation.public_id).where(conv_filter)
+        )
+        convs = convs_res.all()
+        conv_ids = [c.id for c in convs]
+        conv_pub = {c.id: c.public_id for c in convs}
+
+        if conv_ids:
+            unread_msgs_res = await db.execute(
+                select(ChatMessage)
+                .where(
+                    ChatMessage.conversation_id.in_(conv_ids),
+                    ChatMessage.sender_id != current_user.sovereign_id,
+                    ChatMessage.is_read == False,  # noqa: E712
+                    ChatMessage.sender_role != "SYSTEM",
+                )
+                .order_by(ChatMessage.created_at.desc())
+                .limit(10)
+            )
+            for msg in unread_msgs_res.scalars().all():
+                diff = datetime.now(timezone.utc) - msg.created_at.replace(tzinfo=timezone.utc)
+                m = int(diff.total_seconds() // 60)
+                time_ago = "Just now" if m < 1 else f"{m}m ago" if m < 60 else f"{m // 60}h ago"
+                notifications.append({
+                    "type": "NEW_MESSAGE",
+                    "title": "New message",
+                    "body": (msg.content or "")[:80],
+                    "link": f"/dashboard/messages/{conv_pub.get(msg.conversation_id, '')}",
+                    "timestamp": msg.created_at.isoformat(),
+                    "time_ago": time_ago,
+                })
+
+        # ── 2. New quotes on user's requests (last 48h) ───────────────────────
+        if current_user.role != "forwarder":
+            from app.models.marketplace import MarketplaceRequest
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
+            # Get the user's request IDs
+            req_ids_res = await db.execute(
+                select(MarketplaceRequest.request_id)
+                .where(MarketplaceRequest.user_sovereign_id == current_user.sovereign_id)
+            )
+            req_ids = [r[0] for r in req_ids_res.all()]
+            if req_ids:
+                bids_res = await db.execute(
+                    select(MarketplaceBid)
+                    .where(
+                        MarketplaceBid.request_id.in_(req_ids),
+                        MarketplaceBid.received_at >= cutoff,
+                    )
+                    .order_by(MarketplaceBid.received_at.desc())
+                    .limit(5)
+                )
+                for bid in bids_res.scalars().all():
+                    diff = datetime.now(timezone.utc) - bid.received_at.replace(tzinfo=timezone.utc)
+                    m = int(diff.total_seconds() // 60)
+                    time_ago = "Just now" if m < 1 else f"{m}m ago" if m < 60 else f"{m // 60}h ago"
+                    notifications.append({
+                        "type": "NEW_QUOTE",
+                        "title": "New quote received",
+                        "body": f"{bid.forwarder_company} quoted {bid.currency} {int(bid.total_price):,}",
+                        "link": "/dashboard/shipments",
+                        "timestamp": bid.received_at.isoformat(),
+                        "time_ago": time_ago,
+                    })
+    except Exception as e:
+        logger.warning(f"[NOTIFICATIONS] Error: {e}")
+
+    # Sort by timestamp desc, cap at 15
+    notifications.sort(key=lambda n: n["timestamp"], reverse=True)
+    notifications = notifications[:15]
+
+    return {
+        "notifications": notifications,
+        "unread_count": len(notifications),
+    }
+
+
 class LeadCreate(BaseModel):
     name: str = "Anonymous"
     email: str

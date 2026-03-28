@@ -256,10 +256,21 @@ async def get_my_requests(
         for q in all_quotes_res.scalars().all():
             quotes_map.setdefault(q.request_id, []).append(q)
 
+    # Batch load conversations for forwarder online indicator
+    from app.models.conversation import Conversation
+    all_q_ids = [q.quotation_id for qs in quotes_map.values() for q in qs]
+    conv_map: dict = {}
+    if all_q_ids:
+        cr = await db.execute(
+            select(Conversation.quote_id, Conversation.public_id, Conversation.forwarder_last_seen)
+            .where(Conversation.quote_id.in_(all_q_ids))
+        )
+        conv_map = {row.quote_id: row for row in cr.all()}
+
     response = []
     for r in requests:
         quotes = quotes_map.get(r.request_id, [])
-        
+
         response.append({
             "request_id": r.request_id,
             "origin": r.origin,
@@ -285,6 +296,10 @@ async def get_my_requests(
                 "ai_summary": q.ai_summary,
                 "carrier": q.carrier,
                 "received_at": q.received_at,
+                "forwarder_last_seen": conv_map[q.quotation_id].forwarder_last_seen.isoformat()
+                    if q.quotation_id in conv_map and conv_map[q.quotation_id].forwarder_last_seen else None,
+                "conv_public_id": conv_map[q.quotation_id].public_id
+                    if q.quotation_id in conv_map else None,
             } for q in quotes]
         })
         
