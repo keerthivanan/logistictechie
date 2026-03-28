@@ -9,7 +9,7 @@ import { useT } from '@/lib/i18n/t';
 import {
     Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon,
     Ship, Plane, Truck, Warehouse, FileCheck,
-    Store, Users, UserPlus, Search as SearchIcon,
+    Store, Users, UserPlus,
     Calculator, BookOpen,
     Info, MessageSquare,
 } from 'lucide-react';
@@ -69,7 +69,6 @@ export default function Navbar() {
                 { label: t('nav.marketplace'), href: '/marketplace', desc: t('nav.marketplace.desc'), icon: Store },
                 { label: t('nav.partner.dir'), href: '/forwarders', desc: t('nav.partner.dir.desc'), icon: Users },
                 { label: t('nav.carrier.reg'), href: '/forwarders/register', desc: t('nav.carrier.reg.desc'), icon: UserPlus },
-                { label: t('nav.shipper.tools'), href: '/search', desc: t('nav.shipper.tools.desc'), icon: SearchIcon },
             ],
         },
         {
