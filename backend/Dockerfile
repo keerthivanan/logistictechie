@@ -18,5 +18,5 @@ COPY . .
 # Expose port (Railway will use its own internal port routing)
 EXPOSE 8000
 
-# Start command with dynamic port support
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# 4 workers (2 CPU cores x2) — handles ~50-100 concurrent users
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 4 --loop uvloop --http httptools

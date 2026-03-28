@@ -11,6 +11,7 @@ if sys.platform == "win32":
 
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.api import deps
@@ -181,6 +182,8 @@ def health_check():
         "status": "Online",
         "note": "CargoLink API is running. Authentication required."
     }
+
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # CORS CONFIGURATION (G.O.A.T. Security - OUTERMOST)
 # Must be added AFTER all @app.middleware to be the OUTERMOST for requests
