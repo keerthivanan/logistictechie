@@ -209,7 +209,7 @@ Apply ALL relevant tariffs, surcharges, sanctions checks, and routing constraint
 
 Return JSON with key "quotes" containing exactly 3 objects, each with:
 - carrier_name, price (integer USD), transit_time_days (integer), vessel_name
-- wisdom: one sentence citing a SPECIFIC current tariff/surcharge/event affecting this option's price
+- wisdom: MANDATORY — cite a SPECIFIC named tariff rate, index value, surcharge name+amount, or named geopolitical event affecting this route's price TODAY. Examples: "US Section 301 tariffs of 145% on Chinese goods are driving front-loading surges on this lane, keeping rates 30% above pre-tariff-war levels." or "Red Sea EBS of $720 applies as Houthi attacks force Cape of Good Hope routing, adding 14 days and $800 to this shipment." NEVER write generic sentences.
 - breakdown: {{ base_rate, fuel_surcharge, port_fees, surcharges, total }} — all integers, must sum to price"""
 
         resp = await client.chat.completions.create(
@@ -223,7 +223,22 @@ Return JSON with key "quotes" containing exactly 3 objects, each with:
             response_format={"type": "json_object"},
         )
         parsed = json.loads(resp.choices[0].message.content)
-        return parsed.get("quotes") or (parsed if isinstance(parsed, list) else None)
+        raw_quotes = parsed.get("quotes") or (parsed if isinstance(parsed, list) else None)
+        if not raw_quotes:
+            return None
+        # Fix math: recalculate total from breakdown components to ensure accuracy
+        for q in raw_quotes:
+            bd = q.get("breakdown", {})
+            if bd:
+                corrected_total = (
+                    int(bd.get("base_rate", 0)) +
+                    int(bd.get("fuel_surcharge", 0)) +
+                    int(bd.get("port_fees", 0)) +
+                    int(bd.get("surcharges", 0))
+                )
+                bd["total"] = corrected_total
+                q["price"] = corrected_total
+        return raw_quotes
     except Exception as e:
         logger.warning(f"[QUOTES] AI generation failed: {e}")
         return None
