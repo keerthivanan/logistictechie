@@ -20,6 +20,7 @@ export default function DashboardPage() {
     const router = useRouter()
 
     const [stats, setStats] = useState<DashboardStats | null>(null)
+    const [, setActivityLoading] = useState(true)
     const [, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -34,6 +35,7 @@ export default function DashboardPage() {
                 setLoading(true)
                 const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
 
+                // Fetch stats (fast — no activity)
                 const response = await apiFetch(`/api/dashboard/stats/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
@@ -49,9 +51,23 @@ export default function DashboardPage() {
                 const data = await response.json()
                 setStats(data)
                 setError(null)
+                setLoading(false)
+
+                // Lazy-load activity separately so dashboard renders instantly
+                setActivityLoading(true)
+                try {
+                    const actRes = await apiFetch(`/api/dashboard/activity/full?limit=5`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    if (actRes.ok) {
+                        const actData = await actRes.json()
+                        setStats(prev => prev ? { ...prev, recent_activity: actData.activities || [] } : prev)
+                    }
+                } catch { /* activity failing silently is fine */ } finally {
+                    setActivityLoading(false)
+                }
             } catch (err: any) {
                 setError(err.message)
-            } finally {
                 setLoading(false)
             }
         }

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from urllib.parse import urlencode
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, exists
 from app.db.session import get_db
 from app import crud
 from typing import Dict
@@ -48,24 +48,21 @@ async def get_dashboard_stats(
                 for act in fwd_activities
             ]
 
-            # Unread message count for forwarder
+            # Unread message count for forwarder — single subquery
             fwd_unread = 0
             try:
                 from app.models.conversation import Conversation, ChatMessage
-                fwd_conv_ids_res = await db.execute(
-                    select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id)
-                )
-                fwd_conv_ids = [row[0] for row in fwd_conv_ids_res.all()]
-                if fwd_conv_ids:
-                    fwd_unread_res = await db.execute(
-                        select(func.count(ChatMessage.id)).where(
-                            ChatMessage.conversation_id.in_(fwd_conv_ids),
-                            ChatMessage.sender_id != current_user.sovereign_id,
-                            ChatMessage.is_read == False,  # noqa: E712
-                            ChatMessage.sender_role != "SYSTEM",
-                        )
+                fwd_unread_res = await db.execute(
+                    select(func.count(ChatMessage.id)).where(
+                        ChatMessage.conversation_id.in_(
+                            select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id).scalar_subquery()
+                        ),
+                        ChatMessage.sender_id != current_user.sovereign_id,
+                        ChatMessage.is_read == False,  # noqa: E712
+                        ChatMessage.sender_role != "SYSTEM",
                     )
-                    fwd_unread = fwd_unread_res.scalar() or 0
+                )
+                fwd_unread = fwd_unread_res.scalar() or 0
             except Exception:
                 fwd_unread = 0
 
@@ -131,75 +128,23 @@ async def get_dashboard_stats(
         )
         stats["pending_tasks_count"] = task_count_result.scalar() or 0
 
-        # 3. Add Recent Activity (The "Realness" Factor)
-        recent_activities = await crud.activity.get_multi_by_user(db, user_id=str(current_user.id), limit=20)
-        
-        # Build Response List
-        activity_list = []
-        
-        for act in recent_activities:
-            metadata = {}
-            if act.extra_data:
-                try:
-                    metadata = json.loads(act.extra_data)
-                except Exception:
-                    metadata = {}
-            
-            # Smart URL Construction for "Resume" Feature
-            resume_url = "/dashboard"
-            if act.action == "SEARCH":
-                resume_url = f"/results?{urlencode({'origin': metadata.get('origin', ''), 'destination': metadata.get('destination', ''), 'container': metadata.get('container', '40FT')})}"
-            elif act.action == "BOOKING_CREATED":
-                ref = metadata.get("reference", act.entity_id)
-                resume_url = f"/booking/confirmation?id={ref}"
-            elif act.action in ("TASK_COMPLETED", "TASK_REOPENED", "TASK_CREATED"):
-                resume_url = "/dashboard/tasks"
-            elif act.action in ("PROFILE_UPDATE", "SECURITY_UPDATE"):
-                resume_url = "/profile"
-            elif act.action == "MARKETPLACE_SUBMIT":
-                resume_url = f"/marketplace/{act.entity_id}"
-            elif act.action == "PARTNER_APPLIED":
-                resume_url = "/dashboard/partner"
-            elif act.action == "BID_SUBMITTED":
-                resume_url = f"/marketplace/{act.entity_id}"
-            elif act.action in ("LOGIN", "LOGOUT", "SIGNUP", "SOCIAL_LINK"):
-                resume_url = "/dashboard"
+        # recent_activity is NOT included here — fetched lazily by frontend via /activity/full
+        stats["recent_activity"] = []
 
-            activity_list.append({
-                "id": act.id,
-                "action": act.action,
-                "entity": f"{act.entity_type} #{act.entity_id}" if act.entity_id else "System",
-                "timestamp": act.created_at.isoformat(),
-                "metadata": metadata, # Return parsed JSON object, not string
-                "url": resume_url
-            })
-
-        stats["recent_activity"] = activity_list
-
-        # Unread message count (for Messages nav badge)
+        # Unread message count — single subquery, no round-trip for conv_ids
         try:
             from app.models.conversation import Conversation, ChatMessage
-            if current_user.role == "forwarder":
-                conv_ids_res = await db.execute(
-                    select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id)
+            unread_res = await db.execute(
+                select(func.count(ChatMessage.id)).where(
+                    ChatMessage.conversation_id.in_(
+                        select(Conversation.id).where(Conversation.shipper_id == current_user.sovereign_id).scalar_subquery()
+                    ),
+                    ChatMessage.sender_id != current_user.sovereign_id,
+                    ChatMessage.is_read == False,  # noqa: E712
+                    ChatMessage.sender_role != "SYSTEM",
                 )
-            else:
-                conv_ids_res = await db.execute(
-                    select(Conversation.id).where(Conversation.shipper_id == current_user.sovereign_id)
-                )
-            conv_ids = [row[0] for row in conv_ids_res.all()]
-            if conv_ids:
-                unread_res = await db.execute(
-                    select(func.count(ChatMessage.id)).where(
-                        ChatMessage.conversation_id.in_(conv_ids),
-                        ChatMessage.sender_id != current_user.sovereign_id,
-                        ChatMessage.is_read == False,  # noqa: E712
-                        ChatMessage.sender_role != "SYSTEM",
-                    )
-                )
-                stats["unread_messages_count"] = unread_res.scalar() or 0
-            else:
-                stats["unread_messages_count"] = 0
+            )
+            stats["unread_messages_count"] = unread_res.scalar() or 0
         except Exception:
             stats["unread_messages_count"] = 0
 
