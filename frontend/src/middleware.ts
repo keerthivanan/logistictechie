@@ -5,13 +5,11 @@ import type { NextRequest } from 'next/server'
 // 1. Define Protective Boundaries
 const PROTECTED_ROUTES = [
     '/dashboard',
-    '/search',
     '/marketplace',
     '/shipments',
     '/profile',
     '/settings',
     '/booking',
-    '/results'
 ]
 
 const AUTH_ROUTES = [
@@ -68,13 +66,11 @@ export function middleware(request: NextRequest) {
 export const config = {
     matcher: [
         '/dashboard/:path*',
-        '/search/:path*',
         '/marketplace/:path*',
         '/shipments/:path*',
         '/profile/:path*',
         '/settings/:path*',
         '/booking/:path*',
-        '/results/:path*',
         '/login',
         '/signup'
     ]
