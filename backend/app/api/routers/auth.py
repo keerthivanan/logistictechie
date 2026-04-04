@@ -405,17 +405,11 @@ async def register_user(
             status_code=400,
             detail="An account with this email already exists. Please sign in."
         )
-    
-    user = await crud.user.create(
-        db,
-        email=form_data.email,
-        password=form_data.password,
-        full_name=form_data.full_name,
-        company_name=form_data.company_name
-    )
-    user.onboarding_completed = True
-    
-    # SOVEREIGN ID ASSIGNMENT (same logic as social-sync)
+
+    # Hash password (CPU-bound, ~200ms)
+    password_hash = security.get_password_hash(form_data.password)
+
+    # SOVEREIGN ID — 2 queries, no commit yet
     user_count_res = await db.execute(select(func.count(User.id)))
     user_count = user_count_res.scalar() or 0
     new_sovereign_id = f"OMEGO-{str(user_count + 1).zfill(4)}"
@@ -423,21 +417,35 @@ async def register_user(
     if check_existing.scalars().first():
         entropy = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
         new_sovereign_id = f"OMEGO-{entropy}-{str(user_count).zfill(4)}"
-    user.sovereign_id = new_sovereign_id
+
+    # Stage user (no commit)
+    user = User(
+        email=form_data.email.lower().strip(),
+        password_hash=password_hash,
+        full_name=form_data.full_name,
+        company_name=form_data.company_name,
+        sovereign_id=new_sovereign_id,
+        role="user",
+        onboarding_completed=True,
+    )
+    db.add(user)
+    await db.flush()  # Gets user.id without committing
+
+    # Stage 3 tasks (no commit)
+    from app.models.task import Task
+    for task_data in [
+        {"title": "Complete Your Profile", "description": "Add your company name, phone number, and contact details to your profile.", "task_type": "SECURITY", "priority": "HIGH"},
+        {"title": "Verify Your Account", "description": "Complete identity verification to unlock all platform features.", "task_type": "SECURITY", "priority": "CRITICAL"},
+        {"title": "Browse the Marketplace", "description": "Explore open freight requests and find the right shipping partner for your cargo.", "task_type": "DOCUMENT", "priority": "MEDIUM"},
+    ]:
+        db.add(Task(**task_data, user_id=str(user.id)))
+
+    # Stage activity (no commit)
+    await activity_service.log(db, user_id=str(user.id), action="SIGNUP", entity_type="USER", entity_id=str(user.id), commit=False)
+
+    # ONE commit for everything
     await db.commit()
     await db.refresh(user)
-    
-    # OMEGO PROTOCOL: Create Initial Mission Set
-    await create_default_tasks(db, str(user.id))
-    
-    # AUDIT PILLAR: Log Signup event
-    await activity_service.log(
-        db,
-        user_id=str(user.id),
-        action="SIGNUP",
-        entity_type="USER",
-        entity_id=str(user.id)
-    )
 
     # Send welcome email via n8n WF_WELCOME
     from app.services.webhook import webhook_service
