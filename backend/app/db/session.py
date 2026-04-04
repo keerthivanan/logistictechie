@@ -24,16 +24,17 @@ if _is_neon:
     _connect_args = {
         "ssl": ctx,
         "command_timeout": 30,
+        "statement_cache_size": 0,  # Required: Neon pooler (PgBouncer transaction mode) doesn't support prepared statements
         "server_settings": {"application_name": "cargolink_backend"},
     }
 
 engine = create_async_engine(
     DATABASE_URL,
     echo=settings.DEBUG,
-    pool_pre_ping=True,
-    pool_recycle=240,      # Recycle before Neon's 5-min sleep threshold
-    pool_size=10,          # More warm connections ready
-    max_overflow=20,
+    pool_pre_ping=False,   # Skip extra round-trip ping — Neon pooler keeps connections alive
+    pool_recycle=300,
+    pool_size=5,           # Small pool — pooler handles multiplexing
+    max_overflow=10,
     pool_timeout=30,
     connect_args=_connect_args
 )
