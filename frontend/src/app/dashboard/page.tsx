@@ -56,7 +56,7 @@ export default function DashboardPage() {
                 // Lazy-load activity separately so dashboard renders instantly
                 setActivityLoading(true)
                 try {
-                    const actRes = await apiFetch(`/api/dashboard/activity/full?limit=5`, {
+                    const actRes = await apiFetch(`/api/dashboard/activity/full?limit=20`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
                     if (actRes.ok) {

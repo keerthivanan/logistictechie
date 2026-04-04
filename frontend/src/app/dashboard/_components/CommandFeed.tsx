@@ -28,7 +28,7 @@ function dedupe(activities: Activity[], max = 5): Activity[] {
 
 export default function CommandFeed({ activities, title }: { activities: Activity[], title?: string }) {
     const t = useT()
-    const items = dedupe(activities, 5)
+    const items = dedupe(activities, 20)
 
     const ACTION_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
         LOGIN:              { label: t('act.signed.in'),           icon: LogIn,        color: 'text-blue-400' },
@@ -66,8 +66,8 @@ export default function CommandFeed({ activities, title }: { activities: Activit
                 <h3 className="text-[10px] font-bold text-zinc-600 tracking-widest uppercase font-inter">{title ?? t('act.recent')}</h3>
             </div>
 
-            {/* List — fixed, no scroll */}
-            <div className="flex-1 flex flex-col gap-1">
+            {/* List — scrollable */}
+            <div className="flex-1 flex flex-col gap-1 overflow-y-auto scrollbar-hide min-h-0">
                 {items.length > 0 ? items.map((act) => {
                     const { label, icon: Icon, color } = getConfig(act.action)
                     return (
