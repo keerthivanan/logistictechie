@@ -18,7 +18,7 @@ interface Quote {
     origin: string
     destination: string
     cargo_type: string
-    your_price: number
+    your_price?: number
 }
 
 interface Metrics {
@@ -47,7 +47,7 @@ export default function PartnerDashboard() {
     const fetchData = useCallback(async () => {
         if (!user) return
         const token = localStorage.getItem('token')
-        const fwdId = user.sovereign_id
+        const fwdId = user.forwarder_id || user.sovereign_id
 
         try {
             const res = await apiFetch(
@@ -57,7 +57,7 @@ export default function PartnerDashboard() {
             if (res.ok) {
                 const data = await res.json()
                 setCompanyName(data.company_name || user.name || '')
-                setQuotes(data.quotes || [])
+                setQuotes(data.open_requests || [])
                 setMetrics(data.metrics || null)
             }
         } catch { /* silent */ } finally {
@@ -67,6 +67,12 @@ export default function PartnerDashboard() {
 
     useEffect(() => {
         if (!user) return
+        // Sync portal credentials to localStorage so forwarder chat works without re-login
+        if (user.role === 'forwarder') {
+            const fwdId = user.forwarder_id || user.sovereign_id
+            if (fwdId) localStorage.setItem('cl_fwd_id', fwdId)
+            if (user.email) localStorage.setItem('cl_fwd_email', user.email)
+        }
         if (user.role !== 'forwarder') {
             const token = localStorage.getItem('token')
             apiFetch('/api/forwarders/my-status', { headers: { Authorization: `Bearer ${token}` } })
@@ -89,7 +95,7 @@ export default function PartnerDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     request_id: selectedRequest.request_id,
-                    forwarder_id: user.sovereign_id,
+                    forwarder_id: user.forwarder_id || user.sovereign_id,
                     email: user.email,
                     status: 'ANSWERED',
                     price: parseFloat(bidPrice)
@@ -285,8 +291,8 @@ export default function PartnerDashboard() {
                                             </div>
                                             <div className="text-right flex-shrink-0">
                                                 <p className="text-[8px] text-zinc-600 uppercase tracking-wider mb-0.5">Your Quote</p>
-                                                <p className={`text-sm font-bold font-mono ${q.your_price > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
-                                                    {q.your_price > 0 ? `$${q.your_price.toLocaleString()}` : '—'}
+                                                <p className={`text-sm font-bold font-mono ${(q.your_price ?? 0) > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
+                                                    {(q.your_price ?? 0) > 0 ? `$${q.your_price!.toLocaleString()}` : '—'}
                                                 </p>
                                             </div>
                                         </div>

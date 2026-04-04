@@ -71,12 +71,23 @@ export default function ChatPage() {
 
     const isShipper = user?.role !== 'forwarder'
 
+    // JWT-forwarders must use the forwarder chat page — redirect immediately
+    useEffect(() => {
+        if (!authLoading && user?.role === 'forwarder') {
+            const fwdId = user.forwarder_id || user.sovereign_id
+            if (fwdId) localStorage.setItem('cl_fwd_id', fwdId)
+            if (user.email) localStorage.setItem('cl_fwd_email', user.email)
+            router.replace(`/forwarders/chat/${id}`)
+        }
+    }, [authLoading, user, id, router])
+
     const fetchMessages = useCallback(async () => {
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch(`/api/conversations/${id}/messages`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
+            if (res.status === 401) { router.push('/login?returnUrl=' + encodeURIComponent('/dashboard/messages/' + id)); return }
             if (!res.ok) return
             const data = await res.json()
             setConv(data.conversation)
@@ -155,22 +166,6 @@ export default function ChatPage() {
             }
         } catch {
             setError('Failed to send offer.')
-        } finally {
-            setSending(false)
-        }
-    }
-
-    const respondOffer = async (action: 'ACCEPT' | 'REJECT') => {
-        setSending(true)
-        try {
-            const token = localStorage.getItem('token')
-            await apiFetch(`/api/conversations/${id}/respond-offer`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action }),
-            })
-        } catch {
-            // silent
         } finally {
             setSending(false)
         }

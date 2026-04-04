@@ -21,7 +21,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const d = $json;\n\nif (!d.email || !d.company_name) throw new Error('Missing required fields: email or company_name');\n\nreturn {\n  json: {\n    forwarder_id: d.forwarder_id || '',\n    company_name: d.company_name,\n    contact_person: d.contact_person || 'N/A',\n    email: d.email,\n    company_email: d.company_email || d.email,\n    phone: d.phone || 'N/A',\n    whatsapp: d.whatsapp || d.phone || 'N/A',\n    country: d.country || 'N/A',\n    specializations: Array.isArray(d.specializations) ? d.specializations.join(', ') : (d.specializations || 'N/A'),\n    routes: Array.isArray(d.routes) ? d.routes.join(', ') : (d.routes || 'N/A'),\n    tax_id: d.tax_id || 'N/A',\n    website: d.website || 'N/A',\n    document_url: d.document_url || '',\n    logo_url: d.logo_url || '',\n    registered_at: new Date().toISOString()\n  }\n};"
+        "jsCode": "const d = $json.body || $json;\n\nif (!d.email || !d.company_name) throw new Error('Missing required fields: email or company_name');\n\nreturn {\n  json: {\n    forwarder_id: d.forwarder_id || '',\n    company_name: d.company_name,\n    contact_person: d.contact_person || 'N/A',\n    email: d.email,\n    company_email: d.company_email || d.email,\n    phone: d.phone || 'N/A',\n    whatsapp: d.whatsapp || d.phone || 'N/A',\n    country: d.country || 'N/A',\n    specializations: Array.isArray(d.specializations) ? d.specializations.join(', ') : (d.specializations || 'N/A'),\n    routes: Array.isArray(d.routes) ? d.routes.join(', ') : (d.routes || 'N/A'),\n    tax_id: d.tax_id || 'N/A',\n    website: d.website || 'N/A',\n    document_url: d.document_url || '',\n    logo_url: d.logo_url || '',\n    registered_at: new Date().toISOString()\n  }\n};"
       },
       "id": "parse-payload",
       "name": "Code - Parse & Normalize",
@@ -163,10 +163,11 @@
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "2",
+          "id": "uzUh6HqKP03Ck9VO",
           "name": "Google Sheets OAuth"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -241,8 +242,8 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
-          "name": "Gmail OAuth - Quotes"
+          "id": "4",
+          "name": "Gmail OAuth - Support"
         }
       }
     },

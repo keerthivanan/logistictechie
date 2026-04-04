@@ -192,8 +192,8 @@ export default function ForwarderChatPage() {
         try {
             await apiFetch(`/api/forwarders/conversations/${id}/messages`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail, content: text.trim() }),
+                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
+                body: JSON.stringify({ content: text.trim() }),
             })
             setText('')
         } catch {
@@ -209,8 +209,8 @@ export default function ForwarderChatPage() {
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail, action }),
+                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
+                body: JSON.stringify({ action }),
             })
             if (!res.ok) {
                 const data = await res.json()
@@ -231,8 +231,8 @@ export default function ForwarderChatPage() {
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail, action: 'COUNTER', counter_amount: amount }),
+                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
+                body: JSON.stringify({ action: 'COUNTER', counter_amount: amount }),
             })
             if (res.ok) {
                 setShowCounterInput(false)
@@ -272,8 +272,7 @@ export default function ForwarderChatPage() {
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/confirm-booking`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail }),
+                headers: { 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
             })
             if (!res.ok) {
                 const data = await res.json()
@@ -293,8 +292,7 @@ export default function ForwarderChatPage() {
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/close`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId, email: fwdEmail }),
+                headers: { 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
             })
             if (!res.ok) {
                 const data = await res.json()
@@ -471,7 +469,7 @@ export default function ForwarderChatPage() {
                                     Waiting for shipper...
                                 </span>
                             )}
-                            {conv.shipper_book_req && !conv.forwarder_book_req && (
+                            {conv.shipper_book_req && !conv.forwarder_book_req && !shipperWaiting && (
                                 <button
                                     onClick={confirmBooking}
                                     disabled={sending}
@@ -480,7 +478,7 @@ export default function ForwarderChatPage() {
                                     {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Shipper confirmed — Lock Deal'}
                                 </button>
                             )}
-                            {!conv.shipper_book_req && !conv.forwarder_book_req && (
+                            {!conv.shipper_book_req && !conv.forwarder_book_req && !shipperWaiting && (
                                 <button
                                     onClick={confirmBooking}
                                     disabled={sending}

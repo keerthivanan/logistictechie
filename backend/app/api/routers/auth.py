@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, Request, Body
+from fastapi import APIRouter, HTTPException, Depends, Request, Body, BackgroundTasks
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import deps
 from app.api.deps import reusable_oauth2
 from app.models.user import User
+from app.models.forwarder import Forwarder
 from app.schemas import Token, UserLogin, UserResponse
 from app.core import security
 from app import crud
@@ -150,6 +151,11 @@ async def social_sync(
         raise HTTPException(status_code=401, detail="Account Inactive")
 
     role = _effective_role(user.email, user.role)
+    social_fwd_id = None
+    if role == "forwarder":
+        fwd_res = await db.execute(select(Forwarder).where(Forwarder.email == user.email))
+        fwd = fwd_res.scalars().first()
+        social_fwd_id = fwd.forwarder_id if fwd else user.sovereign_id
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={
@@ -176,7 +182,7 @@ async def social_sync(
         "onboarding_completed": user.onboarding_completed,
         "sovereign_id": user.sovereign_id,
         "role": role,
-        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
+        "forwarder_id": social_fwd_id,
         "avatar_url": user.avatar_url,
         "website": user.website
     }
@@ -270,6 +276,14 @@ async def login_for_access_token(
         await crud.user.update(db, user_id=str(user.id), obj_in=update_fields)
 
     role = _effective_role(user.email, user.role)
+
+    # Look up actual forwarder table ID (differs from sovereign_id for promoted users)
+    forwarder_id_val = None
+    if role == "forwarder":
+        fwd_res = await db.execute(select(Forwarder).where(Forwarder.email == user.email))
+        fwd = fwd_res.scalars().first()
+        forwarder_id_val = fwd.forwarder_id if fwd else user.sovereign_id
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={
@@ -305,7 +319,7 @@ async def login_for_access_token(
         "user_email": user.email,
         "sovereign_id": user.sovereign_id or "OMEGO-PENDING",
         "role": role,
-        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
+        "forwarder_id": forwarder_id_val,
         "onboarding_completed": user.onboarding_completed or False,
         "avatar_url": user.avatar_url,
         "website": user.website
@@ -330,6 +344,11 @@ async def refresh_access_token(
             raise HTTPException(status_code=401, detail="Account is locked. Contact support.")
 
         role = _effective_role(user.email, user.role)
+        refresh_fwd_id = None
+        if role == "forwarder":
+            fwd_res = await db.execute(select(Forwarder).where(Forwarder.email == user.email))
+            fwd = fwd_res.scalars().first()
+            refresh_fwd_id = fwd.forwarder_id if fwd else user.sovereign_id
         access_token = security.create_access_token(
             data={
                 "sub": user.email,
@@ -354,7 +373,7 @@ async def refresh_access_token(
             "onboarding_completed": user.onboarding_completed or False,
             "avatar_url": user.avatar_url,
             "role": role,
-            "forwarder_id": user.sovereign_id if role == "forwarder" else None,
+            "forwarder_id": refresh_fwd_id,
             "website": user.website,
         }
     except Exception as e:
@@ -364,6 +383,7 @@ async def refresh_access_token(
 @router.post("/register")
 async def register_user(
     form_data: RegisterRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(deps.get_db)
 ):
     """Register a new user account."""
@@ -418,7 +438,17 @@ async def register_user(
         entity_type="USER",
         entity_id=str(user.id)
     )
-    
+
+    # Send welcome email via n8n WF_WELCOME
+    from app.services.webhook import webhook_service
+    background_tasks.add_task(webhook_service.trigger_welcome_webhook, {
+        "email": user.email,
+        "full_name": user.full_name or "Valued Client",
+        "company_name": user.company_name or "",
+        "sovereign_id": user.sovereign_id or "",
+        "registered_at": user.created_at.isoformat() if user.created_at else ""
+    })
+
     return {
         "success": True,
         "message": "Account created successfully. Please sign in.",
@@ -428,11 +458,17 @@ async def register_user(
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(
     current_user: User = Depends(deps.get_current_user),
+    db: AsyncSession = Depends(deps.get_db),
 ):
     """Get current user profile."""
     user = current_user
         
     role = _effective_role(user.email, user.role)
+    me_forwarder_id = None
+    if role == "forwarder":
+        fwd_res = await db.execute(select(Forwarder).where(Forwarder.email == user.email))
+        fwd = fwd_res.scalars().first()
+        me_forwarder_id = fwd.forwarder_id if fwd else user.sovereign_id
     return {
         "id": str(user.id),
         "email": user.email,
@@ -445,7 +481,7 @@ async def read_users_me(
         "onboarding_completed": user.onboarding_completed,
         "avatar_url": user.avatar_url,
         "role": role,
-        "forwarder_id": user.sovereign_id if role == "forwarder" else None,
+        "forwarder_id": me_forwarder_id,
     }
 
 class ProfileUpdate(BaseModel):
@@ -537,7 +573,12 @@ async def change_password(
         raise HTTPException(status_code=400, detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character.")
         
     await crud.user.update(db, user_id=user_id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
-    
+
+    # Invalidate all existing sessions (attacker with stolen token can no longer use it)
+    import time as _time
+    if _redis_mod.redis_client:
+        await _redis_mod.redis_client.setex(f"pw_changed_at:{user_id}", 86400 * 30, str(int(_time.time())))
+
     # AUDIT PILLAR: Log Password Change
     await activity_service.log(
         db,
@@ -546,7 +587,7 @@ async def change_password(
         entity_type="USER",
         entity_id=str(user_id)
     )
-    
+
     return {"success": True, "message": "Password updated successfully"}
 
 class ForgotPassword(BaseModel):
@@ -639,7 +680,7 @@ async def reset_password(data: ResetPassword, db: AsyncSession = Depends(deps.ge
     # Verify JTI — ensures this is the latest token and hasn't been used yet
     if _redis_mod.redis_client:
         stored_jti = await _redis_mod.redis_client.get(f"reset_jti:{user.id}")
-        if not stored_jti or stored_jti.decode() != jti:
+        if not stored_jti or stored_jti != jti:
             raise HTTPException(
                 status_code=400,
                 detail="This reset link has already been used or a newer one was requested. Please request a new link."

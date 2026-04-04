@@ -49,7 +49,7 @@ async def get_current_user(
         pw_changed_at = await _redis_mod.redis_client.get(f"pw_changed_at:{user.id}")
         if pw_changed_at:
             token_iat = payload.get("iat", 0)
-            if token_iat < int(pw_changed_at.decode()):
+            if token_iat < int(pw_changed_at):
                 raise HTTPException(
                     status_code=401,
                     detail="Session expired after a password change. Please log in again."

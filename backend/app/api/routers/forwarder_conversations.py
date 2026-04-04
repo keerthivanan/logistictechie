@@ -31,32 +31,13 @@ def _utcnow():
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────
 
-class PortalAuth(BaseModel):
-    forwarder_id: str
-    email: str
-
-
 class PortalMessageIn(BaseModel):
-    forwarder_id: str
-    email: str
     content: str = Field(..., min_length=1, max_length=2000)
 
 
 class PortalRespondIn(BaseModel):
-    forwarder_id: str
-    email: str
     action: str  # ACCEPT | REJECT | COUNTER
     counter_amount: Optional[float] = None
-
-
-class PortalCloseIn(BaseModel):
-    forwarder_id: str
-    email: str
-
-
-class PortalBookingConfirmIn(BaseModel):
-    forwarder_id: str
-    email: str
 
 
 # ─── Auth Helper ──────────────────────────────────────────────────────────────
@@ -161,29 +142,41 @@ async def list_portal_conversations(
     )
     conversations = convs_res.scalars().all()
 
+    if not conversations:
+        return {"conversations": []}
+
+    conv_ids = [c.id for c in conversations]
+
+    # Batch: latest message per conversation
+    max_id_rows = await db.execute(
+        select(ChatMessage.conversation_id, func.max(ChatMessage.id).label("max_id"))
+        .where(ChatMessage.conversation_id.in_(conv_ids))
+        .group_by(ChatMessage.conversation_id)
+    )
+    max_ids = [r.max_id for r in max_id_rows.all()]
+    last_msg_map: dict = {}
+    if max_ids:
+        lm_res = await db.execute(select(ChatMessage).where(ChatMessage.id.in_(max_ids)))
+        for m in lm_res.scalars().all():
+            last_msg_map[m.conversation_id] = m
+
+    # Batch: unread counts per conversation
+    unread_rows = await db.execute(
+        select(ChatMessage.conversation_id, func.count(ChatMessage.id).label("cnt"))
+        .where(
+            ChatMessage.conversation_id.in_(conv_ids),
+            ChatMessage.sender_id != x_forwarder_id,
+            ChatMessage.is_read == False,  # noqa: E712
+            ChatMessage.sender_role != "SYSTEM",
+        )
+        .group_by(ChatMessage.conversation_id)
+    )
+    unread_map = {r.conversation_id: r.cnt for r in unread_rows.all()}
+
     result = []
     for conv in conversations:
-        last_msg_res = await db.execute(
-            select(ChatMessage)
-            .where(ChatMessage.conversation_id == conv.id)
-            .order_by(ChatMessage.created_at.desc())
-            .limit(1)
-        )
-        last_msg = last_msg_res.scalars().first()
-
-        # Count unread (messages not sent by forwarder, not yet read)
-        unread_res = await db.execute(
-            select(func.count(ChatMessage.id)).where(
-                ChatMessage.conversation_id == conv.id,
-                ChatMessage.sender_id != x_forwarder_id,
-                ChatMessage.is_read == False,  # noqa: E712
-                ChatMessage.sender_role != "SYSTEM",
-            )
-        )
-        unread_count = unread_res.scalar() or 0
-
-        entry = _conv_dict(conv, last_msg)
-        entry["unread_count"] = unread_count
+        entry = _conv_dict(conv, last_msg_map.get(conv.id))
+        entry["unread_count"] = unread_map.get(conv.id, 0)
         result.append(entry)
 
     return {"conversations": result}
@@ -237,10 +230,12 @@ async def get_portal_messages(
 async def send_portal_message(
     public_id: str,
     data: PortalMessageIn,
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """Send a plain TEXT message as forwarder (portal auth)."""
-    _, conv = await _verify_portal_forwarder(data.forwarder_id, data.email, public_id, db)
+    _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is closed.")
@@ -248,7 +243,7 @@ async def send_portal_message(
     msg = ChatMessage(
         conversation_id=conv.id,
         sender_role="FORWARDER",
-        sender_id=data.forwarder_id,
+        sender_id=x_forwarder_id,
         message_type="TEXT",
         content=data.content,
         is_read=False,
@@ -265,10 +260,12 @@ async def send_portal_message(
 async def portal_respond_offer(
     public_id: str,
     data: PortalRespondIn,
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """Forwarder (portal auth) accepts or rejects a shipper counter-offer."""
-    _, conv = await _verify_portal_forwarder(data.forwarder_id, data.email, public_id, db)
+    _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is closed.")
@@ -309,13 +306,14 @@ async def portal_respond_offer(
     msg = ChatMessage(
         conversation_id=conv.id,
         sender_role="FORWARDER",
-        sender_id=data.forwarder_id,
+        sender_id=x_forwarder_id,
         message_type=msg_type,
         content=msg_content,
         offer_amount=data.counter_amount if msg_type == "COUNTER_OFFER" else None,
         is_read=False,
     )
     db.add(msg)
+    conv.updated_at = _utcnow()
     await db.commit()
     await db.refresh(msg)
 
@@ -325,14 +323,15 @@ async def portal_respond_offer(
 @router.post("/{public_id}/close")
 async def portal_close_deal(
     public_id: str,
-    data: PortalCloseIn,
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Forwarder (portal auth) requests to close the deal.
     If shipper has already requested close → both confirmed → conversation + request CLOSED.
     """
-    _, conv = await _verify_portal_forwarder(data.forwarder_id, data.email, public_id, db)
+    _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="This conversation is already closed.")
@@ -377,6 +376,7 @@ async def portal_close_deal(
                 is_read=False,
             ))
 
+        conv.updated_at = _utcnow()
         await db.commit()
         return {"status": "CLOSED", "message": "Deal closed. Both parties confirmed."}
     else:
@@ -387,6 +387,7 @@ async def portal_close_deal(
             is_read=False,
         )
         db.add(system_msg)
+        conv.updated_at = _utcnow()
         await db.commit()
         return {"status": "PENDING_CLOSE", "message": "Waiting for shipper to confirm closure."}
 
@@ -394,8 +395,9 @@ async def portal_close_deal(
 @router.post("/{public_id}/confirm-booking")
 async def portal_confirm_booking(
     public_id: str,
-    data: PortalBookingConfirmIn,
     background_tasks: BackgroundTasks,
+    x_forwarder_id: str = Header(..., alias="X-Forwarder-Id"),
+    x_forwarder_email: str = Header(..., alias="X-Forwarder-Email"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -407,12 +409,16 @@ async def portal_confirm_booking(
     from app.models.booking import Booking
     import secrets
 
-    _, conv = await _verify_portal_forwarder(data.forwarder_id, data.email, public_id, db)
+    _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
     if conv.status != "OPEN":
         raise HTTPException(status_code=409, detail="Conversation is not open.")
     if conv.forwarder_book_req:
         raise HTTPException(status_code=409, detail="You already confirmed. Waiting for the shipper.")
+    if conv.offer_side == "SHIPPER":
+        raise HTTPException(status_code=409, detail="There is a pending offer from the shipper. Respond to it before confirming the booking.")
+    if conv.current_offer is not None and conv.offer_side == "FORWARDER":
+        raise HTTPException(status_code=409, detail="Your counter-offer is pending. Wait for the shipper to respond before confirming the booking.")
 
     conv.forwarder_book_req = True
 
@@ -435,5 +441,6 @@ async def portal_confirm_booking(
         content="Forwarder confirmed — waiting for shipper to lock the deal.",
         is_read=False,
     ))
+    conv.updated_at = _utcnow()
     await db.commit()
     return {"status": "PENDING_BOOKING", "message": "Waiting for shipper to confirm."}

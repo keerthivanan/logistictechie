@@ -11,13 +11,14 @@ from app.models.user import User
 from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.services.activity import activity_service
+from app.core.config import settings
 import logging
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 class MarketplaceSubmit(BaseModel):
-    user_id: str = Field(..., min_length=1, max_length=100)
+    user_id: str = Field("", max_length=100)  # ignored — resolved from JWT by endpoint
     sovereign_id: str = Field("", max_length=50)
     name: str = Field("Client", max_length=200)
     email: str = Field("", max_length=254)
@@ -223,7 +224,9 @@ async def submit_request(
 @router.get("/my-requests")
 async def get_my_requests(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    limit: int = 50,
+    offset: int = 0,
 ):
     """
     ULTIMATE SHIPPER COCKPIT: Returns all requests for the current user.
@@ -240,7 +243,7 @@ async def get_my_requests(
     # Fetch requests (Lookup both identity versions)
     stmt = select(MarketplaceRequest).where(
         MarketplaceRequest.user_sovereign_id.in_([sovereign_id, original_id])
-    ).order_by(MarketplaceRequest.submitted_at.desc())
+    ).order_by(MarketplaceRequest.submitted_at.desc()).limit(limit).offset(offset)
     result = await db.execute(stmt)
     requests = result.scalars().all()
 
@@ -340,7 +343,8 @@ async def get_request_details(
     if not req:
         raise HTTPException(status_code=404, detail="Request not found in Mirror.")
         
-    if req.user_sovereign_id != current_user.sovereign_id and current_user.role != "admin":
+    original_sovereign_id = current_user.sovereign_id.replace("REG-", "")
+    if req.user_sovereign_id not in (current_user.sovereign_id, original_sovereign_id) and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to view this request.")
     
     # 2. Get Quotations
@@ -569,12 +573,12 @@ async def n8n_quote_sync(
     """
     High-performance upsert for WF2 results.
     """
-    # 1. Hard-enforce max 3 quotes — check before upsert (allow updates to existing quotes)
+    # 1. Hard-enforce max quotes — check before upsert (allow updates to existing quotes)
     req_check_res = await db.execute(
         select(MarketplaceRequest).where(MarketplaceRequest.request_id == sync_in.request_id)
     )
     req_check = req_check_res.scalars().first()
-    if req_check and (req_check.quotation_count or 0) >= 3:
+    if req_check and (req_check.quotation_count or 0) >= settings.MAX_QUOTES_PER_REQUEST:
         # Only block if this is a truly NEW quotation (not an update)
         existing_bid_res = await db.execute(
             select(MarketplaceBid).where(MarketplaceBid.quotation_id == sync_in.quotation_id)
@@ -641,7 +645,7 @@ async def n8n_quote_sync(
         "request_id": sync_in.request_id,
         "quotation_count": req.quotation_count if req else 0,
         "request_status": req.status if req else "UNKNOWN",
-        "trigger_close": (req.quotation_count or 0) >= 3 if req else False,
+        "trigger_close": (req.quotation_count or 0) >= settings.MAX_QUOTES_PER_REQUEST if req else False,
     }
 
 class N8nBidStatusSync(BaseModel):

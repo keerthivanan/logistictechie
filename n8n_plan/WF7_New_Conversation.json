@@ -11,7 +11,7 @@
       "id": "node-wf7-webhook",
       "name": "Webhook: New Conversation",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
         240,
         300
@@ -36,8 +36,8 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "YOUR_GMAIL_CREDENTIAL_ID",
-          "name": "Gmail OAuth2 account"
+          "id": "4",
+          "name": "Gmail OAuth - Support"
         }
       }
     },

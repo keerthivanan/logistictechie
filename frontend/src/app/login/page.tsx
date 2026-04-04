@@ -56,7 +56,7 @@ function LoginContent() {
                 })
                 const data = await res.json()
                 if (res.ok) {
-                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role, data.avatar_url, data.user_id, data.user_email)
+                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role, data.avatar_url, data.user_id, data.user_email, data.forwarder_id, data.refresh_token)
                     handleRedirect()
                 } else {
                     throw new Error(data.detail || 'Google Sign-In failed')
@@ -84,7 +84,7 @@ function LoginContent() {
             })
             const data = await res.json()
             if (res.ok) {
-                login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role, data.avatar_url, data.user_id, data.user_email)
+                login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role, data.avatar_url, data.user_id, data.user_email, data.forwarder_id, data.refresh_token)
                 handleRedirect()
             } else {
                 throw new Error(data.detail || 'Login failed')
@@ -131,7 +131,7 @@ function LoginContent() {
             })
             const loginData = await loginRes.json()
             if (loginRes.ok) {
-                login(loginData.access_token, loginData.user_name, loginData.onboarding_completed, loginData.sovereign_id, loginData.role, loginData.avatar_url, loginData.user_id, loginData.user_email)
+                login(loginData.access_token, loginData.user_name, loginData.onboarding_completed, loginData.sovereign_id, loginData.role, loginData.avatar_url, loginData.user_id, loginData.user_email, loginData.forwarder_id, loginData.refresh_token)
                 handleRedirect()
             } else {
                 // Registration worked but auto-login failed — send to login page

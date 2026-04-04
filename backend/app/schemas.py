@@ -93,6 +93,7 @@ class UserResponse(BaseModel):
     role: str
     onboarding_completed: bool = False
     created_at: Optional[datetime] = None
+    forwarder_id: Optional[str] = None
 # --- Booking Models ---
 class BookingCreate(BaseModel):
     quote_id: Optional[str] = None

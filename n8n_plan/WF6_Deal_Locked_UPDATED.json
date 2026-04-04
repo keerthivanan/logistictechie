@@ -21,7 +21,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT company_name, email, phone, whatsapp FROM forwarders WHERE forwarder_id = '{{ $json.body.forwarder_id }}' LIMIT 1",
+        "query": "SELECT company_name, email, phone, whatsapp FROM forwarders WHERE email = '{{ $json.body.forwarder_email }}' LIMIT 1",
         "options": {}
       },
       "id": "wf6-get-forwarder",

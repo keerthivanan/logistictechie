@@ -21,7 +21,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const decision = $json.decision;\nconst company = $json.company_name;\nconst contact = $json.contact_person || 'Partner';\nconst forwarderId = $json.forwarder_id;\nconst newId = $json.new_sovereign_id || forwarderId;\nconst email = $json.email;\nconst country = $json.country || '';\n\nif (!decision || !email) throw new Error('Missing decision or email in payload');\n\nreturn {\n  json: {\n    decision,\n    company_name: company,\n    contact_person: contact,\n    forwarder_id: forwarderId,\n    new_sovereign_id: newId,\n    email,\n    country,\n    is_approved: decision === 'APPROVED'\n  }\n};"
+        "jsCode": "const d = $json.body || $json;\nconst decision = d.decision;\nconst company = d.company_name;\nconst contact = d.contact_person || 'Partner';\nconst forwarderId = d.forwarder_id;\nconst newId = d.new_sovereign_id || forwarderId;\nconst email = d.email;\nconst country = d.country || '';\n\nif (!decision || !email) throw new Error('Missing decision or email in payload');\n\nreturn {\n  json: {\n    decision,\n    company_name: company,\n    contact_person: contact,\n    forwarder_id: forwarderId,\n    new_sovereign_id: newId,\n    email,\n    country,\n    is_approved: decision === 'APPROVED'\n  }\n};"
       },
       "id": "parse-payload",
       "name": "Code - Parse Payload",
@@ -36,9 +36,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "combinator": "and",
           "conditions": [
@@ -80,8 +81,8 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
-          "name": "Gmail OAuth - Quotes"
+          "id": "4",
+          "name": "Gmail OAuth - Support"
         }
       }
     },
@@ -103,8 +104,8 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
-          "name": "Gmail OAuth - Quotes"
+          "id": "4",
+          "name": "Gmail OAuth - Support"
         }
       }
     },

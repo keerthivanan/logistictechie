@@ -57,7 +57,7 @@ export default function ForwarderRegisterPage() {
 
     // Redirect to login if not authenticated; fetch application status
     useEffect(() => {
-        if (user === null) { router.push('/login?redirect=/forwarders/register'); return; }
+        if (user === null) { router.push('/login?returnUrl=%2Fforwarders%2Fregister'); return; }
         if (!user) return;
         const token = localStorage.getItem('token');
         apiFetch('/api/forwarders/my-status', { headers: { Authorization: `Bearer ${token}` } })
@@ -81,6 +81,12 @@ export default function ForwarderRegisterPage() {
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'document_url' | 'logo_url') => {
         const file = e.target.files?.[0];
         if (!file) return;
+        const maxSize = 5 * 1024 * 1024; // 5 MB
+        if (file.size > maxSize) {
+            alert('File too large. Please upload a file under 5 MB.');
+            e.target.value = '';
+            return;
+        }
         setUploadingField(field);
         const reader = new FileReader();
         reader.onloadend = () => {

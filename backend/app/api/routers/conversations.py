@@ -113,8 +113,8 @@ async def start_conversation(
         raise HTTPException(status_code=404, detail="Request not found.")
     if req.user_sovereign_id != current_user.sovereign_id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="You do not own this request.")
-    if req.status == "CLOSED":
-        raise HTTPException(status_code=409, detail="This request is closed and no longer accepting conversations.")
+    if req.status not in ("OPEN", "CLOSED"):
+        raise HTTPException(status_code=409, detail="This request is no longer active.")
 
     # 2. Fetch the quote
     quote_res = await db.execute(
@@ -248,29 +248,41 @@ async def list_conversations(
     res = await db.execute(stmt)
     conversations = res.scalars().all()
 
+    if not conversations:
+        return {"conversations": []}
+
+    conv_ids = [c.id for c in conversations]
+
+    # Batch: latest message id per conversation (avoids N+1)
+    max_id_rows = await db.execute(
+        select(ChatMessage.conversation_id, func.max(ChatMessage.id).label("max_id"))
+        .where(ChatMessage.conversation_id.in_(conv_ids))
+        .group_by(ChatMessage.conversation_id)
+    )
+    max_ids = [r.max_id for r in max_id_rows.all()]
+    last_msg_map: dict = {}
+    if max_ids:
+        lm_res = await db.execute(select(ChatMessage).where(ChatMessage.id.in_(max_ids)))
+        for m in lm_res.scalars().all():
+            last_msg_map[m.conversation_id] = m
+
+    # Batch: unread counts per conversation (avoids N+1)
+    unread_rows = await db.execute(
+        select(ChatMessage.conversation_id, func.count(ChatMessage.id).label("cnt"))
+        .where(
+            ChatMessage.conversation_id.in_(conv_ids),
+            ChatMessage.sender_id != current_user.sovereign_id,
+            ChatMessage.is_read == False,  # noqa: E712
+            ChatMessage.sender_role != "SYSTEM",
+        )
+        .group_by(ChatMessage.conversation_id)
+    )
+    unread_map = {r.conversation_id: r.cnt for r in unread_rows.all()}
+
     result = []
     for conv in conversations:
-        last_msg_res = await db.execute(
-            select(ChatMessage)
-            .where(ChatMessage.conversation_id == conv.id)
-            .order_by(ChatMessage.created_at.desc())
-            .limit(1)
-        )
-        last_msg = last_msg_res.scalars().first()
-
-        # Count unread messages (not sent by current user, not SYSTEM, not yet read)
-        unread_res = await db.execute(
-            select(func.count(ChatMessage.id)).where(
-                ChatMessage.conversation_id == conv.id,
-                ChatMessage.sender_id != current_user.sovereign_id,
-                ChatMessage.is_read == False,  # noqa: E712
-                ChatMessage.sender_role != "SYSTEM",
-            )
-        )
-        unread_count = unread_res.scalar() or 0
-
-        entry = _conv_dict(conv, last_msg)
-        entry["unread_count"] = unread_count
+        entry = _conv_dict(conv, last_msg_map.get(conv.id))
+        entry["unread_count"] = unread_map.get(conv.id, 0)
         result.append(entry)
 
     return {"conversations": result}
@@ -426,6 +438,7 @@ async def send_offer(
     db.add(msg)
     conv.current_offer = data.offer_amount
     conv.offer_side = "SHIPPER"
+    conv.updated_at = _utcnow()
     await db.commit()
     await db.refresh(msg)
 
@@ -494,6 +507,7 @@ async def respond_offer(
         is_read=False,
     )
     db.add(msg)
+    conv.updated_at = _utcnow()
     await db.commit()
     await db.refresh(msg)
 
@@ -532,6 +546,7 @@ async def accept_counter(
         is_read=False,
     )
     db.add(msg)
+    conv.updated_at = _utcnow()
     await db.commit()
     await db.refresh(msg)
 
@@ -611,6 +626,7 @@ async def close_deal(
                 is_read=False,
             ))
 
+        conv.updated_at = _utcnow()
         await db.commit()
         return {"status": "CLOSED", "message": "Deal closed. Both parties confirmed."}
     else:
@@ -620,6 +636,7 @@ async def close_deal(
             content=pending_msg,
             is_read=False,
         ))
+        conv.updated_at = _utcnow()
         await db.commit()
         return {"status": "PENDING_CLOSE", "message": pending_msg}
 
@@ -659,7 +676,7 @@ async def _finalize_booking(
         carrier_name=conv.forwarder_company,
         origin_locode=req.origin if req else "",
         destination_locode=req.destination if req else "",
-        container_type=req.container_type or "FCL" if req else "FCL",
+        container_type=(req.container_type or "FCL") if req else "FCL",
         transit_days=quote.transit_days if quote else None,
         total_price=final_price,
         currency=conv.currency,
@@ -717,7 +734,7 @@ async def _finalize_booking(
             "marketplace_request_id": conv.request_id,
             "total_price": final_price,
             "carrier_name": conv.forwarder_company,
-            "container_type": req.container_type or "FCL" if req else "FCL",
+            "container_type": (req.container_type or "FCL") if req else "FCL",
             "transit_days": quote.transit_days if quote else 0,
             "currency": conv.currency,
             "origin": req.origin if req else "",
@@ -772,5 +789,6 @@ async def confirm_booking(
         content="Shipper confirmed — waiting for forwarder to lock the deal.",
         is_read=False,
     ))
+    conv.updated_at = _utcnow()
     await db.commit()
     return {"status": "PENDING_BOOKING", "message": "Waiting for forwarder to confirm."}

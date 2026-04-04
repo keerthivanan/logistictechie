@@ -120,10 +120,12 @@ export default function ForwarderPortal() {
 
     useEffect(() => {
         let id: string | null = null;
-        if (user && user.role === 'forwarder' && user.sovereign_id?.startsWith('REG-')) {
-            localStorage.setItem('cl_fwd_id', user.sovereign_id);
+        if (user && user.role === 'forwarder') {
+            const fwdId = user.forwarder_id || localStorage.getItem('forwarder_id') || user.sovereign_id;
+            localStorage.setItem('cl_fwd_id', fwdId);
+            if (user.email) localStorage.setItem('cl_fwd_email', user.email);
             setIsAuthenticated(true);
-            id = user.sovereign_id;
+            id = fwdId;
             fetchDashboardData(id);
         } else {
             const storedId = localStorage.getItem('cl_fwd_id');
@@ -262,7 +264,8 @@ export default function ForwarderPortal() {
 
     // ── DASHBOARD ─────────────────────────────────────────────────────────────
     const metrics = dashboardData?.metrics;
-    const quotes = dashboardData?.quotes || [];
+    const openRequests = dashboardData?.open_requests || [];
+    const bidHistory = dashboardData?.quotes || [];
     const companyName = dashboardData?.company_name || user?.name || '—';
     const fwdId = localStorage.getItem('cl_fwd_id') || user?.sovereign_id || '';
 
@@ -389,15 +392,20 @@ export default function ForwarderPortal() {
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <Package className="w-3.5 h-3.5 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('portal.open.requests')}</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                    {activeTab === 'performance' ? t('portal.tab.performance') : t('portal.open.requests')}
+                                </span>
                             </div>
                             <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
-                                {quotes.length} {quotes.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}
+                                {activeTab === 'performance'
+                                    ? `${bidHistory.length} ${bidHistory.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}`
+                                    : `${openRequests.length} ${openRequests.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}`
+                                }
                             </span>
                         </div>
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
-                            {quotes.length === 0 ? (
+                            {(activeTab === 'performance' ? bidHistory : openRequests).length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
                                     <Clock className="w-8 h-8 text-zinc-600" />
                                     <div>
@@ -406,42 +414,48 @@ export default function ForwarderPortal() {
                                     </div>
                                 </div>
                             ) : (
-                                quotes.map((quote: any) => {
-                                    const isSelected = selectedRequest?.request_id === quote.request_id;
+                                (activeTab === 'performance' ? bidHistory : openRequests).map((item: any) => {
+                                    const isSelected = selectedRequest?.request_id === item.request_id;
+                                    const isHistory = activeTab === 'performance';
                                     return (
                                         <div
-                                            key={quote.request_id}
-                                            onClick={() => { setSelectedRequest(quote); setBidSuccess(false); }}
-                                            className={`p-4 rounded-xl border cursor-pointer transition-all group ${
+                                            key={item.request_id}
+                                            onClick={() => { if (!isHistory) { setSelectedRequest(item); setBidSuccess(false); } }}
+                                            className={`p-4 rounded-xl border transition-all group ${
+                                                isHistory ? 'bg-black border-white/5' :
                                                 isSelected
-                                                    ? 'bg-emerald-500/[0.06] border-emerald-500/30 border-l-2 border-l-emerald-500'
-                                                    : 'bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
+                                                    ? 'bg-emerald-500/[0.06] border-emerald-500/30 border-l-2 border-l-emerald-500 cursor-pointer'
+                                                    : 'bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] cursor-pointer'
                                             }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                                                        isSelected ? 'bg-emerald-500 text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
+                                                        isSelected && !isHistory ? 'bg-emerald-500 text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
                                                     }`}>
-                                                        {quote.cargo_type?.includes('SEA') ? <Ship className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
+                                                        {item.cargo_type?.toUpperCase().includes('SEA') || item.cargo_type?.toUpperCase().includes('OCEAN') ? <Ship className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-0.5">
-                                                            <span className="text-sm font-bold text-white">{quote.origin}</span>
+                                                            <span className="text-sm font-bold text-white">{item.origin}</span>
                                                             <ArrowRight className="w-3 h-3 text-zinc-600" />
-                                                            <span className="text-sm font-bold text-white">{quote.destination}</span>
+                                                            <span className="text-sm font-bold text-white">{item.destination}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-mono text-zinc-600">{quote.request_id}</span>
+                                                            <span className="text-[10px] font-mono text-zinc-600">{item.request_id}</span>
                                                             <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                                                            <span className="text-[10px] text-zinc-600 uppercase tracking-wide">{quote.cargo_type}</span>
+                                                            <span className="text-[10px] text-zinc-600 uppercase tracking-wide">{item.cargo_type}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="text-right flex-shrink-0">
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">{t('portal.your.quote')}</p>
-                                                    <p className={`text-sm font-bold font-mono ${quote.your_price > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
-                                                        {quote.your_price > 0 ? `USD ${quote.your_price.toLocaleString()}` : '—'}
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">
+                                                        {isHistory ? t('portal.your.quote') : `${item.quotation_count}/3 quotes`}
+                                                    </p>
+                                                    <p className={`text-sm font-bold font-mono ${isHistory && item.your_price > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                                                        {isHistory
+                                                            ? (item.your_price > 0 ? `USD ${item.your_price.toLocaleString()}` : '—')
+                                                            : t('portal.submit.quote')}
                                                     </p>
                                                 </div>
                                             </div>

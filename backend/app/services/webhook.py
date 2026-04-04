@@ -25,6 +25,7 @@ class WebhookService:
         # which maps to WF2's second Webhook Trigger node in n8n
         self.bid_confirmation_webhook = os.getenv("N8N_BID_CONFIRMATION_WEBHOOK")
         self.password_reset_webhook = os.getenv("N8N_PASSWORD_RESET_WEBHOOK")
+        self.welcome_webhook = os.getenv("N8N_WELCOME_WEBHOOK")
         if not os.getenv("OMEGO_API_SECRET", ""):
             logger.warning("[CRITICAL] OMEGO_API_SECRET is empty. Webhook authentication is bypassed!")
 
@@ -131,6 +132,18 @@ class WebhookService:
             self.password_reset_webhook,
             payload,
             "PASSWORD_RESET"
+        )
+
+    async def trigger_welcome_webhook(self, payload: dict):
+        """
+        Fires when a new shipper registers on CargoLink.
+        n8n WF_WELCOME sends a welcome email from support@ with account details.
+        Payload keys: email, full_name, company_name, sovereign_id, registered_at
+        """
+        return await self._trigger(
+            self.welcome_webhook,
+            payload,
+            "USER_WELCOME"
         )
 
     async def trigger_bid_confirmation_webhook(self, payload: dict):

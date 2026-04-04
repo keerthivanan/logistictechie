@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from urllib.parse import urlencode
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, exists
+from sqlalchemy import select, func
 from app.db.session import get_db
 from app import crud
 from typing import Dict
@@ -55,7 +55,7 @@ async def get_dashboard_stats(
                 fwd_unread_res = await db.execute(
                     select(func.count(ChatMessage.id)).where(
                         ChatMessage.conversation_id.in_(
-                            select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id).scalar_subquery()
+                            select(Conversation.id).where(Conversation.forwarder_id == current_user.sovereign_id)
                         ),
                         ChatMessage.sender_id != current_user.sovereign_id,
                         ChatMessage.is_read == False,  # noqa: E712
@@ -137,7 +137,7 @@ async def get_dashboard_stats(
             unread_res = await db.execute(
                 select(func.count(ChatMessage.id)).where(
                     ChatMessage.conversation_id.in_(
-                        select(Conversation.id).where(Conversation.shipper_id == current_user.sovereign_id).scalar_subquery()
+                        select(Conversation.id).where(Conversation.shipper_id == current_user.sovereign_id)
                     ),
                     ChatMessage.sender_id != current_user.sovereign_id,
                     ChatMessage.is_read == False,  # noqa: E712
@@ -262,7 +262,8 @@ async def get_notifications(
         # ── 2. New quotes on user's requests (last 48h) ───────────────────────
         if current_user.role != "forwarder":
             from app.models.marketplace import MarketplaceRequest
-            cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
+            from datetime import datetime as _dt
+            cutoff = _dt.utcnow() - timedelta(hours=48)
             # Get the user's request IDs
             req_ids_res = await db.execute(
                 select(MarketplaceRequest.request_id)
@@ -280,7 +281,8 @@ async def get_notifications(
                     .limit(5)
                 )
                 for bid in bids_res.scalars().all():
-                    diff = datetime.now(timezone.utc) - bid.received_at.replace(tzinfo=timezone.utc)
+                    received = bid.received_at if bid.received_at.tzinfo else bid.received_at.replace(tzinfo=timezone.utc)
+                    diff = datetime.now(timezone.utc) - received
                     m = int(diff.total_seconds() // 60)
                     time_ago = "Just now" if m < 1 else f"{m}m ago" if m < 60 else f"{m // 60}h ago"
                     notifications.append({

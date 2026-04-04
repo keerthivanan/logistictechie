@@ -17,7 +17,7 @@ from app.db.session import get_db
 from app.api import deps
 from fastapi.middleware.cors import CORSMiddleware
 import time
-from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools, admin, bookings, conversations, forwarder_conversations
+from app.api.routers import auth, references, dashboard, marketplace, forwarders, tasks, quotes, tools, admin, bookings, conversations
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from app.models.user import User
@@ -129,7 +129,6 @@ app.include_router(tools.router, prefix="/api/tools", tags=["Freight Intelligenc
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])
 app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
-app.include_router(forwarder_conversations.router, prefix="/api/forwarders/conversations", tags=["Forwarder Portal Chat"])
 
 # GLOBAL BRIDGE: Headless n8n Aliases (Matches COMPLETE_SETUP_GUIDE hardcoded URLs)
 # All 4 routes are protected by verify_n8n_webhook

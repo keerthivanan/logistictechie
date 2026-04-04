@@ -209,11 +209,14 @@ async def admin_stats(
     closed_requests    = (await db.execute(select(func.count(MarketplaceRequest.id)).where(MarketplaceRequest.status == "CLOSED"))).scalar() or 0
     total_quotes       = (await db.execute(select(func.count(MarketplaceBid.id)))).scalar() or 0
 
+    locked_users = (await db.execute(select(func.count(User.id)).where(User.is_locked == True))).scalar() or 0
+
     return {
         # Users
         "total_users": total_users,
         "active_users": active_users,
         "inactive_users": inactive_users,
+        "locked_users": locked_users,
         "forwarder_users": forwarder_users,
         "regular_users": regular_users,
         # Forwarders
@@ -227,3 +230,22 @@ async def admin_stats(
         "closed_requests": closed_requests,
         "total_quotes": total_quotes,
     }
+
+
+@router.post("/unlock-user/{user_id}")
+async def unlock_user(
+    user_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """Unlock a user account that was locked after repeated failed login attempts."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not user.is_locked:
+        return {"success": True, "message": f"{user.email} is not locked."}
+    user.is_locked = False
+    user.failed_login_attempts = 0
+    await db.commit()
+    return {"success": True, "message": f"{user.email} has been unlocked."}

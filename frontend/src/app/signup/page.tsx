@@ -46,7 +46,7 @@ function SignupContent() {
                 })
                 const data = await res.json()
                 if (res.ok) {
-                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role || 'user', data.avatar_url, data.user_id, data.user_email)
+                    login(data.access_token, data.user_name, data.onboarding_completed, data.sovereign_id, data.role || 'user', data.avatar_url, data.user_id, data.user_email, data.forwarder_id, data.refresh_token)
                     handleRedirect()
                 } else {
                     throw new Error(data.detail || 'Google Sign-In failed')
@@ -69,10 +69,11 @@ function SignupContent() {
         setError('')
         if (!signupName.trim()) { setError('Full name is required.'); return }
         if (!signupEmail.trim()) { setError('Email is required.'); return }
-        if (signupPassword.length < 8) { setError('Password must be at least 8 characters.'); return }
+        if (signupPassword.length < 10) { setError('Password must be at least 10 characters.'); return }
         if (!/[A-Z]/.test(signupPassword) || !/[a-z]/.test(signupPassword) || !/[0-9]/.test(signupPassword)) {
             setError('Password must contain uppercase, lowercase, and a number.'); return
         }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/.test(signupPassword)) { setError('Password must contain at least one special character.'); return }
         if (signupPassword !== signupConfirm) { setError('Passwords do not match.'); return }
 
         setIsLoading(true)

@@ -1,6 +1,5 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 
 class Settings(BaseSettings):
     # MISSION CRITICAL: Pydantic Settings automatically loads from .env 
@@ -32,7 +31,7 @@ class Settings(BaseSettings):
 
     # AUTHENTICATION — SECRET_KEY must be set in .env (no default — startup fails if missing)
     SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 hours
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     
     # N8N SECURE HANDSHAKE KEY (must be set in .env)
     OMEGO_API_SECRET: str
@@ -48,6 +47,9 @@ class Settings(BaseSettings):
 
     RATE_LIMIT_PER_MINUTE: int = 120
     DEBUG: bool = False
+
+    # Marketplace — max quotes accepted per freight request before auto-close
+    MAX_QUOTES_PER_REQUEST: int = 3
 
     # Pydantic V2 Config
     model_config = SettingsConfigDict(

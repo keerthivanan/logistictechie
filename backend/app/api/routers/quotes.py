@@ -93,11 +93,6 @@ CONTAINER_MULT = {
     "LCL": 0.38,
 }
 
-CARRIERS = ["Maersk", "MSC", "CMA CGM", "Hapag-Lloyd", "Evergreen", "ONE", "COSCO Shipping"]
-
-VESSEL_PREFIXES = ["MERIDIAN", "PACIFIC", "ATLANTIC", "NAVIGATOR", "PIONEER", "HORIZON", "VOYAGER"]
-
-
 # ── AI Quote Generation ───────────────────────────────────────────────────────
 
 _SYSTEM_PROMPT = """You are CargoLink's AI Freight Intelligence Engine — the world's most advanced ocean freight rate analyst.
@@ -231,10 +226,10 @@ Return JSON with key "quotes" containing exactly 3 objects, each with:
             bd = q.get("breakdown", {})
             if bd:
                 corrected_total = (
-                    int(bd.get("base_rate", 0)) +
-                    int(bd.get("fuel_surcharge", 0)) +
-                    int(bd.get("port_fees", 0)) +
-                    int(bd.get("surcharges", 0))
+                    int(bd.get("base_rate") or 0) +
+                    int(bd.get("fuel_surcharge") or 0) +
+                    int(bd.get("port_fees") or 0) +
+                    int(bd.get("surcharges") or 0)
                 )
                 bd["total"] = corrected_total
                 q["price"] = corrected_total

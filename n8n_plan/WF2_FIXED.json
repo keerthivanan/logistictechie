@@ -77,9 +77,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -129,9 +130,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -181,9 +183,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -233,9 +236,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {
@@ -298,7 +302,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "var openaiResponse = $json;\nvar aiResponseText = '';\n\nif (openaiResponse.choices && openaiResponse.choices[0] && openaiResponse.choices[0].message) {\n  aiResponseText = openaiResponse.choices[0].message.content;\n} else {\n  throw new Error('Could not find AI response: ' + JSON.stringify(openaiResponse));\n}\n\nvar extractedData;\ntry {\n  var cleanedResponse = aiResponseText.replace(/```json\\n|```/g, '').trim();\n  extractedData = JSON.parse(cleanedResponse);\n} catch (e) {\n  throw new Error('AI response is not valid JSON: ' + aiResponseText);\n}\n\nif (!extractedData.total_price || !extractedData.currency) {\n  throw new Error('Missing required fields: total_price or currency');\n}\n\nvar requestData = $('Code - Extract Request ID').first().json;\nvar forwarderData = $('PostgreSQL - Verify Forwarder').first().json;\n\nvar quotationId = requestData.request_id + '-' + forwarderData.forwarder_id.toString().split('-').pop();\nvar aiSummary = forwarderData.company_name + ' offers ' + extractedData.currency + ' ' + extractedData.total_price + ' for ' + (extractedData.transit_days || 'N/A') + ' days transit via ' + (extractedData.carrier || 'carrier TBD') + '.';\n\nreturn {\n  json: {\n    quotation_id: quotationId,\n    request_id: requestData.request_id,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_email: forwarderData.email,\n    forwarder_company: forwarderData.company_name,\n    total_price: extractedData.total_price,\n    currency: extractedData.currency,\n    transit_days: extractedData.transit_days || null,\n    validity_days: extractedData.validity_days || 7,\n    carrier: extractedData.carrier || 'Not specified',\n    service_type: extractedData.service_type || 'Not specified',\n    surcharges: extractedData.surcharges || {},\n    is_hazardous: extractedData.is_hazardous || false,\n    is_stackable: extractedData.is_stackable !== false,\n    needs_insurance: extractedData.needs_insurance || false,\n    notes: extractedData.notes || '',\n    ai_summary: aiSummary,\n    raw_email: requestData.email_body,\n    status: 'ACTIVE',\n    received_at: requestData.received_at,\n    expires_at: new Date(Date.now() + (extractedData.validity_days || 7) * 24 * 60 * 60 * 1000).toISOString()\n  }\n};"
+        "jsCode": "var openaiResponse = $json;\nvar aiResponseText = '';\n\nif (openaiResponse.choices && openaiResponse.choices[0] && openaiResponse.choices[0].message) {\n  aiResponseText = openaiResponse.choices[0].message.content;\n} else {\n  throw new Error('Could not find AI response: ' + JSON.stringify(openaiResponse));\n}\n\nvar extractedData;\ntry {\n  var cleanedResponse = aiResponseText.replace(/```json\\n|```/g, '').trim();\n  extractedData = JSON.parse(cleanedResponse);\n} catch (e) {\n  throw new Error('AI response is not valid JSON: ' + aiResponseText);\n}\n\nif (!extractedData.total_price || !extractedData.currency) {\n  throw new Error('Missing required fields: total_price or currency');\n}\n\n// Force total_price to a real number — GPT sometimes returns '1200 USD' or a string\nvar price = parseFloat(String(extractedData.total_price).replace(/[^0-9.]/g, ''));\nif (isNaN(price) || price <= 0 || price > 10000000) {\n  throw new Error('Invalid total_price from AI: ' + extractedData.total_price);\n}\nextractedData.total_price = price;\n\n// Force transit_days to integer if present\nif (extractedData.transit_days) {\n  var days = parseInt(extractedData.transit_days);\n  extractedData.transit_days = isNaN(days) ? null : days;\n}\n\nvar requestData = $('Code - Extract Request ID').first().json;\nvar forwarderData = $('PostgreSQL - Verify Forwarder').first().json;\n\nvar quotationId = requestData.request_id + '-' + forwarderData.forwarder_id.toString().split('-').pop();\nvar aiSummary = forwarderData.company_name + ' offers ' + extractedData.currency + ' ' + extractedData.total_price + ' for ' + (extractedData.transit_days || 'N/A') + ' days transit via ' + (extractedData.carrier || 'carrier TBD') + '.';\n\nreturn {\n  json: {\n    quotation_id: quotationId,\n    request_id: requestData.request_id,\n    forwarder_id: forwarderData.forwarder_id,\n    forwarder_email: forwarderData.email,\n    forwarder_company: forwarderData.company_name,\n    total_price: extractedData.total_price,\n    currency: extractedData.currency,\n    transit_days: extractedData.transit_days || null,\n    validity_days: extractedData.validity_days || 7,\n    carrier: extractedData.carrier || 'Not specified',\n    service_type: extractedData.service_type || 'Not specified',\n    surcharges: extractedData.surcharges || {},\n    is_hazardous: extractedData.is_hazardous || false,\n    is_stackable: extractedData.is_stackable !== false,\n    needs_insurance: extractedData.needs_insurance || false,\n    notes: extractedData.notes || '',\n    ai_summary: aiSummary,\n    raw_email: requestData.email_body,\n    status: 'ACTIVE',\n    received_at: requestData.received_at,\n    expires_at: new Date(Date.now() + (extractedData.validity_days || 7) * 24 * 60 * 60 * 1000).toISOString()\n  }\n};"
       },
       "id": "validate-ai-output",
       "name": "Code - Validate AI Output",
@@ -369,7 +373,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE forwarder_bid_status SET status = 'ANSWERED', quoted_at = NOW(), quoted_price = {{ $('Code - Validate AI Output').first().json.total_price }} WHERE request_id = '{{ $('Code - Validate AI Output').first().json.request_id }}' AND forwarder_id = '{{ $('Code - Validate AI Output').first().json.forwarder_id }}'",
+        "query": "INSERT INTO forwarder_bid_status (forwarder_id, request_id, status, quoted_price, attempted_at, quoted_at) VALUES ('{{ $('Code - Validate AI Output').first().json.forwarder_id }}', '{{ $('Code - Validate AI Output').first().json.request_id }}', 'ANSWERED', {{ $('Code - Validate AI Output').first().json.total_price }}, NOW(), NOW()) ON CONFLICT (forwarder_id, request_id) DO UPDATE SET status = 'ANSWERED', quoted_price = EXCLUDED.quoted_price, quoted_at = NOW()",
         "options": {}
       },
       "id": "update-forwarder-status",
@@ -412,9 +416,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose",
+            "version": 2
           },
           "conditions": [
             {

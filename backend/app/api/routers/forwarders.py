@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.forwarder import Forwarder
@@ -7,9 +7,11 @@ from app.models.marketplace import MarketplaceBid, MarketplaceRequest, Forwarder
 from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, Field
 from app.services.activity import activity_service
 from app.services.webhook import webhook_service
+from app.core.config import settings
 import logging
 
 router = APIRouter()
@@ -293,13 +295,12 @@ class LoginRequest(BaseModel):
     email: str
 
 @router.post("/auth")
-async def forwarder_auth(req: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+async def forwarder_auth(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     """
     Secure passwordless login for forwarders using their assigned ID + Email combo.
     Rate-limited: 5 failed attempts locks the forwarder account for 15 minutes.
     """
     import time
-    from fastapi import Request as FastAPIRequest
 
     # Brute-force guard: check failed attempt count on forwarder record
     stmt = select(Forwarder).where(Forwarder.forwarder_id == req.forwarder_id)
@@ -353,6 +354,12 @@ async def get_forwarder_bids(
     if current_user.role != "forwarder":
         raise HTTPException(status_code=403, detail="Access denied. Partners only.")
 
+    # Look up the forwarder table record to get the actual forwarder_id
+    # (sovereign_id ≠ forwarder_id for promoted users)
+    fwd_lookup = await db.execute(select(Forwarder).where(Forwarder.email == current_user.email))
+    fwd_record = fwd_lookup.scalars().first()
+    fwd_id = fwd_record.forwarder_id if fwd_record else current_user.sovereign_id
+
     # Query the Bid Status history joined with Request details
     stmt = (
         select(
@@ -367,7 +374,7 @@ async def get_forwarder_bids(
             MarketplaceRequest.status.label("request_status")
         )
         .join(MarketplaceRequest, MarketplaceRequest.request_id == ForwarderBidStatus.request_id)
-        .where(ForwarderBidStatus.forwarder_id == current_user.sovereign_id)
+        .where(ForwarderBidStatus.forwarder_id == fwd_id)
         .order_by(ForwarderBidStatus.attempted_at.desc())
     )
     
@@ -376,7 +383,7 @@ async def get_forwarder_bids(
     
     return {
         "success": True,
-        "sovereign_id": current_user.sovereign_id,
+        "forwarder_id": fwd_id,
         "bids": [
             {
                 "request_id": r.request_id,
@@ -401,9 +408,13 @@ async def get_forwarder_dashboard(
     """
     Returns real-time metrics for a partner's dashboard.
     """
-    # 1. Verify access
-    if current_user.sovereign_id != f_id and current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Unauthorized node access.")
+    # 1. Verify access — check sovereign_id match OR that forwarder record belongs to this user
+    if current_user.role != "admin" and current_user.sovereign_id != f_id:
+        owner_check = await db.execute(
+            select(Forwarder).where(Forwarder.forwarder_id == f_id, Forwarder.email == current_user.email)
+        )
+        if not owner_check.scalars().first():
+            raise HTTPException(status_code=403, detail="Unauthorized node access.")
 
     # 2. Fetch Partner Record
     stmt = select(Forwarder).where(Forwarder.forwarder_id == f_id)
@@ -448,6 +459,27 @@ async def get_forwarder_dashboard(
             "your_position": None  # Position ranking requires comparing all bids; shown as N/A until request closes
         })
 
+    # Open requests this forwarder hasn't bid on yet
+    already_bid_sub = select(MarketplaceBid.request_id).where(MarketplaceBid.forwarder_id == f_id)
+    open_req_res = await db.execute(
+        select(MarketplaceRequest)
+        .where(MarketplaceRequest.status == "OPEN", MarketplaceRequest.request_id.notin_(already_bid_sub))
+        .order_by(MarketplaceRequest.submitted_at.desc())
+        .limit(20)
+    )
+    open_requests = [{
+        "request_id": r.request_id,
+        "origin": r.origin,
+        "destination": r.destination,
+        "cargo_type": r.cargo_type,
+        "commodity": r.commodity or "",
+        "weight_kg": float(r.weight_kg) if r.weight_kg else None,
+        "quantity": r.quantity,
+        "target_date": str(r.target_date) if r.target_date else None,
+        "quotation_count": r.quotation_count or 0,
+        "submitted_at": str(r.submitted_at),
+    } for r in open_req_res.scalars().all()]
+
     return {
         "company_name": fwd.company_name,
         "metrics": {
@@ -456,7 +488,8 @@ async def get_forwarder_dashboard(
             "won_bids": won_bids,
             "reliability_score": fwd.reliability_score
         },
-        "quotes": bids
+        "quotes": bids,
+        "open_requests": open_requests,
     }
 
 
@@ -513,6 +546,27 @@ async def portal_forwarder_dashboard(
             "your_position": None
         })
 
+    # Open requests this forwarder hasn't bid on yet
+    already_bid_sub = select(MarketplaceBid.request_id).where(MarketplaceBid.forwarder_id == f_id)
+    open_req_res = await db.execute(
+        select(MarketplaceRequest)
+        .where(MarketplaceRequest.status == "OPEN", MarketplaceRequest.request_id.notin_(already_bid_sub))
+        .order_by(MarketplaceRequest.submitted_at.desc())
+        .limit(20)
+    )
+    open_requests = [{
+        "request_id": r.request_id,
+        "origin": r.origin,
+        "destination": r.destination,
+        "cargo_type": r.cargo_type,
+        "commodity": r.commodity or "",
+        "weight_kg": float(r.weight_kg) if r.weight_kg else None,
+        "quantity": r.quantity,
+        "target_date": str(r.target_date) if r.target_date else None,
+        "quotation_count": r.quotation_count or 0,
+        "submitted_at": str(r.submitted_at),
+    } for r in open_req_res.scalars().all()]
+
     return {
         "company_name": fwd.company_name,
         "metrics": {
@@ -521,7 +575,8 @@ async def portal_forwarder_dashboard(
             "won_bids": won_bids,
             "reliability_score": fwd.reliability_score
         },
-        "quotes": bids
+        "quotes": bids,
+        "open_requests": open_requests,
     }
 
 
@@ -529,7 +584,11 @@ class PortalBidSubmit(BaseModel):
     forwarder_id: str
     email: str
     request_id: str
-    price: float
+    price: float = Field(..., gt=0, le=1_000_000)
+    currency: str = "USD"
+    transit_days: Optional[int] = None
+    carrier: Optional[str] = None
+    notes: Optional[str] = None
     status: str = "ANSWERED"
 
 @router.post("/portal-bid")
@@ -566,11 +625,11 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
             detail="This request is no longer accepting quotes — it has been fulfilled."
         )
 
-    # Hard-enforce max 3 quotes per request
-    if (req.quotation_count or 0) >= 3:
+    # Hard-enforce max quotes per request
+    if (req.quotation_count or 0) >= settings.MAX_QUOTES_PER_REQUEST:
         raise HTTPException(
             status_code=409,
-            detail="This request already has 3 quotes and is no longer accepting new submissions."
+            detail=f"This request already has {settings.MAX_QUOTES_PER_REQUEST} quotes and is no longer accepting new submissions."
         )
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -613,11 +672,14 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
         forwarder_email=fwd.email,
         forwarder_company=fwd.company_name,
         total_price=bid_in.price,
-        currency="USD",
-        transit_days=None,
-        carrier=None,
+        currency=bid_in.currency,
+        transit_days=bid_in.transit_days,
+        carrier=bid_in.carrier,
         service_type=None,
-        ai_summary=f"Direct quote submitted by {fwd.company_name} via the Partner Portal.",
+        notes=bid_in.notes,
+        ai_summary=f"Direct quote submitted by {fwd.company_name} via the Partner Portal."
+            + (f" Transit: {bid_in.transit_days} days." if bid_in.transit_days else "")
+            + (f" Carrier: {bid_in.carrier}." if bid_in.carrier else ""),
         status="ACTIVE",
         received_at=now,
     )
@@ -639,7 +701,7 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
 
     # 4. Auto-close request when 3 quotes received (same threshold as n8n WF3)
     should_send_comparison = False
-    if new_count >= 3 and req.status == "OPEN":
+    if new_count >= settings.MAX_QUOTES_PER_REQUEST and req.status == "OPEN":
         req.status = "CLOSED"
         req.closed_reason = "Auto-closed: 3 quotes received via portal"
         req.closed_at = now
@@ -656,13 +718,13 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
         "origin": req.origin,
         "destination": req.destination,
         "price": bid_in.price,
-        "currency": "USD",
+        "currency": bid_in.currency,
         "submitted_at": now.isoformat(),
     })
 
     # If 3 quotes reached via portal, notify shipper with comparison email
     if should_send_comparison:
-        shipper_stmt = select(User).where(User.sovereign_id == req.user_sovereign_id)
+        shipper_stmt = select(User).where(User.email == req.user_email)
         shipper_res = await db.execute(shipper_stmt)
         shipper = shipper_res.scalars().first()
         if shipper:
@@ -675,7 +737,7 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
                 "quotation_count": new_count,
             })
 
-    # Log bid submission against the user account
+    # Log bid submission against the forwarder's user account
     user_stmt = select(User).where(User.email == bid_in.email)
     user_res = await db.execute(user_stmt)
     bid_user = user_res.scalars().first()
@@ -689,10 +751,416 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
             metadata={"forwarder_id": bid_in.forwarder_id, "price": bid_in.price, "request_id": bid_in.request_id}
         )
 
+    # Notify shipper of new quote (in-app notification via activity log)
+    shipper_user_stmt = select(User).where(User.email == req.user_email)
+    shipper_user_res = await db.execute(shipper_user_stmt)
+    shipper_user = shipper_user_res.scalars().first()
+    if shipper_user:
+        await activity_service.log(
+            db,
+            user_id=str(shipper_user.id),
+            action="NEW_QUOTE",
+            entity_type="REQUEST",
+            entity_id=str(bid_in.request_id),
+            metadata={
+                "forwarder_company": fwd.company_name,
+                "forwarder_id": bid_in.forwarder_id,
+                "price": bid_in.price,
+                "request_id": bid_in.request_id,
+                "quotation_count": new_count,
+            }
+        )
+
     return {
         "success": True,
+        "quotation_id": quotation_id,
         "request_id": bid_in.request_id,
         "forwarder_id": bid_in.forwarder_id,
         "quotation_count": new_count,
-        "trigger_close": new_count >= 3,
+        "trigger_close": new_count >= settings.MAX_QUOTES_PER_REQUEST,
     }
+
+
+# ─── Portal Conversation Endpoints (X-Forwarder-Id + X-Forwarder-Email auth) ──
+
+async def _verify_portal_forwarder(
+    x_forwarder_id: Optional[str] = Header(None, alias="X-Forwarder-Id"),
+    x_forwarder_email: Optional[str] = Header(None, alias="X-Forwarder-Email"),
+    db: AsyncSession = Depends(get_db),
+) -> Forwarder:
+    """Validate portal credentials from headers. Used by all portal conv endpoints."""
+    if not x_forwarder_id or not x_forwarder_email:
+        raise HTTPException(status_code=401, detail="Missing portal credentials.")
+    result = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == x_forwarder_id))
+    f = result.scalars().first()
+    if not f or f.email.lower() != x_forwarder_email.lower() or f.status != "ACTIVE":
+        raise HTTPException(status_code=401, detail="Invalid portal credentials.")
+    return f
+
+
+class PortalSendMessageIn(BaseModel):
+    content: str = Field(..., min_length=1, max_length=2000)
+
+class PortalRespondOfferIn(BaseModel):
+    action: str          # ACCEPT | REJECT | COUNTER
+    counter_amount: Optional[float] = None
+
+
+@router.get("/conversations/list")
+async def portal_list_conversations(
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    res = await db.execute(
+        select(Conversation)
+        .where(Conversation.forwarder_id == fwd.forwarder_id)
+        .order_by(Conversation.updated_at.desc())
+        .limit(50)
+    )
+    convs = res.scalars().all()
+    result = []
+    for conv in convs:
+        last_msg_res = await db.execute(
+            select(ChatMessage)
+            .where(ChatMessage.conversation_id == conv.id)
+            .order_by(ChatMessage.created_at.desc())
+            .limit(1)
+        )
+        last_msg = last_msg_res.scalars().first()
+        unread_res = await db.execute(
+            select(func.count(ChatMessage.id))
+            .where(
+                ChatMessage.conversation_id == conv.id,
+                ChatMessage.sender_role == "SHIPPER",
+                ChatMessage.is_read == False,  # noqa: E712
+            )
+        )
+        unread = unread_res.scalar() or 0
+        result.append({
+            "public_id": conv.public_id,
+            "request_id": conv.request_id,
+            "quote_id": conv.quote_id,
+            "forwarder_company": conv.forwarder_company,
+            "original_price": float(conv.original_price) if conv.original_price else None,
+            "current_offer": float(conv.current_offer) if conv.current_offer else None,
+            "agreed_price": float(conv.agreed_price) if conv.agreed_price else None,
+            "currency": conv.currency,
+            "status": conv.status,
+            "offer_side": conv.offer_side,
+            "shipper_book_req": conv.shipper_book_req,
+            "forwarder_book_req": conv.forwarder_book_req,
+            "unread_count": unread,
+            "updated_at": conv.updated_at.isoformat() if conv.updated_at else None,
+            "last_message": {
+                "content": last_msg.content,
+                "sender_role": last_msg.sender_role,
+                "message_type": last_msg.message_type,
+                "created_at": last_msg.created_at.isoformat() if last_msg.created_at else None,
+            } if last_msg else None,
+        })
+    return {"conversations": result}
+
+
+@router.get("/conversations/{public_id}/messages")
+async def portal_get_messages(
+    public_id: str,
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    res = await db.execute(select(Conversation).where(Conversation.public_id == public_id))
+    conv = res.scalars().first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    if conv.forwarder_id != fwd.forwarder_id:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+
+    # Mark shipper messages as read
+    msgs_res = await db.execute(
+        select(ChatMessage).where(ChatMessage.conversation_id == conv.id).order_by(ChatMessage.created_at.asc())
+    )
+    msgs = msgs_res.scalars().all()
+    for m in msgs:
+        if m.sender_role == "SHIPPER" and not m.is_read:
+            m.is_read = True
+    conv.forwarder_last_seen = datetime.utcnow()
+    await db.commit()
+
+    return {
+        "conversation": {
+            "public_id": conv.public_id,
+            "request_id": conv.request_id,
+            "quote_id": conv.quote_id,
+            "forwarder_company": conv.forwarder_company,
+            "original_price": float(conv.original_price) if conv.original_price else None,
+            "current_offer": float(conv.current_offer) if conv.current_offer else None,
+            "agreed_price": float(conv.agreed_price) if conv.agreed_price else None,
+            "currency": conv.currency,
+            "status": conv.status,
+            "offer_side": conv.offer_side,
+            "shipper_book_req": conv.shipper_book_req,
+            "forwarder_book_req": conv.forwarder_book_req,
+            "shipper_close_req": conv.shipper_close_req,
+            "forwarder_close_req": conv.forwarder_close_req,
+            "booking_id": conv.booking_id,
+            "shipper_last_seen": conv.shipper_last_seen.isoformat() if conv.shipper_last_seen else None,
+            "forwarder_last_seen": conv.forwarder_last_seen.isoformat() if conv.forwarder_last_seen else None,
+        },
+        "messages": [
+            {
+                "id": m.id,
+                "sender_role": m.sender_role,
+                "message_type": m.message_type,
+                "content": m.content,
+                "offer_amount": float(m.offer_amount) if m.offer_amount else None,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+            }
+            for m in msgs
+        ],
+    }
+
+
+@router.post("/conversations/{public_id}/messages")
+async def portal_send_message(
+    public_id: str,
+    data: PortalSendMessageIn,
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    res = await db.execute(select(Conversation).where(Conversation.public_id == public_id))
+    conv = res.scalars().first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    if conv.forwarder_id != fwd.forwarder_id:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="This conversation is closed.")
+
+    msg = ChatMessage(
+        conversation_id=conv.id,
+        sender_role="FORWARDER",
+        sender_id=fwd.forwarder_id,
+        message_type="TEXT",
+        content=data.content,
+        is_read=False,
+    )
+    conv.updated_at = datetime.utcnow()
+    db.add(msg)
+    await db.commit()
+    await db.refresh(msg)
+    return {"id": msg.id, "sender_role": msg.sender_role, "message_type": msg.message_type,
+            "content": msg.content, "created_at": msg.created_at.isoformat() if msg.created_at else None}
+
+
+@router.post("/conversations/{public_id}/respond-offer")
+async def portal_respond_offer(
+    public_id: str,
+    data: PortalRespondOfferIn,
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    res = await db.execute(select(Conversation).where(Conversation.public_id == public_id))
+    conv = res.scalars().first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    if conv.forwarder_id != fwd.forwarder_id:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Conversation is closed.")
+    if conv.offer_side != "SHIPPER":
+        raise HTTPException(status_code=409, detail="No shipper offer to respond to.")
+
+    action = data.action.upper()
+    if action not in ("ACCEPT", "REJECT", "COUNTER"):
+        raise HTTPException(status_code=422, detail="Action must be ACCEPT, REJECT, or COUNTER.")
+
+    if action == "ACCEPT":
+        conv.agreed_price = conv.current_offer
+        conv.current_offer = None
+        conv.offer_side = None
+        msg_content = f"Offer accepted — agreed price: {conv.currency} {float(conv.agreed_price):,.2f}"
+        msg_type = "ACCEPTED"
+        offer_amount = None
+    elif action == "REJECT":
+        conv.current_offer = None
+        conv.offer_side = None
+        msg_content = f"Offer rejected. Original price stands: {conv.currency} {float(conv.original_price):,.2f}"
+        msg_type = "REJECTED"
+        offer_amount = None
+    else:  # COUNTER
+        if not data.counter_amount:
+            raise HTTPException(status_code=422, detail="counter_amount required for COUNTER.")
+        if data.counter_amount <= float(conv.current_offer):
+            raise HTTPException(status_code=422, detail="Counter must be higher than shipper's offer.")
+        if data.counter_amount >= float(conv.original_price):
+            raise HTTPException(status_code=422, detail="Counter must be less than original price.")
+        conv.current_offer = data.counter_amount
+        conv.offer_side = "FORWARDER"
+        msg_content = f"Counter offer: {conv.currency} {data.counter_amount:,.2f}"
+        msg_type = "COUNTER_OFFER"
+        offer_amount = data.counter_amount
+
+    msg = ChatMessage(
+        conversation_id=conv.id,
+        sender_role="FORWARDER",
+        sender_id=fwd.forwarder_id,
+        message_type=msg_type,
+        content=msg_content,
+        offer_amount=offer_amount,
+        is_read=False,
+    )
+    db.add(msg)
+    conv.updated_at = datetime.utcnow()
+    await db.commit()
+    await db.refresh(msg)
+    return {"id": msg.id, "message_type": msg.message_type, "content": msg.content}
+
+
+@router.post("/conversations/{public_id}/confirm-booking")
+async def portal_confirm_booking(
+    public_id: str,
+    background_tasks: BackgroundTasks,
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    from app.models.booking import Booking
+    from app.models.user import User as UserModel
+    res = await db.execute(select(Conversation).where(Conversation.public_id == public_id))
+    conv = res.scalars().first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    if conv.forwarder_id != fwd.forwarder_id:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Booking already confirmed or conversation closed.")
+    if conv.forwarder_book_req:
+        raise HTTPException(status_code=409, detail="You already confirmed. Waiting for the shipper.")
+
+    conv.forwarder_book_req = True
+
+    if conv.shipper_book_req:
+        # Both confirmed — finalize booking
+        final_price = float(conv.agreed_price or conv.original_price)
+        import secrets as _secrets
+        booking_ref = "BK-" + _secrets.token_hex(3).upper()
+        # Get shipper info for Booking record + WF6
+        shipper_res = await db.execute(
+            select(UserModel).where(UserModel.sovereign_id == conv.shipper_id)
+        )
+        shipper = shipper_res.scalars().first()
+
+        # Get request info for Booking record + WF6
+        req_res = await db.execute(
+            select(MarketplaceRequest).where(MarketplaceRequest.request_id == conv.request_id)
+        )
+        req = req_res.scalars().first()
+
+        booking = Booking(
+            reference=booking_ref,
+            user_sovereign_id=conv.shipper_id,
+            carrier_name=fwd.company_name,
+            origin_locode=req.origin if req else "",
+            destination_locode=req.destination if req else "",
+            container_type=req.container_type if req and req.container_type else "FCL",
+            total_price=final_price,
+            currency=conv.currency,
+            marketplace_request_id=conv.request_id,
+            quote_id=conv.quote_id,
+            status="CONFIRMED",
+        )
+        db.add(booking)
+        conv.status = "BOOKED"
+        conv.booking_id = booking_ref
+
+        # Close the marketplace request
+        if req:
+            req.status = "CLOSED"
+
+        db.add(ChatMessage(
+            conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
+            message_type="SYSTEM", content="Deal locked! Booking confirmed by both parties.", is_read=False,
+        ))
+
+        # Cascade: close all other OPEN conversations for this request
+        other_convs_res = await db.execute(
+            select(Conversation).where(
+                Conversation.request_id == conv.request_id,
+                Conversation.id != conv.id,
+                Conversation.status == "OPEN",
+            )
+        )
+        for other_conv in other_convs_res.scalars().all():
+            other_conv.status = "CLOSED"
+            db.add(ChatMessage(
+                conversation_id=other_conv.id,
+                sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
+                content="This request has been fulfilled. The shipper has locked a deal with another forwarder.",
+                is_read=False,
+            ))
+
+        conv.updated_at = datetime.utcnow()
+        await db.commit()
+
+        if shipper and req:
+            background_tasks.add_task(webhook_service.trigger_booking_webhook, {
+                "reference": booking_ref,
+                "user_name": shipper.full_name or shipper.email,
+                "user_email": shipper.email,
+                "forwarder_email": fwd.email,
+                "forwarder_company": fwd.company_name,
+                "marketplace_request_id": conv.request_id,
+                "total_price": final_price,
+                "carrier_name": "",
+                "container_type": req.container_type or "",
+                "transit_days": "",
+                "currency": conv.currency,
+                "origin": req.origin,
+                "destination": req.destination,
+            })
+
+        return {"success": True, "booking_reference": booking_ref, "status": "BOOKED"}
+
+    db.add(ChatMessage(
+        conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
+        message_type="SYSTEM", content="Forwarder confirmed — waiting for shipper to lock the deal.", is_read=False,
+    ))
+    conv.updated_at = datetime.utcnow()
+    await db.commit()
+    return {"success": True, "status": "waiting_for_shipper"}
+
+
+@router.post("/conversations/{public_id}/close")
+async def portal_close_conversation(
+    public_id: str,
+    fwd: Forwarder = Depends(_verify_portal_forwarder),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.conversation import Conversation, ChatMessage
+    res = await db.execute(select(Conversation).where(Conversation.public_id == public_id))
+    conv = res.scalars().first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    if conv.forwarder_id != fwd.forwarder_id:
+        raise HTTPException(status_code=403, detail="Not authorized.")
+    if conv.status != "OPEN":
+        raise HTTPException(status_code=409, detail="Conversation already closed.")
+
+    conv.forwarder_close_req = True
+    if conv.shipper_close_req:
+        conv.status = "CLOSED"
+        db.add(ChatMessage(
+            conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
+            message_type="SYSTEM", content="Both parties closed this deal off-platform.", is_read=False,
+        ))
+    else:
+        db.add(ChatMessage(
+            conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
+            message_type="SYSTEM", content="Forwarder requested to close — waiting for shipper.", is_read=False,
+        ))
+    conv.updated_at = datetime.utcnow()
+    await db.commit()
+    return {"success": True, "status": conv.status}
