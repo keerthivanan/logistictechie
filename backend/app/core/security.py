@@ -13,9 +13,9 @@ REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 pwd_context = CryptContext(
     schemes=["argon2"],
     deprecated="auto",
-    argon2__time_cost=2,
-    argon2__memory_cost=16384,  # 16MB (default=65536/64MB) — 4x faster, still secure
-    argon2__parallelism=1,
+    argon2__time_cost=1,
+    argon2__memory_cost=8192,   # 8MB — fast on 2-vCPU VPS, rate limiter handles brute force
+    argon2__parallelism=2,
 )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
