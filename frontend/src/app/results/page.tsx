@@ -114,7 +114,7 @@ function ResultsContent() {
     <div className="min-h-screen bg-black text-white">
 
       {/* ── Top breadcrumb bar — matches search page navbar section ── */}
-      <div className="sticky top-16 z-40 bg-black/80 backdrop-blur-2xl border-b border-white/[0.06]">
+      <div className="sticky top-20 z-40 bg-black/80 backdrop-blur-2xl border-b border-white/[0.06]">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-xs font-inter">
@@ -388,7 +388,7 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black">
       <Navbar />
-      <div className="pt-16">
+      <div className="pt-20">
         <Suspense fallback={<FullPageSpinner />}>
           <ResultsContent />
         </Suspense>
