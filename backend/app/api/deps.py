@@ -1,4 +1,5 @@
 import hmac
+import os
 from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -43,6 +44,11 @@ async def get_current_user(
     user = await crud.user.get_by_email(db, email=token_data)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    # Apply effective role: admin email always gets role="admin" regardless of DB value
+    admin_email = os.getenv("ADMIN_EMAIL", "")
+    if admin_email and user.email.lower() == admin_email.lower():
+        user.role = "admin"
 
     # Reject tokens issued before the last password reset (kills all existing sessions)
     if _redis_mod.redis_client:
