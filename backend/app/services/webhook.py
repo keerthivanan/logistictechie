@@ -8,11 +8,19 @@ load_dotenv()
 
 logger = logging.getLogger("cargolink.webhook")
 
+_shared_client: httpx.AsyncClient | None = None
+
+def _get_client() -> httpx.AsyncClient:
+    global _shared_client
+    if _shared_client is None or _shared_client.is_closed:
+        _shared_client = httpx.AsyncClient(timeout=httpx.Timeout(5.0, connect=3.0))
+    return _shared_client
+
 class WebhookService:
     """
     Sovereign Webhook Protocol: Dispatches tactical data to n8n and external mission controllers.
     """
-    
+
     def __init__(self):
         self.forwarder_webhook = os.getenv("N8N_FORWARDER_REGISTER_WEBHOOK")
         self.marketplace_webhook = os.getenv("N8N_MARKETPLACE_SUBMIT_WEBHOOK")
@@ -20,9 +28,6 @@ class WebhookService:
         self.booking_webhook = os.getenv("N8N_BOOKING_WEBHOOK")
         self.quotes_complete_webhook = os.getenv("N8N_QUOTES_COMPLETE_WEBHOOK")
         self.new_conversation_webhook = os.getenv("N8N_NEW_CONVERSATION_WEBHOOK")
-        # WF1 handles shipper confirmation email internally (email field already in WF1 payload)
-        # WF2 handles forwarder bid confirmation — portal bids fire bid_confirmation_webhook
-        # which maps to WF2's second Webhook Trigger node in n8n
         self.bid_confirmation_webhook = os.getenv("N8N_BID_CONFIRMATION_WEBHOOK")
         self.password_reset_webhook = os.getenv("N8N_PASSWORD_RESET_WEBHOOK")
         self.welcome_webhook = os.getenv("N8N_WELCOME_WEBHOOK")
@@ -41,16 +46,15 @@ class WebhookService:
                 "X-OMEGO-Auth": api_secret,
                 "Content-Type": "application/json"
             }
-            async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, headers=headers, timeout=20.0)
-                response.raise_for_status()
-                logger.info(f"[WEBHOOK] Event {event_name} dispatched securely to {url}")
-                try:
-                    return response.json()
-                except Exception:
-                    return {"success": True, "raw_text": response.text}
+            response = await _get_client().post(url, json=payload, headers=headers)
+            response.raise_for_status()
+            logger.info(f"[WEBHOOK] {event_name} dispatched to {url}")
+            try:
+                return response.json()
+            except Exception:
+                return {"success": True, "raw_text": response.text}
         except Exception as e:
-            logger.error(f"[WEBHOOK] Mission Failure: Failed to dispatch {event_name} to {url}. Error: {e}")
+            logger.error(f"[WEBHOOK] Failed to dispatch {event_name}: {e}")
             return None
 
     async def trigger_registration_webhook(self, forwarder_data: Dict[str, Any]):

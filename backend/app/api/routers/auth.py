@@ -598,7 +598,7 @@ class ResetPassword(BaseModel):
     new_password: str
 
 @router.post("/forgot-password")
-async def forgot_password(data: ForgotPassword, db: AsyncSession = Depends(deps.get_db)):
+async def forgot_password(data: ForgotPassword, background_tasks: BackgroundTasks, db: AsyncSession = Depends(deps.get_db)):
     """
     Generates a single-use signed 1-hour reset token and fires a webhook so n8n emails the link.
     Security:
@@ -636,7 +636,7 @@ async def forgot_password(data: ForgotPassword, db: AsyncSession = Depends(deps.
 
         frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
         reset_url = f"{frontend_url}/reset-password?token={reset_token}"
-        await webhook_service.trigger_password_reset_webhook({
+        background_tasks.add_task(webhook_service.trigger_password_reset_webhook, {
             "email": user.email,
             "full_name": user.full_name or "User",
             "reset_url": reset_url,
@@ -646,7 +646,7 @@ async def forgot_password(data: ForgotPassword, db: AsyncSession = Depends(deps.
 
 
 @router.post("/reset-password")
-async def reset_password(data: ResetPassword, db: AsyncSession = Depends(deps.get_db)):
+async def reset_password(data: ResetPassword, background_tasks: BackgroundTasks, db: AsyncSession = Depends(deps.get_db)):
     """
     Verifies and consumes the password reset token, then sets the new password.
     Security:
@@ -703,7 +703,7 @@ async def reset_password(data: ResetPassword, db: AsyncSession = Depends(deps.ge
         await _redis_mod.redis_client.setex(f"pw_changed_at:{user.id}", 86400 * 30, str(int(time.time())))
 
     # Fire security alert so the real user knows their password was just changed
-    await webhook_service.trigger_password_reset_webhook({
+    background_tasks.add_task(webhook_service.trigger_password_reset_webhook, {
         "email": user.email,
         "full_name": user.full_name or "User",
         "reset_url": "",
