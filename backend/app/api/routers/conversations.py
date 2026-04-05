@@ -180,12 +180,12 @@ async def start_conversation(
         webhook_service.trigger_new_conversation_webhook,
         {
             "forwarder_email": quote.forwarder_email,
-            "company_name": conv.forwarder_company,
+            "forwarder_company": conv.forwarder_company,
             "shipper_name": current_user.full_name or current_user.sovereign_id,
             "request_id": data.request_id,
             "origin": req.origin,
             "destination": req.destination,
-            "conversation_url": f"{_frontend_url}/forwarders/chat/{conv.public_id}",
+            "conv_link": f"{_frontend_url}/forwarders/chat/{conv.public_id}",
         }
     )
 
