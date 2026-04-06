@@ -343,6 +343,14 @@ async def refresh_access_token(
         if user.is_locked:
             raise HTTPException(status_code=401, detail="Account is locked. Contact support.")
 
+        # Reject refresh tokens issued before a password change
+        if _redis_mod.redis_client:
+            pw_changed_at = await _redis_mod.redis_client.get(f"pw_changed_at:{user.id}")
+            if pw_changed_at:
+                token_iat = payload.get("iat", 0)
+                if token_iat < int(pw_changed_at):
+                    raise HTTPException(status_code=401, detail="Session expired after a password change. Please log in again.")
+
         role = _effective_role(user.email, user.role)
         refresh_fwd_id = None
         if role == "forwarder":
