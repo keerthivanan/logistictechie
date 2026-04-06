@@ -742,34 +742,40 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
     user_res = await db.execute(user_stmt)
     bid_user = user_res.scalars().first()
     if bid_user:
-        await activity_service.log(
-            db,
-            user_id=str(bid_user.id),
-            action="BID_SUBMITTED",
-            entity_type="REQUEST",
-            entity_id=str(bid_in.request_id),
-            metadata={"forwarder_id": bid_in.forwarder_id, "price": bid_in.price, "request_id": bid_in.request_id}
-        )
+        try:
+            await activity_service.log(
+                db,
+                user_id=str(bid_user.id),
+                action="BID_SUBMITTED",
+                entity_type="REQUEST",
+                entity_id=str(bid_in.request_id),
+                metadata={"forwarder_id": bid_in.forwarder_id, "price": bid_in.price, "request_id": bid_in.request_id}
+            )
+        except Exception:
+            pass
 
     # Notify shipper of new quote (in-app notification via activity log)
     shipper_user_stmt = select(User).where(User.email == req.user_email)
     shipper_user_res = await db.execute(shipper_user_stmt)
     shipper_user = shipper_user_res.scalars().first()
     if shipper_user:
-        await activity_service.log(
-            db,
-            user_id=str(shipper_user.id),
-            action="NEW_QUOTE",
-            entity_type="REQUEST",
-            entity_id=str(bid_in.request_id),
-            metadata={
-                "forwarder_company": fwd.company_name,
-                "forwarder_id": bid_in.forwarder_id,
-                "price": bid_in.price,
-                "request_id": bid_in.request_id,
-                "quotation_count": new_count,
-            }
-        )
+        try:
+            await activity_service.log(
+                db,
+                user_id=str(shipper_user.id),
+                action="NEW_QUOTE",
+                entity_type="REQUEST",
+                entity_id=str(bid_in.request_id),
+                metadata={
+                    "forwarder_company": fwd.company_name,
+                    "forwarder_id": bid_in.forwarder_id,
+                    "price": bid_in.price,
+                    "request_id": bid_in.request_id,
+                    "quotation_count": new_count,
+                }
+            )
+        except Exception:
+            pass
 
     return {
         "success": True,

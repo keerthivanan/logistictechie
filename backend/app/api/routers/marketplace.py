@@ -203,14 +203,17 @@ async def submit_request(
     request_id = generated_req_id
         
     # LOG ACTIVITY: Track the submission for the Sovereign Dashboard
-    await activity_service.log(
-        db,
-        user_id=str(current_user.id),
-        action="MARKETPLACE_SUBMIT",
-        entity_type="REQUEST",
-        entity_id=request_id,
-        metadata=payload
-    )
+    try:
+        await activity_service.log(
+            db,
+            user_id=str(current_user.id),
+            action="MARKETPLACE_SUBMIT",
+            entity_type="REQUEST",
+            entity_id=request_id,
+            metadata=payload
+        )
+    except Exception:
+        pass
         
     return {
         "success": True, 
