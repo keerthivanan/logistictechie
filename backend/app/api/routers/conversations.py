@@ -113,8 +113,8 @@ async def start_conversation(
         raise HTTPException(status_code=404, detail="Request not found.")
     if req.user_sovereign_id != current_user.sovereign_id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="You do not own this request.")
-    if req.status not in ("OPEN", "CLOSED"):
-        raise HTTPException(status_code=409, detail="This request is no longer active.")
+    if req.status != "OPEN":
+        raise HTTPException(status_code=409, detail="This request is no longer accepting conversations.")
 
     # 2. Fetch the quote
     quote_res = await db.execute(
