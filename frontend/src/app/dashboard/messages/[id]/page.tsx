@@ -39,7 +39,7 @@ interface ConvMeta {
 function lastSeenLabel(isoString: string | null): string {
     if (!isoString) return 'Not yet active'
     const diff = Math.floor((Date.now() - new Date(isoString + 'Z').getTime()) / 1000)
-    if (diff < 30) return 'Online now'
+    if (diff < 120) return 'Online now'
     if (diff < 3600) return `Last seen ${Math.floor(diff / 60)}m ago`
     if (diff < 86400) return `Last seen ${Math.floor(diff / 3600)}h ago`
     return `Last seen ${Math.floor(diff / 86400)}d ago`

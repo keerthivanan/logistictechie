@@ -109,7 +109,7 @@ async def submit_request(
     
     # Normalize Weight to KG
     weight_kg = request_in.weight
-    if request_in.weight_unit.upper() in ["LBS", "LB"]:
+    if request_in.weight_unit.upper() in ["LBS", "LB", "LBR"]:
         weight_kg = request_in.weight * 0.453592
     
     payload = {
