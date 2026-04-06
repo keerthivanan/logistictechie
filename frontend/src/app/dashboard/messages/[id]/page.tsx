@@ -316,7 +316,7 @@ export default function ChatPage() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                            conv.forwarder_last_seen && (Date.now() - new Date(conv.forwarder_last_seen + 'Z').getTime()) < 30000
+                            conv.forwarder_last_seen && (Date.now() - new Date(conv.forwarder_last_seen + 'Z').getTime()) < 120000
                                 ? 'bg-emerald-400'
                                 : 'bg-zinc-700'
                         }`} />
