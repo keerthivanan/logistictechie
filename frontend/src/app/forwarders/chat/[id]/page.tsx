@@ -39,7 +39,7 @@ interface ConvMeta {
 function lastSeenLabel(isoString: string | null, t: (key: TKey) => string): string {
     if (!isoString) return t('chat.not.yet.active')
     const diff = Math.floor((Date.now() - new Date(isoString + 'Z').getTime()) / 1000)
-    if (diff < 30) return t('chat.online.now')
+    if (diff < 120) return t('chat.online.now')
     if (diff < 3600) return t('chat.last.seen.m').replace('{n}', String(Math.floor(diff / 60)))
     if (diff < 86400) return t('chat.last.seen.h').replace('{n}', String(Math.floor(diff / 3600)))
     return t('chat.last.seen.d').replace('{n}', String(Math.floor(diff / 86400)))

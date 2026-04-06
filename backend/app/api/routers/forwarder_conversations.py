@@ -249,6 +249,7 @@ async def send_portal_message(
         is_read=False,
     )
     conv.updated_at = _utcnow()
+    conv.forwarder_last_seen = _utcnow()
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
@@ -314,6 +315,7 @@ async def portal_respond_offer(
     )
     db.add(msg)
     conv.updated_at = _utcnow()
+    conv.forwarder_last_seen = _utcnow()
     await db.commit()
     await db.refresh(msg)
 
@@ -339,6 +341,7 @@ async def portal_close_deal(
         raise HTTPException(status_code=409, detail="You have already requested to close this deal.")
 
     conv.forwarder_close_req = True
+    conv.forwarder_last_seen = _utcnow()
 
     if conv.shipper_close_req:
         # Both confirmed — close this conversation, the request, and notify all others.

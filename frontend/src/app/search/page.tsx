@@ -59,6 +59,7 @@ export default function SearchPage() {
 
     // ── Details ──
     const [readyDate, setReadyDate] = useState('')
+    const [commodity, setCommodity] = useState('')
     const [isHazardous, setIsHazardous] = useState(false)
     const [isPersonal, setIsPersonal] = useState(false)
 
@@ -100,6 +101,7 @@ export default function SearchPage() {
             container: mode === 'FCL' ? containerType : mode,
             units: String(units),
         }
+        if (commodity.trim()) params.commodity = commodity.trim()
         if (weight) params.weight = `${weight}${weightUnit}`
         if (volume) params.volume = volume
         if (dimL && dimW && dimH) params.dims = `${dimL}x${dimW}x${dimH}${dimUnit}`
@@ -373,7 +375,19 @@ export default function SearchPage() {
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-inter">{t('search.details')}</p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-4 mb-6">
+                        <div className="grid md:grid-cols-4 gap-4 mb-6">
+                            {/* Commodity */}
+                            <div>
+                                <label className={lbl}>Commodity</label>
+                                <input
+                                    type="text"
+                                    value={commodity}
+                                    onChange={e => setCommodity(e.target.value)}
+                                    placeholder="e.g. Electronics, Textiles..."
+                                    className={inp}
+                                />
+                            </div>
+
                             {/* Ready date */}
                             <div>
                                 <label className={lbl}>{t('search.ready')}</label>

@@ -446,7 +446,7 @@
     },
     {
       "parameters": {
-        "workflowId": "={{ $env.WF3_AUTO_CLOSE_WORKFLOW_ID }}",
+        "workflowId": "ZuzxW0OO0UNwa8hE",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {

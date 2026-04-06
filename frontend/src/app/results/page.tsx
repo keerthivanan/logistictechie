@@ -51,9 +51,11 @@ function ResultsContent() {
     async function load() {
       try {
         setLoading(true)
-        let commodity = 'General Cargo'
-        if (isHazardous) commodity = 'Hazardous Goods'
-        else if (value && parseFloat(value) > 50000) commodity = 'High Value Goods'
+        let commodity = searchParams.get('commodity') || 'General Cargo'
+        if (!searchParams.get('commodity')) {
+          if (isHazardous) commodity = 'Hazardous Goods'
+          else if (value && parseFloat(value) > 50000) commodity = 'High Value Goods'
+        }
         const token = localStorage.getItem('token')
         const res = await apiFetch('/api/quotes/', {
           method: 'POST',
@@ -89,15 +91,22 @@ function ResultsContent() {
       const token = localStorage.getItem('token')
       const mode = searchParams.get('mode') || 'FCL'
       const units = parseInt(searchParams.get('units') || '1')
-      const cargoType = mode === 'Air' ? 'AIR' : mode === 'LCL' ? 'LCL' : 'FCL'
+      const cargoTypeMap: Record<string, string> = { FCL: 'FCL', LCL: 'LCL', Air: 'AIR', Truck: 'ROAD' }
+      const cargoType = cargoTypeMap[mode] || 'FCL'
+      const rawWeight = searchParams.get('weight') || '1000KG'
+      const weightVal = parseFloat(rawWeight.replace(/[A-Za-z]/g, '')) || 1000
+      const weightUnit = rawWeight.toUpperCase().includes('LB') ? 'LBR' : 'KGM'
+      const commodity = searchParams.get('commodity') ||
+        (isHazardous ? 'Hazardous Goods' : (value && parseFloat(value) > 50000 ? 'High Value Goods' : 'General Cargo'))
       const res = await apiFetch('/api/marketplace/submit', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: 'client', origin, destination, cargo_type: cargoType,
-          container_type: container, container_count: units, weight: 1000, weight_unit: 'KGM',
-          commodity: isHazardous ? 'Hazardous Goods' : (value && parseFloat(value) > 50000 ? 'High Value Goods' : 'General Cargo'),
-          is_hazardous: isHazardous, pickup_ready_date: readyDate || new Date().toISOString().split('T')[0],
+          container_type: container, container_count: units, weight: weightVal, weight_unit: weightUnit,
+          commodity, is_hazardous: isHazardous,
+          needs_insurance: searchParams.get('personal') === 'true',
+          pickup_ready_date: readyDate || new Date().toISOString().split('T')[0],
           vessel: quote.vessel_name || '', special_requirements: '',
         }),
       })
