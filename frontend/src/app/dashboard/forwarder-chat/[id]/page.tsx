@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Send, ArrowLeft, X, BarChart3, ArrowRight, MessageSquare, Lock, Ship, TrendingUp } from 'lucide-react'
-import { FullPageSpinner } from '@/components/ui/Spinner'
+import { Loader2, Send, ArrowLeft, X, MessageSquare, Lock, Ship, TrendingUp } from 'lucide-react'
 import { useT, TKey } from '@/lib/i18n/t'
 
 interface Message {
@@ -46,7 +45,9 @@ function lastSeenLabel(isoString: string | null, t: (key: TKey) => string): stri
     return t('chat.last.seen.d').replace('{n}', String(Math.floor(diff / 86400)))
 }
 
-export default function ForwarderChatPage() {
+const CONV_CURRENCIES = ['USD', 'EUR', 'GBP', 'SAR', 'AED', 'QAR', 'KWD', 'BHD', 'JPY', 'CNY', 'SGD', 'INR', 'AUD', 'CAD', 'CHF', 'TRY', 'EGP', 'NZD', 'HKD']
+
+export default function ForwarderDashboardChatPage() {
     const { id } = useParams<{ id: string }>()
     const router = useRouter()
     const t = useT()
@@ -54,8 +55,6 @@ export default function ForwarderChatPage() {
     const [fwdId, setFwdId] = useState('')
     const [fwdEmail, setFwdEmail] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [authLoading, setAuthLoading] = useState(false)
-    const [authError, setAuthError] = useState('')
 
     const [conv, setConv] = useState<ConvMeta | null>(() => {
         try { return JSON.parse(sessionStorage.getItem(`fwd_conv_${id}`) || 'null') } catch { return null }
@@ -79,8 +78,7 @@ export default function ForwarderChatPage() {
     const [convResult, setConvResult] = useState<string | null>(null)
     const [convLoading, setConvLoading] = useState(false)
 
-    const CONV_CURRENCIES = ['USD', 'EUR', 'GBP', 'SAR', 'AED', 'QAR', 'KWD', 'BHD', 'JPY', 'CNY', 'SGD', 'INR', 'AUD', 'CAD', 'CHF', 'TRY', 'EGP', 'NZD', 'HKD']
-
+    // Load credentials from localStorage — redirect if missing
     useEffect(() => {
         const storedId = localStorage.getItem('cl_fwd_id')
         const storedEmail = localStorage.getItem('cl_fwd_email')
@@ -88,8 +86,10 @@ export default function ForwarderChatPage() {
             setFwdId(storedId)
             setFwdEmail(storedEmail)
             setIsAuthenticated(true)
+        } else {
+            router.replace('/dashboard/messages')
         }
-    }, [])
+    }, [router])
 
     const fetchMessages = useCallback(async () => {
         if (!fwdId || !fwdEmail) return
@@ -103,6 +103,7 @@ export default function ForwarderChatPage() {
                     setIsAuthenticated(false)
                     localStorage.removeItem('cl_fwd_id')
                     localStorage.removeItem('cl_fwd_email')
+                    router.replace('/dashboard/messages')
                 }
                 return
             }
@@ -115,7 +116,7 @@ export default function ForwarderChatPage() {
             } catch {}
         } catch {}
         finally { setLoading(false) }
-    }, [id, fwdId, fwdEmail])
+    }, [id, fwdId, fwdEmail, router])
 
     useEffect(() => {
         if (!isAuthenticated || !fwdId || !fwdEmail) return
@@ -125,6 +126,7 @@ export default function ForwarderChatPage() {
         return () => clearInterval(interval)
     }, [isAuthenticated, fetchMessages, fwdId, fwdEmail])
 
+    // Smart auto-scroll
     useEffect(() => {
         const newCount = messages.length
         const el = containerRef.current
@@ -138,7 +140,7 @@ export default function ForwarderChatPage() {
         prevCountRef.current = newCount
     }, [messages])
 
-    // Auto-switch convTo if it matches deal currency on load
+    // Auto-switch convTo if it matches deal currency
     useEffect(() => {
         if (!conv?.currency) return
         if (convTo === conv.currency) {
@@ -147,6 +149,7 @@ export default function ForwarderChatPage() {
         }
     }, [conv?.currency])
 
+    // Currency conversion
     useEffect(() => {
         const price = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
         if (!conv || !price) { setConvResult(null); return }
@@ -169,29 +172,6 @@ export default function ForwarderChatPage() {
             .finally(() => setConvLoading(false))
         return () => controller.abort()
     }, [conv?.agreed_price, conv?.current_offer, conv?.original_price, convTo, conv?.currency])
-
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setAuthLoading(true); setAuthError('')
-        try {
-            const res = await apiFetch('/api/forwarders/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ forwarder_id: fwdId.toUpperCase(), email: fwdEmail }),
-            })
-            const data = await res.json()
-            if (res.ok && data.success) {
-                const normalizedId = fwdId.toUpperCase()
-                localStorage.setItem('cl_fwd_id', normalizedId)
-                localStorage.setItem('cl_fwd_email', fwdEmail)
-                setFwdId(normalizedId)
-                setIsAuthenticated(true)
-            } else {
-                setAuthError(data.detail || t('chat.invalid.creds'))
-            }
-        } catch { setAuthError(t('chat.network.error')) }
-        finally { setAuthLoading(false) }
-    }
 
     const sendText = async () => {
         if (!text.trim() || sending) return
@@ -290,60 +270,26 @@ export default function ForwarderChatPage() {
         ? (Date.now() - new Date(conv.shipper_last_seen + 'Z').getTime()) < 120000
         : false
 
-    // ── Login screen ──────────────────────────────────────────────────────────
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-                <div className="w-full max-w-sm">
-                    <div className="text-center mb-8">
-                        <div className="w-14 h-14 bg-white/[0.04] border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <BarChart3 className="w-6 h-6 text-white" />
-                        </div>
-                        <h1 className="text-xl font-bold text-white font-outfit uppercase mb-1">{t('chat.partner.chat')}</h1>
-                        <p className="text-xs text-zinc-500">{t('chat.signin.desc')}</p>
-                    </div>
-                    <form onSubmit={handleLogin} className="bg-[#0a0a0a] border border-white/[0.08] rounded-3xl p-6 space-y-4">
-                        {authError && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2.5 rounded-xl text-xs">
-                                {authError}
-                            </div>
-                        )}
-                        <div>
-                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('chat.partner.id')}</label>
-                            <input type="text" placeholder="REG-OMEGO-XXXX" value={fwdId} onChange={e => setFwdId(e.target.value)}
-                                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700 uppercase" required />
-                        </div>
-                        <div>
-                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('chat.email')}</label>
-                            <input type="email" placeholder="company@email.com" value={fwdEmail} onChange={e => setFwdEmail(e.target.value)}
-                                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700" required />
-                        </div>
-                        <button type="submit" disabled={authLoading}
-                            className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 uppercase tracking-widest">
-                            {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t('chat.access')} <ArrowRight className="w-3.5 h-3.5" /></>}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        )
-    }
-
-    if (loading && !conv) return <FullPageSpinner />
+    if (loading && !conv) return (
+        <div className="h-full flex items-center justify-center text-zinc-600 text-sm">
+            <Loader2 className="w-5 h-5 animate-spin" />
+        </div>
+    )
     if (!conv) return (
-        <div className="h-screen bg-black flex items-center justify-center text-zinc-600 text-sm">
+        <div className="h-full flex items-center justify-center text-zinc-600 text-sm">
             {t('chat.not.found')}
         </div>
     )
 
     return (
-        <div className="h-screen bg-black flex">
+        <div className="h-full bg-[#0a0a0a] border border-white/[0.05] rounded-2xl overflow-hidden flex">
 
             {/* ── LEFT: Chat Column ── */}
             <div className="flex-1 flex flex-col min-w-0 border-r border-white/[0.05]">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-[#0d0d0d] flex-shrink-0">
-                    <button onClick={() => router.push('/forwarders/portal')}
+                    <button onClick={() => router.push('/dashboard/messages')}
                         className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors flex-shrink-0">
                         <ArrowLeft className="w-4 h-4 text-zinc-500" />
                     </button>
@@ -353,7 +299,7 @@ export default function ForwarderChatPage() {
                         <div className="w-9 h-9 rounded-xl bg-zinc-800 text-white flex items-center justify-center text-xs font-bold font-outfit">
                             {shipperInitials}
                         </div>
-                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080808] ${isShipperOnline ? 'bg-white' : 'bg-zinc-700'}`} />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0d0d0d] ${isShipperOnline ? 'bg-white' : 'bg-zinc-700'}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -375,7 +321,6 @@ export default function ForwarderChatPage() {
 
                     <div className="flex-1" />
 
-                    {/* Empty state */}
                     {messages.filter(m => m.message_type !== 'SYSTEM').length === 0 && (
                         <div className="flex flex-col items-center justify-center py-12 text-center gap-4 opacity-40">
                             <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
@@ -504,7 +449,7 @@ export default function ForwarderChatPage() {
                                 <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                                     className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
                                     {!isMine && (
-                                        <div className="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-500/20 text-blue-400 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mb-0.5">
+                                        <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-white/10 text-zinc-400 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mb-0.5">
                                             {shipperInitials}
                                         </div>
                                     )}

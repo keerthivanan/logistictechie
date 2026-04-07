@@ -4,6 +4,7 @@ from app.db.session import get_db
 from app.models.forwarder import Forwarder
 from app.models.user import User
 from app.models.marketplace import MarketplaceBid, MarketplaceRequest, ForwarderBidStatus
+from app.models.conversation import Conversation
 from app.api.deps import get_current_user, verify_n8n_webhook
 from sqlalchemy import select, func
 from datetime import datetime, timezone, timedelta
@@ -430,10 +431,10 @@ async def get_forwarder_dashboard(
     bid_count_res = await db.execute(bid_count_stmt)
     total_bids = bid_count_res.scalar() or 0
 
-    # Won Bids (ACCEPTED or COMPLETED status)
-    won_bids_stmt = select(func.count(ForwarderBidStatus.id)).where(
-        ForwarderBidStatus.forwarder_id == f_id,
-        ForwarderBidStatus.status.in_(["ACCEPTED", "COMPLETED"])
+    # Won Bids — conversations that reached BOOKED status
+    won_bids_stmt = select(func.count(Conversation.id)).where(
+        Conversation.forwarder_id == f_id,
+        Conversation.status == "BOOKED"
     )
     won_bids_res = await db.execute(won_bids_stmt)
     won_bids = won_bids_res.scalar() or 0
@@ -522,9 +523,9 @@ async def portal_forwarder_dashboard(
     total_bids = bid_count_res.scalar() or 0
 
     won_bids_res = await db.execute(
-        select(func.count(ForwarderBidStatus.id)).where(
-            ForwarderBidStatus.forwarder_id == f_id,
-            ForwarderBidStatus.status.in_(["ACCEPTED", "COMPLETED"])
+        select(func.count(Conversation.id)).where(
+            Conversation.forwarder_id == f_id,
+            Conversation.status == "BOOKED"
         )
     )
     won_bids = won_bids_res.scalar() or 0

@@ -79,7 +79,7 @@ export default function ChatPage() {
             const fwdId = user.forwarder_id || user.sovereign_id
             if (fwdId) localStorage.setItem('cl_fwd_id', fwdId)
             if (user.email) localStorage.setItem('cl_fwd_email', user.email)
-            router.replace(`/forwarders/chat/${id}`)
+            router.replace(`/dashboard/forwarder-chat/${id}`)
         }
     }, [authLoading, user, id, router])
 

@@ -60,7 +60,7 @@ export default function MessagesPage() {
     }, [user, authLoading, router, fetchConversations])
 
     const displayPrice = (conv: ConversationSummary) => {
-        if (conv.agreed_price) return { label: t('msg.agreed'), price: conv.agreed_price, color: 'text-emerald-400' }
+        if (conv.agreed_price) return { label: t('msg.agreed'), price: conv.agreed_price, color: 'text-white' }
         if (conv.current_offer) return { label: t('msg.offer'), price: conv.current_offer, color: 'text-amber-400' }
         return { label: t('msg.quoted'), price: conv.original_price, color: 'text-white' }
     }
@@ -119,10 +119,10 @@ export default function MessagesPage() {
                                     {/* Icon with unread indicator */}
                                     <div className="relative flex-shrink-0">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                            isBooked ? 'bg-emerald-500/10' : 'bg-white/[0.04] border border-white/5'
+                                            isBooked ? 'bg-white/[0.05]' : 'bg-white/[0.04] border border-white/5'
                                         }`}>
                                             {isBooked
-                                                ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                                ? <CheckCircle2 className="w-4 h-4 text-white" />
                                                 : isClosed
                                                     ? <X className="w-4 h-4 text-zinc-600" />
                                                     : <MessageSquare className={`w-4 h-4 ${hasUnread ? 'text-white' : 'text-zinc-500'}`} />
@@ -140,7 +140,7 @@ export default function MessagesPage() {
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className={`text-sm font-semibold font-outfit truncate ${isClosed ? 'text-zinc-500' : 'text-white'}`}>{conv.forwarder_company}</span>
                                             <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full flex-shrink-0 ${
-                                                isBooked ? 'bg-emerald-500/10 text-emerald-400'
+                                                isBooked ? 'bg-white/[0.05] text-white'
                                                 : isClosed ? 'bg-zinc-800 text-zinc-600'
                                                 : 'bg-white/5 text-zinc-500'
                                             }`}>

@@ -213,7 +213,7 @@ export default function DashboardLayout({
                     {/* Partner Section — forwarders only */}
                     {user?.role === 'forwarder' && (
                         <div>
-                            <p className="px-3 text-[9px] font-semibold text-emerald-500/70 uppercase tracking-[0.25em] mb-2">{t('dash.partner.center')}</p>
+                            <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">{t('dash.partner.center')}</p>
                             <div className="space-y-0.5">
                                 {partnerNav.map((item) => {
                                     const isActive = pathname === item.href
@@ -222,12 +222,12 @@ export default function DashboardLayout({
                                             key={item.name}
                                             href={item.href}
                                             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                                                ? 'bg-emerald-500 text-white font-bold shadow-[0_2px_16px_rgba(16,185,129,0.2)]'
-                                                : 'text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/[0.06]'
+                                                ? 'bg-white text-black font-bold shadow-[0_2px_16px_rgba(255,255,255,0.08)]'
+                                                : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'
                                             }`}
                                         >
-                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-white/20' : 'bg-emerald-500/[0.08] group-hover:bg-emerald-500/[0.15]'}`}>
-                                                <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-emerald-600 group-hover:text-emerald-400'}`} />
+                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                                <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
                                             </div>
                                             <span className="text-[13px] font-semibold tracking-tight">{item.name}</span>
                                         </Link>
@@ -377,7 +377,7 @@ export default function DashboardLayout({
                                 >
                                     <Bell className={`w-5 h-5 ${notifOpen ? 'text-white' : 'text-zinc-500'} group-hover:text-white transition-colors`} />
                                     {notifUnread > 0 && (
-                                        <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-emerald-500 rounded-full border-2 border-[#050505] flex items-center justify-center text-[9px] font-bold text-black px-0.5">
+                                        <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 bg-white rounded-full border-2 border-[#050505] flex items-center justify-center text-[9px] font-bold text-black px-0.5">
                                             {notifUnread > 9 ? '9+' : notifUnread}
                                         </span>
                                     )}
@@ -396,7 +396,7 @@ export default function DashboardLayout({
                                             <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-xs font-semibold text-white uppercase tracking-[0.2em] font-outfit">{t('dash.alerts')}</h3>
                                                 {notifUnread > 0 && (
-                                                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                                    <span className="text-[9px] font-bold text-white bg-white/10 px-2 py-0.5 rounded-full">
                                                         {notifUnread} new
                                                     </span>
                                                 )}
@@ -417,7 +417,7 @@ export default function DashboardLayout({
                                                             {n.body && <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2">{n.body}</p>}
                                                             <p className="text-[9px] text-zinc-700">{n.time_ago || (n.timestamp ? new Date(n.timestamp).toLocaleTimeString() : '')}</p>
                                                         </div>
-                                                        <span className="text-[9px] text-emerald-400 font-semibold flex-shrink-0 self-center">View →</span>
+                                                        <span className="text-[9px] text-zinc-400 font-semibold flex-shrink-0 self-center">View →</span>
                                                     </Link>
                                                 )) : (
                                                     <div className="py-10 text-center opacity-30">
