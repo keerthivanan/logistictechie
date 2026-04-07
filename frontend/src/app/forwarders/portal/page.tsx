@@ -558,19 +558,56 @@ export default function ForwarderPortal() {
                                     </div>
 
                                     {/* Request summary */}
-                                    <div className="bg-black border border-white/5 rounded-xl p-3 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <Info className="w-3 h-3 text-zinc-600" />
-                                            <span className="text-[10px] font-mono text-zinc-500">{selectedRequest.request_id}</span>
+                                    <div className="bg-black border border-white/5 rounded-xl p-3 space-y-2.5">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-mono text-zinc-600">{selectedRequest.request_id}</span>
+                                            <span className="text-[9px] font-bold text-zinc-500 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-lg uppercase tracking-wider">
+                                                {selectedRequest.cargo_type}
+                                            </span>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-xs font-bold text-white">
                                             <span>{selectedRequest.origin}</span>
-                                            <ArrowRight className="w-3 h-3 text-zinc-600" />
+                                            <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
                                             <span>{selectedRequest.destination}</span>
                                         </div>
-                                        <span className="inline-block text-[9px] font-bold text-zinc-500 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-lg uppercase tracking-wider">
-                                            {selectedRequest.cargo_type}
-                                        </span>
+                                        <div className="border-t border-white/[0.04] pt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                                            {selectedRequest.commodity && (
+                                                <div className="col-span-2">
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Commodity</p>
+                                                    <p className="text-[11px] text-white font-medium truncate">{selectedRequest.commodity}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.weight_kg && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Weight</p>
+                                                    <p className="text-[11px] text-white font-medium">{Number(selectedRequest.weight_kg).toLocaleString()} kg</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.quantity && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Qty</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.quantity} units</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.container_type && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Container</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.container_type} × {selectedRequest.container_count || 1}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.incoterms && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Incoterms</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.incoterms}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.target_date && (
+                                                <div className="col-span-2">
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Required by</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.target_date}</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Price input */}
