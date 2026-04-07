@@ -100,9 +100,7 @@ export default function RequestQuoteForm() {
         // Timeline
         pickup_ready_date: '',
         delivery_date: '',
-        // Contact & Notes
-        phone: '',
-        phone_code: '+1',
+        // Notes
         vessel: '',
         notes: '',
     });
@@ -174,7 +172,7 @@ export default function RequestQuoteForm() {
                 sovereign_id: user.sovereign_id || '',
                 name: user.name || user.email || 'Client',
                 email: user.email,
-                phone: formData.phone ? `${formData.phone_code} ${formData.phone}`.trim() : '',
+                phone: '',
                 origin: formData.origin_district || (originC?.name || formData.origin_country),
                 origin_locode: formData.origin_locode,
                 origin_type: formData.origin_type,
@@ -608,30 +606,7 @@ export default function RequestQuoteForm() {
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className={lbl}>{t('rqf.phone')} <span className="text-zinc-700 normal-case tracking-normal ml-1">(optional)</span></label>
-                                <div className="flex bg-black border border-white/[0.06] rounded-xl overflow-hidden">
-                                    <select
-                                        value={formData.phone_code}
-                                        onChange={e => set('phone_code', e.target.value)}
-                                        className="bg-white/[0.03] border-r border-white/[0.06] px-3 py-3 text-xs font-bold text-zinc-400 font-inter appearance-none cursor-pointer focus:outline-none"
-                                    >
-                                        {countries
-                                            .filter((c: Country, i: number, arr: Country[]) => arr.findIndex((x: Country) => x.dial_code === c.dial_code) === i)
-                                            .sort((a: Country, b: Country) => a.dial_code.localeCompare(b.dial_code))
-                                            .map((c: Country) => (
-                                                <option key={c.code} value={c.dial_code} className="bg-zinc-900">
-                                                    {c.dial_code} {c.name}
-                                                </option>
-                                            ))}
-                                    </select>
-                                    <input name="phone" type="tel" value={formData.phone}
-                                        onChange={e => set('phone', e.target.value.replace(/\D/g, '').slice(0, 15))}
-                                        placeholder="Phone number"
-                                        className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
-                                </div>
-                            </div>
+                        <div className="grid md:grid-cols-1 gap-5">
                             <div>
                                 <label className={lbl}>{t('rqf.notes')}</label>
                                 <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2}
