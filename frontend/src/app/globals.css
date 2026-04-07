@@ -7,6 +7,145 @@
   --foreground: #ffffff;
 }
 
+/* ============================================================
+   LIGHT THEME — toggled by adding class="light" to <html>
+   Covers every Tailwind color pattern used across the codebase
+   ============================================================ */
+
+html.light {
+  --background: #f4f4f5;
+  --foreground: #0f0f0f;
+  color-scheme: light;
+}
+
+/* ── Body ── */
+html.light body {
+  background-color: #f4f4f5;
+  color: #0f0f0f;
+}
+
+/* ── Page backgrounds ── */
+html.light .bg-\[#050505\],
+html.light .bg-\[#060606\],
+html.light .bg-\[#0a0a0a\],
+html.light .bg-\[#0f0f0f\],
+html.light .bg-\[#111\],
+html.light .bg-\[#111111\] { background-color: #f4f4f5 !important; }
+
+html.light .bg-black { background-color: #ffffff !important; }
+
+html.light .bg-zinc-950 { background-color: #e4e4e7 !important; }
+html.light .bg-zinc-900 { background-color: #e4e4e7 !important; }
+html.light .bg-zinc-800 { background-color: #d4d4d8 !important; }
+
+/* ── Card / surface overlays (white-alpha → dark-alpha) ── */
+html.light .bg-white\/\[0\.02\] { background-color: rgba(0,0,0,0.03) !important; }
+html.light .bg-white\/\[0\.03\] { background-color: rgba(0,0,0,0.04) !important; }
+html.light .bg-white\/\[0\.04\] { background-color: rgba(0,0,0,0.05) !important; }
+html.light .bg-white\/\[0\.05\] { background-color: rgba(0,0,0,0.06) !important; }
+html.light .bg-white\/\[0\.06\] { background-color: rgba(0,0,0,0.07) !important; }
+html.light .bg-white\/\[0\.07\] { background-color: rgba(0,0,0,0.08) !important; }
+html.light .bg-white\/\[0\.08\] { background-color: rgba(0,0,0,0.09) !important; }
+html.light .bg-white\/\[0\.10\] { background-color: rgba(0,0,0,0.10) !important; }
+html.light .bg-white\/10       { background-color: rgba(0,0,0,0.10) !important; }
+html.light .bg-white\/20       { background-color: rgba(0,0,0,0.12) !important; }
+html.light .bg-white\/5        { background-color: rgba(0,0,0,0.05) !important; }
+
+/* Navbar glass pill */
+html.light .bg-black\/30 { background-color: rgba(255,255,255,0.88) !important; }
+html.light .bg-black\/40 { background-color: rgba(255,255,255,0.92) !important; }
+html.light .bg-black\/50 { background-color: rgba(255,255,255,0.95) !important; }
+html.light .bg-black\/80 { background-color: rgba(255,255,255,0.97) !important; }
+html.light .bg-black\/90 { background-color: rgba(255,255,255,0.99) !important; }
+html.light .bg-black\/95 { background-color: #ffffff !important; }
+
+/* Gradient backgrounds */
+html.light .bg-gradient-to-br.from-zinc-900,
+html.light .bg-gradient-to-b.from-zinc-900 { background: #e8e8ed !important; }
+html.light .from-zinc-900 { --tw-gradient-from: #e8e8ed !important; }
+html.light .from-zinc-950 { --tw-gradient-from: #e4e4e7 !important; }
+html.light .to-zinc-950   { --tw-gradient-to:   #d4d4d8 !important; }
+html.light .to-zinc-900   { --tw-gradient-to:   #e4e4e7 !important; }
+html.light .to-black      { --tw-gradient-to:   #f4f4f5 !important; }
+
+/* ── Text ── */
+html.light .text-white  { color: #111111 !important; }
+html.light .text-zinc-100 { color: #1f1f22 !important; }
+html.light .text-zinc-200 { color: #27272a !important; }
+html.light .text-zinc-300 { color: #3f3f46 !important; }
+html.light .text-zinc-400 { color: #52525b !important; }
+html.light .text-zinc-500 { color: #71717a !important; }
+html.light .text-zinc-600 { color: #52525b !important; }
+html.light .text-zinc-700 { color: #3f3f46 !important; }
+
+/* Keep white text on colored/dark buttons */
+html.light .bg-white { background-color: #0f0f0f !important; color: #ffffff !important; }
+html.light .bg-white.text-black { color: #ffffff !important; }
+html.light a.bg-white,
+html.light button.bg-white { background-color: #111111 !important; color: #ffffff !important; }
+html.light .hover\:bg-zinc-100:hover { background-color: #27272a !important; }
+
+/* ── Borders ── */
+html.light .border-white\/\[0\.04\] { border-color: rgba(0,0,0,0.06) !important; }
+html.light .border-white\/\[0\.05\] { border-color: rgba(0,0,0,0.07) !important; }
+html.light .border-white\/\[0\.06\] { border-color: rgba(0,0,0,0.08) !important; }
+html.light .border-white\/\[0\.07\] { border-color: rgba(0,0,0,0.09) !important; }
+html.light .border-white\/\[0\.08\] { border-color: rgba(0,0,0,0.10) !important; }
+html.light .border-white\/\[0\.09\] { border-color: rgba(0,0,0,0.11) !important; }
+html.light .border-white\/\[0\.10\] { border-color: rgba(0,0,0,0.12) !important; }
+html.light .border-white\/10        { border-color: rgba(0,0,0,0.12) !important; }
+html.light .border-white\/20        { border-color: rgba(0,0,0,0.16) !important; }
+html.light .border-white\/\[0\.12\] { border-color: rgba(0,0,0,0.14) !important; }
+html.light .border-white\/\[0\.15\] { border-color: rgba(0,0,0,0.15) !important; }
+html.light .border-white\/\[0\.20\] { border-color: rgba(0,0,0,0.16) !important; }
+html.light .border-white\/\[0\.25\] { border-color: rgba(0,0,0,0.20) !important; }
+html.light .border-white\/40        { border-color: rgba(0,0,0,0.30) !important; }
+
+/* ── Inputs ── */
+html.light input:not([type="range"]),
+html.light textarea,
+html.light select {
+  background-color: rgba(0,0,0,0.04) !important;
+  color: #0f0f0f !important;
+  border-color: rgba(0,0,0,0.10) !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder { color: #71717a !important; }
+html.light input:focus,
+html.light textarea:focus { border-color: rgba(0,0,0,0.20) !important; }
+
+/* ── Shadows ── */
+html.light .shadow-\[0_30px_60px_-15px_rgba\(0\,0\,0\,0\.5\)\] {
+  box-shadow: 0 8px 32px -8px rgba(0,0,0,0.12) !important;
+}
+html.light .shadow-\[0_20px_60px_rgba\(0\,0\,0\,0\.8\)\],
+html.light .shadow-\[0_20px_60px_rgba\(0\,0\,0\,0\.9\)\] {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+}
+
+/* ── Selection ── */
+html.light ::selection { background: #111111; color: #ffffff; }
+
+/* ── Scrollbar ── */
+html.light ::-webkit-scrollbar-track { background: #e4e4e7; }
+html.light ::-webkit-scrollbar-thumb { background: #a1a1aa; border-radius: 4px; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #71717a; }
+
+/* ── Emerald accents — kept unchanged by not overriding them ── */
+
+/* Dashboard sidebar */
+html.light .bg-\[#050505\].border-white\/\[0\.06\] { border-color: rgba(0,0,0,0.08) !important; }
+
+/* Dropdown menus */
+html.light .bg-\[#0a0a0a\]\/95,
+html.light .bg-\[#0a0a0a\] { background-color: #ffffff !important; }
+
+/* Mobile menu */
+html.light .md\:hidden.bg-black { background-color: #ffffff !important; }
+
+/* Opacity tweaks for logo in light mode */
+html.light img[alt="CargoLink"] { filter: none; }
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
