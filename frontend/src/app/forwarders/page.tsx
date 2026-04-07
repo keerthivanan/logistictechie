@@ -169,21 +169,19 @@ export default function ForwarderDirectoryPage() {
                                     <button
                                         key={letter}
                                         onClick={() => {
-                                            if (!hasData) return
                                             setActiveLetter(letter)
                                             setShowAllCountries(false)
                                             setSearch('')
-                                            // auto-select first country in this letter
                                             const first = allCountries.find(c => c.toUpperCase().startsWith(letter))
                                             if (first) setSelectedCountry(first)
+                                            else setSelectedCountry(null)
                                         }}
-                                        disabled={!hasData}
                                         className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                                             isActive
                                                 ? 'bg-emerald-500 text-white shadow-[0_0_16px_rgba(16,185,129,0.4)]'
                                                 : hasData
                                                     ? 'bg-white/[0.06] text-zinc-300 hover:bg-white/10 hover:text-white'
-                                                    : 'bg-white/[0.02] text-zinc-700 cursor-not-allowed'
+                                                    : 'bg-white/[0.03] text-zinc-600 hover:bg-white/[0.05] hover:text-zinc-400'
                                         }`}
                                     >
                                         {letter}
