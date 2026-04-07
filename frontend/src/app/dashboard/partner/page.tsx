@@ -5,9 +5,9 @@ import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import {
-    Search, Package, TrendingUp, CheckCircle2,
+    Search, Package, TrendingUp,
     ArrowRight, Clock, AlertCircle, Star,
-    DollarSign, Ship, Truck, Info, Loader2,
+    Ship, Truck,
     Zap, X
 } from 'lucide-react'
 import { Spinner } from '@/components/ui/Spinner'
@@ -40,11 +40,6 @@ export default function PartnerDashboard() {
     const [appStatus, setAppStatus] = useState<string | null>(null)
 
     const [search, setSearch] = useState('')
-    const [selectedRequest, setSelectedRequest] = useState<Quote | null>(null)
-    const [bidPrice, setBidPrice] = useState('')
-    const [submittingBid, setSubmittingBid] = useState(false)
-    const [bidSuccess, setBidSuccess] = useState(false)
-    const [bidError, setBidError] = useState('')
 
     const fetchData = useCallback(async () => {
         if (!user) return
@@ -86,41 +81,6 @@ export default function PartnerDashboard() {
         }
         fetchData()
     }, [user, fetchData])
-
-    const submitBid = async () => {
-        if (!selectedRequest || !bidPrice || !user) return
-        setSubmittingBid(true)
-        setBidError('')
-        try {
-            const res = await apiFetch('/api/forwarders/portal-bid', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    request_id: selectedRequest.request_id,
-                    forwarder_id: user.forwarder_id || user.sovereign_id,
-                    email: user.email,
-                    status: 'ANSWERED',
-                    price: parseFloat(bidPrice)
-                })
-            })
-            if (res.ok) {
-                setBidSuccess(true)
-                setBidPrice('')
-                fetchData()
-                setTimeout(() => {
-                    setBidSuccess(false)
-                    setSelectedRequest(null)
-                }, 2500)
-            } else {
-                const err = await res.json().catch(() => null)
-                setBidError(err?.detail || 'Failed to submit quote.')
-            }
-        } catch {
-            setBidError('Network error. Please try again.')
-        } finally {
-            setSubmittingBid(false)
-        }
-    }
 
     // Non-forwarder states
     if (!loading && user?.role !== 'forwarder') {
@@ -204,11 +164,8 @@ export default function PartnerDashboard() {
                 ))}
             </div>
 
-            {/* Main split */}
-            <div className="flex-1 flex gap-4 min-h-0">
-
-                {/* LEFT — Open Requests + Search */}
-                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+            {/* Open Requests */}
+            <div className="flex-1 min-h-0 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
 
                     {/* Search header */}
                     <div className="px-4 py-3 border-b border-white/5 flex-shrink-0">
@@ -260,22 +217,15 @@ export default function PartnerDashboard() {
                             </div>
                         ) : (
                             filtered.map(q => {
-                                const isSelected = selectedRequest?.request_id === q.request_id
                                 return (
                                     <div
                                         key={q.request_id}
                                         onClick={() => router.push(`/marketplace/${q.request_id}`)}
-                                        className={`p-3.5 rounded-xl border cursor-pointer transition-all group ${
-                                            isSelected
-                                                ? 'bg-emerald-500/[0.06] border-emerald-500/25 border-l-2 border-l-emerald-500'
-                                                : 'bg-black/50 border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
-                                        }`}
+                                        className="p-3.5 rounded-xl border cursor-pointer transition-all group bg-black/50 border-white/5 hover:border-white/10 hover:bg-white/[0.02]"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
-                                                    isSelected ? 'bg-emerald-500 text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600'
-                                                }`}>
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-all flex-shrink-0 bg-white/[0.03] border border-white/5 text-zinc-600">
                                                     {q.cargo_type?.includes('SEA') ? <Ship className="w-3.5 h-3.5" /> : <Truck className="w-3.5 h-3.5" />}
                                                 </div>
                                                 <div>
@@ -303,90 +253,6 @@ export default function PartnerDashboard() {
                             })
                         )}
                     </div>
-                </div>
-
-                {/* RIGHT — Bid Form */}
-                <div className="w-68 flex-shrink-0">
-                    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 h-full flex flex-col">
-
-                        {!selectedRequest ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 opacity-25">
-                                <CheckCircle2 className="w-8 h-8 text-zinc-600" />
-                                <p className="text-xs text-zinc-500 leading-relaxed">
-                                    Select a request from the list to submit your quote
-                                </p>
-                            </div>
-                        ) : bidSuccess ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white mb-1">Quote Submitted</p>
-                                    <p className="text-xs text-zinc-500">Your bid has been sent successfully.</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col h-full gap-4">
-                                {/* Form header */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('partner.bid')}</span>
-                                    <button onClick={() => setSelectedRequest(null)} className="text-zinc-600 hover:text-white transition-colors">
-                                        <X className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-
-                                {/* Request info */}
-                                <div className="bg-black border border-white/5 rounded-xl p-3 space-y-2.5">
-                                    <div className="flex items-center gap-2">
-                                        <Info className="w-3 h-3 text-zinc-600 flex-shrink-0" />
-                                        <span className="text-[10px] font-mono text-zinc-500 truncate">{selectedRequest.request_id}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-sm font-bold text-white">
-                                        <span className="truncate">{selectedRequest.origin}</span>
-                                        <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
-                                        <span className="truncate">{selectedRequest.destination}</span>
-                                    </div>
-                                    <span className="inline-block text-[9px] font-bold text-zinc-500 bg-white/[0.03] border border-white/5 px-2 py-0.5 rounded-lg uppercase tracking-wider">
-                                        {selectedRequest.cargo_type}
-                                    </span>
-                                </div>
-
-                                {/* Price input */}
-                                <div className="flex-1 flex flex-col justify-end gap-3">
-                                    <div>
-                                        <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('partner.bid.price')}</label>
-                                        <div className="relative">
-                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                                            <input
-                                                type="number"
-                                                placeholder="0.00"
-                                                value={bidPrice}
-                                                onChange={e => setBidPrice(e.target.value)}
-                                                className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-xl font-bold text-emerald-400 placeholder-zinc-800 focus:border-emerald-500/30 outline-none transition-colors font-mono"
-                                            />
-                                        </div>
-                                    </div>
-                                    {bidError && (
-                                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-[10px] text-red-400 font-inter leading-relaxed">
-                                            {bidError}
-                                        </div>
-                                    )}
-                                    <button
-                                        disabled={!bidPrice || submittingBid}
-                                        onClick={submitBid}
-                                        className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-30 active:scale-[0.98]"
-                                    >
-                                        {submittingBid
-                                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                                            : <>{t('partner.bid.submit')} <ArrowRight className="w-3.5 h-3.5" /></>
-                                        }
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     )

@@ -68,6 +68,9 @@ export default function ChatPage() {
     const [closingDeal, setClosingDeal] = useState(false)
     const [error, setError] = useState('')
     const bottomRef = useRef<HTMLDivElement>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const prevCountRef = useRef(0)
+    const isInitialRef = useRef(true)
 
     const isShipper = user?.role !== 'forwarder'
 
@@ -107,7 +110,16 @@ export default function ChatPage() {
     }, [fetchMessages, authLoading, user])
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        const newCount = messages.length
+        const el = containerRef.current
+        if (isInitialRef.current && newCount > 0) {
+            bottomRef.current?.scrollIntoView({ behavior: 'instant' })
+            isInitialRef.current = false
+        } else if (newCount > prevCountRef.current && el) {
+            const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+            if (nearBottom) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+        prevCountRef.current = newCount
     }, [messages])
 
     useEffect(() => {
@@ -220,7 +232,7 @@ export default function ChatPage() {
         if (amount >= conv.original_price) return { text: 'Must be less than the quoted price', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' }
         if (amount < floor) return { text: `Too low — minimum is ${conv.currency} ${Math.ceil(floor).toLocaleString()}`, color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' }
         const pct = ((conv.original_price - amount) / conv.original_price) * 100
-        if (pct <= 3) return { text: 'Very likely to be accepted', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' }
+        if (pct <= 3) return { text: 'Very likely to be accepted', color: 'text-white', bg: 'bg-white/[0.06] border-white/20' }
         if (pct <= 10) return { text: 'Good offer — forwarder may accept', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' }
         return { text: 'Fair offer — forwarder may counter', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' }
     }
@@ -262,10 +274,10 @@ export default function ChatPage() {
 
                     {/* Forwarder avatar */}
                     <div className="relative flex-shrink-0">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center text-xs font-bold font-outfit">
+                        <div className="w-9 h-9 rounded-xl bg-zinc-800 text-white flex items-center justify-center text-xs font-bold font-outfit">
                             {fwdInitials}
                         </div>
-                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0d0d0d] ${isOnline ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0d0d0d] ${isOnline ? 'bg-white' : 'bg-zinc-700'}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -274,7 +286,7 @@ export default function ChatPage() {
                     </div>
 
                     <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0 ${
-                        isLocked ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        isLocked ? 'bg-white/[0.08] text-white border border-white/20'
                         : isClosed ? 'bg-zinc-900 text-zinc-600 border border-white/[0.06]'
                         : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
                     }`}>
@@ -283,7 +295,9 @@ export default function ChatPage() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col justify-end gap-3 min-h-0">
+                <div ref={containerRef} className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-3 min-h-0">
+
+                    <div className="flex-1" />
 
                     {/* Empty state */}
                     {messages.filter(m => m.message_type !== 'SYSTEM').length === 0 && (
@@ -316,13 +330,13 @@ export default function ChatPage() {
                                     <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`flex ${isMyOffer ? 'justify-end' : 'justify-start'}`}>
                                         <div className="bg-[#0d0d0d] border border-white/[0.08] rounded-2xl p-4 max-w-[240px]">
                                             <div className="flex items-center gap-1.5 mb-2">
-                                                <TrendingDown className="w-3 h-3 text-blue-400" />
-                                                <p className="text-[9px] font-semibold text-blue-400 uppercase tracking-widest">Your Offer</p>
+                                                <TrendingDown className="w-3 h-3 text-zinc-500" />
+                                                <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest font-inter">{isMyOffer ? 'Your Offer' : 'Shipper Offer'}</p>
                                             </div>
                                             <p className="text-2xl font-semibold font-mono text-white">
                                                 {conv.currency} {Number(msg.offer_amount).toLocaleString()}
                                             </p>
-                                            <p className="text-[9px] text-zinc-600 mt-1">
+                                            <p className="text-[9px] text-zinc-600 mt-1 font-inter">
                                                 {isMyOffer ? 'Waiting for forwarder response' : 'Offered by shipper'}
                                             </p>
                                         </div>
@@ -362,8 +376,8 @@ export default function ChatPage() {
                             // ACCEPTED
                             if (msg.message_type === 'ACCEPTED') return (
                                 <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
-                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-5 py-3 text-center">
-                                        <p className="text-xs font-semibold text-emerald-400">✅ {msg.content}</p>
+                                    <div className="bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3 text-center">
+                                        <p className="text-xs font-semibold text-white">✓ {msg.content}</p>
                                     </div>
                                 </motion.div>
                             )
@@ -383,7 +397,7 @@ export default function ChatPage() {
                                 <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                                     className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
                                     {!isMine && (
-                                        <div className="w-6 h-6 rounded-lg bg-emerald-500 text-black flex items-center justify-center text-[8px] font-bold flex-shrink-0 mb-0.5">
+                                        <div className="w-6 h-6 rounded-lg bg-zinc-800 text-white flex items-center justify-center text-[8px] font-bold flex-shrink-0 mb-0.5">
                                             {fwdInitials}
                                         </div>
                                     )}
@@ -503,7 +517,7 @@ export default function ChatPage() {
                     <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-4 space-y-3">
                         <div>
                             <p className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
-                            <p className={`text-3xl font-semibold font-mono mt-0.5 ${conv.agreed_price ? 'text-emerald-400' : conv.current_offer ? 'text-amber-400' : 'text-white'}`}>
+                            <p className={`text-3xl font-semibold font-mono mt-0.5 ${conv.agreed_price ? 'text-white' : conv.current_offer ? 'text-amber-400' : 'text-white'}`}>
                                 {conv.currency} {Number(activePrice).toLocaleString()}
                             </p>
                             {conv.current_offer && !conv.agreed_price && (
@@ -517,13 +531,13 @@ export default function ChatPage() {
                         <div className="space-y-2 pt-2 border-t border-white/[0.05]">
                             <div className="flex items-center justify-between">
                                 <span className="text-[9px] text-zinc-600 uppercase tracking-widest">You</span>
-                                <span className={`text-[9px] font-semibold ${conv.shipper_book_req ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                <span className={`text-[9px] font-semibold ${conv.shipper_book_req ? 'text-white' : 'text-zinc-600'}`}>
                                     {conv.shipper_book_req ? '✓ Ready to lock' : 'Negotiating'}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[9px] text-zinc-600 uppercase tracking-widest">{conv.forwarder_company}</span>
-                                <span className={`text-[9px] font-semibold ${conv.forwarder_book_req ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                <span className={`text-[9px] font-semibold ${conv.forwarder_book_req ? 'text-white' : 'text-zinc-600'}`}>
                                     {conv.forwarder_book_req ? '✓ Ready to lock' : 'Negotiating'}
                                 </span>
                             </div>
@@ -533,12 +547,12 @@ export default function ChatPage() {
 
                 {/* Deal locked */}
                 {isLocked && (
-                    <div className="mx-5 mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+                    <div className="mx-5 mt-4 bg-white/[0.04] border border-white/10 rounded-2xl p-4">
                         <div className="flex items-center gap-2 mb-1">
-                            <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                            <p className="text-xs font-semibold text-emerald-400">Deal Locked</p>
+                            <Lock className="w-3.5 h-3.5 text-white" />
+                            <p className="text-xs font-semibold text-white">Deal Locked</p>
                         </div>
-                        <p className="text-[10px] text-emerald-500/70 leading-relaxed">Contact details have been sent to your email.</p>
+                        <p className="text-[10px] text-zinc-500 leading-relaxed">Contact details have been sent to your email.</p>
                     </div>
                 )}
 

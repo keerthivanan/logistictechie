@@ -134,10 +134,10 @@ export default function ActivityPage() {
     }
 
     return (
-        <div className="h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar">
+        <div className="h-full flex flex-col gap-4 overflow-hidden">
 
             {/* Header */}
-            <div className="border-b border-white/5 pb-4">
+            <div className="border-b border-white/5 pb-4 flex-shrink-0">
                 <h1 className="text-base font-semibold font-outfit tracking-tight text-white mb-0.5">
                     {t('activity.title')}
                 </h1>
@@ -145,6 +145,7 @@ export default function ActivityPage() {
             </div>
 
             {/* List */}
+            <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar space-y-0 pr-1">
             {activities.length === 0 ? (
                 <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl flex flex-col items-center justify-center py-16 opacity-40">
                     <History className="w-6 h-6 mb-3 text-zinc-600" />
@@ -186,14 +187,15 @@ export default function ActivityPage() {
                 <button
                     onClick={() => { setLoadingMore(true); fetchActivities(offset, true) }}
                     disabled={loadingMore}
-                    className="w-full py-3 text-[11px] font-semibold text-zinc-600 hover:text-white uppercase tracking-widest font-inter border border-white/[0.05] rounded-2xl hover:border-white/10 transition-all disabled:opacity-40"
+                    className="w-full mt-4 py-3 text-[11px] font-semibold text-zinc-600 hover:text-white uppercase tracking-widest font-inter border border-white/[0.05] rounded-2xl hover:border-white/10 transition-all disabled:opacity-40"
                 >
                     {loadingMore ? '...' : t('activity.load.more')}
                 </button>
             )}
             {!hasMore && activities.length > 0 && (
-                <p className="text-[10px] text-zinc-800 font-inter text-center">{t('activity.all.loaded').replace('{n}', activities.length.toString())}</p>
+                <p className="text-[10px] text-zinc-800 font-inter text-center mt-4">{t('activity.all.loaded').replace('{n}', activities.length.toString())}</p>
             )}
+            </div>
         </div>
     )
 }
