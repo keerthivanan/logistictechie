@@ -346,7 +346,7 @@ export default function ChatPage() {
                                             {isShipper && isActivePending && !isLocked && !isClosed && (
                                                 <div className="flex gap-2 mt-3">
                                                     <button onClick={acceptCounter} disabled={sending}
-                                                        className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50">
+                                                        className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-100 transition-all disabled:opacity-50">
                                                         Accept
                                                     </button>
                                                     <button onClick={() => { setTab('offer'); setOfferAmount('') }} disabled={sending}
@@ -561,7 +561,7 @@ export default function ChatPage() {
                                 </button>
                             ) : (
                                 <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                                    className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
                                     {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Lock Deal</>}
                                 </button>
                             )

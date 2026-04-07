@@ -293,7 +293,7 @@ export default function ForwarderChatPage() {
                                 className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700" required />
                         </div>
                         <button type="submit" disabled={authLoading}
-                            className="w-full bg-emerald-500 text-black font-bold text-xs py-3 rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 uppercase tracking-widest">
+                            className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 uppercase tracking-widest">
                             {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t('chat.access')} <ArrowRight className="w-3.5 h-3.5" /></>}
                         </button>
                     </form>
@@ -391,7 +391,7 @@ export default function ForwarderChatPage() {
                                             {isActivePending && !isLocked && !isClosed && !showCounterInput && (
                                                 <div className="flex gap-2 mt-3">
                                                     <button onClick={() => respondOffer('ACCEPT')} disabled={sending}
-                                                        className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50">
+                                                        className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-100 transition-all disabled:opacity-50">
                                                         {t('chat.accept')}
                                                     </button>
                                                     <button onClick={() => setShowCounterInput(true)} disabled={sending}
@@ -613,7 +613,7 @@ export default function ForwarderChatPage() {
                                 </button>
                             ) : (
                                 <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                                    className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
                                     {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Confirm Deal</>}
                                 </button>
                             )

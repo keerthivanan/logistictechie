@@ -366,7 +366,7 @@ export default function MarketplaceLiveDashboard() {
                                 <button
                                     onClick={submitBid}
                                     disabled={bidSubmitting || !bidPrice}
-                                    className="w-full flex items-center justify-center gap-2 h-11 bg-emerald-500 text-black rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                                    className="w-full flex items-center justify-center gap-2 h-11 bg-white text-black rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     {bidSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                     {bidSubmitting ? 'Submitting…' : 'Submit Quote'}
