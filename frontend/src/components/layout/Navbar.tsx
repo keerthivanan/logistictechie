@@ -11,9 +11,8 @@ import {
     Ship, Plane, Truck, Warehouse, FileCheck,
     Store, Users, UserPlus,
     Calculator, BookOpen,
-    Info, MessageSquare, Sun, Moon,
+    Info, MessageSquare,
 } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from '@/components/visuals/Avatar';
@@ -51,7 +50,6 @@ export default function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const { lang, setLang } = useLanguage();
-    const { theme, toggle: toggleTheme } = useTheme();
     const t = useT();
 
     const navItems = [
@@ -232,13 +230,6 @@ export default function Navbar() {
                         className="hidden md:block text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest font-inter px-2"
                     >
                         {lang === 'en' ? 'عربي' : 'EN'}
-                    </button>
-                    <button
-                        onClick={toggleTheme}
-                        title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                        className="hidden md:flex w-8 h-8 items-center justify-center rounded-full text-zinc-500 hover:text-white hover:bg-white/10 transition-all"
-                    >
-                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     </button>
                     {user ? (
                         <div className="relative">
