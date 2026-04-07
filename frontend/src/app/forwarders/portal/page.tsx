@@ -151,11 +151,12 @@ export default function ForwarderPortal() {
         if (cvFrom === cvTo) { setCvResult(amount.toLocaleString(undefined, { maximumFractionDigits: 2 })); return; }
         const controller = new AbortController();
         setCvLoading(true);
-        fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${cvFrom}&to=${cvTo}`, { signal: controller.signal })
+        setCvResult(null);
+        fetch(`https://open.er-api.com/v6/latest/${cvFrom}`, { signal: controller.signal })
             .then(r => r.json())
             .then(data => {
                 const rate = data.rates?.[cvTo];
-                setCvResult(rate != null ? Number(rate).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null);
+                setCvResult(rate != null ? Number(rate * amount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null);
             })
             .catch(() => {})
             .finally(() => setCvLoading(false));
@@ -514,11 +515,11 @@ export default function ForwarderPortal() {
                                 />
                                 <div className="flex items-center gap-2">
                                     <select value={cvFrom} onChange={e => setCvFrom(e.target.value)} className="flex-1 bg-black border border-white/5 rounded-xl px-2 py-2 text-[11px] text-zinc-400 outline-none cursor-pointer">
-                                        {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
+                                        {['USD','EUR','GBP','SAR','AED','QAR','KWD','BHD','JPY','CNY','SGD','INR','AUD','CAD','CHF','TRY','EGP','NZD','HKD'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
                                     </select>
                                     <ArrowRight className="w-3 h-3 text-zinc-700 flex-shrink-0" />
                                     <select value={cvTo} onChange={e => setCvTo(e.target.value)} className="flex-1 bg-black border border-white/5 rounded-xl px-2 py-2 text-[11px] text-zinc-400 outline-none cursor-pointer">
-                                        {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
+                                        {['USD','EUR','GBP','SAR','AED','QAR','KWD','BHD','JPY','CNY','SGD','INR','AUD','CAD','CHF','TRY','EGP','NZD','HKD'].map(c => <option key={c} value={c} className="bg-black">{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="bg-black border border-white/[0.04] rounded-xl px-3 py-2 text-center min-h-[36px] flex items-center justify-center">
