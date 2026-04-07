@@ -27,22 +27,31 @@ export default function MarketplaceLiveDashboard() {
     const router = useRouter();
     const requestId = params.id as string;
     const [loading, setLoading] = useState(true);
-    const [fetchError, setFetchError] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
     const [quotes, setQuotes] = useState<Quote[]>([]);
     const [status, setStatus] = useState('OPEN');
     const [progress, setProgress] = useState(0);
     const [shipmentInfo, setShipmentInfo] = useState<any>(null);
 
     useEffect(() => {
+        let retries = 0;
         const fetchQuotes = async () => {
             try {
                 const token = localStorage.getItem('token');
+                if (!token) { setFetchError('Not logged in. Please log in and try again.'); setLoading(false); return; }
                 const res = await apiFetch(`/api/marketplace/request/${requestId}`, {
-                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    headers: { 'Authorization': `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error('Network error');
+                if (res.status === 401) { setFetchError('Session expired. Please log in again.'); setLoading(false); return; }
+                if (res.status === 403) { setFetchError('You are not authorised to view this request.'); setLoading(false); return; }
+                if (res.status === 404) {
+                    // Request may not be written yet — retry up to 3 times with 1s delay
+                    if (retries < 3) { retries++; setTimeout(fetchQuotes, 1000); return; }
+                    setFetchError('Request not found. It may still be processing — try refreshing in a moment.'); setLoading(false); return;
+                }
+                if (!res.ok) { setFetchError(`Server error (${res.status}). Please try again.`); setLoading(false); return; }
                 const data = await res.json();
-
+                setFetchError(null);
                 if (data.quotations) {
                     setQuotes(data.quotations);
                     setProgress(data.quotations.length);
@@ -52,7 +61,7 @@ export default function MarketplaceLiveDashboard() {
                     setStatus(data.request.status);
                 }
             } catch {
-                setFetchError(true);
+                setFetchError('Network error. Please check your connection.');
             } finally {
                 setLoading(false);
             }
@@ -61,9 +70,7 @@ export default function MarketplaceLiveDashboard() {
         fetchQuotes();
 
         const interval = setInterval(() => {
-            if (status !== 'CLOSED') {
-                fetchQuotes();
-            }
+            if (status !== 'CLOSED') fetchQuotes();
         }, 5000);
 
         return () => clearInterval(interval);
@@ -339,10 +346,15 @@ export default function MarketplaceLiveDashboard() {
                     {fetchError && quotes.length === 0 && !loading && (
                         <div className="p-16 flex flex-col items-center justify-center text-center">
                             <p className="text-sm font-semibold text-zinc-400 font-outfit uppercase mb-2">{t('mkt.failed')}</p>
-                            <p className="text-xs text-zinc-600 mb-6">{t('mkt.failed.sub')}</p>
-                            <button onClick={() => router.back()} className="text-xs text-zinc-500 hover:text-white underline underline-offset-4 transition-colors">
-                                {t('mkt.go.back')}
-                            </button>
+                            <p className="text-xs text-zinc-500 mb-2 max-w-xs">{fetchError}</p>
+                            <div className="flex items-center gap-4 mt-4">
+                                <button onClick={() => window.location.reload()} className="text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 px-4 py-2 rounded-xl transition-colors">
+                                    Retry
+                                </button>
+                                <button onClick={() => router.back()} className="text-xs text-zinc-500 hover:text-white underline underline-offset-4 transition-colors">
+                                    {t('mkt.go.back')}
+                                </button>
+                            </div>
                         </div>
                     )}
 
