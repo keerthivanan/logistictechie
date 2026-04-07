@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import {
     Search, Package, TrendingUp, CheckCircle2,
@@ -31,6 +32,7 @@ interface Metrics {
 export default function PartnerDashboard() {
     const t = useT()
     const { user } = useAuth()
+    const router = useRouter()
     const [quotes, setQuotes] = useState<Quote[]>([])
     const [metrics, setMetrics] = useState<Metrics | null>(null)
     const [companyName, setCompanyName] = useState('')
@@ -262,7 +264,7 @@ export default function PartnerDashboard() {
                                 return (
                                     <div
                                         key={q.request_id}
-                                        onClick={() => { setSelectedRequest(q); setBidSuccess(false); setBidPrice('') }}
+                                        onClick={() => router.push(`/marketplace/${q.request_id}`)}
                                         className={`p-3.5 rounded-xl border cursor-pointer transition-all group ${
                                             isSelected
                                                 ? 'bg-emerald-500/[0.06] border-emerald-500/25 border-l-2 border-l-emerald-500'

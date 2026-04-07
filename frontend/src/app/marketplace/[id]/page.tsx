@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Ship, Loader2, Zap, MessageSquare, Search, ChevronLeft, Activity, CheckCircle2 } from 'lucide-react';
+import { Ship, Loader2, Zap, MessageSquare, Search, ChevronLeft, Activity, CheckCircle2, Send } from 'lucide-react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
 import { useT } from '@/lib/i18n/t';
+import { useAuth } from '@/context/AuthContext';
 
 interface Quote {
     quotation_id: string;
@@ -23,6 +24,7 @@ interface Quote {
 
 export default function MarketplaceLiveDashboard() {
     const t = useT();
+    const { user } = useAuth();
     const params = useParams();
     const router = useRouter();
     const requestId = params.id as string;
@@ -32,6 +34,17 @@ export default function MarketplaceLiveDashboard() {
     const [status, setStatus] = useState('OPEN');
     const [progress, setProgress] = useState(0);
     const [shipmentInfo, setShipmentInfo] = useState<any>(null);
+
+    // Forwarder quote submission state
+    const isForwarder = user?.role === 'forwarder';
+    const [bidPrice, setBidPrice] = useState('');
+    const [bidCurrency, setBidCurrency] = useState('USD');
+    const [bidTransitDays, setBidTransitDays] = useState('');
+    const [bidCarrier, setBidCarrier] = useState('');
+    const [bidNotes, setBidNotes] = useState('');
+    const [bidSubmitting, setBidSubmitting] = useState(false);
+    const [bidSuccess, setBidSuccess] = useState(false);
+    const [bidError, setBidError] = useState<string | null>(null);
 
     useEffect(() => {
         let retries = 0;
@@ -78,6 +91,35 @@ export default function MarketplaceLiveDashboard() {
 
     const shortId = requestId?.slice(0, 8).toUpperCase();
 
+    const submitBid = async () => {
+        if (!bidPrice || !user) return;
+        setBidSubmitting(true);
+        setBidError(null);
+        try {
+            const res = await apiFetch('/api/forwarders/portal-bid', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    forwarder_id: user.sovereign_id,
+                    email: user.email,
+                    request_id: requestId,
+                    price: parseFloat(bidPrice),
+                    currency: bidCurrency,
+                    transit_days: bidTransitDays ? parseInt(bidTransitDays) : null,
+                    carrier: bidCarrier || null,
+                    notes: bidNotes || null,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) { setBidError(data.detail || 'Submission failed.'); return; }
+            setBidSuccess(true);
+        } catch {
+            setBidError('Network error. Please try again.');
+        } finally {
+            setBidSubmitting(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-inter">
             <Navbar />
@@ -86,11 +128,11 @@ export default function MarketplaceLiveDashboard() {
             <div className="fixed top-16 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/[0.05]">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
                     <button
-                        onClick={() => router.push('/search')}
+                        onClick={() => isForwarder ? router.push('/dashboard/partner') : router.push('/search')}
                         className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors text-xs font-medium"
                     >
                         <ChevronLeft className="w-3.5 h-3.5" />
-                        {t('mkt.back.search')}
+                        {isForwarder ? 'Back to Requests' : t('mkt.back.search')}
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -99,16 +141,22 @@ export default function MarketplaceLiveDashboard() {
                                 {shipmentInfo.origin} → {shipmentInfo.destination}
                             </span>
                         )}
-                        <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest ${
-                            status === 'CLOSED'
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
-                        }`}>
-                            {status === 'CLOSED'
-                                ? <><CheckCircle2 className="w-3 h-3" /> {t('mkt.quoting.complete')}</>
-                                : <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" /> {t('mkt.collecting')}</>
-                            }
-                        </span>
+                        {isForwarder ? (
+                            <span className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" /> Open for Bids
+                            </span>
+                        ) : (
+                            <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest ${
+                                status === 'CLOSED'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
+                            }`}>
+                                {status === 'CLOSED'
+                                    ? <><CheckCircle2 className="w-3 h-3" /> {t('mkt.quoting.complete')}</>
+                                    : <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" /> {t('mkt.collecting')}</>
+                                }
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -121,7 +169,7 @@ export default function MarketplaceLiveDashboard() {
                         REF · {shortId}
                     </p>
                     <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white">
-                        {t('mkt.live.results')}
+                        {isForwarder ? 'Freight Request Details' : t('mkt.live.results')}
                     </h1>
                     {shipmentInfo && (
                         <p className="text-sm text-zinc-500 mt-1 font-inter">
@@ -130,8 +178,8 @@ export default function MarketplaceLiveDashboard() {
                     )}
                 </div>
 
-                {/* Progress bar */}
-                <div className="mb-8 bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-5">
+                {/* Progress bar — shipper only */}
+                {!isForwarder && <div className="mb-8 bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-5">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">
                             {status === 'CLOSED' ? t('mkt.progress.complete') : t('mkt.progress.collecting')}
@@ -148,7 +196,7 @@ export default function MarketplaceLiveDashboard() {
                             transition={{ duration: 0.6, ease: 'easeOut' }}
                         />
                     </div>
-                </div>
+                </div>}
 
                 {/* Shipment details */}
                 {shipmentInfo && (
@@ -207,8 +255,109 @@ export default function MarketplaceLiveDashboard() {
                     </motion.div>
                 )}
 
+                {/* Forwarder: Quote submission panel */}
+                {isForwarder && !loading && !fetchError && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 bg-[#0a0a0a] border border-white/[0.08] rounded-3xl overflow-hidden"
+                    >
+                        <div className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex items-center justify-between">
+                            <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.3em]">Submit Your Quote</p>
+                            <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full uppercase tracking-widest">Partner</span>
+                        </div>
+
+                        {bidSuccess ? (
+                            <div className="p-12 flex flex-col items-center justify-center text-center">
+                                <CheckCircle2 className="w-10 h-10 text-emerald-400 mb-4" />
+                                <p className="text-sm font-semibold text-white font-outfit uppercase mb-1">Quote Submitted!</p>
+                                <p className="text-xs text-zinc-500">The shipper will be notified and may start a negotiation with you.</p>
+                            </div>
+                        ) : (
+                            <div className="p-6 space-y-4">
+                                {/* Price + currency row */}
+                                <div className="flex gap-3">
+                                    <div className="flex-1">
+                                        <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-1.5">Price *</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={bidPrice}
+                                            onChange={e => setBidPrice(e.target.value)}
+                                            placeholder="e.g. 3500"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                        />
+                                    </div>
+                                    <div className="w-28">
+                                        <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-1.5">Currency</label>
+                                        <select
+                                            value={bidCurrency}
+                                            onChange={e => setBidCurrency(e.target.value)}
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/40 transition-colors appearance-none"
+                                        >
+                                            {['USD','EUR','GBP','SAR','AED','CNY','JPY','INR'].map(c => (
+                                                <option key={c} value={c} className="bg-zinc-900">{c}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Transit days + carrier */}
+                                <div className="flex gap-3">
+                                    <div className="w-40">
+                                        <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-1.5">Transit Days</label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={bidTransitDays}
+                                            onChange={e => setBidTransitDays(e.target.value)}
+                                            placeholder="e.g. 21"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-1.5">Carrier</label>
+                                        <input
+                                            type="text"
+                                            value={bidCarrier}
+                                            onChange={e => setBidCarrier(e.target.value)}
+                                            placeholder="e.g. MSC, Maersk"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Notes */}
+                                <div>
+                                    <label className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-1.5">Notes</label>
+                                    <textarea
+                                        rows={2}
+                                        value={bidNotes}
+                                        onChange={e => setBidNotes(e.target.value)}
+                                        placeholder="Any conditions, inclusions, or remarks..."
+                                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors resize-none"
+                                    />
+                                </div>
+
+                                {bidError && (
+                                    <p className="text-xs text-red-400">{bidError}</p>
+                                )}
+
+                                <button
+                                    onClick={submitBid}
+                                    disabled={bidSubmitting || !bidPrice}
+                                    className="w-full flex items-center justify-center gap-2 h-11 bg-emerald-500 text-black rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-emerald-400 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
+                                >
+                                    {bidSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                    {bidSubmitting ? 'Submitting…' : 'Submit Quote'}
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+
                 {/* Heading when all quotes received */}
-                {status === 'CLOSED' && quotes.length >= 3 && (
+                {!isForwarder && status === 'CLOSED' && quotes.length >= 3 && (
                     <motion.div
                         initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -224,8 +373,8 @@ export default function MarketplaceLiveDashboard() {
                     </motion.div>
                 )}
 
-                {/* Quotes card */}
-                <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-3xl overflow-hidden">
+                {/* Quotes card — shipper only */}
+                {!isForwarder && <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-3xl overflow-hidden">
                     <AnimatePresence>
                         {quotes.map((quote, index) => {
                             const isBestPrice = quotes.length > 0 && quote.total_price === Math.min(...quotes.map(q => q.total_price));
@@ -389,7 +538,7 @@ export default function MarketplaceLiveDashboard() {
                             </div>
                         </div>
                     )}
-                </div>
+                </div>}
 
                 {/* Footer */}
                 <div className="mt-12 text-center">

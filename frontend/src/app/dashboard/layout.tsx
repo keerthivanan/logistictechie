@@ -443,7 +443,7 @@ export default function DashboardLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-hidden p-6 h-[calc(100vh-80px)]">
+                <main className="flex-1 overflow-y-auto p-6 h-[calc(100vh-80px)]">
                     {children}
                 </main>
             </div>
