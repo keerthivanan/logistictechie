@@ -47,6 +47,7 @@ class SocialSyncRequest(BaseModel):
 async def social_sync(
     request: SocialSyncRequest,
     raw_request: Request,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(deps.get_db)
 ):
     """
@@ -108,6 +109,16 @@ async def social_sync(
         
         # OMEGO PROTOCOL: Create Initial Mission Set
         await create_default_tasks(db, str(user.id))
+
+        # Fire welcome email after commit (background — don't block login)
+        from app.services.webhook import webhook_service as _ws
+        background_tasks.add_task(_ws.trigger_welcome_webhook, {
+            "email": email,
+            "full_name": name or "Valued Client",
+            "company_name": "",
+            "sovereign_id": new_sovereign_id,
+            "registered_at": "",
+        })
     else:
         # SELF-HEALING: Legacy Data Fix
         if not user.sovereign_id:
