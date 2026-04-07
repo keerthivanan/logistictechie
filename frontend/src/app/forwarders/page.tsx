@@ -199,7 +199,17 @@ export default function ForwarderDirectoryPage() {
                                     ))}
                                 </div>
                             ) : filteredCountries.length === 0 ? (
-                                <p className="text-center text-xs text-zinc-600 py-8">No partners found for &quot;{activeLetter}&quot;</p>
+                                <div className="py-12 text-center">
+                                    <p className="text-2xl mb-2">🌍</p>
+                                    <p className="text-sm font-semibold text-zinc-400 mb-1">
+                                        {allCountries.length === 0 ? 'No partners registered yet' : `No partners under "${activeLetter}"`}
+                                    </p>
+                                    <p className="text-xs text-zinc-600">
+                                        {allCountries.length === 0
+                                            ? 'Partners will appear here once approved by admin'
+                                            : 'Try a different letter or search by country name'}
+                                    </p>
+                                </div>
                             ) : (
                                 <>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
