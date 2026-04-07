@@ -134,7 +134,7 @@ export default function ActivityPage() {
     }
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="h-full flex flex-col gap-4 overflow-y-auto custom-scrollbar">
 
             {/* Header */}
             <div className="border-b border-white/5 pb-4">

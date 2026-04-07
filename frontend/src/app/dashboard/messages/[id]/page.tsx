@@ -246,14 +246,13 @@ export default function ChatPage() {
     )
 
     return (
-        // -m-6 cancels the layout's p-6 so chat fills the full main area
-        <div className="h-full -m-6 bg-black flex">
+        <div className="h-full bg-[#0a0a0a] border border-white/[0.05] rounded-2xl overflow-hidden flex">
 
             {/* ── LEFT: Chat Column ── */}
             <div className="flex-1 flex flex-col min-w-0 border-r border-white/[0.05]">
 
                 {/* Header */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-[#080808] flex-shrink-0">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-[#0d0d0d] flex-shrink-0">
                     <button
                         onClick={() => router.push('/dashboard/messages')}
                         className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors flex-shrink-0"
@@ -266,7 +265,7 @@ export default function ChatPage() {
                         <div className="w-9 h-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center text-xs font-bold font-outfit">
                             {fwdInitials}
                         </div>
-                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080808] ${isOnline ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0d0d0d] ${isOnline ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -418,7 +417,7 @@ export default function ChatPage() {
 
                 {/* Input area */}
                 {!isLocked && !isClosed ? (
-                    <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
+                    <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#0d0d0d]">
                         {isShipper && !conv.agreed_price && (
                             <div className="flex border-b border-white/[0.04]">
                                 {(['chat', 'offer'] as Tab[]).map(t => (
@@ -486,7 +485,7 @@ export default function ChatPage() {
                         )}
                     </div>
                 ) : (
-                    <div className="flex-shrink-0 border-t border-white/[0.06] px-5 py-4 bg-[#080808] text-center">
+                    <div className="flex-shrink-0 border-t border-white/[0.06] px-5 py-4 bg-[#0d0d0d] text-center">
                         <p className="text-xs text-zinc-600">
                             {isLocked ? '🔒 Deal locked — contact details sent to your email.' : 'This conversation is closed.'}
                         </p>
@@ -495,7 +494,7 @@ export default function ChatPage() {
             </div>
 
             {/* ── RIGHT: Deal Details Panel ── */}
-            <div className="w-80 flex-shrink-0 flex flex-col bg-[#050505] overflow-y-auto">
+            <div className="w-80 flex-shrink-0 flex flex-col bg-black/20 overflow-y-auto border-l border-white/[0.05]">
 
                 {/* Price card */}
                 <div className="p-5 border-b border-white/[0.05]">
