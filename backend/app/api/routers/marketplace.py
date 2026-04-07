@@ -346,8 +346,16 @@ async def get_request_details(
     if not req:
         raise HTTPException(status_code=404, detail="Request not found in Mirror.")
         
-    original_sovereign_id = current_user.sovereign_id.replace("REG-", "")
-    if req.user_sovereign_id not in (current_user.sovereign_id, original_sovereign_id) and current_user.role != "admin":
+    # Dual-ID ownership check — same logic as my-requests endpoint.
+    # A user approved as forwarder gets sovereign_id = REG-OMEGO-XXXX,
+    # but their old requests were saved under OMEGO-XXXX.
+    # Strip "REG-" to recover original ID, also handle multi-segment IDs like REG-OMEGO-WVHC-0001.
+    sid = current_user.sovereign_id
+    original_sid = sid[4:] if sid.startswith("REG-") else sid  # strip leading "REG-"
+    allowed_ids = {sid, original_sid}
+    is_owner = req.user_sovereign_id in allowed_ids
+    is_staff = current_user.role in ("admin", "forwarder")
+    if not is_owner and not is_staff:
         raise HTTPException(status_code=403, detail="Not authorized to view this request.")
     
     # 2. Get Quotations
