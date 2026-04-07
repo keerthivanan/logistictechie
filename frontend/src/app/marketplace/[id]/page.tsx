@@ -91,6 +91,11 @@ export default function MarketplaceLiveDashboard() {
 
     const shortId = requestId?.slice(0, 8).toUpperCase();
 
+    // Detect if this forwarder already has a bid for this request
+    const myExistingBid = isForwarder && user
+        ? quotes.find(q => q.quotation_id.startsWith(`PORTAL-${user.sovereign_id}-`))
+        : null;
+
     const submitBid = async () => {
         if (!bidPrice || !user) return;
         setBidSubmitting(true);
@@ -267,11 +272,26 @@ export default function MarketplaceLiveDashboard() {
                             <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full uppercase tracking-widest">Partner</span>
                         </div>
 
-                        {bidSuccess ? (
-                            <div className="p-12 flex flex-col items-center justify-center text-center">
-                                <CheckCircle2 className="w-10 h-10 text-emerald-400 mb-4" />
-                                <p className="text-sm font-semibold text-white font-outfit uppercase mb-1">Quote Submitted!</p>
-                                <p className="text-xs text-zinc-500">The shipper will be notified and may start a negotiation with you.</p>
+                        {myExistingBid || bidSuccess ? (
+                            <div className="p-10 flex flex-col items-center justify-center text-center gap-3">
+                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-white font-outfit uppercase mb-1">Quote Already Submitted</p>
+                                    <p className="text-xs text-zinc-500 max-w-xs">You have already submitted a quote for this request. The shipper will contact you if they&apos;re interested.</p>
+                                </div>
+                                {myExistingBid && (
+                                    <div className="mt-2 bg-[#111] border border-white/[0.06] rounded-2xl px-6 py-4 text-center">
+                                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Your Quote</p>
+                                        <p className="text-2xl font-semibold font-mono text-emerald-400">
+                                            {myExistingBid.currency} {Number(myExistingBid.total_price).toLocaleString()}
+                                        </p>
+                                        {myExistingBid.transit_days && (
+                                            <p className="text-[10px] text-zinc-600 mt-1">{myExistingBid.transit_days} transit days</p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="p-6 space-y-4">
