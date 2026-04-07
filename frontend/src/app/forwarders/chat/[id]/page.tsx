@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
-import { Loader2, Send, ArrowLeft, X, BarChart3, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Loader2, Send, ArrowLeft, X, BarChart3, ArrowRight, MessageSquare, Lock, Ship, TrendingUp } from 'lucide-react'
 import { FullPageSpinner } from '@/components/ui/Spinner'
 import { useT, TKey } from '@/lib/i18n/t'
 
@@ -50,14 +51,12 @@ export default function ForwarderChatPage() {
     const router = useRouter()
     const t = useT()
 
-    // Portal auth state
     const [fwdId, setFwdId] = useState('')
     const [fwdEmail, setFwdEmail] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [authLoading, setAuthLoading] = useState(false)
     const [authError, setAuthError] = useState('')
 
-    // Chat state — initialized from sessionStorage so return visits are instant
     const [conv, setConv] = useState<ConvMeta | null>(() => {
         try { return JSON.parse(sessionStorage.getItem(`fwd_conv_${id}`) || 'null') } catch { return null }
     })
@@ -73,12 +72,10 @@ export default function ForwarderChatPage() {
     const [error, setError] = useState('')
     const bottomRef = useRef<HTMLDivElement>(null)
 
-    // Currency converter state
     const [convTo, setConvTo] = useState('USD')
     const [convResult, setConvResult] = useState<string | null>(null)
     const [convLoading, setConvLoading] = useState(false)
 
-    // On mount: check localStorage for saved portal credentials
     useEffect(() => {
         const storedId = localStorage.getItem('cl_fwd_id')
         const storedEmail = localStorage.getItem('cl_fwd_email')
@@ -107,19 +104,14 @@ export default function ForwarderChatPage() {
             const data = await res.json()
             setConv(data.conversation)
             setMessages(data.messages)
-            // Cache for instant revisit
             try {
                 sessionStorage.setItem(`fwd_conv_${id}`, JSON.stringify(data.conversation))
                 sessionStorage.setItem(`fwd_msgs_${id}`, JSON.stringify(data.messages))
             } catch {}
-        } catch {
-            // silent poll failure
-        } finally {
-            setLoading(false)
-        }
+        } catch {}
+        finally { setLoading(false) }
     }, [id, fwdId, fwdEmail])
 
-    // Start polling when authenticated
     useEffect(() => {
         if (!isAuthenticated || !fwdId || !fwdEmail) return
         setLoading(true)
@@ -128,12 +120,10 @@ export default function ForwarderChatPage() {
         return () => clearInterval(interval)
     }, [isAuthenticated, fetchMessages, fwdId, fwdEmail])
 
-    // Auto-scroll to bottom on new messages
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
 
-    // Currency converter — uses conv directly to avoid temporal dead zone with activePrice
     useEffect(() => {
         const price = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
         if (!conv || !price) { setConvResult(null); return }
@@ -154,12 +144,9 @@ export default function ForwarderChatPage() {
         return () => controller.abort()
     }, [conv?.agreed_price, conv?.current_offer, conv?.original_price, convTo, conv?.currency])
 
-    // ── Auth ──────────────────────────────────────────────────────────────────
-
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
-        setAuthLoading(true)
-        setAuthError('')
+        setAuthLoading(true); setAuthError('')
         try {
             const res = await apiFetch('/api/forwarders/auth', {
                 method: 'POST',
@@ -176,19 +163,13 @@ export default function ForwarderChatPage() {
             } else {
                 setAuthError(data.detail || t('chat.invalid.creds'))
             }
-        } catch {
-            setAuthError(t('chat.network.error'))
-        } finally {
-            setAuthLoading(false)
-        }
+        } catch { setAuthError(t('chat.network.error')) }
+        finally { setAuthLoading(false) }
     }
-
-    // ── Chat actions ──────────────────────────────────────────────────────────
 
     const sendText = async () => {
         if (!text.trim() || sending) return
-        setSending(true)
-        setError('')
+        setSending(true); setError('')
         try {
             await apiFetch(`/api/forwarders/conversations/${id}/messages`, {
                 method: 'POST',
@@ -196,59 +177,39 @@ export default function ForwarderChatPage() {
                 body: JSON.stringify({ content: text.trim() }),
             })
             setText('')
-        } catch {
-            setError(t('chat.send.failed'))
-        } finally {
-            setSending(false)
-        }
+        } catch { setError(t('chat.send.failed')) }
+        finally { setSending(false) }
     }
 
     const respondOffer = async (action: 'ACCEPT' | 'REJECT') => {
-        setSending(true)
-        setError('')
+        setSending(true); setError('')
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
                 body: JSON.stringify({ action }),
             })
-            if (!res.ok) {
-                const data = await res.json()
-                setError(data.detail || t('chat.action.failed'))
-            }
-        } catch {
-            setError(t('chat.request.failed'))
-        } finally {
-            setSending(false)
-        }
+            if (!res.ok) { const data = await res.json(); setError(data.detail || t('chat.action.failed')) }
+        } catch { setError(t('chat.request.failed')) }
+        finally { setSending(false) }
     }
 
     const sendCounter = async () => {
         const amount = parseFloat(counterAmount)
         if (isNaN(amount) || amount <= 0 || !conv) return
-        setSending(true)
-        setError('')
+        setSending(true); setError('')
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/respond-offer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
                 body: JSON.stringify({ action: 'COUNTER', counter_amount: amount }),
             })
-            if (res.ok) {
-                setShowCounterInput(false)
-                setCounterAmount('')
-            } else {
-                const data = await res.json()
-                setError(data.detail || t('chat.counter.failed'))
-            }
-        } catch {
-            setError(t('chat.counter.failed'))
-        } finally {
-            setSending(false)
-        }
+            if (res.ok) { setShowCounterInput(false); setCounterAmount('') }
+            else { const data = await res.json(); setError(data.detail || t('chat.counter.failed')) }
+        } catch { setError(t('chat.counter.failed')) }
+        finally { setSending(false) }
     }
 
-    // Counter chips: prices between shipper's offer and original (going UP)
     const getCounterChips = (): number[] => {
         if (!conv?.current_offer) return []
         const low = conv.current_offer
@@ -267,103 +228,72 @@ export default function ForwarderChatPage() {
 
     const confirmBooking = async () => {
         if (sending) return
-        setSending(true)
-        setError('')
+        setSending(true); setError('')
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/confirm-booking`, {
                 method: 'POST',
                 headers: { 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
             })
-            if (!res.ok) {
-                const data = await res.json()
-                setError(data.detail || 'Booking confirmation failed.')
-            }
-        } catch {
-            setError('Booking confirmation failed.')
-        } finally {
-            setSending(false)
-        }
+            if (!res.ok) { const data = await res.json(); setError(data.detail || 'Booking confirmation failed.') }
+        } catch { setError('Booking confirmation failed.') }
+        finally { setSending(false) }
     }
 
     const closeDeal = async () => {
         if (closingDeal) return
-        setClosingDeal(true)
-        setError('')
+        setClosingDeal(true); setError('')
         try {
             const res = await apiFetch(`/api/forwarders/conversations/${id}/close`, {
                 method: 'POST',
                 headers: { 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
             })
-            if (!res.ok) {
-                const data = await res.json()
-                setError(data.detail || t('chat.close.failed'))
-            }
-        } catch {
-            setError(t('chat.close.deal.failed'))
-        } finally {
-            setClosingDeal(false)
-        }
+            if (!res.ok) { const data = await res.json(); setError(data.detail || t('chat.close.failed')) }
+        } catch { setError(t('chat.close.deal.failed')) }
+        finally { setClosingDeal(false) }
     }
-
-    // ── Derived state ─────────────────────────────────────────────────────────
 
     const isLocked = conv?.status === 'BOOKED'
     const isClosed = conv?.status === 'CLOSED'
-    const shipperWaiting = conv?.offer_side === 'SHIPPER'   // shipper sent offer → forwarder must respond
-    const activePriceLabel = conv?.agreed_price ? 'Agreed' : conv?.current_offer ? 'Counter Offer' : 'Quoted'
+    const shipperWaiting = conv?.offer_side === 'SHIPPER'
+    const activePriceLabel = conv?.agreed_price ? 'Agreed Price' : conv?.current_offer ? 'Counter Offer' : 'Quoted Price'
     const activePrice = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
-
-    // Close deal button state
     const iAlreadyRequested = conv?.forwarder_close_req ?? false
     const otherRequested = conv?.shipper_close_req ?? false
+    const shipperInitials = 'SH'
+    const isShipperOnline = conv?.shipper_last_seen
+        ? (Date.now() - new Date(conv.shipper_last_seen + 'Z').getTime()) < 120000
+        : false
 
     // ── Login screen ──────────────────────────────────────────────────────────
-
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-[#080808] text-white flex items-center justify-center px-4">
+            <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
                 <div className="w-full max-w-sm">
                     <div className="text-center mb-8">
-                        <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <BarChart3 className="w-5 h-5 text-emerald-400" />
+                        <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <BarChart3 className="w-6 h-6 text-emerald-400" />
                         </div>
-                        <h1 className="text-xl font-bold text-white mb-1">{t('chat.partner.chat')}</h1>
+                        <h1 className="text-xl font-bold text-white font-outfit uppercase mb-1">{t('chat.partner.chat')}</h1>
                         <p className="text-xs text-zinc-500">{t('chat.signin.desc')}</p>
                     </div>
-
-                    <form onSubmit={handleLogin} className="bg-zinc-950 border border-white/5 rounded-2xl p-6 space-y-4">
+                    <form onSubmit={handleLogin} className="bg-[#0a0a0a] border border-white/[0.08] rounded-3xl p-6 space-y-4">
                         {authError && (
                             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2.5 rounded-xl text-xs">
                                 {authError}
                             </div>
                         )}
                         <div>
-                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('chat.partner.id')}</label>
-                            <input
-                                type="text"
-                                placeholder="REG-OMEGO-XXXX"
-                                value={fwdId}
-                                onChange={e => setFwdId(e.target.value)}
-                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700 uppercase"
-                                required
-                            />
+                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('chat.partner.id')}</label>
+                            <input type="text" placeholder="REG-OMEGO-XXXX" value={fwdId} onChange={e => setFwdId(e.target.value)}
+                                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700 uppercase" required />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('chat.email')}</label>
-                            <input
-                                type="email"
-                                placeholder="company@email.com"
-                                value={fwdEmail}
-                                onChange={e => setFwdEmail(e.target.value)}
-                                className="w-full bg-black border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700"
-                                required
-                            />
+                            <label className="block text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('chat.email')}</label>
+                            <input type="email" placeholder="company@email.com" value={fwdEmail} onChange={e => setFwdEmail(e.target.value)}
+                                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white focus:border-white/20 outline-none transition-colors placeholder-zinc-700" required />
                         </div>
-                        <button
-                            type="submit"
-                            disabled={authLoading}
-                            className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
-                        >
+                        <button type="submit" disabled={authLoading}
+                            className="w-full bg-emerald-500 text-black font-bold text-xs py-3 rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 uppercase tracking-widest">
                             {authLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{t('chat.access')} <ArrowRight className="w-3.5 h-3.5" /></>}
                         </button>
                     </form>
@@ -372,352 +302,353 @@ export default function ForwarderChatPage() {
         )
     }
 
-    // ── Loading ───────────────────────────────────────────────────────────────
-
-    if (loading && !conv) {
-        return (
-            <FullPageSpinner />
-        )
-    }
-
-    if (!conv) {
-        return (
-            <div className="h-screen bg-[#050505] flex items-center justify-center text-zinc-500 text-sm">
-                {t('chat.not.found')}
-            </div>
-        )
-    }
-
-    // ── Chat UI ───────────────────────────────────────────────────────────────
+    if (loading && !conv) return <FullPageSpinner />
+    if (!conv) return (
+        <div className="h-screen bg-black flex items-center justify-center text-zinc-600 text-sm">
+            {t('chat.not.found')}
+        </div>
+    )
 
     return (
-        <div className="h-screen bg-[#050505] flex flex-col max-w-2xl mx-auto">
+        <div className="h-screen bg-black flex">
 
-            {/* ── Header ────────────────────────────────── */}
-            <div className="flex items-center gap-3 px-4 py-4 border-b border-white/[0.06] flex-shrink-0 bg-[#080808]">
-                <button
-                    onClick={() => router.push('/forwarders/portal')}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4 text-zinc-500" />
-                </button>
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-white font-outfit truncate">{conv.forwarder_company}</span>
-                        <span className="text-zinc-700">↔</span>
-                        <span className="text-xs font-mono text-zinc-600 truncate">{t('chat.shipper')}</span>
+            {/* ── LEFT: Chat Column ── */}
+            <div className="flex-1 flex flex-col min-w-0 border-r border-white/[0.05]">
+
+                {/* Header */}
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-[#080808] flex-shrink-0">
+                    <button onClick={() => router.push('/forwarders/portal')}
+                        className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors flex-shrink-0">
+                        <ArrowLeft className="w-4 h-4 text-zinc-500" />
+                    </button>
+
+                    {/* Shipper avatar */}
+                    <div className="relative flex-shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] font-bold font-outfit">
+                            {shipperInitials}
+                        </div>
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080808] ${isShipperOnline ? 'bg-emerald-400' : 'bg-zinc-700'}`} />
                     </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                            conv.shipper_last_seen && (Date.now() - new Date(conv.shipper_last_seen + 'Z').getTime()) < 120000
-                                ? 'bg-emerald-400'
-                                : 'bg-zinc-700'
-                        }`} />
+
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white font-outfit truncate">{t('chat.shipper')}</p>
                         <p className="text-[10px] text-zinc-600 font-mono">{lastSeenLabel(conv.shipper_last_seen, t)}</p>
                     </div>
+
+                    <span className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full flex-shrink-0 ${
+                        isLocked ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : isClosed ? 'bg-zinc-900 text-zinc-600 border border-white/[0.06]'
+                        : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
+                    }`}>
+                        {isLocked ? '🔒 Locked' : isClosed ? t('chat.closed') : 'Negotiating'}
+                    </span>
                 </div>
-                <span className={`text-[9px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full flex-shrink-0 ${
-                    isLocked ? 'bg-emerald-500/10 text-emerald-400'
-                    : isClosed ? 'bg-zinc-800 text-zinc-500'
-                    : 'bg-white/5 text-zinc-500'
-                }`}>
-                    {isLocked ? t('chat.booked') : isClosed ? t('chat.closed') : t('chat.open')}
-                </span>
-            </div>
 
-            {/* ── Price Bar ─────────────────────────────── */}
-            <div className="px-4 py-3 border-b border-white/[0.04] bg-[#080808] flex-shrink-0">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
-                        <p className={`text-xl font-semibold font-mono leading-tight ${
-                            conv.agreed_price ? 'text-emerald-400'
-                            : conv.current_offer ? 'text-amber-400'
-                            : 'text-white'
-                        }`}>
-                            {conv.currency} {Number(activePrice).toLocaleString()}
-                        </p>
-                        {conv.current_offer && !conv.agreed_price && (
-                            <p className="text-[9px] text-zinc-600 font-inter">
-                                Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
-                            </p>
-                        )}
-                        {/* Currency converter */}
-                        <div className="flex items-center gap-1.5 mt-1.5">
-                            <span className="text-[9px] text-zinc-700">≈</span>
-                            <select
-                                value={convTo}
-                                onChange={e => setConvTo(e.target.value)}
-                                className="bg-black border border-white/[0.06] rounded-lg text-[10px] text-zinc-500 px-1.5 py-0.5 outline-none cursor-pointer"
-                            >
-                                {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].filter(c => c !== conv.currency).map(c => (
-                                    <option key={c} value={c} className="bg-black">{c}</option>
-                                ))}
-                            </select>
-                            <span className="text-[10px] font-mono text-zinc-500">
-                                {convLoading ? '...' : convResult ? `${convTo} ${convResult}` : '—'}
-                            </span>
-                        </div>
-                    </div>
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col justify-end gap-3 min-h-0">
 
-                    {/* Booking confirmation + Close Deal — forwarder side */}
-                    {!isLocked && !isClosed && (
-                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                            {/* Mutual booking confirm */}
-                            {conv.forwarder_book_req && !conv.shipper_book_req && (
-                                <span className="text-[9px] text-zinc-500 italic animate-pulse">
-                                    Waiting for shipper...
-                                </span>
-                            )}
-                            {conv.shipper_book_req && !conv.forwarder_book_req && !shipperWaiting && (
-                                <button
-                                    onClick={confirmBooking}
-                                    disabled={sending}
-                                    className="bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-amber-400 transition-all animate-pulse disabled:opacity-50"
-                                >
-                                    {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Shipper confirmed — Lock Deal'}
-                                </button>
-                            )}
-                            {!conv.shipper_book_req && !conv.forwarder_book_req && !shipperWaiting && (
-                                <button
-                                    onClick={confirmBooking}
-                                    disabled={sending}
-                                    className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-emerald-500/20 transition-all disabled:opacity-50"
-                                >
-                                    {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Confirm Deal'}
-                                </button>
-                            )}
-
-                            {/* Close Deal (off-platform) */}
-                            {iAlreadyRequested ? (
-                                <span className="text-[9px] text-zinc-600 font-inter italic">
-                                    {t('chat.waiting.shipper')}
-                                </span>
-                            ) : otherRequested ? (
-                                <button
-                                    onClick={closeDeal}
-                                    disabled={closingDeal}
-                                    className="bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-white/10 hover:text-white transition-all animate-pulse disabled:opacity-50"
-                                >
-                                    {t('chat.shipper.wants.close')}
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={closeDeal}
-                                    disabled={closingDeal}
-                                    className="bg-white/5 border border-white/[0.06] text-zinc-600 text-[10px] font-semibold uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-white/10 hover:text-zinc-400 transition-all disabled:opacity-50"
-                                >
-                                    {closingDeal ? <Loader2 className="w-3 h-3 animate-spin" /> : t('chat.close.deal')}
-                                </button>
-                            )}
+                    {/* Empty state */}
+                    {messages.filter(m => m.message_type !== 'SYSTEM').length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-12 text-center gap-4 opacity-40">
+                            <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                                <MessageSquare className="w-6 h-6 text-zinc-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-white font-outfit uppercase mb-1">Awaiting Messages</p>
+                                <p className="text-[11px] text-zinc-600 max-w-[200px] leading-relaxed">The shipper will message you here to begin negotiating</p>
+                            </div>
                         </div>
                     )}
+
+                    <AnimatePresence initial={false}>
+                        {messages.map((msg) => {
+
+                            if (msg.message_type === 'SYSTEM') return (
+                                <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
+                                    <p className="text-[10px] text-zinc-600 italic text-center max-w-sm bg-white/[0.02] px-4 py-2.5 rounded-2xl border border-white/[0.04] leading-relaxed">
+                                        {msg.content}
+                                    </p>
+                                </motion.div>
+                            )
+
+                            if (msg.message_type === 'OFFER') {
+                                const latestOfferId = Math.max(...messages.filter(m => m.message_type === 'OFFER').map(m => m.id))
+                                const isActivePending = shipperWaiting && msg.id === latestOfferId
+                                return (
+                                    <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
+                                        <div className="bg-[#0d0d0d] border border-blue-500/20 rounded-2xl p-4 max-w-[300px]">
+                                            <div className="flex items-center gap-1.5 mb-2">
+                                                <TrendingUp className="w-3 h-3 text-blue-400" />
+                                                <p className="text-[9px] font-semibold text-blue-400 uppercase tracking-widest">{t('chat.shipper.offer')}</p>
+                                            </div>
+                                            <p className="text-2xl font-semibold font-mono text-white">
+                                                {conv.currency} {Number(msg.offer_amount).toLocaleString()}
+                                            </p>
+                                            <p className="text-[9px] text-zinc-600 mt-1">
+                                                Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
+                                            </p>
+
+                                            {isActivePending && !isLocked && !isClosed && !showCounterInput && (
+                                                <div className="flex gap-2 mt-3">
+                                                    <button onClick={() => respondOffer('ACCEPT')} disabled={sending}
+                                                        className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50">
+                                                        {t('chat.accept')}
+                                                    </button>
+                                                    <button onClick={() => setShowCounterInput(true)} disabled={sending}
+                                                        className="flex-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-amber-500/20 transition-all disabled:opacity-50">
+                                                        {t('chat.counter')}
+                                                    </button>
+                                                    <button onClick={() => respondOffer('REJECT')} disabled={sending}
+                                                        className="flex-1 bg-white/[0.04] border border-white/[0.08] text-zinc-500 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-white/[0.08] transition-all disabled:opacity-50">
+                                                        {t('chat.reject')}
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {isActivePending && !isLocked && !isClosed && showCounterInput && (
+                                                <div className="mt-3 space-y-2">
+                                                    <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">{t('chat.your.counter.price')}</p>
+                                                    <div className="flex gap-1.5 flex-wrap">
+                                                        {getCounterChips().map(p => (
+                                                            <button key={p} onClick={() => setCounterAmount(String(p))}
+                                                                className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold font-mono transition-all ${
+                                                                    counterAmount === String(p)
+                                                                        ? 'bg-white text-black border-white'
+                                                                        : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:border-white/20 hover:text-white'
+                                                                }`}>
+                                                                {p.toLocaleString()}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-zinc-500 text-xs font-mono">{conv.currency}</span>
+                                                        <input type="number" value={counterAmount} onChange={e => setCounterAmount(e.target.value)}
+                                                            placeholder={String(Math.round(((conv.current_offer ?? conv.original_price) + conv.original_price) / 2))}
+                                                            className="flex-1 bg-transparent text-xl font-semibold font-mono text-white outline-none border-b border-white/10 focus:border-white/30 transition-colors pb-0.5" />
+                                                    </div>
+                                                    <div className="flex gap-2 pt-1">
+                                                        <button onClick={sendCounter} disabled={sending || !counterAmount}
+                                                            className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-30">
+                                                            {t('chat.send.counter')}
+                                                        </button>
+                                                        <button onClick={() => { setShowCounterInput(false); setCounterAmount('') }}
+                                                            className="px-3 py-2 bg-white/[0.04] border border-white/[0.08] text-zinc-500 text-[10px] font-semibold rounded-xl hover:bg-white/[0.08] transition-all">
+                                                            {t('chat.cancel')}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )
+                            }
+
+                            if (msg.message_type === 'COUNTER_OFFER') return (
+                                <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+                                    <div className="bg-[#0d0d0d] border border-amber-500/20 rounded-2xl p-4 max-w-[260px]">
+                                        <p className="text-[9px] font-semibold text-amber-400 uppercase tracking-widest mb-2">{t('chat.your.counter')}</p>
+                                        <p className="text-2xl font-semibold font-mono text-white">
+                                            {conv.currency} {Number(msg.offer_amount).toLocaleString()}
+                                        </p>
+                                        <p className="text-[9px] text-zinc-600 mt-1">{t('chat.waiting.resp')}</p>
+                                    </div>
+                                </motion.div>
+                            )
+
+                            if (msg.message_type === 'ACCEPTED') return (
+                                <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
+                                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-5 py-3 text-center">
+                                        <p className="text-xs font-semibold text-emerald-400">✅ {msg.content}</p>
+                                    </div>
+                                </motion.div>
+                            )
+
+                            if (msg.message_type === 'REJECTED') return (
+                                <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
+                                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3 text-center">
+                                        <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
+                                    </div>
+                                </motion.div>
+                            )
+
+                            const isMine = msg.sender_id === fwdId
+                            return (
+                                <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                                    className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                                    {!isMine && (
+                                        <div className="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-500/20 text-blue-400 flex items-center justify-center text-[8px] font-bold flex-shrink-0 mb-0.5">
+                                            {shipperInitials}
+                                        </div>
+                                    )}
+                                    <div className={`max-w-[68%] px-4 py-2.5 rounded-2xl ${
+                                        isMine
+                                            ? 'bg-white text-black rounded-br-sm'
+                                            : 'bg-[#111] border border-white/[0.07] text-white rounded-bl-sm'
+                                    }`}>
+                                        <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
+                                        <p className={`text-[9px] mt-1 ${isMine ? 'text-black/40' : 'text-zinc-600'}`}>
+                                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
+                    </AnimatePresence>
+                    <div ref={bottomRef} />
                 </div>
 
-                {/* Closed banner */}
-                {isClosed && !isLocked && (
-                    <div className="mt-3 bg-zinc-800/50 border border-white/5 rounded-xl px-4 py-3">
-                        <p className="text-xs font-semibold text-zinc-400">{t('chat.deal.archived')}</p>
+                {/* Error */}
+                <AnimatePresence>
+                    {error && (
+                        <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                            className="mx-5 mb-2 flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+                            <p className="text-xs text-red-400">{error}</p>
+                            <button onClick={() => setError('')}><X className="w-3.5 h-3.5 text-red-400" /></button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Input */}
+                {!isLocked && !isClosed ? (
+                    <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
+                        <div className="flex items-center gap-3 px-5 py-3">
+                            <input type="text" value={text} onChange={e => setText(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText() } }}
+                                placeholder={t('chat.type.message')}
+                                className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-2xl px-4 py-3 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/15 transition-colors" />
+                            <button onClick={sendText} disabled={!text.trim() || sending}
+                                className="w-11 h-11 bg-white text-black rounded-2xl flex items-center justify-center hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-30 flex-shrink-0">
+                                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex-shrink-0 border-t border-white/[0.06] px-5 py-4 bg-[#080808] text-center">
+                        <p className="text-xs text-zinc-600">
+                            {isLocked ? t('chat.booking.confirmed') : t('chat.deal.closed')}
+                        </p>
                     </div>
                 )}
             </div>
 
-            {/* ── Messages ──────────────────────────────── */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
-                {messages.map((msg) => {
+            {/* ── RIGHT: Deal Details Panel ── */}
+            <div className="w-80 flex-shrink-0 flex flex-col bg-[#050505] overflow-y-auto">
 
-                    if (msg.message_type === 'SYSTEM') {
-                        return (
-                            <div key={msg.id} className="flex justify-center">
-                                <p className="text-[10px] text-zinc-600 font-inter italic text-center max-w-xs bg-white/[0.02] px-3 py-2 rounded-xl border border-white/[0.04]">
-                                    {msg.content}
+                {/* Price card */}
+                <div className="p-5 border-b border-white/[0.05]">
+                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-3">Deal Summary</p>
+                    <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-4 space-y-3">
+                        <div>
+                            <p className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest">{activePriceLabel}</p>
+                            <p className={`text-3xl font-semibold font-mono mt-0.5 ${conv.agreed_price ? 'text-emerald-400' : conv.current_offer ? 'text-amber-400' : 'text-white'}`}>
+                                {conv.currency} {Number(activePrice).toLocaleString()}
+                            </p>
+                            {conv.current_offer && !conv.agreed_price && (
+                                <p className="text-[10px] text-zinc-600 mt-1">
+                                    Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
                                 </p>
+                            )}
+                        </div>
+
+                        {/* Status rows */}
+                        <div className="space-y-2 pt-2 border-t border-white/[0.05]">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[9px] text-zinc-600 uppercase tracking-widest">Shipper</span>
+                                <span className={`text-[9px] font-semibold ${conv.shipper_book_req ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                    {conv.shipper_book_req ? '✓ Ready to lock' : 'Negotiating'}
+                                </span>
                             </div>
-                        )
-                    }
-
-                    if (msg.message_type === 'OFFER') {
-                        const latestOfferId = Math.max(...messages.filter(m => m.message_type === 'OFFER').map(m => m.id))
-                        const isActivePending = shipperWaiting && msg.id === latestOfferId
-                        return (
-                            <div key={msg.id} className="flex justify-start">
-                                <div className="bg-[#0d0d0d] border border-white/10 rounded-2xl p-4 max-w-[280px]">
-                                    <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">{t('chat.shipper.offer')}</p>
-                                    <p className="text-2xl font-semibold font-mono text-white">
-                                        {conv.currency} {Number(msg.offer_amount).toLocaleString()}
-                                    </p>
-                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">
-                                        Original: {conv.currency} {Number(conv.original_price).toLocaleString()}
-                                    </p>
-
-                                    {isActivePending && !isLocked && !isClosed && !showCounterInput && (
-                                        <div className="flex gap-2 mt-3">
-                                            <button
-                                                onClick={() => respondOffer('ACCEPT')}
-                                                disabled={sending}
-                                                className="flex-1 bg-emerald-500 text-white text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-400 transition-all disabled:opacity-50"
-                                            >
-                                                {t('chat.accept')}
-                                            </button>
-                                            <button
-                                                onClick={() => setShowCounterInput(true)}
-                                                disabled={sending}
-                                                className="flex-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-amber-500/20 transition-all disabled:opacity-50"
-                                            >
-                                                {t('chat.counter')}
-                                            </button>
-                                            <button
-                                                onClick={() => respondOffer('REJECT')}
-                                                disabled={sending}
-                                                className="flex-1 bg-white/5 border border-white/10 text-zinc-400 text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
-                                            >
-                                                {t('chat.reject')}
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Counter input panel */}
-                                    {isActivePending && !isLocked && !isClosed && showCounterInput && (
-                                        <div className="mt-3 space-y-2">
-                                            <p className="text-[9px] text-zinc-500 font-semibold uppercase tracking-widest">{t('chat.your.counter.price')}</p>
-                                            {/* Counter chips */}
-                                            <div className="flex gap-1.5 flex-wrap">
-                                                {getCounterChips().map(p => (
-                                                    <button
-                                                        key={p}
-                                                        onClick={() => setCounterAmount(String(p))}
-                                                        className={`px-2.5 py-1 rounded-full border text-[10px] font-semibold font-mono transition-all ${
-                                                            counterAmount === String(p)
-                                                                ? 'bg-white text-black border-white'
-                                                                : 'bg-white/[0.04] border-white/10 text-zinc-400 hover:border-white/20 hover:text-white'
-                                                        }`}
-                                                    >
-                                                        {p.toLocaleString()}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-zinc-500 text-xs font-mono">{conv.currency}</span>
-                                                <input
-                                                    type="number"
-                                                    value={counterAmount}
-                                                    onChange={e => setCounterAmount(e.target.value)}
-                                                    placeholder={String(Math.round(((conv.current_offer ?? conv.original_price) + conv.original_price) / 2))}
-                                                    className="flex-1 bg-transparent text-xl font-semibold font-mono text-white outline-none border-b border-white/10 focus:border-white/30 transition-colors pb-0.5"
-                                                />
-                                            </div>
-                                            <div className="flex gap-2 pt-1">
-                                                <button
-                                                    onClick={sendCounter}
-                                                    disabled={sending || !counterAmount}
-                                                    className="flex-1 bg-white text-black text-[10px] font-semibold uppercase tracking-widest py-2 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-30"
-                                                >
-                                                    {t('chat.send.counter')}
-                                                </button>
-                                                <button
-                                                    onClick={() => { setShowCounterInput(false); setCounterAmount('') }}
-                                                    className="px-3 py-2 bg-white/5 border border-white/10 text-zinc-500 text-[10px] font-semibold rounded-xl hover:bg-white/10 transition-all"
-                                                >
-                                                    {t('chat.cancel')}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    }
-
-                    // COUNTER_OFFER — forwarder's own counter, shown on right
-                    if (msg.message_type === 'COUNTER_OFFER') {
-                        return (
-                            <div key={msg.id} className="flex justify-end">
-                                <div className="bg-[#0d0d0d] border border-amber-500/20 rounded-2xl p-4 max-w-[260px]">
-                                    <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-widest mb-2">{t('chat.your.counter')}</p>
-                                    <p className="text-2xl font-semibold font-mono text-white">
-                                        {conv.currency} {Number(msg.offer_amount).toLocaleString()}
-                                    </p>
-                                    <p className="text-[9px] text-zinc-600 font-inter mt-1">{t('chat.waiting.resp')}</p>
-                                </div>
-                            </div>
-                        )
-                    }
-
-                    if (msg.message_type === 'ACCEPTED') {
-                        return (
-                            <div key={msg.id} className="flex justify-center">
-                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-semibold text-emerald-400">✅ {msg.content}</p>
-                                </div>
-                            </div>
-                        )
-                    }
-
-                    if (msg.message_type === 'REJECTED') {
-                        return (
-                            <div key={msg.id} className="flex justify-center">
-                                <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5 text-center">
-                                    <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
-                                </div>
-                            </div>
-                        )
-                    }
-
-                    const isMine = msg.sender_id === fwdId
-                    return (
-                        <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[72%] px-4 py-3 rounded-2xl ${
-                                isMine
-                                    ? 'bg-white text-black rounded-br-sm'
-                                    : 'bg-[#141414] border border-white/[0.06] text-white rounded-bl-sm'
-                            }`}>
-                                <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
-                                <p className={`text-[9px] mt-1 ${isMine ? 'text-black/40' : 'text-zinc-600'}`}>
-                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[9px] text-zinc-600 uppercase tracking-widest">You</span>
+                                <span className={`text-[9px] font-semibold ${conv.forwarder_book_req ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                    {conv.forwarder_book_req ? '✓ Ready to lock' : 'Negotiating'}
+                                </span>
                             </div>
                         </div>
-                    )
-                })}
-                <div ref={bottomRef} />
-            </div>
+                    </div>
 
-            {/* ── Error ─────────────────────────────────── */}
-            {error && (
-                <div className="mx-4 mb-2 flex items-center justify-between bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
-                    <p className="text-xs text-red-400 font-inter">{error}</p>
-                    <button onClick={() => setError('')}><X className="w-3.5 h-3.5 text-red-400" /></button>
-                </div>
-            )}
-
-            {/* ── Input Area ────────────────────────────── */}
-            {!isLocked && !isClosed ? (
-                <div className="flex-shrink-0 border-t border-white/[0.06] bg-[#080808]">
-                    <div className="flex items-center gap-3 px-4 py-3">
-                        <input
-                            type="text"
-                            value={text}
-                            onChange={e => setText(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText() } }}
-                            placeholder={t('chat.type.message')}
-                            className="flex-1 bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/15 transition-colors font-inter"
-                        />
-                        <button
-                            onClick={sendText}
-                            disabled={!text.trim() || sending}
-                            className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-95 disabled:opacity-30 flex-shrink-0"
-                        >
-                            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                        </button>
+                    {/* Currency converter */}
+                    <div className="mt-3 bg-[#0a0a0a] border border-white/[0.08] rounded-2xl px-4 py-3">
+                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-2">Convert</p>
+                        <div className="flex items-center gap-2">
+                            <select value={convTo} onChange={e => setConvTo(e.target.value)}
+                                className="bg-white/[0.04] border border-white/[0.08] rounded-lg text-[10px] text-zinc-400 px-2 py-1.5 outline-none cursor-pointer flex-shrink-0">
+                                {['USD','EUR','GBP','JPY','CNY','AED','SGD','INR','SAR','AUD','CAD','CHF'].filter(c => c !== conv.currency).map(c => (
+                                    <option key={c} value={c} className="bg-black">{c}</option>
+                                ))}
+                            </select>
+                            <span className="text-sm font-semibold font-mono text-white">
+                                {convLoading ? <Loader2 className="w-3 h-3 animate-spin text-zinc-600" /> : convResult ? `${convResult}` : '—'}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            ) : (
-                <div className="flex-shrink-0 border-t border-white/[0.06] px-4 py-4 bg-[#080808] text-center">
-                    <p className="text-xs text-zinc-600 font-inter">
-                        {isLocked ? t('chat.booking.confirmed') : t('chat.deal.closed')}
-                    </p>
+
+                {/* Locked banner */}
+                {isLocked && (
+                    <div className="mx-5 mt-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                            <p className="text-xs font-semibold text-emerald-400">Deal Locked</p>
+                        </div>
+                        <p className="text-[10px] text-emerald-500/70 leading-relaxed">Contact details have been shared. Check your email.</p>
+                    </div>
+                )}
+
+                {/* Actions */}
+                {!isLocked && !isClosed && (
+                    <div className="p-5 space-y-3">
+                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Actions</p>
+
+                        {/* Confirm booking */}
+                        {!shipperWaiting && (
+                            conv.forwarder_book_req && !conv.shipper_book_req ? (
+                                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-center">
+                                    <p className="text-[10px] text-zinc-500 animate-pulse">Waiting for shipper to lock...</p>
+                                </div>
+                            ) : conv.shipper_book_req && !conv.forwarder_book_req ? (
+                                <button onClick={confirmBooking} disabled={sending}
+                                    className="w-full bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse flex items-center justify-center gap-2">
+                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Shipper confirmed — Lock Deal</>}
+                                </button>
+                            ) : (
+                                <button onClick={confirmBooking} disabled={sending}
+                                    className="w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Confirm Deal</>}
+                                </button>
+                            )
+                        )}
+
+                        {/* Close deal */}
+                        {iAlreadyRequested ? (
+                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-center">
+                                <p className="text-[10px] text-zinc-600 italic">{t('chat.waiting.shipper')}</p>
+                            </div>
+                        ) : otherRequested ? (
+                            <button onClick={closeDeal} disabled={closingDeal}
+                                className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-500/20 transition-all animate-pulse disabled:opacity-50">
+                                {closingDeal ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : t('chat.shipper.wants.close')}
+                            </button>
+                        ) : (
+                            <button onClick={closeDeal} disabled={closingDeal}
+                                className="w-full bg-white/[0.04] border border-white/[0.06] text-zinc-500 text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-white/[0.07] hover:text-zinc-300 transition-all disabled:opacity-50">
+                                {closingDeal ? <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" /> : t('chat.close.deal')}
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Request info */}
+                <div className="p-5 mt-auto border-t border-white/[0.05]">
+                    <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-3">Request</p>
+                    <div className="bg-[#0a0a0a] border border-white/[0.08] rounded-2xl p-4">
+                        <div className="flex items-center gap-2">
+                            <Ship className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+                            <span className="text-[10px] font-mono text-zinc-500 truncate">{conv.request_id}</span>
+                        </div>
+                    </div>
                 </div>
-            )}
+            </div>
         </div>
     )
 }
