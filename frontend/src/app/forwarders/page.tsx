@@ -1,190 +1,383 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Loader2, Globe, ExternalLink, Building2 } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
-import Avatar from '@/components/visuals/Avatar';
-import PartnerModal from '@/components/modals/PartnerModal';
-import { apiFetch } from '@/lib/config';
-import { useT } from '@/lib/i18n/t';
+import { useState, useEffect, useMemo } from 'react'
+import { Search, ChevronDown, ArrowRight, Globe, MapPin, ExternalLink } from 'lucide-react'
+import Navbar from '@/components/layout/Navbar'
+import Avatar from '@/components/visuals/Avatar'
+import PartnerModal from '@/components/modals/PartnerModal'
+import { apiFetch } from '@/lib/config'
+import { useT } from '@/lib/i18n/t'
+import Link from 'next/link'
 
 interface Forwarder {
-    id: string;
-    forwarder_id?: string;
-    company_name: string;
-    email: string;
-    country: string;
-    logo_url: string;
-    website?: string;
-    phone?: string;
-    reliability_score?: number;
-    specializations?: string;
-    routes?: string;
+    id: string
+    forwarder_id?: string
+    company_name: string
+    email: string
+    country: string
+    logo_url: string
+    website?: string
+    phone?: string
+    reliability_score?: number
+    specializations?: string
+    routes?: string
 }
+
+// Country name → ISO 3166-1 alpha-2 code for flagcdn.com
+function getISOCode(country: string): string {
+    const map: Record<string, string> = {
+        'Saudi Arabia': 'sa', 'UAE': 'ae', 'United Arab Emirates': 'ae',
+        'USA': 'us', 'United States': 'us', 'UK': 'gb', 'United Kingdom': 'gb',
+        'China': 'cn', 'India': 'in', 'Germany': 'de', 'France': 'fr',
+        'Japan': 'jp', 'South Korea': 'kr', 'Singapore': 'sg', 'Australia': 'au',
+        'Canada': 'ca', 'Brazil': 'br', 'Netherlands': 'nl', 'Belgium': 'be',
+        'Turkey': 'tr', 'Egypt': 'eg', 'South Africa': 'za', 'Nigeria': 'ng',
+        'Kenya': 'ke', 'Pakistan': 'pk', 'Bangladesh': 'bd', 'Sri Lanka': 'lk',
+        'Malaysia': 'my', 'Indonesia': 'id', 'Thailand': 'th', 'Vietnam': 'vn',
+        'Philippines': 'ph', 'Hong Kong': 'hk', 'Taiwan': 'tw',
+        'Qatar': 'qa', 'Kuwait': 'kw', 'Bahrain': 'bh', 'Oman': 'om',
+        'Jordan': 'jo', 'Lebanon': 'lb', 'Iraq': 'iq', 'Iran': 'ir',
+        'Mexico': 'mx', 'Argentina': 'ar', 'Colombia': 'co', 'Chile': 'cl',
+        'Spain': 'es', 'Italy': 'it', 'Poland': 'pl', 'Russia': 'ru',
+        'Switzerland': 'ch', 'Sweden': 'se', 'Norway': 'no', 'Denmark': 'dk',
+        'Finland': 'fi', 'Austria': 'at', 'Portugal': 'pt', 'Greece': 'gr',
+        'Morocco': 'ma', 'Tunisia': 'tn', 'Algeria': 'dz', 'Libya': 'ly',
+        'Ethiopia': 'et', 'Ghana': 'gh', 'Tanzania': 'tz', 'Uganda': 'ug',
+    }
+    return map[country] || ''
+}
+
+function FlagImg({ country, size = 20 }: { country: string; size?: number }) {
+    const code = getISOCode(country)
+    if (!code) return <Globe className="w-4 h-4 text-zinc-500" />
+    return (
+        <img
+            src={`https://flagcdn.com/w${size}/${code}.png`}
+            srcSet={`https://flagcdn.com/w${size * 2}/${code}.png 2x`}
+            width={size}
+            alt={country}
+            className="rounded-sm flex-shrink-0 object-cover"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+        />
+    )
+}
+
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
 export default function ForwarderDirectoryPage() {
     const t = useT()
-    const [forwarders, setForwarders] = useState<Forwarder[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('');
-    const [selectedPartner, setSelectedPartner] = useState<Forwarder | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [forwarders, setForwarders] = useState<Forwarder[]>([])
+    const [loading, setLoading] = useState(true)
+    const [activeLetter, setActiveLetter] = useState('A')
+    const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+    const [search, setSearch] = useState('')
+    const [showAllCountries, setShowAllCountries] = useState(false)
+    const [selectedPartner, setSelectedPartner] = useState<Forwarder | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     useEffect(() => {
-        const fetchForwarders = async () => {
-            try {
-                const res = await apiFetch('/api/forwarders/active');
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    setForwarders(data);
-                    console.log('Active Forwarders (Array):', data);
-                } else if (data.forwarders) {
-                    setForwarders(data.forwarders);
-                    console.log('Active Forwarders (Object):', data.forwarders);
-                }
-            } catch (error) {
-                console.error("Failed to load forwarders:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        apiFetch('/api/forwarders/active')
+            .then(r => r.json())
+            .then(data => {
+                const list = Array.isArray(data) ? data : (data.forwarders || [])
+                setForwarders(list)
+                // Auto-select first country under first active letter
+                const first = list.find((f: Forwarder) => f.country?.toUpperCase().startsWith('A'))
+                if (first) setSelectedCountry(first.country)
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false))
+    }, [])
 
-        fetchForwarders();
-    }, []);
+    // All unique countries
+    const allCountries = useMemo(() => {
+        const seen = new Set<string>()
+        return forwarders
+            .map(f => f.country)
+            .filter(c => c && !seen.has(c) && seen.add(c))
+            .sort()
+    }, [forwarders])
 
-    const filteredForwarders = forwarders.filter(f =>
-        f.company_name.toLowerCase().includes(filter.toLowerCase()) ||
-        f.country.toLowerCase().includes(filter.toLowerCase())
-    );
+    // Countries filtered by active letter + search
+    const filteredCountries = useMemo(() => {
+        return allCountries.filter(c => {
+            const matchesLetter = c.toUpperCase().startsWith(activeLetter)
+            const matchesSearch = !search || c.toLowerCase().includes(search.toLowerCase())
+            return matchesLetter && matchesSearch
+        })
+    }, [allCountries, activeLetter, search])
 
-    const handleOpenModal = (partner: Forwarder) => {
-        setSelectedPartner(partner);
-        setIsModalOpen(true);
-    };
+    // Letters that have at least one country
+    const activeLetters = useMemo(() => {
+        const set = new Set(allCountries.map(c => c[0]?.toUpperCase()))
+        return set
+    }, [allCountries])
+
+    // Members of selected country
+    const countryMembers = useMemo(() => {
+        if (!selectedCountry) return []
+        return forwarders.filter(f => f.country === selectedCountry)
+    }, [forwarders, selectedCountry])
+
+    const displayedCountries = showAllCountries ? filteredCountries : filteredCountries.slice(0, 12)
 
     return (
-        <div className="min-h-screen bg-black text-white font-inter selection:bg-white selection:text-black pb-20">
+        <div className="min-h-screen bg-[#050505] text-white font-inter selection:bg-white selection:text-black">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-4 pt-32 pb-16">
+            <div className="max-w-7xl mx-auto px-4 pt-28 pb-20">
 
-                {/* Hero */}
-                <div className="text-center mb-12">
-                    <h1 className="text-2xl md:text-3xl font-semibold font-outfit uppercase tracking-tight text-white mb-3">
-                        {t('fwd.dir.title')}
-                    </h1>
-                    <p className="text-xs text-zinc-500 font-inter mb-8">{t('fwd.dir.sub')}</p>
-
-                    <div className="max-w-2xl mx-auto relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
-                        <input
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                            placeholder={t('fwd.dir.search')}
-                            className="w-full bg-[#0a0a0a] border border-white/[0.08] rounded-xl pl-12 pr-6 py-3 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-white/20 transition-all font-inter"
-                        />
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-1">CargoLink Network</p>
+                        <h1 className="text-2xl font-bold text-white font-outfit">Global Agent Forwarders Distribution</h1>
                     </div>
-                    {!loading && (
-                        <p className="text-xs text-zinc-700 font-inter mt-3">{filteredForwarders.length} {filteredForwarders.length === 1 ? 'partner' : 'partners'} listed</p>
-                    )}
+                    <Link href="/forwarders/register" className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors border border-emerald-500/20 px-4 py-2 rounded-xl bg-emerald-500/5 hover:bg-emerald-500/10">
+                        Become a Partner <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                 </div>
 
-                {/* Grid */}
-                {loading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="w-10 h-10 animate-spin text-white/20" />
+                {/* Search */}
+                <div className="relative max-w-sm mb-6">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+                    <input
+                        value={search}
+                        onChange={e => { setSearch(e.target.value); setShowAllCountries(true) }}
+                        placeholder="Search country or company..."
+                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-white/20 transition-all"
+                    />
+                </div>
+
+                <div className="flex gap-6">
+
+                    {/* ── Left Panel ── */}
+                    <div className="flex-1 min-w-0">
+
+                        {/* A–Z tabs */}
+                        <div className="flex flex-wrap gap-1 mb-5">
+                            {ALPHABET.map(letter => {
+                                const hasData = activeLetters.has(letter)
+                                const isActive = activeLetter === letter
+                                return (
+                                    <button
+                                        key={letter}
+                                        onClick={() => {
+                                            if (!hasData) return
+                                            setActiveLetter(letter)
+                                            setShowAllCountries(false)
+                                            setSearch('')
+                                            // auto-select first country in this letter
+                                            const first = allCountries.find(c => c.toUpperCase().startsWith(letter))
+                                            if (first) setSelectedCountry(first)
+                                        }}
+                                        disabled={!hasData}
+                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                                            isActive
+                                                ? 'bg-emerald-500 text-white shadow-[0_0_16px_rgba(16,185,129,0.4)]'
+                                                : hasData
+                                                    ? 'bg-white/[0.06] text-zinc-300 hover:bg-white/10 hover:text-white'
+                                                    : 'bg-white/[0.02] text-zinc-700 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        {letter}
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        {/* Country grid */}
+                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+                            {loading ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                    {[...Array(8)].map((_, i) => (
+                                        <div key={i} className="h-10 bg-white/[0.04] rounded-xl animate-pulse" />
+                                    ))}
+                                </div>
+                            ) : filteredCountries.length === 0 ? (
+                                <p className="text-center text-xs text-zinc-600 py-8">No partners found for &quot;{activeLetter}&quot;</p>
+                            ) : (
+                                <>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {displayedCountries.map(country => (
+                                            <button
+                                                key={country}
+                                                onClick={() => setSelectedCountry(country)}
+                                                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all group ${
+                                                    selectedCountry === country
+                                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-white'
+                                                        : 'bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:border-white/20 hover:text-white hover:bg-white/[0.05]'
+                                                }`}
+                                            >
+                                                <FlagImg country={country} size={20} />
+                                                <span className="text-xs font-semibold truncate">{country}</span>
+                                                {selectedCountry === country && (
+                                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {filteredCountries.length > 12 && (
+                                        <button
+                                            onClick={() => setShowAllCountries(!showAllCountries)}
+                                            className="w-full mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
+                                        >
+                                            {showAllCountries ? 'Show Less' : `View More (${filteredCountries.length - 12} more)`}
+                                            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllCountries ? 'rotate-180' : ''}`} />
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
+                        {/* Stats bar */}
+                        <div className="flex items-center gap-6 mt-4 px-1">
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] text-zinc-500 font-mono">{forwarders.length} verified partners</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <Globe className="w-3 h-3 text-zinc-600" />
+                                <span className="text-[10px] text-zinc-500 font-mono">{allCountries.length} countries</span>
+                            </div>
+                        </div>
                     </div>
-                ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <AnimatePresence>
-                            {filteredForwarders.map((forwarder, i) => (
-                                <motion.div
-                                    key={forwarder.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-                                    onClick={() => handleOpenModal(forwarder)}
-                                    className="bg-black border border-white/5 rounded-3xl p-8 group hover:border-white/20 transition-all duration-500 hover:bg-zinc-950 relative overflow-hidden shadow-[0_0_50px_rgba(255,255,255,0.02)] cursor-pointer"
-                                >
-                                    {/* Premium Light Sweep Effect */}
-                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.02)_50%,transparent_75%)] bg-[length:250%_250%] animate-[shimmer_3s_infinite]" />
 
-                                    <div className="relative z-10 h-full flex flex-col">
-                                        <div className="flex items-start justify-between mb-10">
-                                            <div className="relative group/logo">
-                                                <div className="absolute -inset-2 bg-white/5 rounded-[28%] blur-xl opacity-0 group-hover/logo:opacity-100 transition-opacity duration-500" />
-                                                <Avatar
-                                                    src={forwarder.logo_url || undefined}
-                                                    name={forwarder.company_name}
-                                                    size="lg"
-                                                    shape="square"
-                                                    className="border-white/5 group-hover:border-white/10 transition-all shadow-2xl relative z-10"
-                                                />
-                                                <div className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 bg-white rounded-full border-2 border-black z-20 shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                                            </div>
+                    {/* ── Right Sidebar ── */}
+                    <div className="w-72 flex-shrink-0">
+                        <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl overflow-hidden sticky top-28">
 
-                                            <div className="flex flex-col items-end gap-1.5">
-                                                <div className="text-[8px] font-semibold text-white/40 tracking-[0.2em] font-inter uppercase">
-                                                    {forwarder.forwarder_id || 'O-REG-7402'}
-                                                </div>
-                                                <div className="flex items-center gap-1.5 border border-white/10 px-2.5 py-1 rounded-full bg-white/[0.02]">
-                                                    <div className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                                                    <span className="text-[8px] font-bold text-white/60 tracking-widest font-inter">{t('fwd.dir.verified')}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                            {/* Country header */}
+                            <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-b border-white/[0.06] px-5 py-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-8 flex items-center justify-center">
+                                        {selectedCountry ? <FlagImg country={selectedCountry} size={40} /> : <Globe className="w-6 h-6 text-zinc-500" />}
+                                    </div>
+                                    <div>
+                                        <p className="text-base font-bold text-white font-outfit">
+                                            {selectedCountry || 'Select a country'}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-500">{countryMembers.length} partner{countryMembers.length !== 1 ? 's' : ''}</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                                        <div className="flex-grow space-y-6">
-                                            <div>
-                                                <h3 className="text-2xl font-semibold mb-2 tracking-tighter font-outfit uppercase group-hover:text-white transition-colors duration-300">
-                                                    {forwarder.company_name}
-                                                </h3>
-                                                <div className="flex items-center text-white/40 text-[9px] font-bold uppercase tracking-[0.15em] font-inter">
-                                                    <MapPin className="w-3 h-3 mr-2 opacity-50" />
-                                                    {forwarder.country} • {t('fwd.global.registry')}
-                                                </div>
-                                            </div>
+                            {/* Members section */}
+                            <div className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Our Members</p>
+                                    {countryMembers.length > 6 && (
+                                        <button className="text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5 hover:text-emerald-300">
+                                            View more <ArrowRight className="w-2.5 h-2.5" />
+                                        </button>
+                                    )}
+                                </div>
 
-                                            <div className="pt-8 border-t border-white/5 space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center text-[9px] text-white/30 font-bold uppercase tracking-widest font-inter">
-                                                        <Globe className="w-3.5 h-3.5 mr-3 opacity-30" />
-                                                        {t('fwd.dir.status')}
-                                                    </div>
-                                                    <span className="text-[8px] font-semibold text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-0.5 rounded">{t('fwd.dir.active')}</span>
-                                                </div>
-
-                                                {forwarder.website && (
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center text-[9px] text-white/30 font-bold uppercase tracking-widest font-inter">
-                                                            <ExternalLink className="w-3.5 h-3.5 mr-3 opacity-30" />
-                                                            {t('fwd.public.node')}
-                                                        </div>
-                                                        <span className="text-[8px] font-bold text-white/50 group-hover:text-white/80 transition-colors max-w-[140px] truncate">
-                                                            {forwarder.website.replace(/^https?:\/\//, '')}
+                                {countryMembers.length === 0 ? (
+                                    <div className="py-8 text-center">
+                                        <MapPin className="w-6 h-6 text-zinc-700 mx-auto mb-2" />
+                                        <p className="text-xs text-zinc-600">No partners in this country yet</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-3 gap-2 mb-4">
+                                        {countryMembers.slice(0, 6).map(fwd => (
+                                            <button
+                                                key={fwd.id}
+                                                onClick={() => { setSelectedPartner(fwd); setIsModalOpen(true) }}
+                                                title={fwd.company_name}
+                                                className="aspect-square bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/20 rounded-xl flex items-center justify-center transition-all group overflow-hidden"
+                                            >
+                                                {fwd.logo_url ? (
+                                                    <img
+                                                        src={fwd.logo_url}
+                                                        alt={fwd.company_name}
+                                                        className="w-10 h-10 object-contain rounded-lg"
+                                                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                                                        <span className="text-[10px] font-bold text-zinc-400">
+                                                            {fwd.company_name.slice(0, 2).toUpperCase()}
                                                         </span>
                                                     </div>
                                                 )}
-                                            </div>
-                                        </div>
-
-                                        <button className="w-full mt-10 bg-white text-black py-4 rounded-2xl text-[9px] font-semibold uppercase tracking-[0.4em] transition-all duration-500 hover:bg-zinc-200 active:scale-[0.97] shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                                            {t('fwd.dir.connect')}
-                                        </button>
+                                            </button>
+                                        ))}
                                     </div>
+                                )}
 
-                                    {/* Scanline Effect - Subtle Luxury Version */}
-                                    <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[length:100%_40px] opacity-10" />
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
+                                {/* Member list (compact) */}
+                                {countryMembers.length > 0 && (
+                                    <div className="space-y-1.5 mb-4">
+                                        {countryMembers.slice(0, 3).map(fwd => (
+                                            <button
+                                                key={fwd.id}
+                                                onClick={() => { setSelectedPartner(fwd); setIsModalOpen(true) }}
+                                                className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.05] transition-all group text-left"
+                                            >
+                                                <Avatar src={fwd.logo_url || undefined} name={fwd.company_name} size="sm" shape="square" className="border-white/5 flex-shrink-0" />
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-[11px] font-semibold text-white truncate">{fwd.company_name}</p>
+                                                    {fwd.specializations && (
+                                                        <p className="text-[9px] text-zinc-600 truncate">{fwd.specializations.split(',')[0]}</p>
+                                                    )}
+                                                </div>
+                                                {fwd.website && (
+                                                    <ExternalLink className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 flex-shrink-0" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Find Agent CTA */}
+                                <button
+                                    onClick={() => {
+                                        if (countryMembers.length > 0) {
+                                            setSelectedPartner(countryMembers[0])
+                                            setIsModalOpen(true)
+                                        }
+                                    }}
+                                    className="w-full bg-white text-black text-xs font-bold py-3 rounded-xl hover:bg-zinc-100 transition-all active:scale-[0.98] tracking-wide"
+                                >
+                                    Find Agent
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                )}
+                </div>
 
-                {!loading && filteredForwarders.length === 0 && (
-                    <div className="text-center py-20 text-zinc-500 text-xs font-inter">
-                        {t('fwd.no.match')} &quot;{filter}&quot;
+                {/* All Partners Grid (below) */}
+                {!loading && selectedCountry && countryMembers.length > 3 && (
+                    <div className="mt-10">
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-sm font-bold text-white">
+                                All Partners in {selectedCountry}
+                                <span className="ml-2 text-zinc-500 font-normal">({countryMembers.length})</span>
+                            </h2>
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {countryMembers.map(fwd => (
+                                <button
+                                    key={fwd.id}
+                                    onClick={() => { setSelectedPartner(fwd); setIsModalOpen(true) }}
+                                    className="bg-white/[0.02] border border-white/[0.06] hover:border-white/20 hover:bg-white/[0.05] rounded-2xl p-4 flex items-center gap-3 transition-all text-left group"
+                                >
+                                    <Avatar src={fwd.logo_url || undefined} name={fwd.company_name} size="md" shape="square" className="border-white/5 flex-shrink-0" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold text-white truncate group-hover:text-emerald-300 transition-colors">{fwd.company_name}</p>
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                            <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                            <p className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Verified Partner</p>
+                                        </div>
+                                        {fwd.specializations && (
+                                            <p className="text-[9px] text-zinc-600 truncate mt-0.5">{fwd.specializations}</p>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -196,5 +389,5 @@ export default function ForwarderDirectoryPage() {
                 partner={selectedPartner}
             />
         </div>
-    );
+    )
 }
