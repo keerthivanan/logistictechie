@@ -146,6 +146,36 @@ html.light .md\:hidden.bg-black { background-color: #ffffff !important; }
 /* Opacity tweaks for logo in light mode */
 html.light img[alt="CargoLink"] { filter: none; }
 
+/* ── Fix hero section — Prism 3D visual uses mix-blend-screen (dark-only) ── */
+html.light .mix-blend-screen { display: none !important; }
+html.light .mix-blend-overlay { opacity: 0.06 !important; }
+
+/* ── Fix gradient overlays that go "to black" (hero overlay, section fades) ── */
+html.light .via-black\/40 { --tw-gradient-via: transparent !important; }
+html.light .via-black\/60 { --tw-gradient-via: transparent !important; }
+html.light .via-black\/80 { --tw-gradient-via: transparent !important; }
+
+/* ── Text gradient effects (bg-clip-text text-transparent) ── */
+html.light .bg-clip-text.text-transparent {
+  -webkit-text-fill-color: #111111 !important;
+  color: #111111 !important;
+}
+
+/* ── White/alpha text — used in hero "MOVE FASTER." opacity variant ── */
+html.light .text-white\/70 { color: rgba(0,0,0,0.55) !important; }
+html.light .text-white\/60 { color: rgba(0,0,0,0.50) !important; }
+html.light .text-white\/50 { color: rgba(0,0,0,0.45) !important; }
+html.light .text-white\/40 { color: rgba(0,0,0,0.40) !important; }
+html.light .text-white\/30 { color: rgba(0,0,0,0.30) !important; }
+html.light .text-white\/20 { color: rgba(0,0,0,0.20) !important; }
+html.light .text-white\/80 { color: rgba(0,0,0,0.70) !important; }
+html.light .text-white\/90 { color: rgba(0,0,0,0.80) !important; }
+
+/* ── Border white/alpha extras ── */
+html.light .border-white\/30 { border-color: rgba(0,0,0,0.18) !important; }
+html.light .border-white\/50 { border-color: rgba(0,0,0,0.25) !important; }
+html.light .border-white\/\[0\.03\] { border-color: rgba(0,0,0,0.05) !important; }
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
