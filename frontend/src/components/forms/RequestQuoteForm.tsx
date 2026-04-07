@@ -102,6 +102,7 @@ export default function RequestQuoteForm() {
         delivery_date: '',
         // Contact & Notes
         phone: '',
+        phone_code: '+1',
         vessel: '',
         notes: '',
     });
@@ -156,7 +157,6 @@ export default function RequestQuoteForm() {
 
             const originC = countries.find((c: Country) => c.code === formData.origin_country);
             const destC = countries.find((c: Country) => c.code === formData.dest_country);
-            const dialCode = originC?.dial_code || '';
 
             // Build special_requirements to include extra logistics fields
             const extras = [
@@ -174,7 +174,7 @@ export default function RequestQuoteForm() {
                 sovereign_id: user.sovereign_id || '',
                 name: user.name || user.email || 'Client',
                 email: user.email,
-                phone: `${dialCode} ${formData.phone}`.trim(),
+                phone: formData.phone ? `${formData.phone_code} ${formData.phone}`.trim() : '',
                 origin: formData.origin_district || (originC?.name || formData.origin_country),
                 origin_locode: formData.origin_locode,
                 origin_type: formData.origin_type,
@@ -220,7 +220,6 @@ export default function RequestQuoteForm() {
 
     const originC = countries.find((c: Country) => c.code === formData.origin_country);
     const destC2 = countries.find((c: Country) => c.code === formData.dest_country);
-    const uiDialCode = originC?.dial_code || '';
 
     const iOcean = formData.mode === 'FCL' || formData.mode === 'LCL';
     const isFCL = formData.mode === 'FCL';
@@ -611,18 +610,25 @@ export default function RequestQuoteForm() {
 
                         <div className="grid md:grid-cols-2 gap-5">
                             <div>
-                                <label className={lbl}>{t('rqf.phone')}</label>
+                                <label className={lbl}>{t('rqf.phone')} <span className="text-zinc-700 normal-case tracking-normal ml-1">(optional)</span></label>
                                 <div className="flex bg-black border border-white/[0.06] rounded-xl overflow-hidden">
-                                    <div className="flex items-center justify-center pl-4 pr-3 py-3 text-xs font-bold text-zinc-500 font-inter bg-white/[0.03] border-r border-white/[0.06] whitespace-nowrap select-none">
-                                        {uiDialCode || '+'}
-                                    </div>
+                                    <select
+                                        value={formData.phone_code}
+                                        onChange={e => set('phone_code', e.target.value)}
+                                        className="bg-white/[0.03] border-r border-white/[0.06] px-3 py-3 text-xs font-bold text-zinc-400 font-inter appearance-none cursor-pointer focus:outline-none"
+                                    >
+                                        {countries
+                                            .filter((c: Country, i: number, arr: Country[]) => arr.findIndex((x: Country) => x.dial_code === c.dial_code) === i)
+                                            .sort((a: Country, b: Country) => a.dial_code.localeCompare(b.dial_code))
+                                            .map((c: Country) => (
+                                                <option key={c.code} value={c.dial_code} className="bg-zinc-900">
+                                                    {c.dial_code} {c.name}
+                                                </option>
+                                            ))}
+                                    </select>
                                     <input name="phone" type="tel" value={formData.phone}
-                                        onChange={e => {
-                                            let val = e.target.value.replace(/\D/g, '');
-                                            val = formData.origin_country === 'IN' ? val.slice(0, 10) : val.slice(0, 15);
-                                            set('phone', val);
-                                        }}
-                                        placeholder={formData.origin_country === 'IN' ? t('rqf.phone.in') : t('rqf.phone.placeholder')}
+                                        onChange={e => set('phone', e.target.value.replace(/\D/g, '').slice(0, 15))}
+                                        placeholder="Phone number"
                                         className="flex-1 bg-transparent px-3 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                                 </div>
                             </div>
