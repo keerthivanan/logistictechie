@@ -23,43 +23,49 @@ interface Forwarder {
     routes?: string
 }
 
-// Country name → ISO 3166-1 alpha-2 code for flagcdn.com
-function getISOCode(country: string): string {
+// Country name → flag emoji
+function getFlag(country: string): string {
     const map: Record<string, string> = {
-        'Saudi Arabia': 'sa', 'UAE': 'ae', 'United Arab Emirates': 'ae',
-        'USA': 'us', 'United States': 'us', 'UK': 'gb', 'United Kingdom': 'gb',
-        'China': 'cn', 'India': 'in', 'Germany': 'de', 'France': 'fr',
-        'Japan': 'jp', 'South Korea': 'kr', 'Singapore': 'sg', 'Australia': 'au',
-        'Canada': 'ca', 'Brazil': 'br', 'Netherlands': 'nl', 'Belgium': 'be',
-        'Turkey': 'tr', 'Egypt': 'eg', 'South Africa': 'za', 'Nigeria': 'ng',
-        'Kenya': 'ke', 'Pakistan': 'pk', 'Bangladesh': 'bd', 'Sri Lanka': 'lk',
-        'Malaysia': 'my', 'Indonesia': 'id', 'Thailand': 'th', 'Vietnam': 'vn',
-        'Philippines': 'ph', 'Hong Kong': 'hk', 'Taiwan': 'tw',
-        'Qatar': 'qa', 'Kuwait': 'kw', 'Bahrain': 'bh', 'Oman': 'om',
-        'Jordan': 'jo', 'Lebanon': 'lb', 'Iraq': 'iq', 'Iran': 'ir',
-        'Mexico': 'mx', 'Argentina': 'ar', 'Colombia': 'co', 'Chile': 'cl',
-        'Spain': 'es', 'Italy': 'it', 'Poland': 'pl', 'Russia': 'ru',
-        'Switzerland': 'ch', 'Sweden': 'se', 'Norway': 'no', 'Denmark': 'dk',
-        'Finland': 'fi', 'Austria': 'at', 'Portugal': 'pt', 'Greece': 'gr',
-        'Morocco': 'ma', 'Tunisia': 'tn', 'Algeria': 'dz', 'Libya': 'ly',
-        'Ethiopia': 'et', 'Ghana': 'gh', 'Tanzania': 'tz', 'Uganda': 'ug',
+        'Saudi Arabia': '🇸🇦', 'UAE': '🇦🇪', 'United Arab Emirates': '🇦🇪',
+        'USA': '🇺🇸', 'United States': '🇺🇸', 'UK': '🇬🇧', 'United Kingdom': '🇬🇧',
+        'China': '🇨🇳', 'India': '🇮🇳', 'Germany': '🇩🇪', 'France': '🇫🇷',
+        'Japan': '🇯🇵', 'South Korea': '🇰🇷', 'Singapore': '🇸🇬', 'Australia': '🇦🇺',
+        'Canada': '🇨🇦', 'Brazil': '🇧🇷', 'Netherlands': '🇳🇱', 'Belgium': '🇧🇪',
+        'Turkey': '🇹🇷', 'Egypt': '🇪🇬', 'South Africa': '🇿🇦', 'Nigeria': '🇳🇬',
+        'Kenya': '🇰🇪', 'Pakistan': '🇵🇰', 'Bangladesh': '🇧🇩', 'Sri Lanka': '🇱🇰',
+        'Malaysia': '🇲🇾', 'Indonesia': '🇮🇩', 'Thailand': '🇹🇭', 'Vietnam': '🇻🇳',
+        'Philippines': '🇵🇭', 'Hong Kong': '🇭🇰', 'Taiwan': '🇹🇼',
+        'Qatar': '🇶🇦', 'Kuwait': '🇰🇼', 'Bahrain': '🇧🇭', 'Oman': '🇴🇲',
+        'Jordan': '🇯🇴', 'Lebanon': '🇱🇧', 'Iraq': '🇮🇶', 'Iran': '🇮🇷',
+        'Mexico': '🇲🇽', 'Argentina': '🇦🇷', 'Colombia': '🇨🇴', 'Chile': '🇨🇱',
+        'Spain': '🇪🇸', 'Italy': '🇮🇹', 'Poland': '🇵🇱', 'Russia': '🇷🇺',
+        'Switzerland': '🇨🇭', 'Sweden': '🇸🇪', 'Norway': '🇳🇴', 'Denmark': '🇩🇰',
+        'Finland': '🇫🇮', 'Austria': '🇦🇹', 'Portugal': '🇵🇹', 'Greece': '🇬🇷',
+        'Morocco': '🇲🇦', 'Tunisia': '🇹🇳', 'Algeria': '🇩🇿', 'Libya': '🇱🇾',
+        'Ethiopia': '🇪🇹', 'Ghana': '🇬🇭', 'Tanzania': '🇹🇿', 'Uganda': '🇺🇬',
+        'New Zealand': '🇳🇿', 'Israel': '🇮🇱', 'Czech Republic': '🇨🇿', 'Romania': '🇷🇴',
+        'Hungary': '🇭🇺', 'Ukraine': '🇺🇦', 'Serbia': '🇷🇸', 'Croatia': '🇭🇷',
+        'Slovakia': '🇸🇰', 'Bulgaria': '🇧🇬', 'Slovenia': '🇸🇮', 'Lithuania': '🇱🇹',
+        'Latvia': '🇱🇻', 'Estonia': '🇪🇪', 'Belarus': '🇧🇾', 'Kazakhstan': '🇰🇿',
+        'Azerbaijan': '🇦🇿', 'Georgia': '🇬🇪', 'Armenia': '🇦🇲', 'Uzbekistan': '🇺🇿',
+        'Sudan': '🇸🇩', 'Yemen': '🇾🇪', 'Syria': '🇸🇾', 'Afghanistan': '🇦🇫',
+        'Myanmar': '🇲🇲', 'Cambodia': '🇰🇭', 'Laos': '🇱🇦', 'Nepal': '🇳🇵',
+        'Maldives': '🇲🇻', 'Mongolia': '🇲🇳', 'Cuba': '🇨🇺', 'Peru': '🇵🇪',
+        'Venezuela': '🇻🇪', 'Ecuador': '🇪🇨', 'Bolivia': '🇧🇴', 'Paraguay': '🇵🇾',
+        'Uruguay': '🇺🇾', 'Panama': '🇵🇦', 'Costa Rica': '🇨🇷', 'Guatemala': '🇬🇹',
+        'Honduras': '🇭🇳', 'El Salvador': '🇸🇻', 'Nicaragua': '🇳🇮', 'Dominican Republic': '🇩🇴',
+        'Jamaica': '🇯🇲', 'Trinidad and Tobago': '🇹🇹', 'Senegal': '🇸🇳', 'Ivory Coast': '🇨🇮',
+        'Cameroon': '🇨🇲', 'Angola': '🇦🇴', 'Mozambique': '🇲🇿', 'Zambia': '🇿🇲',
+        'Zimbabwe': '🇿🇼', 'Somalia': '🇸🇴', 'Rwanda': '🇷🇼', 'Botswana': '🇧🇼',
+        'Namibia': '🇳🇦', 'Malawi': '🇲🇼', 'Eritrea': '🇪🇷', 'Djibouti': '🇩🇯',
+        'Congo': '🇨🇬', 'DR Congo': '🇨🇩', 'Madagascar': '🇲🇬', 'Mauritius': '🇲🇺',
+        'Macau': '🇲🇴', 'Brunei': '🇧🇳', 'Timor-Leste': '🇹🇱', 'Papua New Guinea': '🇵🇬',
+        'Fiji': '🇫🇯', 'Iceland': '🇮🇸', 'Luxembourg': '🇱🇺', 'Malta': '🇲🇹',
+        'Cyprus': '🇨🇾', 'Albania': '🇦🇱', 'North Macedonia': '🇲🇰', 'Bosnia': '🇧🇦',
+        'Montenegro': '🇲🇪', 'Kosovo': '🇽🇰', 'Moldova': '🇲🇩', 'Ireland': '🇮🇪',
+        'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
     }
-    return map[country] || ''
-}
-
-function FlagImg({ country, size = 20 }: { country: string; size?: number }) {
-    const code = getISOCode(country)
-    if (!code) return <Globe className="w-4 h-4 text-zinc-500" />
-    return (
-        <img
-            src={`https://flagcdn.com/w${size}/${code}.png`}
-            srcSet={`https://flagcdn.com/w${size * 2}/${code}.png 2x`}
-            width={size}
-            alt={country}
-            className="rounded-sm flex-shrink-0 object-cover"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-        />
-    )
+    return map[country] || '🌐'
 }
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
@@ -209,7 +215,7 @@ export default function ForwarderDirectoryPage() {
                                                         : 'bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:border-white/20 hover:text-white hover:bg-white/[0.05]'
                                                 }`}
                                             >
-                                                <FlagImg country={country} size={20} />
+                                                <span className="text-lg leading-none flex-shrink-0">{getFlag(country)}</span>
                                                 <span className="text-xs font-semibold truncate">{country}</span>
                                                 {selectedCountry === country && (
                                                     <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
@@ -251,9 +257,7 @@ export default function ForwarderDirectoryPage() {
                             {/* Country header */}
                             <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 border-b border-white/[0.06] px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-8 flex items-center justify-center">
-                                        {selectedCountry ? <FlagImg country={selectedCountry} size={40} /> : <Globe className="w-6 h-6 text-zinc-500" />}
-                                    </div>
+                                    <span className="text-4xl leading-none">{selectedCountry ? getFlag(selectedCountry) : '🌐'}</span>
                                     <div>
                                         <p className="text-base font-bold text-white font-outfit">
                                             {selectedCountry || 'Select a country'}
