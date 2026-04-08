@@ -139,7 +139,7 @@ export default function ForwarderDirectoryPage() {
                         <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-1">CargoLink Network</p>
                         <h1 className="text-2xl font-bold text-white font-outfit">Global Agent Forwarders Distribution</h1>
                     </div>
-                    <Link href="/forwarders/register" className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors border border-emerald-500/20 px-4 py-2 rounded-xl bg-emerald-500/5 hover:bg-emerald-500/10">
+                    <Link href="/forwarders/register" className="flex items-center gap-1.5 text-xs font-semibold text-white hover:text-zinc-300 transition-colors border border-white/20 px-4 py-2 rounded-xl bg-white/20/5 hover:bg-white/[0.06]">
                         Become a Partner <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
@@ -178,7 +178,7 @@ export default function ForwarderDirectoryPage() {
                                         }}
                                         className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
                                             isActive
-                                                ? 'bg-emerald-500 text-white shadow-[0_0_16px_rgba(16,185,129,0.4)]'
+                                                ? 'bg-white/20 text-white '
                                                 : hasData
                                                     ? 'bg-white/[0.06] text-zinc-300 hover:bg-white/10 hover:text-white'
                                                     : 'bg-white/[0.03] text-zinc-600 hover:bg-white/[0.05] hover:text-zinc-400'
@@ -219,14 +219,14 @@ export default function ForwarderDirectoryPage() {
                                                 onClick={() => setSelectedCountry(country)}
                                                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all group ${
                                                     selectedCountry === country
-                                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-white'
+                                                        ? 'bg-white/[0.06] border-white/20 text-white'
                                                         : 'bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:border-white/20 hover:text-white hover:bg-white/[0.05]'
                                                 }`}
                                             >
                                                 <span className="text-lg leading-none flex-shrink-0">{getFlag(country)}</span>
                                                 <span className="text-xs font-semibold truncate">{country}</span>
                                                 {selectedCountry === country && (
-                                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white flex-shrink-0" />
                                                 )}
                                             </button>
                                         ))}
@@ -235,7 +235,7 @@ export default function ForwarderDirectoryPage() {
                                     {filteredCountries.length > 12 && (
                                         <button
                                             onClick={() => setShowAllCountries(!showAllCountries)}
-                                            className="w-full mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
+                                            className="w-full mt-4 pt-4 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-xs text-white hover:text-zinc-300 transition-colors font-semibold"
                                         >
                                             {showAllCountries ? 'Show Less' : `View More (${filteredCountries.length - 12} more)`}
                                             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showAllCountries ? 'rotate-180' : ''}`} />
@@ -248,7 +248,7 @@ export default function ForwarderDirectoryPage() {
                         {/* Stats bar */}
                         <div className="flex items-center gap-6 mt-4 px-1">
                             <div className="flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <div className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse" />
                                 <span className="text-[10px] text-zinc-500 font-mono">{forwarders.length} verified partners</span>
                             </div>
                             <div className="flex items-center gap-1.5">
@@ -280,7 +280,7 @@ export default function ForwarderDirectoryPage() {
                                 <div className="flex items-center justify-between mb-3">
                                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Our Members</p>
                                     {countryMembers.length > 6 && (
-                                        <button className="text-[9px] text-emerald-400 font-semibold flex items-center gap-0.5 hover:text-emerald-300">
+                                        <button className="text-[9px] text-white font-semibold flex items-center gap-0.5 hover:text-zinc-300">
                                             View more <ArrowRight className="w-2.5 h-2.5" />
                                         </button>
                                     )}
@@ -378,9 +378,9 @@ export default function ForwarderDirectoryPage() {
                                 >
                                     <Avatar src={fwd.logo_url || undefined} name={fwd.company_name} size="md" shape="square" className="border-white/5 flex-shrink-0" />
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-semibold text-white truncate group-hover:text-emerald-300 transition-colors">{fwd.company_name}</p>
+                                        <p className="text-sm font-semibold text-white truncate group-hover:text-zinc-300 transition-colors">{fwd.company_name}</p>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                                            <div className="w-1 h-1 rounded-full bg-white/20" />
                                             <p className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider">Verified Partner</p>
                                         </div>
                                         {fwd.specializations && (

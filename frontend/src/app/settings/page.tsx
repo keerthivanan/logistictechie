@@ -145,7 +145,7 @@ export default function SettingsPage() {
                         </div>
 
                         {profileMsg && (
-                            <div className={`flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl text-xs font-medium ${profileMsg.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+                            <div className={`flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl text-xs font-medium ${profileMsg.type === 'success' ? 'bg-white/[0.06] border border-white/20 text-white' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
                                 {profileMsg.type === 'success' ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
                                 {profileMsg.text}
                             </div>

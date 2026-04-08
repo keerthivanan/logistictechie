@@ -34,7 +34,7 @@ export default function PartnerSuccessPage() {
 
                 {status === 'loading' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
-                        <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
+                        <Loader2 className="w-16 h-16 text-white animate-spin mb-8" />
                         <h1 className="text-3xl font-bold font-outfit uppercase tracking-wider mb-4">Checking Status</h1>
                         <p className="text-zinc-400 font-inter">Please wait a moment...</p>
                     </motion.div>
@@ -42,11 +42,11 @@ export default function PartnerSuccessPage() {
 
                 {status === 'approved' && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center">
-                        <div className="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-8">
-                            <CheckCircle className="w-12 h-12 text-emerald-500" />
+                        <div className="w-24 h-24 rounded-full bg-white/[0.06] border border-white/20 flex items-center justify-center mb-8">
+                            <CheckCircle className="w-12 h-12 text-white" />
                         </div>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold font-inter tracking-[0.2em] uppercase mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/20 text-white text-[10px] font-semibold font-inter tracking-[0.2em] uppercase mb-6">
                             Partner Activated
                         </div>
 
@@ -54,7 +54,7 @@ export default function PartnerSuccessPage() {
 
                         <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full mb-8 text-left">
                             <p className="text-zinc-400 font-inter text-sm mb-2 uppercase tracking-widest font-bold text-[10px]">Your Partner ID</p>
-                            <p className="text-2xl font-mono text-emerald-400 font-bold">{user?.sovereign_id}</p>
+                            <p className="text-2xl font-mono text-white font-bold">{user?.sovereign_id}</p>
                             <div className="h-px bg-white/5 my-4" />
                             <p className="text-zinc-400 font-inter text-sm leading-relaxed">
                                 Your partner account is active. Use your Partner ID to log into the forwarder portal and start quoting on freight requests.

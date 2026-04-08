@@ -285,7 +285,7 @@ export default function DashboardLayout({
                                     }
                                 }}
                                 placeholder={t('dash.search.placeholder')}
-                                className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
+                                className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium outline-none focus:border-white/20 focus:bg-white/10 transition-all text-white placeholder:text-zinc-600"
                             />
                         </div>
                     </div>

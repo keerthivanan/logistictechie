@@ -341,24 +341,24 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
     const isBest = rank === 1
     const online = isOnline(quote.forwarder_last_seen)
     return (
-        <div className={`px-4 py-3 transition-colors ${isBest ? 'bg-emerald-500/[0.03]' : 'hover:bg-white/[0.02]'}`}>
+        <div className={`px-4 py-3 transition-colors ${isBest ? 'bg-white/[0.02]' : 'hover:bg-white/[0.02]'}`}>
             {/* Top row: rank + company + price */}
             <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`text-[9px] font-semibold font-mono flex-shrink-0 w-5 text-center py-0.5 rounded ${isBest ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-700'}`}>
+                    <span className={`text-[9px] font-semibold font-mono flex-shrink-0 w-5 text-center py-0.5 rounded ${isBest ? 'bg-white/10 text-white' : 'text-zinc-700'}`}>
                         {String(rank).padStart(2, '0')}
                     </span>
                     <div className="relative w-6 h-6 bg-white/[0.03] border border-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
                         <Building2 className="w-3 h-3 text-zinc-500" />
                         {quote.forwarder_last_seen && (
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0c0c0c] ${online ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#0c0c0c] ${online ? 'bg-white' : 'bg-zinc-600'}`} />
                         )}
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2">
                             <p className="text-xs font-semibold text-white font-inter truncate">{quote.forwarder_company}</p>
                             {isBest && (
-                                <span className="flex-shrink-0 text-[8px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">{t('panel.best')}</span>
+                                <span className="flex-shrink-0 text-[8px] font-semibold text-white bg-white/10 border border-white/20 px-1.5 py-0.5 rounded uppercase tracking-widest font-inter">{t('panel.best')}</span>
                             )}
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
@@ -366,7 +366,7 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                                 <Clock className="w-2.5 h-2.5" />{quote.transit_days} {t('panel.transit')}
                             </span>
                             {quote.forwarder_last_seen ? (
-                                <span className={`text-[9px] font-inter ${online ? 'text-emerald-500' : 'text-zinc-700'}`}>
+                                <span className={`text-[9px] font-inter ${online ? 'text-white' : 'text-zinc-700'}`}>
                                     {lastSeenLabel(quote.forwarder_last_seen)}
                                 </span>
                             ) : (
@@ -376,7 +376,7 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                     </div>
                 </div>
                 <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                    <p className={`text-sm font-semibold font-inter leading-none ${isBest ? 'text-emerald-400' : 'text-white'}`}>
+                    <p className="text-sm font-semibold font-inter leading-none text-white">
                         ${quote.total_price.toLocaleString()}
                     </p>
                     <p className="text-[9px] text-zinc-600 font-inter uppercase">{quote.currency}</p>

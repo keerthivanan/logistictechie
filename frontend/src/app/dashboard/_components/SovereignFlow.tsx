@@ -18,7 +18,7 @@ export default function SovereignFlow({
 
     const columns = [
         { title: 'Processing', status: 'processing', color: 'bg-blue-500' },
-        { title: 'In Transit', status: 'transit', color: 'bg-emerald-500' },
+        { title: 'In Transit', status: 'transit', color: 'bg-white' },
         { title: 'Customs', status: 'customs', color: 'bg-amber-500' },
         { title: 'Delivered', status: 'delivered', color: 'bg-purple-500' },
     ]

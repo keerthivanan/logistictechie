@@ -211,8 +211,8 @@ export default function ForwarderPortal() {
                 <div className="flex items-center justify-center min-h-screen px-4">
                     <div className="w-full max-w-sm">
                         <div className="text-center mb-8">
-                            <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <BarChart3 className="w-5 h-5 text-emerald-400" />
+                            <div className="w-12 h-12 bg-white/[0.06] border border-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <BarChart3 className="w-5 h-5 text-white" />
                             </div>
                             <h1 className="text-xl font-bold font-outfit text-white mb-1">{t('portal.title')}</h1>
                             <p className="text-xs text-zinc-500">{t('portal.sign.in.sub')}</p>
@@ -289,8 +289,8 @@ export default function ForwarderPortal() {
                         <div className="flex items-center gap-3 mt-0.5">
                             <span className="text-xs font-mono text-zinc-500">{fwdId}</span>
                             <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase tracking-widest">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                                 {t('portal.active')}
                             </span>
                         </div>
@@ -358,7 +358,7 @@ export default function ForwarderPortal() {
                                                 )}
                                             </div>
                                             <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${
-                                                conv.status === 'BOOKED' ? 'bg-emerald-500/10 text-emerald-400'
+                                                conv.status === 'BOOKED' ? 'bg-white/[0.06] text-white'
                                                 : conv.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500'
                                                 : 'bg-white/5 text-zinc-500'
                                             }`}>
@@ -425,14 +425,14 @@ export default function ForwarderPortal() {
                                             className={`p-4 rounded-xl border transition-all group ${
                                                 isHistory ? 'bg-black border-white/5' :
                                                 isSelected
-                                                    ? 'bg-emerald-500/[0.06] border-emerald-500/30 border-l-2 border-l-emerald-500 cursor-pointer'
+                                                    ? 'bg-white/[0.04] border-white/20 border-l-2 border-l-white cursor-pointer'
                                                     : 'bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] cursor-pointer'
                                             }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                                                        isSelected && !isHistory ? 'bg-emerald-500 text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
+                                                        isSelected && !isHistory ? 'bg-white text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
                                                     }`}>
                                                         {item.cargo_type?.toUpperCase().includes('SEA') || item.cargo_type?.toUpperCase().includes('OCEAN') ? <Ship className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
                                                     </div>
@@ -453,7 +453,7 @@ export default function ForwarderPortal() {
                                                     <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">
                                                         {isHistory ? t('portal.your.quote') : `${item.quotation_count}/3 quotes`}
                                                     </p>
-                                                    <p className={`text-sm font-bold font-mono ${isHistory && item.your_price > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                                                    <p className={`text-sm font-bold font-mono ${isHistory && item.your_price > 0 ? 'text-white' : 'text-zinc-500'}`}>
                                                         {isHistory
                                                             ? (item.your_price > 0 ? `USD ${item.your_price.toLocaleString()}` : '—')
                                                             : t('portal.submit.quote')}
@@ -483,7 +483,7 @@ export default function ForwarderPortal() {
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
                                     <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.won')}</p>
-                                    <p className="text-xl font-bold text-emerald-400 font-mono">{metrics?.won_bids ?? '—'}</p>
+                                    <p className="text-xl font-bold text-white font-mono">{metrics?.won_bids ?? '—'}</p>
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
                                     <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.reliability')}</p>
@@ -491,8 +491,8 @@ export default function ForwarderPortal() {
                                 </div>
                                 <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
                                     <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">{t('portal.status')}</p>
-                                    <p className="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <p className="text-sm font-bold text-white flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                                         {t('portal.active')}
                                     </p>
                                 </div>
@@ -526,7 +526,7 @@ export default function ForwarderPortal() {
                                     {cvLoading ? (
                                         <span className="text-[10px] text-zinc-600">{t('portal.converting')}</span>
                                     ) : cvResult ? (
-                                        <span className="text-sm font-semibold font-mono text-emerald-400">{cvTo} {cvResult}</span>
+                                        <span className="text-sm font-semibold font-mono text-white">{cvTo} {cvResult}</span>
                                     ) : (
                                         <span className="text-[10px] text-zinc-700">{t('portal.enter.amount.above')}</span>
                                     )}
@@ -543,8 +543,8 @@ export default function ForwarderPortal() {
                                 </div>
                             ) : bidSuccess ? (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                        <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                                    <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/20 flex items-center justify-center">
+                                        <CheckCircle2 className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-white mb-1">{t('portal.quote.submitted')}</p>
@@ -622,7 +622,7 @@ export default function ForwarderPortal() {
                                                     placeholder="0.00"
                                                     value={bidPrice}
                                                     onChange={e => setBidPrice(e.target.value)}
-                                                    className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-lg font-bold text-emerald-400 placeholder-zinc-800 focus:border-emerald-500/30 outline-none transition-colors font-mono"
+                                                    className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-lg font-bold text-white placeholder-zinc-800 focus:border-white/20 outline-none transition-colors font-mono"
                                                 />
                                             </div>
                                         </div>
@@ -632,7 +632,7 @@ export default function ForwarderPortal() {
                                         <button
                                             disabled={!bidPrice || submittingBid}
                                             onClick={submitBid}
-                                            className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-30 active:scale-[0.98]"
+                                            className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-30 active:scale-[0.98]"
                                         >
                                             {submittingBid
                                                 ? <Loader2 className="w-4 h-4 animate-spin" />

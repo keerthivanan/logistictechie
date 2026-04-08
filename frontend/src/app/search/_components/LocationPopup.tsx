@@ -166,7 +166,7 @@ export function LocationPopup({ title, data, setData }: LocationPopupProps) {
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-sm font-semibold text-white font-inter truncate">{p.name}</span>
                                                         {p.code && (
-                                                            <span className="text-[9px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded flex-shrink-0">{p.code}</span>
+                                                            <span className="text-[9px] font-mono font-bold text-white bg-white/10 px-1.5 py-0.5 rounded flex-shrink-0">{p.code}</span>
                                                         )}
                                                     </div>
                                                     <span className="text-[10px] text-zinc-600 font-inter">{p.city !== p.name ? `${p.city} · ` : ''}{p.country}</span>

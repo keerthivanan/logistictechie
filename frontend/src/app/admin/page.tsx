@@ -60,7 +60,7 @@ interface AdminStats {
 type Tab = 'pending' | 'all' | 'users'
 
 const statusColor = (s: string) => {
-    if (s === 'ACTIVE') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+    if (s === 'ACTIVE') return 'text-white bg-white/[0.06] border-white/20'
     if (s === 'PENDING') return 'text-amber-400 bg-amber-500/10 border-amber-500/20'
     if (s === 'REJECTED') return 'text-red-400 bg-red-500/10 border-red-500/20'
     return 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
@@ -191,7 +191,7 @@ export default function AdminPage() {
             label: 'Users',
             items: [
                 { icon: Users, label: 'Total Users', value: stats.total_users, color: 'text-blue-400' },
-                { icon: UserCheck, label: 'Active', value: stats.active_users, color: 'text-emerald-400' },
+                { icon: UserCheck, label: 'Active', value: stats.active_users, color: 'text-white' },
                 { icon: UserX, label: 'Inactive / Locked', value: stats.inactive_users, color: 'text-red-400' },
                 { icon: ShoppingBag, label: 'Shippers', value: stats.regular_users, color: 'text-zinc-400' },
                 { icon: Briefcase, label: 'Partners', value: stats.forwarder_users, color: 'text-purple-400' },
@@ -202,7 +202,7 @@ export default function AdminPage() {
             items: [
                 { icon: Building2, label: 'Total Applied', value: stats.total_forwarders, color: 'text-blue-400' },
                 { icon: Clock, label: 'Pending Review', value: stats.pending_applications, color: 'text-amber-400' },
-                { icon: CheckCircle2, label: 'Active Partners', value: stats.active_forwarders, color: 'text-emerald-400' },
+                { icon: CheckCircle2, label: 'Active Partners', value: stats.active_forwarders, color: 'text-white' },
                 { icon: XCircle, label: 'Rejected', value: stats.rejected_applications, color: 'text-red-400' },
             ],
         },
@@ -212,7 +212,7 @@ export default function AdminPage() {
                 { icon: Package, label: 'Total Requests', value: stats.total_requests, color: 'text-blue-400' },
                 { icon: AlertCircle, label: 'Open', value: stats.open_requests, color: 'text-amber-400' },
                 { icon: CheckCircle2, label: 'Closed', value: stats.closed_requests, color: 'text-zinc-400' },
-                { icon: TrendingUp, label: 'Total Quotes', value: stats.total_quotes, color: 'text-emerald-400' },
+                { icon: TrendingUp, label: 'Total Quotes', value: stats.total_quotes, color: 'text-white' },
             ],
         },
     ] : []
@@ -221,7 +221,7 @@ export default function AdminPage() {
         <div className="min-h-screen bg-[#050505] text-white font-inter">
 
             {toast && (
-                <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl text-sm font-bold border shadow-2xl transition-all ${toast.ok ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl text-sm font-bold border shadow-2xl transition-all ${toast.ok ? 'bg-white/[0.06] border-white/20 text-white' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                     {toast.msg}
                 </div>
             )}
@@ -276,7 +276,7 @@ export default function AdminPage() {
                     <div className="space-y-4">
                         {pending.length === 0 ? (
                             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-16 text-center">
-                                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
+                                <CheckCircle2 className="w-8 h-8 text-white mx-auto mb-3" />
                                 <p className="text-sm font-bold text-zinc-300">No pending applications</p>
                                 <p className="text-xs text-zinc-600 mt-1">All caught up!</p>
                             </div>
@@ -331,7 +331,7 @@ export default function AdminPage() {
                                     <button
                                         onClick={() => handleApprove(fwd)}
                                         disabled={actionLoading === fwd.forwarder_id}
-                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-all disabled:opacity-40"
+                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-white/[0.06] border border-white/20 text-white hover:bg-white/10 transition-all disabled:opacity-40"
                                     >
                                         {actionLoading === fwd.forwarder_id ? 'Processing...' : 'Approve'}
                                     </button>
@@ -366,7 +366,7 @@ export default function AdminPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             {fwd.is_verified
-                                                ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                                ? <CheckCircle2 className="w-4 h-4 text-white" />
                                                 : <XCircle className="w-4 h-4 text-zinc-700" />}
                                         </td>
                                         <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{new Date(fwd.registered_at).toLocaleDateString()}</td>
@@ -402,7 +402,7 @@ export default function AdminPage() {
                                             {u.is_locked
                                                 ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-red-400 bg-red-500/10 border-red-500/20">LOCKED</span>
                                                 : u.is_active
-                                                    ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-emerald-400 bg-emerald-500/10 border-emerald-500/20">ACTIVE</span>
+                                                    ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-white bg-white/[0.06] border-white/20">ACTIVE</span>
                                                     : <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-zinc-400 bg-zinc-500/10 border-zinc-500/20">INACTIVE</span>
                                             }
                                         </td>

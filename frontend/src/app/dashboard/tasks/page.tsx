@@ -171,7 +171,7 @@ export default function TasksPage() {
                                     className="flex items-center justify-between p-3 bg-white/[0.01] border border-white/5 rounded-2xl group hover:bg-white/[0.04] hover:border-white/10 transition-all">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <button onClick={() => handleToggle(task.id)}
-                                            className="w-5 h-5 rounded-xl border border-emerald-500/30 flex items-center justify-center text-emerald-500 bg-emerald-500/5 hover:bg-emerald-500 hover:text-black transition-all flex-shrink-0">
+                                            className="w-5 h-5 rounded-xl border border-white/20 flex items-center justify-center text-white bg-white/5 hover:bg-white hover:text-black transition-all flex-shrink-0">
                                             <CheckCircle2 className="w-3 h-3" />
                                         </button>
                                         <div className="overflow-hidden">
@@ -209,7 +209,7 @@ function TaskCard({ task, onToggle, isToggling }: { task: Task; onToggle: (id: s
                     </button>
                 </div>
                 <div className="space-y-1">
-                    <h3 className="text-[12px] font-bold text-white font-outfit tracking-tight group-hover:text-emerald-400 transition-colors uppercase leading-tight">{task.title}</h3>
+                    <h3 className="text-[12px] font-bold text-white font-outfit tracking-tight group-hover:text-zinc-300 transition-colors uppercase leading-tight">{task.title}</h3>
                     <p className="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed font-inter">{task.description}</p>
                 </div>
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between">

@@ -149,7 +149,7 @@ export default function SearchPage() {
                     {/* ── 1. ROUTE ── */}
                     <div className="p-8">
                         <div className="flex items-center gap-2 mb-6">
-                            <Ship className="w-3.5 h-3.5 text-emerald-500" />
+                            <Ship className="w-3.5 h-3.5 text-white" />
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-inter">{t('search.route')}</p>
                         </div>
                         <div className="grid md:grid-cols-2 gap-8">
@@ -157,7 +157,7 @@ export default function SearchPage() {
                             {/* Origin */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                                    <span className="w-2 h-2 rounded-full bg-white/20 flex-shrink-0" />
                                     <span className="text-xs font-bold text-zinc-300 font-inter">{t('search.origin')}</span>
                                 </div>
                                 <div>

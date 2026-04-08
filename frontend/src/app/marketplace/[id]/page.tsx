@@ -153,12 +153,12 @@ export default function MarketplaceLiveDashboard() {
                         ) : (
                             <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest ${
                                 status === 'CLOSED'
-                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                    ? 'bg-white/[0.06] text-white border border-white/20'
                                     : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
                             }`}>
                                 {status === 'CLOSED'
                                     ? <><CheckCircle2 className="w-3 h-3" /> {t('mkt.quoting.complete')}</>
-                                    : <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" /> {t('mkt.collecting')}</>
+                                    : <><span className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse inline-block" /> {t('mkt.collecting')}</>
                                 }
                             </span>
                         )}
@@ -189,13 +189,13 @@ export default function MarketplaceLiveDashboard() {
                         <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">
                             {status === 'CLOSED' ? t('mkt.progress.complete') : t('mkt.progress.collecting')}
                         </span>
-                        <span className={`text-[10px] font-semibold uppercase tracking-widest ${progress > 0 ? 'text-emerald-400' : 'text-zinc-600 animate-pulse'}`}>
+                        <span className={`text-[10px] font-semibold uppercase tracking-widest ${progress > 0 ? 'text-white' : 'text-zinc-600 animate-pulse'}`}>
                             {progress} / 3 {t('mkt.quotes.plural')}
                         </span>
                     </div>
                     <div className="bg-white/[0.04] rounded-full h-1 overflow-hidden">
                         <motion.div
-                            className="h-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+                            className="h-full bg-white/20 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
                             initial={{ width: 0 }}
                             animate={{ width: `${Math.min((progress / 3) * 100, 100)}%` }}
                             transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -247,7 +247,7 @@ export default function MarketplaceLiveDashboard() {
                                 </span>
                             )}
                             {shipmentInfo.is_stackable && (
-                                <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest">
+                                <span className="text-[9px] font-semibold bg-white/[0.06] text-white px-2.5 py-1 rounded-full border border-white/20 uppercase tracking-widest">
                                     {t('mkt.stackable')}
                                 </span>
                             )}
@@ -269,13 +269,13 @@ export default function MarketplaceLiveDashboard() {
                     >
                         <div className="px-6 pt-5 pb-4 border-b border-white/[0.05] flex items-center justify-between">
                             <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.3em]">Submit Your Quote</p>
-                            <span className="text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full uppercase tracking-widest">Partner</span>
+                            <span className="text-[9px] font-semibold text-white bg-white/[0.06] border border-white/20 px-2.5 py-1 rounded-full uppercase tracking-widest">Partner</span>
                         </div>
 
                         {myExistingBid || bidSuccess ? (
                             <div className="p-10 flex flex-col items-center justify-center text-center gap-3">
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                                <div className="w-14 h-14 rounded-2xl bg-white/[0.06] border border-white/20 flex items-center justify-center">
+                                    <CheckCircle2 className="w-7 h-7 text-white" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-white font-outfit uppercase mb-1">Quote Already Submitted</p>
@@ -284,7 +284,7 @@ export default function MarketplaceLiveDashboard() {
                                 {myExistingBid && (
                                     <div className="mt-2 bg-[#111] border border-white/[0.06] rounded-2xl px-6 py-4 text-center">
                                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1">Your Quote</p>
-                                        <p className="text-2xl font-semibold font-mono text-emerald-400">
+                                        <p className="text-2xl font-semibold font-mono text-white">
                                             {myExistingBid.currency} {Number(myExistingBid.total_price).toLocaleString()}
                                         </p>
                                         {myExistingBid.transit_days && (
@@ -305,7 +305,7 @@ export default function MarketplaceLiveDashboard() {
                                             value={bidPrice}
                                             onChange={e => setBidPrice(e.target.value)}
                                             placeholder="e.g. 3500"
-                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-white/20 transition-colors"
                                         />
                                     </div>
                                     <div className="w-28">
@@ -313,7 +313,7 @@ export default function MarketplaceLiveDashboard() {
                                         <select
                                             value={bidCurrency}
                                             onChange={e => setBidCurrency(e.target.value)}
-                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/40 transition-colors appearance-none"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 transition-colors appearance-none"
                                         >
                                             {['USD','EUR','GBP','SAR','AED','CNY','JPY','INR'].map(c => (
                                                 <option key={c} value={c} className="bg-zinc-900">{c}</option>
@@ -332,7 +332,7 @@ export default function MarketplaceLiveDashboard() {
                                             value={bidTransitDays}
                                             onChange={e => setBidTransitDays(e.target.value)}
                                             placeholder="e.g. 21"
-                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-white/20 transition-colors"
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -342,7 +342,7 @@ export default function MarketplaceLiveDashboard() {
                                             value={bidCarrier}
                                             onChange={e => setBidCarrier(e.target.value)}
                                             placeholder="e.g. MSC, Maersk"
-                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors"
+                                            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-white/20 transition-colors"
                                         />
                                     </div>
                                 </div>
@@ -355,7 +355,7 @@ export default function MarketplaceLiveDashboard() {
                                         value={bidNotes}
                                         onChange={e => setBidNotes(e.target.value)}
                                         placeholder="Any conditions, inclusions, or remarks..."
-                                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-emerald-500/40 transition-colors resize-none"
+                                        className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-700 focus:outline-none focus:border-white/20 transition-colors resize-none"
                                     />
                                 </div>
 
@@ -383,7 +383,7 @@ export default function MarketplaceLiveDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4"
                     >
-                        <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-[0.3em] mb-1">
+                        <p className="text-[10px] font-semibold text-white uppercase tracking-[0.3em] mb-1">
                             {t('mkt.all.received')}
                         </p>
                         <h2 className="text-lg font-semibold font-outfit uppercase tracking-tight text-white">
@@ -408,13 +408,13 @@ export default function MarketplaceLiveDashboard() {
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.1 }}
-                                    className={`relative p-6 border-b border-white/[0.05] last:border-b-0 ${isBestPrice ? 'bg-emerald-500/[0.03]' : ''}`}
+                                    className={`relative p-6 border-b border-white/[0.05] last:border-b-0 ${isBestPrice ? 'bg-white/[0.02]' : ''}`}
                                 >
                                     {/* Badges */}
                                     {(isBestPrice || isFastest) && (
                                         <div className="flex gap-2 mb-4">
                                             {isBestPrice && (
-                                                <span className="text-[9px] font-semibold bg-emerald-500 text-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
+                                                <span className="text-[9px] font-semibold bg-white text-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">
                                                     {t('mkt.best.price')}
                                                 </span>
                                             )}
@@ -430,7 +430,7 @@ export default function MarketplaceLiveDashboard() {
                                         {/* Avatar + name */}
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-xs font-bold font-outfit ${
-                                                isBestPrice ? 'bg-emerald-500 text-black' : 'bg-white/10 text-white'
+                                                isBestPrice ? 'bg-white text-black' : 'bg-white/10 text-white'
                                             }`}>
                                                 {initials}
                                             </div>
@@ -441,7 +441,7 @@ export default function MarketplaceLiveDashboard() {
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <span className="text-[9px] text-zinc-500 font-mono uppercase">{quote.carrier}</span>
                                                     <span className="text-[9px] text-zinc-700">·</span>
-                                                    <span className="text-[9px] text-emerald-500 font-semibold uppercase">
+                                                    <span className="text-[9px] text-white font-semibold uppercase">
                                                         {quote.transit_days ?? 'TBD'} {t('mkt.days')}
                                                     </span>
                                                 </div>
@@ -450,7 +450,7 @@ export default function MarketplaceLiveDashboard() {
 
                                         {/* Price */}
                                         <div className="text-left sm:text-right">
-                                            <p className={`text-2xl font-semibold font-outfit tracking-tighter ${isBestPrice ? 'text-emerald-400' : 'text-white'}`}>
+                                            <p className={`text-2xl font-semibold font-outfit tracking-tighter ${isBestPrice ? 'text-white' : 'text-white'}`}>
                                                 {quote.currency} {Number(quote.total_price).toLocaleString()}
                                             </p>
                                             <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] mt-0.5">
@@ -475,7 +475,7 @@ export default function MarketplaceLiveDashboard() {
                                                 }}
                                                 className={`w-full sm:w-auto flex items-center justify-center gap-2 h-10 px-6 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-all active:scale-95 ${
                                                     isBestPrice
-                                                        ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-lg shadow-emerald-500/20'
+                                                        ? 'bg-white text-black hover:bg-zinc-100 '
                                                         : 'bg-white/10 text-white hover:bg-white/20 border border-white/[0.08]'
                                                 }`}
                                             >
@@ -488,7 +488,7 @@ export default function MarketplaceLiveDashboard() {
                                     {/* AI insight */}
                                     {quote.ai_summary && (
                                         <div className="mt-4 flex items-start gap-2.5 bg-white/[0.02] border border-white/[0.05] rounded-xl p-3">
-                                            <Zap className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                                            <Zap className="w-3.5 h-3.5 text-white mt-0.5 flex-shrink-0" />
                                             <p className="text-[11px] text-zinc-500 leading-relaxed italic">{quote.ai_summary}</p>
                                         </div>
                                     )}
@@ -504,8 +504,8 @@ export default function MarketplaceLiveDashboard() {
                                 <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
                                     <Ship className="w-6 h-6 text-zinc-600" />
                                 </div>
-                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping" />
-                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500" />
+                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-white animate-ping" />
+                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-white/20" />
                             </div>
                             <p className="text-sm font-semibold text-zinc-400 font-outfit uppercase">{t('mkt.waiting')}</p>
                         </div>
@@ -517,7 +517,7 @@ export default function MarketplaceLiveDashboard() {
                             <p className="text-sm font-semibold text-zinc-400 font-outfit uppercase mb-2">{t('mkt.failed')}</p>
                             <p className="text-xs text-zinc-500 mb-2 max-w-xs">{fetchError}</p>
                             <div className="flex items-center gap-4 mt-4">
-                                <button onClick={() => window.location.reload()} className="text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 px-4 py-2 rounded-xl transition-colors">
+                                <button onClick={() => window.location.reload()} className="text-xs text-white hover:text-zinc-300 border border-white/20 px-4 py-2 rounded-xl transition-colors">
                                     Retry
                                 </button>
                                 <button onClick={() => router.back()} className="text-xs text-zinc-500 hover:text-white underline underline-offset-4 transition-colors">
@@ -542,8 +542,8 @@ export default function MarketplaceLiveDashboard() {
                                 <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
                                     <Activity className="w-6 h-6 text-zinc-600" />
                                 </div>
-                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping" />
-                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500" />
+                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-white animate-ping" />
+                                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-white/20" />
                             </div>
                             <p className="text-sm font-semibold text-zinc-400 font-outfit uppercase mb-2">{t('mkt.waiting')}</p>
                             <p className="text-xs text-zinc-600 max-w-xs">{t('mkt.waiting.sub')}</p>

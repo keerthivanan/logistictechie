@@ -136,8 +136,8 @@ export default function PartnerDashboard() {
                     <div className="flex items-center gap-3 mt-0.5">
                         <span className="text-xs font-mono text-zinc-500">{user?.sovereign_id}</span>
                         <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase tracking-widest">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                             Active Partner
                         </span>
                     </div>
@@ -149,7 +149,7 @@ export default function PartnerDashboard() {
                 {[
                     { label: t('partner.metrics.total'), value: metrics?.total_quotes_submitted ?? 0, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/[0.07]', border: 'border-blue-500/10' },
                     { label: t('partner.metrics.active'), value: metrics?.active_bids ?? 0, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/[0.07]', border: 'border-amber-500/10' },
-                    { label: t('partner.metrics.won'), value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/[0.07]', border: 'border-emerald-500/10' },
+                    { label: t('partner.metrics.won'), value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-white', bg: 'bg-white/[0.05]', border: 'border-white/10' },
                     { label: t('partner.metrics.score'), value: metrics?.reliability_score ? `${metrics.reliability_score}/5` : '—', icon: Star, color: 'text-purple-400', bg: 'bg-purple-500/[0.07]', border: 'border-purple-500/10' },
                 ].map(s => (
                     <div key={s.label} className="bg-zinc-950 border border-white/5 rounded-xl p-4 flex items-center gap-3">
@@ -243,7 +243,7 @@ export default function PartnerDashboard() {
                                             </div>
                                             <div className="text-right flex-shrink-0">
                                                 <p className="text-[8px] text-zinc-600 uppercase tracking-wider mb-0.5">Your Quote</p>
-                                                <p className={`text-sm font-bold font-mono ${(q.your_price ?? 0) > 0 ? 'text-emerald-400' : 'text-zinc-700'}`}>
+                                                <p className={`text-sm font-bold font-mono ${(q.your_price ?? 0) > 0 ? 'text-white' : 'text-zinc-700'}`}>
                                                     {(q.your_price ?? 0) > 0 ? `$${q.your_price!.toLocaleString()}` : '—'}
                                                 </p>
                                             </div>

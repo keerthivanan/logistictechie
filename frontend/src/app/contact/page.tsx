@@ -98,7 +98,7 @@ export default function ContactPage() {
 
                         {sent ? (
                             <div className="flex flex-col items-center justify-center py-12 gap-4">
-                                <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                                <CheckCircle2 className="w-8 h-8 text-white" />
                                 <p className="text-sm font-bold text-white font-inter">{t('contact.sent')}</p>
                                 <p className="text-xs text-zinc-500 font-inter text-center">{t('contact.sent.sub')}</p>
                             </div>

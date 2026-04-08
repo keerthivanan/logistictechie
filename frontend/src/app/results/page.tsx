@@ -146,7 +146,7 @@ function ResultsContent() {
               <div key={i} className="flex items-center gap-1.5">
                 {i > 0 && <div className="w-5 h-px bg-white/[0.08]" />}
                 <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${
-                  s.done ? 'text-emerald-600' : (s as any).active ? 'bg-white text-black' : 'text-zinc-800'
+                  s.done ? 'text-zinc-400' : (s as any).active ? 'bg-white text-black' : 'text-zinc-800'
                 }`}>
                   {s.done && <CheckCircle2 className="w-2.5 h-2.5 inline mr-1" />}
                   {s.label}
@@ -163,7 +163,7 @@ function ResultsContent() {
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             className="w-20 h-20 rounded-3xl bg-[#0a0a0a] border border-white/[0.08] flex items-center justify-center relative">
             <Ship className="w-8 h-8 text-zinc-500" />
-            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center shadow-lg ">
               <Loader2 className="w-3.5 h-3.5 text-black animate-spin" />
             </div>
           </motion.div>
@@ -198,7 +198,7 @@ function ResultsContent() {
                 <div className="flex items-center gap-5 pb-1">
                   <div>
                     <span className="text-[9px] text-zinc-600 uppercase tracking-widest block mb-0.5">{t('res.lowest.rate')}</span>
-                    <span className="text-xl font-black font-mono text-emerald-400">${lowestPrice.toLocaleString()}</span>
+                    <span className="text-xl font-black font-mono text-white">${lowestPrice.toLocaleString()}</span>
                   </div>
                   <div className="w-px h-6 bg-white/[0.08]" />
                   <div>
@@ -266,12 +266,12 @@ function ResultsContent() {
                       <motion.div key={idx}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                         transition={{ delay: idx * 0.06 }}
-                        className={`p-6 flex items-center gap-6 transition-colors group ${isBest ? 'bg-emerald-500/[0.04] hover:bg-emerald-500/[0.07]' : 'hover:bg-white/[0.02]'}`}
+                        className={`p-6 flex items-center gap-6 transition-colors group ${isBest ? 'bg-white/[0.03] hover:bg-white/[0.05]' : 'hover:bg-white/[0.02]'}`}
                       >
                         {/* Carrier avatar */}
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm font-mono flex-shrink-0 transition-all ${
                           isBest
-                            ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
+                            ? 'bg-white/[0.08] border border-white/20 text-white'
                             : 'bg-black border border-white/[0.08] text-zinc-500 group-hover:border-white/20 group-hover:text-zinc-300'
                         }`}>
                           {initials}
@@ -283,7 +283,7 @@ function ResultsContent() {
                           <p className="text-[9px] text-zinc-700 font-mono mt-0.5 uppercase">{container}</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
                             {isBest && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/25 text-[8px] font-black text-emerald-400 uppercase">
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white/[0.08] border border-white/20 text-[8px] font-black text-white uppercase">
                                 <TrendingDown className="w-2 h-2" /> {t('res.best')}
                               </span>
                             )}
@@ -298,19 +298,19 @@ function ResultsContent() {
                         {/* Route */}
                         <div className="flex-1 flex items-center justify-center gap-4">
                           <div className="text-center">
-                            <p className={`text-xl font-black font-mono tracking-tight leading-none ${isBest ? 'text-emerald-300' : 'text-white'}`}>{shortOrigin}</p>
+                            <p className={`text-xl font-black font-mono tracking-tight leading-none ${isBest ? 'text-white' : 'text-white'}`}>{shortOrigin}</p>
                             <p className="text-[10px] text-zinc-500 font-inter mt-1 truncate max-w-[90px]">{cityOrigin}</p>
                             <p className="text-[8px] text-zinc-700 uppercase tracking-[0.18em] mt-0.5 font-inter">{t('res.departure')}</p>
                           </div>
 
                           <div className="flex-1 flex flex-col items-center gap-1.5">
-                            <span className={`text-[10px] font-bold font-mono flex items-center gap-1 ${isBest ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                            <span className={`text-[10px] font-bold font-mono flex items-center gap-1 ${isBest ? 'text-white' : 'text-zinc-500'}`}>
                               <Clock className="w-2.5 h-2.5" /> {transit}d
                             </span>
                             <div className="w-full flex items-center">
-                              <div className={`flex-1 h-px ${isBest ? 'bg-emerald-500/25' : 'bg-white/[0.08]'}`} />
-                              <div className={`w-1.5 h-1.5 rounded-full mx-1 ${isBest ? 'bg-emerald-500/50' : 'bg-white/20'}`} />
-                              <div className={`flex-1 h-px ${isBest ? 'bg-emerald-500/25' : 'bg-white/[0.08]'}`} />
+                              <div className={`flex-1 h-px ${isBest ? 'bg-white/20/25' : 'bg-white/[0.08]'}`} />
+                              <div className={`w-1.5 h-1.5 rounded-full mx-1 ${isBest ? 'bg-white/20/50' : 'bg-white/20'}`} />
+                              <div className={`flex-1 h-px ${isBest ? 'bg-white/20/25' : 'bg-white/[0.08]'}`} />
                             </div>
                             <p className="text-[8px] text-zinc-700 uppercase tracking-[0.18em] font-inter">{t('res.transit.label')}</p>
                           </div>
@@ -326,7 +326,7 @@ function ResultsContent() {
                         <div className="flex items-center gap-4 flex-shrink-0">
                           <div className="text-right">
                             <p className="text-[8px] text-zinc-600 uppercase tracking-widest font-inter mb-1">{t('res.all.in')}</p>
-                            <p className={`text-2xl font-black font-mono tracking-tight ${isBest ? 'text-emerald-400' : 'text-white'}`}>
+                            <p className={`text-2xl font-black font-mono tracking-tight ${isBest ? 'text-white' : 'text-white'}`}>
                               <span className="text-sm font-bold text-zinc-500 mr-0.5">$</span>{quote.price.toLocaleString()}
                             </p>
                             <div className="flex items-center gap-1 justify-end mt-1">
@@ -338,7 +338,7 @@ function ResultsContent() {
                           <button onClick={() => handleBook(quote, idx)} disabled={submitting}
                             className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 whitespace-nowrap font-inter ${
                               isBest
-                                ? 'bg-emerald-500 text-black hover:bg-emerald-400 shadow-[0_4px_24px_rgba(16,185,129,0.35)]'
+                                ? 'bg-white text-black hover:bg-zinc-100 '
                                 : 'bg-white text-black hover:bg-zinc-100 shadow-[0_2px_16px_rgba(255,255,255,0.08)]'
                             }`}>
                             {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <>{t('res.book')} <ChevronRight className="w-3 h-3" /></>}

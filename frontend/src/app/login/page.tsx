@@ -181,7 +181,7 @@ function LoginContent() {
                         </div>
                     )}
                     {success && (
-                        <div className="mb-5 p-3 bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-widest rounded-xl text-center font-inter">
+                        <div className="mb-5 p-3 bg-white/[0.06] border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl text-center font-inter">
                             {success}
                         </div>
                     )}

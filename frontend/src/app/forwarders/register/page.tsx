@@ -175,8 +175,8 @@ export default function ForwarderRegisterPage() {
                 <Navbar />
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
                     className="max-w-md w-full bg-[#0a0a0a] border border-white/5 p-10 rounded-2xl text-center">
-                    <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Check className="w-6 h-6 text-emerald-400" />
+                    <div className="w-14 h-14 bg-white/[0.06] border border-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Check className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-xl font-semibold font-outfit uppercase tracking-tight mb-3">{t('reg.already.title')}</h2>
                     <p className="text-sm text-zinc-500 font-inter mb-2">{t('reg.already.sub')}</p>
@@ -245,7 +245,7 @@ export default function ForwarderRegisterPage() {
 
                 {/* ── Header ── */}
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-                    <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-[0.2em] mb-3 font-inter">{t('reg.label')}</p>
+                    <p className="text-[10px] font-semibold text-white uppercase tracking-[0.2em] mb-3 font-inter">{t('reg.label')}</p>
                     <h1 className="text-3xl font-bold tracking-tight font-outfit mb-2">{t('fwd.register.title')}</h1>
                     <p className="text-sm text-zinc-500 font-inter">{t('fwd.register.sub')}</p>
                 </motion.div>
@@ -259,7 +259,7 @@ export default function ForwarderRegisterPage() {
                     {/* ── Card 1: Company Info ── */}
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
-                            <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+                            <Building2 className="w-3.5 h-3.5 text-white" />
                             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('reg.company.section')}</h2>
                         </div>
 
@@ -317,7 +317,7 @@ export default function ForwarderRegisterPage() {
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                             {isPhoneValid && (
                                 <div className="absolute right-4 bottom-3.5">
-                                    <Check className="w-4 h-4 text-emerald-400" />
+                                    <Check className="w-4 h-4 text-white" />
                                 </div>
                             )}
                             {phoneError && <p className="text-xs text-red-400 font-inter mt-1.5">{phoneError}</p>}
@@ -341,7 +341,7 @@ export default function ForwarderRegisterPage() {
                                         <button key={spec} type="button" onClick={() => toggleSpec(spec)}
                                             className={`py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest border transition-all font-inter flex items-center justify-center gap-1.5 ${
                                                 sel
-                                                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                                    ? 'bg-white/[0.06] border-white/20 text-white'
                                                     : 'bg-transparent border-white/[0.06] text-zinc-600 hover:border-white/15 hover:text-zinc-400'
                                             }`}>
                                             {sel && <Check className="w-3 h-3" />}{spec}
@@ -396,8 +396,8 @@ export default function ForwarderRegisterPage() {
                                     </div>
                                 ) : formData.document_url ? (
                                     <div className="flex flex-col items-center gap-1">
-                                        <Check className="w-5 h-5 text-emerald-400" />
-                                        <span className="text-xs text-emerald-400 font-inter">{t('reg.doc.uploaded')}</span>
+                                        <Check className="w-5 h-5 text-white" />
+                                        <span className="text-xs text-white font-inter">{t('reg.doc.uploaded')}</span>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center gap-2">
@@ -461,8 +461,8 @@ export default function ForwarderRegisterPage() {
                                 { title: t('reg.benefit5.title'), desc: t('reg.benefit5.desc') },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-4 bg-[#0a0a0a] border border-white/[0.06] rounded-xl p-4">
-                                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 flex-shrink-0 mt-0.5">
-                                        <Check className="w-3 h-3 text-emerald-400" />
+                                    <div className="w-5 h-5 rounded-full bg-white/[0.06] flex items-center justify-center border border-white/20 flex-shrink-0 mt-0.5">
+                                        <Check className="w-3 h-3 text-white" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-white font-inter leading-none">{item.title}</p>

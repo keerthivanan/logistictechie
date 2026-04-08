@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
                 <div className="bg-zinc-950 border border-white/5 p-8 rounded-3xl shadow-2xl">
                     {done ? (
                         <div className="flex flex-col items-center gap-4 py-4 text-center">
-                            <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+                            <CheckCircle2 className="w-10 h-10 text-white" />
                             <p className="text-sm font-bold text-white font-outfit">{t('forgot.done.title')}</p>
                             <p className="text-xs text-zinc-500 font-inter">{t('forgot.done.sub')}</p>
                             <Link href="/login" className="text-[10px] text-zinc-600 hover:text-white transition-colors font-inter mt-2">{t('forgot.back')}</Link>

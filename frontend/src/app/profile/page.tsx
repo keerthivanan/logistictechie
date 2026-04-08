@@ -29,7 +29,7 @@ export default function ProfilePage() {
     if (!user) return null
 
     const roleLabel = user.role === 'forwarder' ? t('profile.role.forwarder') : user.role === 'admin' ? t('profile.role.admin') : t('profile.role.shipper')
-    const roleColor = user.role === 'forwarder' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : user.role === 'admin' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+    const roleColor = user.role === 'forwarder' ? 'text-white bg-white/[0.06] border-white/20' : user.role === 'admin' ? 'text-purple-400 bg-purple-500/10 border-purple-500/20' : 'text-blue-400 bg-blue-500/10 border-blue-500/20'
 
     return (
         <div className="min-h-screen bg-[#080808] text-white">
@@ -144,7 +144,7 @@ export default function ProfilePage() {
                             </div>
                             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                                     <span className="text-[10px] text-zinc-500 font-medium">{t('profile.completed')}</span>
                                 </div>
                                 <p className="text-2xl font-bold text-white">{stats?.delivered_shipments ?? '—'}</p>

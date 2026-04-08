@@ -200,9 +200,9 @@ export default function ShipmentsPage() {
                                     <div className="px-5 py-4 border-b border-white/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                         <div className="flex items-center gap-4 min-w-0">
                                             <div className="flex-shrink-0">
-                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isBooked ? 'bg-emerald-500/10' : 'bg-white/[0.03] border border-white/5'}`}>
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isBooked ? 'bg-white/[0.06]' : 'bg-white/[0.03] border border-white/5'}`}>
                                                     {isBooked
-                                                        ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                                        ? <CheckCircle2 className="w-4 h-4 text-white" />
                                                         : <Ship className="w-4 h-4 text-zinc-600" />
                                                     }
                                                 </div>
@@ -212,7 +212,7 @@ export default function ShipmentsPage() {
                                                     <span className="text-xs font-mono font-bold text-white">{req.request_id}</span>
                                                     <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${
                                                         isBooked
-                                                            ? 'bg-emerald-500/10 text-emerald-400'
+                                                            ? 'bg-white/[0.06] text-white'
                                                             : quotes.length >= 3
                                                             ? 'bg-blue-500/10 text-blue-400'
                                                             : 'bg-amber-500/10 text-amber-400 animate-pulse'
@@ -272,7 +272,7 @@ export default function ShipmentsPage() {
                                                     <div
                                                         key={quote.quotation_id}
                                                         className={`px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition-all ${
-                                                            isBest && !isBooked ? 'bg-emerald-500/[0.03]' : ''
+                                                            isBest && !isBooked ? 'bg-white/[0.02]' : ''
                                                         }`}
                                                     >
                                                         {/* Rank */}
@@ -292,7 +292,7 @@ export default function ShipmentsPage() {
                                                                     </span>
                                                                 )}
                                                                 {isBest && !isBooked && (
-                                                                    <span className="text-[9px] font-semibold bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                                                    <span className="text-[9px] font-semibold bg-white text-black px-2 py-0.5 rounded-full uppercase tracking-widest">
                                                                         Best Price
                                                                     </span>
                                                                 )}
@@ -310,7 +310,7 @@ export default function ShipmentsPage() {
                                                             )}
                                                             {quote.ai_summary && (
                                                                 <div className="flex items-start gap-1.5">
-                                                                    <Zap className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                                                    <Zap className="w-3 h-3 text-zinc-500 flex-shrink-0 mt-0.5" />
                                                                     <p className="text-[10px] text-zinc-500 font-inter leading-relaxed italic line-clamp-2">{quote.ai_summary}</p>
                                                                 </div>
                                                             )}
@@ -326,7 +326,7 @@ export default function ShipmentsPage() {
                                                             </div>
 
                                                             {isBooked ? (
-                                                                <div className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
+                                                                <div className="flex items-center gap-1.5 text-white bg-white/[0.06] border border-white/20 px-3 py-2 rounded-xl">
                                                                     <CheckCircle2 className="w-3.5 h-3.5" />
                                                                     <span className="text-[9px] font-semibold uppercase tracking-widest">Booked</span>
                                                                 </div>
@@ -334,7 +334,7 @@ export default function ShipmentsPage() {
                                                                 <div className="flex flex-col items-end gap-1">
                                                                     {quote.forwarder_last_seen && (
                                                                         <div className="flex items-center gap-1">
-                                                                            <span className={`w-1.5 h-1.5 rounded-full ${isOnline(quote.forwarder_last_seen) ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
+                                                                            <span className={`w-1.5 h-1.5 rounded-full ${isOnline(quote.forwarder_last_seen) ? 'bg-white animate-pulse' : 'bg-zinc-600'}`} />
                                                                             <span className="text-[9px] text-zinc-600 font-inter">{lastSeenLabel(quote.forwarder_last_seen)}</span>
                                                                         </div>
                                                                     )}

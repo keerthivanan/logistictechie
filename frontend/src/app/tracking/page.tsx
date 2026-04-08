@@ -93,7 +93,7 @@ function TrackingContent() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.status')}</div>
-                                <div className="text-green-400 font-bold">{tracking?.status || t('track.active.transit')}</div>
+                                <div className="text-white font-bold">{tracking?.status || t('track.active.transit')}</div>
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.position')}</div>
@@ -163,13 +163,13 @@ function TrackingContent() {
                 <div className="space-y-6">
                     <div className="bg-zinc-900 border border-white/10 rounded-3xl p-6">
                         <h3 className="font-bold flex items-center gap-2 mb-4">
-                            <CheckCircle className="w-5 h-5 text-green-500" />
+                            <CheckCircle className="w-5 h-5 text-white" />
                             {t('track.sentinel')}
                         </h3>
                         <div className="space-y-4">
                             <div className="p-4 bg-black/50 rounded-xl border border-white/5">
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.route.security')}</div>
-                                <div className="text-sm text-green-400 font-bold">OPTIMAL (98/100)</div>
+                                <div className="text-sm text-white font-bold">OPTIMAL (98/100)</div>
                             </div>
                             <div className="p-4 bg-black/50 rounded-xl border border-white/5">
                                 <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">{t('track.weather')}</div>
