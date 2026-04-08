@@ -82,8 +82,8 @@ export default function AiChatVisual() {
                     <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{t('ai.header')}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-[10px] font-bold text-green-500 uppercase">{t('ai.live')}</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                    <span className="text-[10px] font-bold text-white uppercase">{t('ai.live')}</span>
                 </div>
             </div>
 

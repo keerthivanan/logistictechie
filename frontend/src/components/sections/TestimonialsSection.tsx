@@ -59,7 +59,7 @@ export default function TestimonialsSection() {
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-1.5">
                                         <p className="text-sm font-semibold text-white font-inter truncate">{tm.name}</p>
-                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                        <ShieldCheck className="w-3.5 h-3.5 text-white shrink-0" />
                                     </div>
                                     <p className="text-[11px] text-zinc-500 font-inter truncate">{tm.role} · {tm.company}</p>
                                 </div>

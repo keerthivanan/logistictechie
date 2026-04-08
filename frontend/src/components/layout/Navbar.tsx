@@ -139,7 +139,7 @@ export default function Navbar() {
                     )}
 
                     {user && (
-                        <Link href="/dashboard" className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-emerald-400 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
+                        <Link href="/dashboard" className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-white/70 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
                             {user?.role === 'forwarder' ? t('nav.partner.dashboard') : t('nav.dashboard')}
                         </Link>
                     )}
@@ -244,7 +244,7 @@ export default function Navbar() {
                                         size="md"
                                         className="border-white/10 group-hover:border-white/40 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)]"
                                     />
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-black rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-white border-2 border-black rounded-full" />
                                 </div>
                                 <div className="flex flex-col items-start translate-y-[-1px]">
                                     <span className="text-sm font-black text-white leading-none mb-1.5 tracking-tight">{user.name ? user.name.split(' ')[0] : 'User'}</span>
@@ -269,7 +269,7 @@ export default function Navbar() {
                                                 <p className="text-[10px] text-zinc-600 font-mono mt-0.5">{user.sovereign_id}</p>
                                             </div>
                                             {user?.role === 'forwarder' && (
-                                                <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-emerald-500/10 rounded-xl text-emerald-400 hover:text-emerald-300 transition-all">
+                                                <Link href="/forwarders/portal" onClick={() => setActiveDropdown(null)} className="flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.06] rounded-xl text-zinc-300 hover:text-white transition-all">
                                                     <Store className="w-3.5 h-3.5 opacity-70" />
                                                     <span className="text-xs font-semibold font-inter">{t('nav.partner.portal')}</span>
                                                 </Link>
@@ -326,7 +326,7 @@ export default function Navbar() {
                                     </Link>
                                 )}
                                 {user?.role === 'forwarder' && (
-                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-emerald-400 font-inter">{t('nav.partner.portal')}</Link>
+                                    <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-semibold text-white font-inter">{t('nav.partner.portal')}</Link>
                                 )}
                                 {user?.role !== 'forwarder' && (
                                     <>

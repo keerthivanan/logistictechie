@@ -77,7 +77,7 @@ export default function PartnerModal({ isOpen, onClose, partner }: PartnerModalP
                                         <h2 className="text-xl font-semibold text-white leading-tight truncate">
                                             {partner.company_name}
                                         </h2>
-                                        <BadgeCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                                        <BadgeCheck className="w-5 h-5 text-white flex-shrink-0" />
                                     </div>
                                     <div className="flex items-center gap-1.5 text-zinc-500 text-sm mb-2">
                                         <MapPin className="w-3.5 h-3.5" />

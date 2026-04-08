@@ -43,8 +43,8 @@ export default function IntegrationEcosystem() {
                             ].map((item, i) => (
                                 <div key={i} className="flex gap-4 p-4 rounded-xl bg-[#0a0a0a] border border-white/[0.06] hover:border-white/[0.10] transition-all">
                                     <div className="mt-0.5 shrink-0">
-                                        <div className="w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
-                                            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                                        <div className="w-5 h-5 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+                                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
                                         </div>
                                     </div>
                                     <div>
@@ -86,7 +86,7 @@ export default function IntegrationEcosystem() {
                         {/* Central node */}
                         <div className="relative z-10 w-28 h-28 rounded-full bg-[#0e0e0e] border border-white/[0.10] flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.08)]">
                             {/* Subtle pulse ring */}
-                            <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping opacity-30" />
+                            <div className="absolute inset-0 rounded-full border border-white/20 animate-ping opacity-30" />
                             <img src="/cargolink.png" alt="CargoLink" className="h-16 w-16 object-contain opacity-90" />
                         </div>
 

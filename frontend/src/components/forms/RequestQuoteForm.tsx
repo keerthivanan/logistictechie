@@ -237,7 +237,7 @@ export default function RequestQuoteForm() {
 
     // Static color map — Tailwind can't detect dynamically constructed class names
     const TOGGLE_COLORS: Record<string, { wrap: string; check: string; icon: string; text: string }> = {
-        emerald: { wrap: 'border-emerald-500/30 bg-emerald-500/[0.06]', check: 'text-emerald-400', icon: 'text-emerald-400', text: 'text-emerald-300' },
+        emerald: { wrap: 'border-white/20 bg-white/[0.05]', check: 'text-white', icon: 'text-white', text: 'text-zinc-300' },
         red:     { wrap: 'border-red-500/30 bg-red-500/[0.06]',         check: 'text-red-400',     icon: 'text-red-400',     text: 'text-red-300' },
         blue:    { wrap: 'border-blue-500/30 bg-blue-500/[0.06]',       check: 'text-blue-400',    icon: 'text-blue-400',    text: 'text-blue-300' },
         amber:   { wrap: 'border-amber-500/30 bg-amber-500/[0.06]',     check: 'text-amber-400',   icon: 'text-amber-400',   text: 'text-amber-300' },
@@ -275,7 +275,7 @@ export default function RequestQuoteForm() {
                     {/* ── 1. SHIPMENT TYPE ── */}
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className={card}>
                         <div className={hdr}>
-                            <Ship className="w-3.5 h-3.5 text-emerald-500" />
+                            <Ship className="w-3.5 h-3.5 text-zinc-500" />
                             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.type')}</h2>
                         </div>
 
@@ -388,7 +388,7 @@ export default function RequestQuoteForm() {
                             {/* Origin */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
                                     <span className="text-xs font-semibold text-zinc-300 font-inter">{t('rqf.origin')}</span>
                                 </div>
                                 <div>
@@ -616,7 +616,7 @@ export default function RequestQuoteForm() {
                         </div>
 
                         <p className="text-[10px] text-zinc-600 font-inter flex items-center gap-1.5">
-                            <Info className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                            <Info className="w-3 h-3 text-zinc-500 flex-shrink-0" />
                             {t('rqf.privacy')}
                         </p>
                     </motion.div>
@@ -647,7 +647,7 @@ export default function RequestQuoteForm() {
                                 { step: '03', title: t('rqf.step3.title'), desc: t('rqf.step3.desc') },
                             ].map(item => (
                                 <div key={item.step} className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-5 space-y-3">
-                                    <span className="text-[10px] font-mono font-bold text-emerald-500">{item.step}</span>
+                                    <span className="text-[10px] font-mono font-bold text-zinc-500">{item.step}</span>
                                     <h3 className="text-sm font-bold text-white font-inter leading-snug">{item.title}</h3>
                                     <p className="text-xs text-zinc-500 font-inter leading-relaxed">{item.desc}</p>
                                 </div>

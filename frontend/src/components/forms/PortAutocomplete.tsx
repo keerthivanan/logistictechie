@@ -137,7 +137,7 @@ export default function PortAutocomplete({
                                         <div className="flex items-center gap-2">
                                             <span className="text-[11px] font-semibold font-outfit text-white uppercase tracking-tight truncate">{s.name}</span>
                                             {s.code && (
-                                                <span className="text-[9px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded flex-shrink-0">{s.code}</span>
+                                                <span className="text-[9px] font-mono font-bold text-white bg-white/10 px-1.5 py-0.5 rounded flex-shrink-0">{s.code}</span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-2">

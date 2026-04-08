@@ -1964,7 +1964,7 @@ const translations = {
         'portal.your.quote': 'عرضك',
         'portal.performance': 'الأداء',
         'portal.total.bids': 'إجمالي العروض',
-        'portal.won': 'رابحة',
+        'portal.won': 'الصفقات النشطة',
         'portal.reliability': 'الموثوقية',
         'portal.status': 'الحالة',
         'portal.currency.conv': 'محوّل العملات',

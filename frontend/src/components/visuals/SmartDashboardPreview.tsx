@@ -57,7 +57,7 @@ export default function SmartDashboardPreview() {
                         <div className="h-4 w-[1px] bg-zinc-800"></div>
                         <div className="px-3 py-1 bg-zinc-900/50 rounded-full border border-white/5 flex items-center gap-2">
                             <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest">Demo Account</span>
-                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                             <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest">Online</span>
                         </div>
                     </div>
@@ -122,7 +122,7 @@ export default function SmartDashboardPreview() {
 
                             {[
                                 { label: 'Processing', color: 'bg-blue-500' },
-                                { label: 'In Transit', color: 'bg-emerald-500' },
+                                { label: 'In Transit', color: 'bg-white' },
                                 { label: 'Customs', color: 'bg-amber-500' },
                                 { label: 'Delivered', color: 'bg-purple-500' }
                             ].map((step) => (
