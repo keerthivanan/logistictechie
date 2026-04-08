@@ -533,7 +533,7 @@ async def n8n_requests_close(sync_in: N8nStatusUpdate, db: AsyncSession = Depend
     
     if req:
         req.status = sync_in.status
-        req.closed_at = _safe_parse_date(sync_in.closed_at) or datetime.now(timezone.utc)
+        req.closed_at = _safe_parse_date(sync_in.closed_at) or datetime.now(timezone.utc).replace(tzinfo=None)
         req.closed_reason = sync_in.closed_reason
         await db.commit()
     else:

@@ -409,8 +409,6 @@ async def portal_confirm_booking(
     Imports _finalize_booking from conversations router to share logic.
     """
     from app.api.routers.conversations import _finalize_booking
-    from app.models.booking import Booking
-    import secrets
 
     _, conv = await _verify_portal_forwarder(x_forwarder_id, x_forwarder_email, public_id, db)
 
