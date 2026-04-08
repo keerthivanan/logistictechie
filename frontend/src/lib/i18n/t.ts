@@ -320,7 +320,7 @@ const translations = {
         'partner.bid.submitting': 'Submitting...',
         'partner.metrics.total': 'Total Quotes',
         'partner.metrics.active': 'Active Quotes',
-        'partner.metrics.won': 'Quotes Won',
+        'partner.metrics.won': 'Deals Active',
         'partner.metrics.score': 'Reliability Score',
         'partner.empty': 'No available requests right now.',
         // Calculator
@@ -530,7 +530,7 @@ const translations = {
         'portal.your.quote': 'Your Quote',
         'portal.performance': 'Performance',
         'portal.total.bids': 'Total Bids',
-        'portal.won': 'Won',
+        'portal.won': 'Deals Active',
         'portal.reliability': 'Reliability',
         'portal.status': 'Status',
         'portal.currency.conv': 'Currency Converter',
@@ -1754,7 +1754,7 @@ const translations = {
         'partner.bid.submitting': 'جارٍ التقديم...',
         'partner.metrics.total': 'إجمالي العروض',
         'partner.metrics.active': 'العروض النشطة',
-        'partner.metrics.won': 'العروض الرابحة',
+        'partner.metrics.won': 'الصفقات النشطة',
         'partner.metrics.score': 'درجة الموثوقية',
         'partner.empty': 'لا توجد طلبات متاحة حالياً.',
         // Calculator

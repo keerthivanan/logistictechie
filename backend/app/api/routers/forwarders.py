@@ -431,10 +431,10 @@ async def get_forwarder_dashboard(
     bid_count_res = await db.execute(bid_count_stmt)
     total_bids = bid_count_res.scalar() or 0
 
-    # Won Bids — conversations that reached BOOKED status
+    # Won Bids — shipper selected this forwarder to negotiate (conversation started = quote won)
     won_bids_stmt = select(func.count(Conversation.id)).where(
         Conversation.forwarder_id == f_id,
-        Conversation.status == "BOOKED"
+        Conversation.status.in_(["OPEN", "BOOKED"])
     )
     won_bids_res = await db.execute(won_bids_stmt)
     won_bids = won_bids_res.scalar() or 0
@@ -525,7 +525,7 @@ async def portal_forwarder_dashboard(
     won_bids_res = await db.execute(
         select(func.count(Conversation.id)).where(
             Conversation.forwarder_id == f_id,
-            Conversation.status == "BOOKED"
+            Conversation.status.in_(["OPEN", "BOOKED"])
         )
     )
     won_bids = won_bids_res.scalar() or 0
