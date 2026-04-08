@@ -444,7 +444,7 @@ export default function ForwarderDashboardChatPage() {
                                 </motion.div>
                             )
 
-                            const isMine = msg.sender_role === 'forwarder'
+                            const isMine = msg.sender_role === 'FORWARDER'
                             return (
                                 <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                                     className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>

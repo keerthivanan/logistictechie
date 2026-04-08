@@ -150,8 +150,8 @@ export default function ForwarderPortal() {
         if (!cvAmount || isNaN(amount) || amount <= 0) { setCvResult(null); return; }
         if (cvFrom === cvTo) { setCvResult(amount.toLocaleString(undefined, { maximumFractionDigits: 2 })); return; }
         const controller = new AbortController();
-        setCvLoading(true);
         setCvResult(null);
+        setCvLoading(true);
         fetch(`https://open.er-api.com/v6/latest/${cvFrom}`, { signal: controller.signal })
             .then(r => r.json())
             .then(data => {

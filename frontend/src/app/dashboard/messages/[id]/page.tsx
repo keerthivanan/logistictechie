@@ -325,7 +325,7 @@ export default function ChatPage() {
 
                             // OFFER
                             if (msg.message_type === 'OFFER') {
-                                const isMyOffer = msg.sender_role === 'shipper'
+                                const isMyOffer = msg.sender_role === 'SHIPPER'
                                 return (
                                     <motion.div key={msg.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`flex ${isMyOffer ? 'justify-end' : 'justify-start'}`}>
                                         <div className="bg-[#0d0d0d] border border-white/[0.08] rounded-2xl p-4 max-w-[240px]">
@@ -392,7 +392,7 @@ export default function ChatPage() {
                             )
 
                             // TEXT
-                            const isMine = msg.sender_role === 'shipper'
+                            const isMine = msg.sender_role === 'SHIPPER'
                             return (
                                 <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                                     className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
