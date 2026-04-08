@@ -503,7 +503,7 @@
     {
       "parameters": {
         "sendTo": "={{ $json.email }}",
-        "subject": "=🎉 New quote received for {{ $('Code - Extract Request ID').first().json.request_id }}",
+        "subject": "=New quote received for {{ $('Code - Extract Request ID').first().json.request_id }}",
         "emailType": "html",
         "message": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:0 auto;\"><div style=\"background:#28A745;color:white;padding:30px;text-align:center;\"><h1>🎉 New Quotation Received!</h1></div><div style=\"padding:30px;\"><p>Dear {{ $json.full_name }},</p><p>A new quotation has been submitted for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong>.</p><div style=\"background:#E8F4F8;padding:20px;border-radius:5px;border-left:4px solid #2E75B6;margin:20px 0;\"><h3 style=\"margin-top:0;\">{{ $('Code - Validate AI Output').first().json.forwarder_company }}</h3><div style=\"font-size:32px;font-weight:bold;color:#2E75B6;\">{{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</div><p><strong>Transit:</strong> {{ $('Code - Validate AI Output').first().json.transit_days || 'TBD' }} days via {{ $('Code - Validate AI Output').first().json.carrier }}</p></div><p><strong>Quotes received:</strong> {{ $('PostgreSQL - Get Updated Count').first().json.quotation_count }}/3</p></div></div></body></html>",
         "options": {}
@@ -526,7 +526,7 @@
     {
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
-        "subject": "=✅ Your quote for {{ $('Code - Extract Request ID').first().json.request_id }} received",
+        "subject": "=Your quote for {{ $('Code - Extract Request ID').first().json.request_id }} received",
         "emailType": "html",
         "message": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:0 auto;\"><div style=\"background:#28A745;color:white;padding:30px;text-align:center;\"><h1>✅ Quotation Submitted!</h1></div><div style=\"padding:30px;\"><p>Dear {{ $('PostgreSQL - Verify Forwarder').first().json.company_name }},</p><p>Your quotation for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong> has been received and processed.</p><div style=\"background:#D4EDDA;border:2px solid #28A745;padding:20px;border-radius:5px;margin:20px 0;text-align:center;\"><h2 style=\"margin:0;color:#28A745;\">✓ STATUS: ANSWERED</h2></div><ul><li>Price: {{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</li><li>Transit: {{ $('Code - Validate AI Output').first().json.transit_days || 'TBD' }} days</li><li>Valid for: {{ $('Code - Validate AI Output').first().json.validity_days }} days</li></ul></div></div></body></html>",
         "options": {}
@@ -570,7 +570,7 @@
     {
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
-        "subject": "=❌ Quote DECLINED - {{ $('Code - Extract Request ID').first().json.request_id }} already has 3 quotes",
+        "subject": "=Quote DECLINED - {{ $('Code - Extract Request ID').first().json.request_id }} already has 3 quotes",
         "emailType": "html",
         "message": "=<p>Thank you for your quote. This request already has 3 quotations and is now closed.</p>",
         "options": {}
@@ -635,7 +635,7 @@
     {
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
-        "subject": "=❌ Request CLOSED - {{ $('Code - Extract Request ID').first().json.request_id }}",
+        "subject": "=Request CLOSED - {{ $('Code - Extract Request ID').first().json.request_id }}",
         "message": "=This request is CLOSED and no longer accepting quotations. Thank you for your interest.\n\nCargoLink Platform",
         "options": {}
       },
@@ -678,7 +678,7 @@
     {
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
-        "subject": "❌ Registration Required - CargoLink Platform",
+        "subject": "Registration Required - CargoLink Platform",
         "message": "=Your email ({{ $('Code - Extract Request ID').first().json.sender_email }}) is not registered in our CargoLink partner network.\n\nPlease register at: https://cargolink.sa/forwarders/register\n\nCargoLink Platform",
         "options": {}
       },
