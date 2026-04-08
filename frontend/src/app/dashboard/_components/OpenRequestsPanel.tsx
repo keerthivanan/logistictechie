@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Package, Clock, ChevronDown, ShieldAlert, ShieldCheck,
@@ -77,36 +77,38 @@ export default function OpenRequestsPanel() {
     const [filter, setFilter] = useState<Filter>('ALL')
     const [expandedId, setExpandedId] = useState<string | null>(null)
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-            try {
-                const token = localStorage.getItem('token')
-                const res = await apiFetch('/api/marketplace/my-requests', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    if (data.success) {
-                        const sorted = (data.requests || []).sort(
-                            (a: FreightRequest, b: FreightRequest) =>
-                                new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
-                        )
-                        setRequests(sorted)
-                        // Auto-expand first open request
-                        const firstOpen = sorted.find((r: FreightRequest) => r.status === 'OPEN')
-                        if (firstOpen) setExpandedId(firstOpen.request_id)
-                    }
-                } else {
-                    setError(true)
+    const fetchRequests = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch('/api/marketplace/my-requests', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                if (data.success) {
+                    const sorted = (data.requests || []).sort(
+                        (a: FreightRequest, b: FreightRequest) =>
+                            new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+                    )
+                    setRequests(sorted)
+                    const firstOpen = sorted.find((r: FreightRequest) => r.status === 'OPEN')
+                    if (firstOpen) setExpandedId(prev => prev ?? firstOpen.request_id)
                 }
-            } catch {
+            } else {
                 setError(true)
-            } finally {
-                setLoading(false)
             }
+        } catch {
+            setError(true)
+        } finally {
+            setLoading(false)
         }
-        fetchRequests()
     }, [])
+
+    useEffect(() => {
+        fetchRequests()
+        const iv = setInterval(fetchRequests, 10000)
+        return () => clearInterval(iv)
+    }, [fetchRequests])
 
     const openCount = requests.filter(r => r.status === 'OPEN').length
     const closedCount = requests.filter(r => r.status !== 'OPEN').length

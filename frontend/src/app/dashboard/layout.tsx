@@ -409,7 +409,12 @@ export default function DashboardLayout({
                                                         onClick={() => setNotifOpen(false)}
                                                         className="flex gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all"
                                                     >
-                                                        <span className="text-base flex-shrink-0">{n.type === 'NEW_QUOTE' ? '📦' : '💬'}</span>
+                                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${n.type === 'NEW_QUOTE' ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-white/5 border border-white/10'}`}>
+                                                            {n.type === 'NEW_QUOTE'
+                                                                ? <Package className="w-3.5 h-3.5 text-blue-400" />
+                                                                : <MessageSquare className="w-3.5 h-3.5 text-zinc-400" />
+                                                            }
+                                                        </div>
                                                         <div className="min-w-0 space-y-0.5">
                                                             <p className="text-xs font-semibold text-white leading-snug">
                                                                 {n.type === 'NEW_QUOTE' ? 'New quote received' : n.title || 'New message'}

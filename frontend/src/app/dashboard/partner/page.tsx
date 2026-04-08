@@ -80,6 +80,8 @@ export default function PartnerDashboard() {
             return
         }
         fetchData()
+        const iv = setInterval(fetchData, 15000)
+        return () => clearInterval(iv)
     }, [user, fetchData])
 
     // Non-forwarder states
