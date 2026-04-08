@@ -290,7 +290,7 @@ export default function ChatPage() {
                         : isClosed ? 'bg-zinc-900 text-zinc-600 border border-white/[0.06]'
                         : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
                     }`}>
-                        {isLocked ? '🔒 Locked' : isClosed ? 'Closed' : 'Negotiating'}
+                        {isLocked ? <span className="flex items-center gap-1"><Lock className="w-3 h-3" />Locked</span> : isClosed ? 'Closed' : 'Negotiating'}
                     </span>
                 </div>
 
@@ -377,7 +377,7 @@ export default function ChatPage() {
                             if (msg.message_type === 'ACCEPTED') return (
                                 <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
                                     <div className="bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3 text-center">
-                                        <p className="text-xs font-semibold text-white">✓ {msg.content}</p>
+                                        <p className="text-xs font-semibold text-white flex items-center justify-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />{msg.content}</p>
                                     </div>
                                 </motion.div>
                             )
@@ -386,7 +386,7 @@ export default function ChatPage() {
                             if (msg.message_type === 'REJECTED') return (
                                 <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
                                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3 text-center">
-                                        <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
+                                        <p className="text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5"><X className="w-3.5 h-3.5 flex-shrink-0" />{msg.content}</p>
                                     </div>
                                 </motion.div>
                             )
@@ -501,7 +501,7 @@ export default function ChatPage() {
                 ) : (
                     <div className="flex-shrink-0 border-t border-white/[0.06] px-5 py-4 bg-[#0d0d0d] text-center">
                         <p className="text-xs text-zinc-600">
-                            {isLocked ? '🔒 Deal locked — contact details sent to your email.' : 'This conversation is closed.'}
+                            {isLocked ? <span className="flex items-center justify-center gap-1.5"><Lock className="w-3 h-3" />Deal locked — contact details sent to your email.</span> : 'This conversation is closed.'}
                         </p>
                     </div>
                 )}

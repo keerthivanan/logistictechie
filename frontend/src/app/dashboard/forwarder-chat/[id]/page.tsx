@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { apiFetch } from '@/lib/config'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Send, ArrowLeft, X, MessageSquare, Lock, Ship, TrendingUp } from 'lucide-react'
+import { Loader2, Send, ArrowLeft, X, MessageSquare, Lock, Ship, TrendingUp, CheckCircle2 } from 'lucide-react'
 import { useT, TKey } from '@/lib/i18n/t'
 
 interface Message {
@@ -312,7 +312,7 @@ export default function ForwarderDashboardChatPage() {
                         : isClosed ? 'bg-zinc-900 text-zinc-600 border border-white/[0.06]'
                         : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
                     }`}>
-                        {isLocked ? '🔒 Locked' : isClosed ? t('chat.closed') : 'Negotiating'}
+                        {isLocked ? <span className="flex items-center gap-1"><Lock className="w-3 h-3" />Locked</span> : isClosed ? t('chat.closed') : 'Negotiating'}
                     </span>
                 </div>
 
@@ -431,7 +431,7 @@ export default function ForwarderDashboardChatPage() {
                             if (msg.message_type === 'ACCEPTED') return (
                                 <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
                                     <div className="bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-3 text-center">
-                                        <p className="text-xs font-semibold text-white">✓ {msg.content}</p>
+                                        <p className="text-xs font-semibold text-white flex items-center justify-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />{msg.content}</p>
                                     </div>
                                 </motion.div>
                             )
@@ -439,7 +439,7 @@ export default function ForwarderDashboardChatPage() {
                             if (msg.message_type === 'REJECTED') return (
                                 <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center">
                                     <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3 text-center">
-                                        <p className="text-xs font-semibold text-red-400">❌ {msg.content}</p>
+                                        <p className="text-xs font-semibold text-red-400 flex items-center justify-center gap-1.5"><X className="w-3.5 h-3.5 flex-shrink-0" />{msg.content}</p>
                                     </div>
                                 </motion.div>
                             )
@@ -528,7 +528,7 @@ export default function ForwarderDashboardChatPage() {
                             <div className="flex items-center justify-between">
                                 <span className="text-[9px] text-zinc-600 uppercase tracking-widest">Shipper</span>
                                 <span className={`text-[9px] font-semibold ${conv.shipper_book_req ? 'text-white' : 'text-zinc-600'}`}>
-                                    {conv.shipper_book_req ? '✓ Ready to lock' : 'Negotiating'}
+                                    {conv.shipper_book_req ? <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />Ready to lock</span> : 'Negotiating'}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between">
