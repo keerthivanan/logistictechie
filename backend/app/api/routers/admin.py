@@ -117,7 +117,7 @@ async def approve_forwarder(
         raise HTTPException(status_code=400, detail="Already approved.")
 
     # Get linked user by email
-    u_result = await db.execute(select(User).where(User.email == forwarder.email))
+    u_result = await db.execute(select(User).where(func.lower(User.email) == func.lower(forwarder.email)))
     user = u_result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail=f"User account for {forwarder.email} not found.")

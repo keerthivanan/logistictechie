@@ -729,6 +729,7 @@ async def _finalize_booking(
             "reference": reference,
             "user_name": shipper_user.full_name or shipper_user.sovereign_id,
             "user_email": shipper_user.email,
+            "user_phone": shipper_user.phone_number or "",
             "forwarder_email": forwarder_email,
             "forwarder_company": conv.forwarder_company,
             "marketplace_request_id": conv.request_id,
