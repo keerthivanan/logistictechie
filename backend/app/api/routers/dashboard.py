@@ -300,9 +300,12 @@ async def get_notifications(
     notifications.sort(key=lambda n: n["timestamp"], reverse=True)
     notifications = notifications[:15]
 
+    # Bell badge = unread messages only (quotes are informational, not "unread")
+    unread_msg_count = sum(1 for n in notifications if n["type"] == "NEW_MESSAGE")
+
     return {
         "notifications": notifications,
-        "unread_count": len(notifications),
+        "unread_count": unread_msg_count,
     }
 
 

@@ -140,6 +140,16 @@ export default function ForwarderPortal() {
         return () => clearInterval(iv);
     }, [user, fetchDashboardData, handleAuth]);
 
+    // Poll conversations tab every 10s when it's active — keeps unread counts + messages live
+    useEffect(() => {
+        if (!isAuthenticated || activeTab !== 'conversations') return;
+        const id = localStorage.getItem('cl_fwd_id');
+        const mail = localStorage.getItem('cl_fwd_email');
+        if (!id || !mail) return;
+        const iv = setInterval(() => fetchConversations(id, mail), 10000);
+        return () => clearInterval(iv);
+    }, [isAuthenticated, activeTab, fetchConversations]);
+
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         handleAuth(forwarderId.toUpperCase(), email);
