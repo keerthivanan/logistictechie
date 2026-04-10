@@ -622,7 +622,7 @@ async def close_deal(
             db.add(ChatMessage(
                 conversation_id=other_conv.id,
                 sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-                content="This request has been fulfilled. The shipper has closed a deal with another forwarder.",
+                content="This request has been closed by the parties in another conversation.",
                 is_read=False,
             ))
 
@@ -699,7 +699,7 @@ async def _finalize_booking(
         sender_role="SYSTEM",
         sender_id="SYSTEM",
         message_type="SYSTEM",
-        content=f"🔒 Deal Locked at {conv.currency} {final_price:,.2f}. Both parties have confirmed. Contact details have been sent to both of you via email.",
+        content=f"Deal Locked at {conv.currency} {final_price:,.2f}. Both parties have confirmed. Contact details have been sent to both of you via email.",
         is_read=False,
     ))
 
@@ -781,7 +781,7 @@ async def confirm_booking(
         # Both confirmed — finalize booking now
         return await _finalize_booking(conv, db, current_user, background_tasks)
 
-    # Only shipper confirmed — wait for forwarder
+    # Only shipper confirmed — commit first, then re-check to handle concurrent confirms
     db.add(ChatMessage(
         conversation_id=conv.id,
         sender_role="SYSTEM",
@@ -792,4 +792,10 @@ async def confirm_booking(
     ))
     conv.updated_at = _utcnow()
     await db.commit()
+
+    # Race condition guard: forwarder may have confirmed while we were committing
+    await db.refresh(conv)
+    if conv.forwarder_book_req and conv.status == "OPEN":
+        return await _finalize_booking(conv, db, current_user, background_tasks)
+
     return {"status": "PENDING_BOOKING", "message": "Waiting for forwarder to confirm."}

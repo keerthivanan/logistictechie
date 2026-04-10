@@ -32,7 +32,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
+          "id": "eYtkasWvTHeG4DMV",
           "name": "Gmail OAuth - Quotes"
         }
       }
@@ -68,7 +68,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -94,6 +94,12 @@
             }
           ],
           "combinator": "and"
+        },
+        "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
         }
       },
       "id": "check-forwarder-exists",
@@ -121,7 +127,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -147,6 +153,12 @@
             }
           ],
           "combinator": "and"
+        },
+        "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
         }
       },
       "id": "check-is-open",
@@ -174,7 +186,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -200,6 +212,12 @@
             }
           ],
           "combinator": "and"
+        },
+        "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
         }
       },
       "id": "check-under-3-quotes",
@@ -227,7 +245,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -253,6 +271,12 @@
             }
           ],
           "combinator": "and"
+        },
+        "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
         }
       },
       "id": "check-not-duplicate",
@@ -294,7 +318,7 @@
       ],
       "credentials": {
         "openAiApi": {
-          "id": "5",
+          "id": "AMS3UhIDEmZFx4TA",
           "name": "OpenAI API"
         }
       }
@@ -344,7 +368,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -352,7 +376,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE requests SET quotation_count = quotation_count + 1 WHERE request_id = '{{ $('Code - Extract Request ID').first().json.request_id }}'",
+        "query": "UPDATE requests SET quotation_count = (SELECT COUNT(*) FROM quotations WHERE request_id = '{{ $('Code - Extract Request ID').first().json.request_id }}') WHERE request_id = '{{ $('Code - Extract Request ID').first().json.request_id }}'",
         "options": {}
       },
       "id": "update-count",
@@ -365,7 +389,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -386,7 +410,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -407,7 +431,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -433,6 +457,12 @@
             }
           ],
           "combinator": "and"
+        },
+        "options": {
+          "caseSensitive": false,
+          "leftValue": "",
+          "typeValidation": "loose",
+          "version": 2
         }
       },
       "id": "check-3-quotes",
@@ -495,7 +525,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -505,7 +535,7 @@
         "sendTo": "={{ $json.email }}",
         "subject": "=New quote received for {{ $('Code - Extract Request ID').first().json.request_id }}",
         "emailType": "html",
-        "message": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:0 auto;\"><div style=\"background:#28A745;color:white;padding:30px;text-align:center;\"><h1>🎉 New Quotation Received!</h1></div><div style=\"padding:30px;\"><p>Dear {{ $json.full_name }},</p><p>A new quotation has been submitted for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong>.</p><div style=\"background:#E8F4F8;padding:20px;border-radius:5px;border-left:4px solid #2E75B6;margin:20px 0;\"><h3 style=\"margin-top:0;\">{{ $('Code - Validate AI Output').first().json.forwarder_company }}</h3><div style=\"font-size:32px;font-weight:bold;color:#2E75B6;\">{{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</div><p><strong>Transit:</strong> {{ $('Code - Validate AI Output').first().json.transit_days || 'TBD' }} days via {{ $('Code - Validate AI Output').first().json.carrier }}</p></div><p><strong>Quotes received:</strong> {{ $('PostgreSQL - Get Updated Count').first().json.quotation_count }}/3</p></div></div></body></html>",
+        "message": "=<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'></head><body style='margin:0;padding:0;background:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,system-ui,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#f0f4f8;'><tr><td align='center' style='padding:32px 16px;'><table cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);'><tr><td style='background:#1a1a1a;padding:24px 32px;text-align:center;'><table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:0 auto 16px;'><tr><td style=''><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;width:160px;height:64px;border:0;outline:none;'></td></tr></table><h1 style='margin:0 0 3px;font-size:20px;font-weight:900;color:#ffffff;'>New Quotation Received</h1></td></tr><tr><td style='height:3px;background:#b5973a;font-size:0;line-height:0;'> </td></tr><tr><td style='padding:32px 40px;'><p style='margin:0 0 8px;font-size:15px;font-weight:700;color:#111827;'>Dear {{ $json.full_name }},</p><p style='margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.7;'>A new quotation has been submitted for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong>.</p><table cellpadding='0' cellspacing='0' border='0' style='width:100%;border:1px solid #e2e8f0;background:#f8fafc;border-radius:8px;margin:0 0 16px;border-collapse:collapse;'><tr><td style='padding:10px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#6b7280;'>Forwarder</td><td style='padding:10px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#111827;text-align:right;'>{{ $('Code - Validate AI Output').first().json.forwarder_company }}</td></tr><tr><td style='padding:10px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;color:#6b7280;'>Price</td><td style='padding:10px 16px;border-bottom:1px solid #e2e8f0;font-size:18px;font-weight:900;color:#1a1a1a;text-align:right;'>{{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</td></tr><tr><td style='padding:10px 16px;font-size:13px;color:#6b7280;'>Transit</td><td style='padding:10px 16px;font-size:13px;font-weight:700;color:#111827;text-align:right;'>{{ $('Code - Validate AI Output').first().json.transit_days || 'TBD' }} days</td></tr></table><table cellpadding='0' cellspacing='0' border='0' style='margin:20px auto 0;'><tr><td style='background:#1a1a1a;border-radius:8px;'><a href='https://cargolink.sa/dashboard/shipments' style='display:inline-block;padding:13px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;'>View All Quotes →</a></td></tr></table></td></tr><tr><td style='background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;'><p style='margin:0;font-size:11px;color:#94a3b8;'>CargoLink Platform &mdash; <a href='https://cargolink.sa' style='color:#64748b;text-decoration:none;'>cargolink.sa</a> &mdash; &copy; 2025 CargoLink</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "notify-user",
@@ -518,7 +548,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "4",
+          "id": "QYlpY7lFFdn2TQhy",
           "name": "Gmail OAuth - Support"
         }
       }
@@ -528,7 +558,7 @@
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
         "subject": "=Your quote for {{ $('Code - Extract Request ID').first().json.request_id }} received",
         "emailType": "html",
-        "message": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;\"><div style=\"max-width:600px;margin:0 auto;\"><div style=\"background:#28A745;color:white;padding:30px;text-align:center;\"><h1>✅ Quotation Submitted!</h1></div><div style=\"padding:30px;\"><p>Dear {{ $('PostgreSQL - Verify Forwarder').first().json.company_name }},</p><p>Your quotation for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong> has been received and processed.</p><div style=\"background:#D4EDDA;border:2px solid #28A745;padding:20px;border-radius:5px;margin:20px 0;text-align:center;\"><h2 style=\"margin:0;color:#28A745;\">✓ STATUS: ANSWERED</h2></div><ul><li>Price: {{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</li><li>Transit: {{ $('Code - Validate AI Output').first().json.transit_days || 'TBD' }} days</li><li>Valid for: {{ $('Code - Validate AI Output').first().json.validity_days }} days</li></ul></div></div></body></html>",
+        "message": "=<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'></head><body style='margin:0;padding:0;background:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,system-ui,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#f0f4f8;'><tr><td align='center' style='padding:32px 16px;'><table cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);'><tr><td style='background:#1a1a1a;padding:24px 32px;text-align:center;'><table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:0 auto 16px;'><tr><td style=''><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;width:160px;height:64px;border:0;outline:none;'></td></tr></table><h1 style='margin:0 0 3px;font-size:20px;font-weight:900;color:#ffffff;'>Quote Submitted</h1></td></tr><tr><td style='height:3px;background:#b5973a;font-size:0;line-height:0;'> </td></tr><tr><td style='padding:32px 40px;'><p style='margin:0 0 8px;font-size:15px;font-weight:700;color:#111827;'>Dear {{ $('PostgreSQL - Verify Forwarder').first().json.company_name }},</p><p style='margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.7;'>Your quotation for <strong>{{ $('Code - Extract Request ID').first().json.request_id }}</strong> has been received.</p><table cellpadding='0' cellspacing='0' border='0' style='width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:0 0 16px;'><tr><td style='padding:16px;text-align:center;'><p style='margin:0 0 4px;font-size:13px;color:#6b7280;'>Submitted Price</p><p style='margin:0;font-size:26px;font-weight:900;color:#1a1a1a;'>{{ $('Code - Validate AI Output').first().json.currency }} {{ $('Code - Validate AI Output').first().json.total_price }}</p></td></tr></table><p style='margin:0;font-size:13px;color:#6b7280;line-height:1.6;'>The shipper will be notified. If selected, you will receive a booking confirmation via CargoLink chat.</p></td></tr><tr><td style='background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;'><p style='margin:0;font-size:11px;color:#94a3b8;'>CargoLink Platform &mdash; <a href='https://cargolink.sa' style='color:#64748b;text-decoration:none;'>cargolink.sa</a> &mdash; &copy; 2025 CargoLink</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "confirm-forwarder",
@@ -541,7 +571,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
+          "id": "eYtkasWvTHeG4DMV",
           "name": "Gmail OAuth - Quotes"
         }
       }
@@ -562,7 +592,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -572,7 +602,7 @@
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
         "subject": "=Quote DECLINED - {{ $('Code - Extract Request ID').first().json.request_id }} already has 3 quotes",
         "emailType": "html",
-        "message": "=<p>Thank you for your quote. This request already has 3 quotations and is now closed.</p>",
+        "message": "=<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'></head><body style='margin:0;padding:0;background:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,system-ui,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#f0f4f8;'><tr><td align='center' style='padding:32px 16px;'><table cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);'><tr><td style='background:#6b7280;padding:24px 32px;text-align:center;'><table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:0 auto 16px;'><tr><td style=''><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;width:160px;height:64px;border:0;outline:none;'></td></tr></table><h1 style='margin:0 0 3px;font-size:20px;font-weight:900;color:#ffffff;'>Quote Limit Reached</h1></td></tr><tr><td style='height:3px;background:#9ca3af;font-size:0;line-height:0;'> </td></tr><tr><td style='padding:32px 40px;'><p style='margin:0 0 16px;font-size:14px;color:#374151;line-height:1.7;'>Thank you for your submission. This freight request already has <strong>3 quotations</strong> and is now closed for new replies.</p><p style='margin:0;font-size:13px;color:#6b7280;'>New freight requests are posted regularly — stay active to quote early.</p></td></tr><tr><td style='background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;'><p style='margin:0;font-size:11px;color:#94a3b8;'>CargoLink Platform &mdash; <a href='https://cargolink.sa' style='color:#64748b;text-decoration:none;'>cargolink.sa</a> &mdash; &copy; 2025 CargoLink</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "send-declined-email",
@@ -585,7 +615,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
+          "id": "eYtkasWvTHeG4DMV",
           "name": "Gmail OAuth - Quotes"
         }
       }
@@ -606,7 +636,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -627,7 +657,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -636,7 +666,7 @@
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
         "subject": "=Request CLOSED - {{ $('Code - Extract Request ID').first().json.request_id }}",
-        "message": "=This request is CLOSED and no longer accepting quotations. Thank you for your interest.\n\nCargoLink Platform",
+        "message": "=<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'></head><body style='margin:0;padding:0;background:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,system-ui,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#f0f4f8;'><tr><td align='center' style='padding:32px 16px;'><table cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);'><tr><td style='background:#6b7280;padding:24px 32px;text-align:center;'><table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:0 auto 16px;'><tr><td style=''><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;width:160px;height:64px;border:0;outline:none;'></td></tr></table><h1 style='margin:0 0 3px;font-size:20px;font-weight:900;color:#ffffff;'>Request Closed</h1></td></tr><tr><td style='height:3px;background:#9ca3af;font-size:0;line-height:0;'> </td></tr><tr><td style='padding:32px 40px;'><p style='margin:0 0 16px;font-size:14px;color:#374151;line-height:1.7;'>The freight request you replied to is <strong>closed</strong> and no longer accepting quotations.</p><p style='margin:0;font-size:13px;color:#6b7280;'>Thank you for your interest. New requests are posted regularly on CargoLink.</p></td></tr><tr><td style='background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;'><p style='margin:0;font-size:11px;color:#94a3b8;'>CargoLink Platform &mdash; <a href='https://cargolink.sa' style='color:#64748b;text-decoration:none;'>cargolink.sa</a> &mdash; &copy; 2025 CargoLink</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "send-closed-email",
@@ -649,7 +679,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
+          "id": "eYtkasWvTHeG4DMV",
           "name": "Gmail OAuth - Quotes"
         }
       }
@@ -670,7 +700,7 @@
       ],
       "credentials": {
         "postgres": {
-          "id": "1",
+          "id": "mF3BMC9ZawiCE0M8",
           "name": "CargoLink PostgreSQL"
         }
       }
@@ -679,7 +709,7 @@
       "parameters": {
         "sendTo": "={{ $('Code - Extract Request ID').first().json.sender_email }}",
         "subject": "Registration Required - CargoLink Platform",
-        "message": "=Your email ({{ $('Code - Extract Request ID').first().json.sender_email }}) is not registered in our CargoLink partner network.\n\nPlease register at: https://cargolink.sa/forwarders/register\n\nCargoLink Platform",
+        "message": "=<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'></head><body style='margin:0;padding:0;background:#f0f4f8;font-family:-apple-system,BlinkMacSystemFont,system-ui,Arial,sans-serif;'><table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#f0f4f8;'><tr><td align='center' style='padding:32px 16px;'><table cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);'><tr><td style='background:#dc2626;padding:24px 32px;text-align:center;'><table cellpadding='0' cellspacing='0' border='0' align='center' style='margin:0 auto 16px;'><tr><td style=''><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;width:160px;height:64px;border:0;outline:none;'></td></tr></table><h1 style='margin:0 0 3px;font-size:20px;font-weight:900;color:#ffffff;'>Unrecognized Sender</h1></td></tr><tr><td style='height:3px;background:#ef4444;font-size:0;line-height:0;'> </td></tr><tr><td style='padding:32px 40px;'><p style='margin:0 0 16px;font-size:14px;color:#374151;line-height:1.7;'>Your email <strong>{{ $('Code - Extract Request ID').first().json.sender_email }}</strong> is not registered in the CargoLink partner network.</p><div style='background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px;margin:0 0 16px;'><p style='margin:0;font-size:13px;color:#dc2626;'>To submit quotations you must register as a verified freight forwarder.</p></div><table cellpadding='0' cellspacing='0' border='0' style='margin:20px auto 0;'><tr><td style='background:#dc2626;border-radius:8px;'><img src='https://cargolink.sa/cargolink1.png' alt='CargoLink' width='160' height='64' border='0' style='display:block;margin:0 auto 14px;width:160px;height:auto;border:0;outline:none;max-width:100%;' /><a href='https://cargolink.sa/forwarders/register' style='display:inline-block;padding:13px 28px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;'>Register as a Forwarder →</a></td></tr></table></td></tr><tr><td style='background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #e2e8f0;'><p style='margin:0;font-size:11px;color:#94a3b8;'>CargoLink Platform &mdash; <a href='https://cargolink.sa' style='color:#64748b;text-decoration:none;'>cargolink.sa</a> &mdash; &copy; 2025 CargoLink</p></td></tr></table></td></tr></table></body></html>",
         "options": {}
       },
       "id": "send-unknown-sender",
@@ -692,7 +722,7 @@
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "3",
+          "id": "eYtkasWvTHeG4DMV",
           "name": "Gmail OAuth - Quotes"
         }
       }

@@ -124,11 +124,14 @@ async function main() {
 
     let workflowId;
 
+    let versionId;
+
     if (existingId) {
       // UPDATE via PATCH /rest/workflows/{id}
       const res = await request('PATCH', `${N8N_BASE}/rest/workflows/${existingId}`, payload, null, cookies);
       if (res.status === 200) {
         workflowId = existingId;
+        versionId = res.json?.versionId || res.json?.data?.versionId;
         console.log(`✅ UPDATED — ${wfName}`);
         updated++;
       } else {
@@ -141,6 +144,7 @@ async function main() {
       const res = await request('POST', `${N8N_BASE}/rest/workflows`, payload, null, cookies);
       if (res.status === 200 || res.status === 201) {
         workflowId = res.json?.id || res.json?.data?.id;
+        versionId = res.json?.versionId || res.json?.data?.versionId;
         console.log(`✅ CREATED — ${wfName} (id: ${workflowId})`);
         created++;
       } else {
@@ -150,11 +154,17 @@ async function main() {
       }
     }
 
-    // ACTIVATE via POST /rest/workflows/{id}/activate
+    // ACTIVATE + PUBLISH draft → active version (pass versionId so n8n publishes the NEW draft)
     if (workflowId) {
-      const actRes = await request('POST', `${N8N_BASE}/rest/workflows/${workflowId}/activate`, null, null, cookies);
+      payload.active = true;
+      const actRes = await request('PATCH', `${N8N_BASE}/rest/workflows/${workflowId}`, payload, null, cookies);
       if (actRes.status === 200) {
-        console.log(`   ▶  Activated`);
+        // Capture latest versionId from activation PATCH response
+        const latestVersionId = actRes.json?.versionId || actRes.json?.data?.versionId || versionId;
+        // Publish the specific draft version so webhooks use the new code
+        const pubBody = latestVersionId ? { versionId: latestVersionId } : null;
+        const pubRes = await request('POST', `${N8N_BASE}/rest/workflows/${workflowId}/activate`, pubBody, null, cookies);
+        console.log(`   ▶  Activated (versionId: ${latestVersionId || 'n/a'}, publish: ${pubRes.status})`);
         activated++;
       } else {
         console.log(`   ⚠  Could not activate (${actRes.status}) — may need manual activation`);

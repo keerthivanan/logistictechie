@@ -375,7 +375,7 @@ async def portal_close_deal(
             db.add(ChatMessage(
                 conversation_id=other_conv.id,
                 sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-                content="This request has been fulfilled. The shipper has closed a deal with another forwarder.",
+                content="This request has been closed by the parties in another conversation.",
                 is_read=False,
             ))
 
@@ -433,7 +433,7 @@ async def portal_confirm_booking(
             raise HTTPException(status_code=404, detail="Shipper account not found.")
         return await _finalize_booking(conv, db, shipper, background_tasks)
 
-    # Only forwarder confirmed — wait for shipper
+    # Only forwarder confirmed — commit first, then re-check to handle concurrent confirms
     db.add(ChatMessage(
         conversation_id=conv.id,
         sender_role="SYSTEM",
@@ -444,4 +444,15 @@ async def portal_confirm_booking(
     ))
     conv.updated_at = _utcnow()
     await db.commit()
+
+    # Race condition guard: shipper may have confirmed while we were committing
+    await db.refresh(conv)
+    if conv.shipper_book_req and conv.status == "OPEN":
+        shipper_res = await db.execute(
+            select(User).where(User.sovereign_id == conv.shipper_id)
+        )
+        shipper = shipper_res.scalars().first()
+        if shipper:
+            return await _finalize_booking(conv, db, shipper, background_tasks)
+
     return {"status": "PENDING_BOOKING", "message": "Waiting for shipper to confirm."}
