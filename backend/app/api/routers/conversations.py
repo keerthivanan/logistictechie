@@ -597,7 +597,7 @@ async def close_deal(
         db.add(ChatMessage(
             conversation_id=conv.id,
             sender_role="SYSTEM", sender_id="SYSTEM", message_type="SYSTEM",
-            content="✅ Deal closed by both parties. This conversation is now archived.",
+            content="Deal closed by both parties. This conversation is now archived.",
             is_read=False,
         ))
 

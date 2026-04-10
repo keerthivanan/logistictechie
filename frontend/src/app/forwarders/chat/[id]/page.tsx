@@ -281,6 +281,7 @@ export default function ForwarderChatPage() {
     const isLocked = conv?.status === 'BOOKED'
     const isClosed = conv?.status === 'CLOSED'
     const shipperWaiting = conv?.offer_side === 'SHIPPER'
+    const myCounterPending = conv?.offer_side === 'FORWARDER' && !!conv?.current_offer && !conv?.agreed_price
     const activePriceLabel = conv?.agreed_price ? 'Agreed Price' : conv?.current_offer ? 'Counter Offer' : 'Quoted Price'
     const activePrice = conv?.agreed_price ?? conv?.current_offer ?? conv?.original_price
     const iAlreadyRequested = conv?.forwarder_close_req ?? false
@@ -628,22 +629,54 @@ export default function ForwarderChatPage() {
                     <div className="p-5 space-y-3">
                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Actions</p>
 
+                        {/* Agreed price callout */}
+                        {conv.agreed_price && (
+                            <div className="bg-[#0a0a0a] border border-white/15 rounded-2xl px-4 py-3">
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Price Agreed</p>
+                                <p className="text-xl font-semibold font-mono text-white">{conv.currency} {Number(conv.agreed_price).toLocaleString()}</p>
+                                <p className="text-[10px] text-zinc-500 mt-1.5 leading-relaxed">Confirm your side when ready — contact details are shared after both parties lock.</p>
+                            </div>
+                        )}
+
+                        {/* Shipper made an offer — block confirm */}
+                        {shipperWaiting && (
+                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+                                <p className="text-[10px] font-semibold text-white mb-1">Shipper Made an Offer</p>
+                                <p className="text-[10px] text-zinc-500 leading-relaxed">Accept, counter, or reject the shipper's offer above before you can confirm the deal.</p>
+                            </div>
+                        )}
+
+                        {/* Forwarder counter is pending — block confirm */}
+                        {myCounterPending && !shipperWaiting && (
+                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+                                <p className="text-[10px] font-semibold text-white mb-1">Your Counter Offer is Pending</p>
+                                <p className="text-[10px] text-zinc-500 leading-relaxed">Waiting for the shipper to accept or counter. You can confirm the deal once it's resolved.</p>
+                            </div>
+                        )}
+
                         {/* Confirm booking */}
-                        {!shipperWaiting && (
+                        {!shipperWaiting && !myCounterPending && (
                             conv.forwarder_book_req && !conv.shipper_book_req ? (
-                                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-center">
-                                    <p className="text-[10px] text-zinc-500 animate-pulse">Waiting for shipper to lock...</p>
+                                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+                                    <p className="text-[10px] text-zinc-400 font-semibold text-center mb-1">Waiting for the shipper...</p>
+                                    <p className="text-[10px] text-zinc-600 text-center leading-relaxed">They'll be notified to confirm their side.</p>
                                 </div>
                             ) : conv.shipper_book_req && !conv.forwarder_book_req ? (
-                                <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse flex items-center justify-center gap-2">
-                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Shipper confirmed — Lock Deal</>}
-                                </button>
+                                <div>
+                                    <button onClick={confirmBooking} disabled={sending}
+                                        className="w-full bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse flex items-center justify-center gap-2">
+                                        {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Confirm Deal Now</>}
+                                    </button>
+                                    <p className="text-[10px] text-amber-400/70 text-center mt-1.5">Shipper already confirmed — you're the last step</p>
+                                </div>
                             ) : (
-                                <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
-                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Confirm Deal</>}
-                                </button>
+                                <div>
+                                    <button onClick={confirmBooking} disabled={sending}
+                                        className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Confirm Deal</>}
+                                    </button>
+                                    <p className="text-[10px] text-zinc-600 text-center mt-1.5">Both parties must confirm — deal finalizes when both lock</p>
+                                </div>
                             )
                         )}
 

@@ -561,22 +561,46 @@ export default function ChatPage() {
                     <div className="p-5 space-y-3">
                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Actions</p>
 
+                        {/* Agreed price callout — appears once price is settled */}
+                        {conv.agreed_price && (
+                            <div className="bg-[#0a0a0a] border border-white/15 rounded-2xl px-4 py-3">
+                                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Price Agreed</p>
+                                <p className="text-xl font-semibold font-mono text-white">{conv.currency} {Number(conv.agreed_price).toLocaleString()}</p>
+                                <p className="text-[10px] text-zinc-500 mt-1.5 leading-relaxed">Lock the deal when ready — contact details are shared after both parties confirm.</p>
+                            </div>
+                        )}
+
+                        {/* Pending offer — explains why Lock Deal is unavailable */}
+                        {hasPendingOffer && (
+                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+                                <p className="text-[10px] font-semibold text-white mb-1">Pending Offer</p>
+                                <p className="text-[10px] text-zinc-500 leading-relaxed">Accept or counter the forwarder's offer first before you can lock the deal.</p>
+                            </div>
+                        )}
+
                         {/* Lock deal */}
                         {!hasPendingOffer && (
                             conv.shipper_book_req && !conv.forwarder_book_req ? (
-                                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-center">
-                                    <p className="text-[10px] text-zinc-500 animate-pulse">Waiting for forwarder to lock...</p>
+                                <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+                                    <p className="text-[10px] text-zinc-400 font-semibold text-center mb-1">Waiting for {conv.forwarder_company}...</p>
+                                    <p className="text-[10px] text-zinc-600 text-center leading-relaxed">They'll be notified to confirm their side.</p>
                                 </div>
                             ) : conv.forwarder_book_req && !conv.shipper_book_req ? (
-                                <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse flex items-center justify-center gap-2">
-                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Forwarder confirmed — Lock Deal</>}
-                                </button>
+                                <div>
+                                    <button onClick={confirmBooking} disabled={sending}
+                                        className="w-full bg-amber-500 text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-amber-400 transition-all active:scale-95 disabled:opacity-50 animate-pulse flex items-center justify-center gap-2">
+                                        {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Lock Deal Now</>}
+                                    </button>
+                                    <p className="text-[10px] text-amber-400/70 text-center mt-1.5">{conv.forwarder_company} already confirmed — you're the last step</p>
+                                </div>
                             ) : (
-                                <button onClick={confirmBooking} disabled={sending}
-                                    className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
-                                    {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Lock Deal</>}
-                                </button>
+                                <div>
+                                    <button onClick={confirmBooking} disabled={sending}
+                                        className="w-full bg-white text-black text-[10px] font-semibold uppercase tracking-widest px-4 py-3 rounded-2xl hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Lock className="w-3.5 h-3.5" /> Lock Deal</>}
+                                    </button>
+                                    <p className="text-[10px] text-zinc-600 text-center mt-1.5">Both parties must confirm — deal finalizes when both lock</p>
+                                </div>
                             )
                         )}
 
