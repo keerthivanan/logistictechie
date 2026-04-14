@@ -31,7 +31,7 @@ export default function ForwarderPortal() {
     const [bidSuccess, setBidSuccess] = useState(false);
     const [bidError, setBidError] = useState('');
 
-    const [activeTab, setActiveTab] = useState<'requests' | 'conversations' | 'performance'>('requests');
+    const [activeTab, setActiveTab] = useState<'requests' | 'conversations'>('requests');
     const [conversations, setConversations] = useState<any[]>([]);
     const [convLoading, setConvLoading] = useState(false);
 
@@ -41,7 +41,7 @@ export default function ForwarderPortal() {
     const [cvResult, setCvResult] = useState<string | null>(null);
     const [cvLoading, setCvLoading] = useState(false);
 
-    const switchTab = (tab: 'requests' | 'conversations' | 'performance') => {
+    const switchTab = (tab: 'requests' | 'conversations') => {
         setActiveTab(tab);
         if (tab === 'conversations') {
             const id = localStorage.getItem('cl_fwd_id');
@@ -285,14 +285,13 @@ export default function ForwarderPortal() {
     // ── DASHBOARD ─────────────────────────────────────────────────────────────
     const metrics = dashboardData?.metrics;
     const openRequests = dashboardData?.open_requests || [];
-    const bidHistory = dashboardData?.quotes || [];
+
     const companyName = dashboardData?.company_name || user?.name || '—';
     const fwdId = localStorage.getItem('cl_fwd_id') || user?.sovereign_id || '';
 
     const tabLabels: Record<string, string> = {
         requests: t('portal.tab.requests'),
         conversations: t('portal.tab.messages'),
-        performance: t('portal.tab.performance'),
     };
 
     return (
@@ -318,7 +317,7 @@ export default function ForwarderPortal() {
 
                 {/* Tab bar */}
                 <div className="flex gap-1 bg-white/[0.03] border border-white/5 rounded-xl p-1 flex-shrink-0">
-                    {(['requests', 'conversations', 'performance'] as const).map((tab) => {
+                    {(['requests', 'conversations'] as const).map((tab) => {
                         const hasUnread = tab === 'conversations' && conversations.some((c: any) => c.unread_count > 0);
                         return (
                             <button
@@ -413,19 +412,16 @@ export default function ForwarderPortal() {
                             <div className="flex items-center gap-2">
                                 <Package className="w-3.5 h-3.5 text-zinc-600" />
                                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                                    {activeTab === 'performance' ? t('portal.tab.performance') : t('portal.open.requests')}
+                                    {t('portal.open.requests')}
                                 </span>
                             </div>
                             <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
-                                {activeTab === 'performance'
-                                    ? `${bidHistory.length} ${bidHistory.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}`
-                                    : `${openRequests.length} ${openRequests.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}`
-                                }
+                                {openRequests.length} {openRequests.length === 1 ? t('portal.request.singular') : t('portal.requests.plural')}
                             </span>
                         </div>
 
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
-                            {(activeTab === 'performance' ? bidHistory : openRequests).length === 0 ? (
+                            {openRequests.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
                                     <Clock className="w-8 h-8 text-zinc-600" />
                                     <div>
@@ -434,24 +430,22 @@ export default function ForwarderPortal() {
                                     </div>
                                 </div>
                             ) : (
-                                (activeTab === 'performance' ? bidHistory : openRequests).map((item: any) => {
+                                openRequests.map((item: any) => {
                                     const isSelected = selectedRequest?.request_id === item.request_id;
-                                    const isHistory = activeTab === 'performance';
                                     return (
                                         <div
                                             key={item.request_id}
-                                            onClick={() => { if (!isHistory) { setSelectedRequest(item); setBidSuccess(false); } }}
-                                            className={`p-4 rounded-xl border transition-all group ${
-                                                isHistory ? 'bg-black border-white/5' :
+                                            onClick={() => { setSelectedRequest(item); setBidSuccess(false); }}
+                                            className={`p-4 rounded-xl border transition-all group cursor-pointer ${
                                                 isSelected
-                                                    ? 'bg-white/[0.04] border-white/20 border-l-2 border-l-white cursor-pointer'
-                                                    : 'bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] cursor-pointer'
+                                                    ? 'bg-white/[0.04] border-white/20 border-l-2 border-l-white'
+                                                    : 'bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02]'
                                             }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                                                        isSelected && !isHistory ? 'bg-white text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
+                                                        isSelected ? 'bg-white text-black' : 'bg-white/[0.03] border border-white/5 text-zinc-600 group-hover:bg-white/[0.06]'
                                                     }`}>
                                                         {item.cargo_type?.toUpperCase().includes('SEA') || item.cargo_type?.toUpperCase().includes('OCEAN') ? <Ship className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
                                                     </div>
@@ -469,14 +463,8 @@ export default function ForwarderPortal() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right flex-shrink-0">
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">
-                                                        {isHistory ? t('portal.your.quote') : `${item.quotation_count}/3 quotes`}
-                                                    </p>
-                                                    <p className={`text-sm font-bold font-mono ${isHistory && item.your_price > 0 ? 'text-white' : 'text-zinc-500'}`}>
-                                                        {isHistory
-                                                            ? (item.your_price > 0 ? `USD ${item.your_price.toLocaleString()}` : '—')
-                                                            : t('portal.submit.quote')}
-                                                    </p>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">{item.quotation_count}/3 quotes</p>
+                                                    <p className="text-sm font-bold font-mono text-zinc-500">{t('portal.submit.quote')}</p>
                                                 </div>
                                             </div>
                                         </div>
