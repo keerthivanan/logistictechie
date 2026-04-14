@@ -494,7 +494,7 @@ async def n8n_request_sync(sync_in: N8nRequestSync, db: AsyncSession = Depends(g
             "incoterms": sync_in.incoterms,
             "currency": sync_in.currency,
             "status": sync_in.status,
-            "submitted_at": datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.submitted_at else datetime.now(timezone.utc)
+            "submitted_at": datetime.fromisoformat(sync_in.submitted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.submitted_at else datetime.now(timezone.utc).replace(tzinfo=None)
         }
         
         # 2. Build Insert with Upsert
@@ -617,7 +617,7 @@ async def n8n_quote_sync(
         raw_email=sync_in.raw_email,
         ai_summary=sync_in.ai_summary,
         status=sync_in.status,
-        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.received_at else datetime.now(timezone.utc)
+        received_at=datetime.fromisoformat(sync_in.received_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.received_at else datetime.now(timezone.utc).replace(tzinfo=None)
     )
     
     stmt = stmt.on_conflict_do_update(
@@ -678,7 +678,7 @@ async def n8n_bid_status_sync(sync_in: N8nBidStatusSync, db: AsyncSession = Depe
         forwarder_id=sync_in.forwarder_id,
         status=sync_in.status,
         quoted_price=sync_in.price,
-        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.attempted_at else datetime.now(timezone.utc),
+        attempted_at=datetime.fromisoformat(sync_in.attempted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.attempted_at else datetime.now(timezone.utc).replace(tzinfo=None),
         quoted_at=datetime.fromisoformat(sync_in.quoted_at.replace("Z", "+00:00")).replace(tzinfo=None) if sync_in.quoted_at else None
     )
     
