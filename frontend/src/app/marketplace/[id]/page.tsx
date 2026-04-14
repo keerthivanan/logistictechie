@@ -130,7 +130,7 @@ export default function MarketplaceLiveDashboard() {
             <Navbar />
 
             {/* Sticky top bar */}
-            <div className="fixed top-16 left-0 right-0 z-40 bg-[#080808]/95 backdrop-blur-xl border-b border-white/[0.06]">
+            <div className="fixed top-[84px] left-0 right-0 z-40 bg-[#080808]/95 backdrop-blur-xl border-b border-white/[0.06]">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-6">
                     {/* Left: back */}
                     <button
@@ -175,7 +175,7 @@ export default function MarketplaceLiveDashboard() {
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-32 pb-24">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-40 pb-24">
 
                 {/* Header */}
                 <div className="mb-8">
