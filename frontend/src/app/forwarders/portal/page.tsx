@@ -165,13 +165,13 @@ export default function ForwarderPortal() {
         const controller = new AbortController();
         setCvResult(null);
         setCvLoading(true);
-        fetch(`https://open.er-api.com/v6/latest/${cvFrom}`, { signal: controller.signal })
+        fetch(`https://api.frankfurter.app/latest?from=${cvFrom}&to=${cvTo}&amount=${amount}`, { signal: controller.signal })
             .then(r => r.json())
             .then(data => {
                 const rate = data.rates?.[cvTo];
-                setCvResult(rate != null ? Number(rate * amount).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null);
+                setCvResult(rate != null ? Number(rate).toLocaleString(undefined, { maximumFractionDigits: 2 }) : null);
             })
-            .catch(() => {})
+            .catch(() => { setCvResult(null); })
             .finally(() => setCvLoading(false));
         return () => controller.abort();
     }, [cvAmount, cvFrom, cvTo]);

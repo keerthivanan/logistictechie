@@ -89,7 +89,7 @@ export default function MarketplaceLiveDashboard() {
         return () => clearInterval(interval);
     }, [requestId, status]);
 
-    const shortId = requestId?.slice(0, 8).toUpperCase();
+    const shortId = requestId?.toUpperCase();
 
     // Detect if this forwarder already has a bid for this request
     const myExistingBid = isForwarder && user
