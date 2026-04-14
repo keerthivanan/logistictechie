@@ -129,40 +129,49 @@ export default function MarketplaceLiveDashboard() {
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-inter">
             <Navbar />
 
-            {/* Sticky breadcrumb bar */}
-            <div className="fixed top-16 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/[0.05]">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+            {/* Sticky top bar */}
+            <div className="fixed top-16 left-0 right-0 z-40 bg-[#080808]/95 backdrop-blur-xl border-b border-white/[0.06]">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-6">
+                    {/* Left: back */}
                     <button
                         onClick={() => isForwarder ? router.push('/dashboard/partner') : router.push('/search')}
-                        className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors text-xs font-medium"
+                        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group flex-shrink-0"
                     >
-                        <ChevronLeft className="w-3.5 h-3.5" />
-                        {isForwarder ? 'Back to Requests' : t('mkt.back.search')}
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        <span className="text-[11px] font-semibold uppercase tracking-widest">
+                            {isForwarder ? 'Requests' : t('mkt.back.search')}
+                        </span>
                     </button>
 
-                    <div className="flex items-center gap-2">
-                        {shipmentInfo && (
-                            <span className="text-[10px] font-mono text-zinc-600 bg-white/[0.04] border border-white/[0.06] px-3 py-1 rounded-full">
-                                {shipmentInfo.origin} → {shipmentInfo.destination}
-                            </span>
-                        )}
-                        {isForwarder ? (
-                            <span className="flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" /> Open for Bids
-                            </span>
-                        ) : (
-                            <span className={`flex items-center gap-1.5 text-[10px] font-semibold px-3 py-1 rounded-full uppercase tracking-widest ${
-                                status === 'CLOSED'
-                                    ? 'bg-white/[0.06] text-white border border-white/20'
-                                    : 'bg-white/[0.04] text-zinc-500 border border-white/[0.06]'
-                            }`}>
-                                {status === 'CLOSED'
-                                    ? <><CheckCircle2 className="w-3 h-3" /> {t('mkt.quoting.complete')}</>
-                                    : <><span className="w-1.5 h-1.5 rounded-full bg-white/20 animate-pulse inline-block" /> {t('mkt.collecting')}</>
-                                }
-                            </span>
-                        )}
-                    </div>
+                    {/* Center: route */}
+                    {shipmentInfo && (
+                        <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-xs font-mono text-zinc-500 truncate">{shipmentInfo.origin}</span>
+                            <span className="text-zinc-700 flex-shrink-0">→</span>
+                            <span className="text-xs font-mono text-zinc-500 truncate">{shipmentInfo.destination}</span>
+                            <span className="hidden sm:block w-px h-3 bg-white/10 mx-1 flex-shrink-0" />
+                            <span className="hidden sm:block text-[10px] font-mono text-zinc-700 flex-shrink-0">{shortId}</span>
+                        </div>
+                    )}
+
+                    {/* Right: status */}
+                    {isForwarder ? (
+                        <span className="flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest bg-white text-black flex-shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
+                            Open for Bids
+                        </span>
+                    ) : (
+                        <span className={`flex items-center gap-2 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest flex-shrink-0 ${
+                            status === 'CLOSED'
+                                ? 'bg-white text-black'
+                                : 'bg-white/[0.06] text-white border border-white/10'
+                        }`}>
+                            {status === 'CLOSED'
+                                ? <><CheckCircle2 className="w-3 h-3" />{t('mkt.quoting.complete')}</>
+                                : <><span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />{t('mkt.collecting')}</>
+                            }
+                        </span>
+                    )}
                 </div>
             </div>
 
