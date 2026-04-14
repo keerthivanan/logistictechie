@@ -24,6 +24,9 @@ export default function ForwarderPortal() {
     const [dashboardData, setDashboardData] = useState<any>(null);
     const [selectedRequest, setSelectedRequest] = useState<any>(null);
     const [bidPrice, setBidPrice] = useState('');
+    const [bidCurrency, setBidCurrency] = useState('USD');
+    const [bidCarrier, setBidCarrier] = useState('');
+    const [bidTransitDays, setBidTransitDays] = useState('');
     const [submittingBid, setSubmittingBid] = useState(false);
     const [bidSuccess, setBidSuccess] = useState(false);
     const [bidError, setBidError] = useState('');
@@ -192,11 +195,17 @@ export default function ForwarderPortal() {
                     email: localStorage.getItem('cl_fwd_email'),
                     status: 'ANSWERED',
                     price,
+                    currency: bidCurrency,
+                    carrier: bidCarrier || undefined,
+                    transit_days: bidTransitDays ? parseInt(bidTransitDays) : undefined,
                 })
             });
             if (res.ok) {
                 setBidSuccess(true);
                 setBidPrice('');
+                setBidCarrier('');
+                setBidTransitDays('');
+                setBidCurrency('USD');
                 fetchDashboardData(localStorage.getItem('cl_fwd_id'));
                 setTimeout(() => {
                     setBidSuccess(false);
@@ -478,7 +487,7 @@ export default function ForwarderPortal() {
                     </div>
 
                     {/* RIGHT — Metrics + Bid Form */}
-                    <div className="w-72 flex flex-col gap-4 flex-shrink-0">
+                    <div className="w-72 flex flex-col gap-4 flex-shrink-0 overflow-y-auto custom-scrollbar">
 
                         {/* Metrics */}
                         <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
@@ -623,16 +632,53 @@ export default function ForwarderPortal() {
 
                                     {/* Price input */}
                                     <div className="flex-1 flex flex-col justify-end gap-3">
-                                        <div>
-                                            <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('portal.your.price')}</label>
-                                            <div className="relative">
-                                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                                        {/* Currency + Price row */}
+                                        <div className="flex gap-2">
+                                            <div className="w-24">
+                                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Currency</label>
+                                                <select
+                                                    value={bidCurrency}
+                                                    onChange={e => setBidCurrency(e.target.value)}
+                                                    className="w-full bg-black border border-white/5 rounded-xl px-3 py-3 text-sm font-bold text-white focus:border-white/20 outline-none transition-colors"
+                                                >
+                                                    {['USD','EUR','SAR','AED','GBP','CNY'].map(c => <option key={c} value={c}>{c}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="flex-1">
+                                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">{t('portal.your.price')}</label>
+                                                <div className="relative">
+                                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                                                    <input
+                                                        type="number"
+                                                        placeholder="0.00"
+                                                        value={bidPrice}
+                                                        onChange={e => setBidPrice(e.target.value)}
+                                                        className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-lg font-bold text-white placeholder-zinc-800 focus:border-white/20 outline-none transition-colors font-mono"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Carrier + Transit days row */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Carrier</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. Maersk"
+                                                    value={bidCarrier}
+                                                    onChange={e => setBidCarrier(e.target.value)}
+                                                    className="w-full bg-black border border-white/5 rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-700 focus:border-white/20 outline-none transition-colors"
+                                                />
+                                            </div>
+                                            <div className="w-24">
+                                                <label className="block text-[10px] font-medium text-zinc-500 mb-1.5">Transit days</label>
                                                 <input
                                                     type="number"
-                                                    placeholder="0.00"
-                                                    value={bidPrice}
-                                                    onChange={e => setBidPrice(e.target.value)}
-                                                    className="w-full bg-black border border-white/5 rounded-xl pl-9 pr-4 py-3 text-lg font-bold text-white placeholder-zinc-800 focus:border-white/20 outline-none transition-colors font-mono"
+                                                    placeholder="14"
+                                                    min={1}
+                                                    value={bidTransitDays}
+                                                    onChange={e => setBidTransitDays(e.target.value)}
+                                                    className="w-full bg-black border border-white/5 rounded-xl px-3 py-3 text-sm font-bold text-white placeholder-zinc-700 focus:border-white/20 outline-none transition-colors font-mono"
                                                 />
                                             </div>
                                         </div>
