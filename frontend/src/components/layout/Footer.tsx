@@ -122,7 +122,7 @@ export default function Footer() {
                             <Globe className="w-3.5 h-3.5" />
                         </a>
                         <a
-                            href="mailto:support@cargolink.io"
+                            href="mailto:support@cargolink.sa"
                             aria-label="Email"
                             className="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all"
                         >

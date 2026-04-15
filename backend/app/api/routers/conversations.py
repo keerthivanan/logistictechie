@@ -312,7 +312,7 @@ async def get_messages(
     offset: int = Query(0, ge=0),
 ):
     """
-    Returns messages for a conversation with pagination. Frontend polls this every 1 second.
+    Returns messages for a conversation with pagination. Frontend polls this every 3 seconds.
     Also marks messages from the other party as read on each poll.
     """
     conv = await _get_conversation(public_id, db)

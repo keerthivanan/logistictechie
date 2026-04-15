@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/config';
 import NextImage from 'next/image';
 import { User } from 'lucide-react';
 
@@ -16,7 +17,7 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
     const getFullSrc = (url?: string) => {
         if (!url) return undefined;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
-        return `https://api.cargolink.io/static/${url}`;
+        return `${API_URL}/static/${url}`;
     };
 
     const finalSrc = getFullSrc(src);

@@ -197,7 +197,7 @@ function TrackingContent() {
                             {t('track.inspect.btn')}
                         </button>
                         <a
-                            href={`mailto:support@cargolink.io?subject=Tracking Inquiry: ${id || 'N/A'}`}
+                            href={`mailto:support@cargolink.sa?subject=Tracking Inquiry: ${id || 'N/A'}`}
                             className="w-full border border-black/10 text-black py-3 rounded-xl font-bold text-sm hover:bg-black/5 transition-all flex items-center justify-center"
                         >
                             {t('track.contact.agent')}

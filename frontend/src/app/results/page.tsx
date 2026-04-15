@@ -38,6 +38,7 @@ function ResultsContent() {
   const origin      = searchParams.get('origin')      || 'CNSHA'
   const destination = searchParams.get('destination') || 'USNYC'
   const container   = searchParams.get('container')   || '40FT'
+  const mode        = searchParams.get('mode')        || 'FCL'
   const value       = searchParams.get('value')
   const readyDate   = searchParams.get('readyDate')
   const isHazardous = searchParams.get('hazardous') === 'true'
@@ -135,7 +136,7 @@ function ResultsContent() {
               <ArrowRight className="w-3 h-3 text-zinc-600" />
               <span className="text-[11px] font-black font-mono text-white">{shortDest}</span>
             </div>
-            <span className="hidden sm:block text-[10px] font-bold text-zinc-700 uppercase tracking-widest">{container} · FCL</span>
+            <span className="hidden sm:block text-[10px] font-bold text-zinc-700 uppercase tracking-widest">{container} · {mode}</span>
           </div>
           <div className="hidden sm:flex items-center gap-1.5">
             {[

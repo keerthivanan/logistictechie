@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import { Search, AlertCircle, ArrowRight, Hash, FileCheck, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useT } from '@/lib/i18n/t'
+import { apiFetch } from '@/lib/config'
 
 const QUICK_SEARCHES = ['smartphone', 'cotton shirt', 'steel plates', 'laptop', 'tyre', 'battery', 'furniture', 'coffee']
 
@@ -21,7 +22,7 @@ export default function HSCodesPage() {
         setLoading(true)
         setApiError('')
         try {
-            const res = await fetch(`/api/references/commodities/search?q=${encodeURIComponent(term.trim())}`)
+            const res = await apiFetch(`/api/references/commodities/search?q=${encodeURIComponent(term.trim())}`)
             if (!res.ok) {
                 setApiError('Classification service temporarily unavailable.')
                 setResults([])
