@@ -166,7 +166,28 @@ export default function ForwarderDirectoryPage() {
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {[...Array(8)].map((_, i) => (
-                            <div key={i} className="h-36 bg-white/[0.02] border border-white/[0.04] rounded-2xl animate-pulse" />
+                            <div key={i} className="bg-white/[0.02] border border-white/[0.04] rounded-2xl p-5 flex flex-col gap-4">
+                                {/* avatar + badge row */}
+                                <div className="flex items-start justify-between">
+                                    <div className="w-10 h-10 rounded-xl bg-white/[0.06] animate-pulse" />
+                                    <div className="w-20 h-5 rounded-lg bg-white/[0.04] animate-pulse" />
+                                </div>
+                                {/* name + sub */}
+                                <div className="space-y-2">
+                                    <div className="h-4 w-3/4 rounded-lg bg-white/[0.06] animate-pulse" />
+                                    <div className="h-3 w-1/2 rounded-lg bg-white/[0.04] animate-pulse" />
+                                </div>
+                                {/* tags */}
+                                <div className="flex gap-2">
+                                    <div className="h-4 w-16 rounded-md bg-white/[0.03] animate-pulse" />
+                                    <div className="h-4 w-12 rounded-md bg-white/[0.03] animate-pulse" />
+                                </div>
+                                {/* footer */}
+                                <div className="pt-3 border-t border-white/[0.04] flex justify-between">
+                                    <div className="h-3 w-20 rounded-lg bg-white/[0.04] animate-pulse" />
+                                    <div className="h-3 w-3 rounded bg-white/[0.04] animate-pulse" />
+                                </div>
+                            </div>
                         ))}
                     </div>
                 ) : filtered.length === 0 ? (
@@ -236,9 +257,9 @@ function PartnerCard({ fwd, index, onClick }: { fwd: Forwarder; index: number; o
 
     return (
         <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: Math.min(index * 0.04, 0.3) }}
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: Math.min(index * 0.06, 0.4), duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onClick={onClick}
             className="w-full bg-white/[0.02] border border-white/[0.06] hover:border-white/20 hover:bg-white/[0.04] rounded-2xl p-5 flex flex-col gap-4 transition-all text-left group"
         >
