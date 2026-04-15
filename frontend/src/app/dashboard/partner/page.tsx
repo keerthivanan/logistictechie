@@ -134,7 +134,7 @@ export default function PartnerDashboard() {
             {/* Header */}
             <div className="flex items-center justify-between flex-shrink-0 border-b border-white/5 pb-4">
                 <div>
-                    <h1 className="text-lg font-bold text-white tracking-tight">{companyName || user?.name}</h1>
+                    <h1 className="text-lg font-bold font-outfit text-white tracking-tight">{companyName || user?.name}</h1>
                     <div className="flex items-center gap-3 mt-0.5">
                         <span className="text-xs font-mono text-zinc-500">{user?.sovereign_id}</span>
                         <span className="w-1 h-1 rounded-full bg-zinc-700" />
@@ -147,14 +147,14 @@ export default function PartnerDashboard() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-3 flex-shrink-0">
+            <div className="grid grid-cols-4 gap-4 flex-shrink-0">
                 {[
                     { label: t('partner.metrics.total'), value: metrics?.total_quotes_submitted ?? 0, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/[0.07]', border: 'border-blue-500/10' },
                     { label: t('partner.metrics.active'), value: metrics?.active_bids ?? 0, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/[0.07]', border: 'border-amber-500/10' },
                     { label: t('partner.metrics.won'), value: metrics?.won_bids ?? 0, icon: TrendingUp, color: 'text-white', bg: 'bg-white/[0.05]', border: 'border-white/10' },
                     { label: t('partner.metrics.score'), value: metrics?.reliability_score ? `${metrics.reliability_score}/5` : '—', icon: Star, color: 'text-purple-400', bg: 'bg-purple-500/[0.07]', border: 'border-purple-500/10' },
                 ].map(s => (
-                    <div key={s.label} className="bg-zinc-950 border border-white/5 rounded-xl p-4 flex items-center gap-3">
+                    <div key={s.label} className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg ${s.bg} border ${s.border} flex items-center justify-center flex-shrink-0`}>
                             <s.icon className={`w-3.5 h-3.5 ${s.color}`} />
                         </div>
@@ -206,13 +206,15 @@ export default function PartnerDashboard() {
                                 <Spinner size="sm" />
                             </div>
                         ) : filtered.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center gap-3 py-16 opacity-30">
-                                <Clock className="w-8 h-8 text-zinc-600" />
-                                <div>
-                                    <p className="text-sm font-bold text-white mb-1">
+                            <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-16">
+                                <div className="w-16 h-16 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center opacity-40">
+                                    <Clock className="w-7 h-7 text-zinc-600" />
+                                </div>
+                                <div className="opacity-40">
+                                    <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">
                                         {search ? t('partner.no.results') : t('partner.no.requests')}
-                                    </p>
-                                    <p className="text-xs text-zinc-600">
+                                    </h3>
+                                    <p className="text-xs text-zinc-600 font-inter max-w-xs mx-auto">
                                         {search ? t('partner.no.results.sub') : t('partner.no.requests.sub')}
                                     </p>
                                 </div>
@@ -223,7 +225,7 @@ export default function PartnerDashboard() {
                                     <div
                                         key={q.request_id}
                                         onClick={() => router.push(`/marketplace/${q.request_id}`)}
-                                        className="p-3.5 rounded-xl border cursor-pointer transition-all group bg-black/50 border-white/5 hover:border-white/10 hover:bg-white/[0.02]"
+                                        className="p-3.5 rounded-2xl border cursor-pointer transition-all group bg-[#0a0a0a] border-white/5 hover:border-white/10 hover:bg-white/[0.03]"
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">

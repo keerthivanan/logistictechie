@@ -138,21 +138,26 @@ export default function ActivityPage() {
 
             {/* Header */}
             <div className="border-b border-white/5 pb-4 flex-shrink-0">
-                <h1 className="text-base font-semibold font-outfit tracking-tight text-white mb-0.5">
+                <h1 className="text-lg font-bold font-outfit tracking-tight text-white">
                     {t('activity.title')}
                 </h1>
-                <p className="text-xs text-zinc-600 font-inter">{t('activity.sub')}</p>
+                <p className="text-zinc-500 text-xs font-inter mt-0.5">{t('activity.sub')}</p>
             </div>
 
             {/* List */}
             <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar space-y-0 pr-1">
             {activities.length === 0 ? (
-                <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl flex flex-col items-center justify-center py-16 opacity-40">
-                    <History className="w-6 h-6 mb-3 text-zinc-600" />
-                    <p className="text-xs font-semibold uppercase tracking-widest text-zinc-600 font-inter">{t('activity.empty')}</p>
+                <div className="h-[60vh] flex flex-col items-center justify-center text-center gap-4">
+                    <div className="w-16 h-16 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-center">
+                        <History className="w-7 h-7 text-zinc-700" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-white mb-1 font-outfit uppercase tracking-tight">{t('activity.empty')}</h3>
+                        <p className="text-xs text-zinc-600 font-inter max-w-xs">{t('activity.sub')}</p>
+                    </div>
                 </div>
             ) : (
-                <div className="bg-[#0a0a0a] border border-white/[0.05] rounded-2xl divide-y divide-white/[0.04]">
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl divide-y divide-white/[0.04]">
                     {activities.map((act) => {
                         const { label, icon: Icon, color } = getAction(act.action)
                         return (
