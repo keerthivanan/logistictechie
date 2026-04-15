@@ -207,10 +207,6 @@ export default function ForwarderPortal() {
                 setBidTransitDays('');
                 setBidCurrency('USD');
                 fetchDashboardData(localStorage.getItem('cl_fwd_id'));
-                setTimeout(() => {
-                    setBidSuccess(false);
-                    setSelectedRequest(null);
-                }, 2000);
             } else {
                 const err = await res.json().catch(() => null);
                 setBidError(err?.detail || 'Failed to submit quote. Please try again.');

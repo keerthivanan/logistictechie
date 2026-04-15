@@ -379,9 +379,8 @@ function QuoteRow({ quote, rank, requestId }: { quote: Quotation; rank: number; 
                 </div>
                 <div className="flex-shrink-0 flex flex-col items-end gap-1">
                     <p className="text-sm font-semibold font-inter leading-none text-white">
-                        ${quote.total_price.toLocaleString()}
+                        {quote.currency} {Number(quote.total_price).toLocaleString()}
                     </p>
-                    <p className="text-[9px] text-zinc-600 font-inter uppercase">{quote.currency}</p>
                     {quote.conv_public_id && (
                         <Link
                             href={`/dashboard/messages/${quote.conv_public_id}`}

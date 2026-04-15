@@ -300,12 +300,25 @@ async def get_notifications(
     notifications.sort(key=lambda n: n["timestamp"], reverse=True)
     notifications = notifications[:15]
 
-    # Bell badge = unread messages only (quotes are informational, not "unread")
-    unread_msg_count = sum(1 for n in notifications if n["type"] == "NEW_MESSAGE")
+    # Bell badge = unread messages + quotes received in the last 2 hours
+    now_utc = datetime.now(timezone.utc)
+    unread_count = 0
+    for n in notifications:
+        if n["type"] == "NEW_MESSAGE":
+            unread_count += 1
+        elif n["type"] == "NEW_QUOTE":
+            try:
+                ts = datetime.fromisoformat(n["timestamp"])
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                if (now_utc - ts).total_seconds() < 7200:  # 2 hours
+                    unread_count += 1
+            except Exception:
+                pass
 
     return {
         "notifications": notifications,
-        "unread_count": unread_msg_count,
+        "unread_count": unread_count,
     }
 
 

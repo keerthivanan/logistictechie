@@ -62,6 +62,8 @@ export default function ShipmentsPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
     const [search, setSearch] = useState('')
+    const [chatLoading, setChatLoading] = useState<Record<string, boolean>>({})
+    const [chatError, setChatError] = useState<Record<string, boolean>>({})
 
     const fetchRequests = useCallback(async () => {
         try {
@@ -93,6 +95,9 @@ export default function ShipmentsPage() {
     }, [user, authLoading, router, fetchRequests])
 
     const openChat = async (quote: Quotation, req: ShipmentRequest) => {
+        const qid = quote.quotation_id
+        setChatLoading(prev => ({ ...prev, [qid]: true }))
+        setChatError(prev => ({ ...prev, [qid]: false }))
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch('/api/conversations/start', {
@@ -103,9 +108,13 @@ export default function ShipmentsPage() {
             const data = await res.json()
             if (res.ok && data.public_id) {
                 window.open(`/dashboard/messages/${data.public_id}`, '_blank')
+            } else {
+                setChatError(prev => ({ ...prev, [qid]: true }))
             }
         } catch {
-            // silently fail — user can retry
+            setChatError(prev => ({ ...prev, [qid]: true }))
+        } finally {
+            setChatLoading(prev => ({ ...prev, [qid]: false }))
         }
     }
 
@@ -349,9 +358,15 @@ export default function ShipmentsPage() {
                                                                     ) : (
                                                                         <button
                                                                             onClick={() => openChat(quote, req)}
-                                                                            className="bg-white text-black px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg"
+                                                                            disabled={chatLoading[quote.quotation_id]}
+                                                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-all active:scale-95 flex items-center gap-1.5 font-inter shadow-lg disabled:opacity-60 disabled:cursor-not-allowed ${chatError[quote.quotation_id] ? 'bg-zinc-800 text-zinc-400 border border-white/10' : 'bg-white text-black hover:bg-zinc-200'}`}
                                                                         >
-                                                                            <MessageSquare className="w-3 h-3" /> Chat
+                                                                            {chatLoading[quote.quotation_id]
+                                                                                ? <><span className="w-3 h-3 border border-zinc-500 border-t-transparent rounded-full animate-spin" /> Starting</>
+                                                                                : chatError[quote.quotation_id]
+                                                                                    ? <>Failed — Retry</>
+                                                                                    : <><MessageSquare className="w-3 h-3" /> Chat</>
+                                                                            }
                                                                         </button>
                                                                     )}
                                                                 </div>

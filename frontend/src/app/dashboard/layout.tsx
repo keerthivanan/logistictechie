@@ -14,13 +14,24 @@ import {
     Search,
     Plus,
     ShieldCheck,
-    MessageSquare
+    MessageSquare,
+    Menu,
+    X
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
+
+interface Notification {
+    type: 'NEW_QUOTE' | 'NEW_MESSAGE' | string
+    title?: string
+    body?: string
+    link?: string
+    timestamp?: string
+    time_ago?: string
+}
 
 
 export default function DashboardLayout({
@@ -32,14 +43,13 @@ export default function DashboardLayout({
     const pathname = usePathname()
     const router = useRouter()
     const { user, loading } = useAuth()
-    const [stats, setStats] = useState<any>(null)
+    const [stats, setStats] = useState<{ unread_messages_count?: number; pending_tasks_count?: number } | null>(null)
     const [unreadCount, setUnreadCount] = useState(0)
-    const [notifications, setNotifications] = useState<any[]>([])
+    const [notifications, setNotifications] = useState<Notification[]>([])
     const [notifUnread, setNotifUnread] = useState(0)
     const [searchQuery, setSearchQuery] = useState('')
-    const [sortOpen, setSortOpen] = useState(false)
-    const [filterOpen, setFilterOpen] = useState(false)
     const [notifOpen, setNotifOpen] = useState(false)
+    const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
     useEffect(() => {
         const fetchDashboardSummary = async () => {
@@ -123,7 +133,7 @@ export default function DashboardLayout({
             name: t('dash.tasks'),
             href: '/dashboard/tasks',
             icon: ClipboardList,
-            badge: stats?.pending_tasks_count > 0 ? stats.pending_tasks_count.toString() : null
+            badge: (stats?.pending_tasks_count ?? 0) > 0 ? stats!.pending_tasks_count!.toString() : null
         },
         { name: t('dash.activity'), href: '/dashboard/activity', icon: ActivityIcon },
         { name: t('dash.shipments'), href: '/dashboard/shipments', icon: Package },
@@ -271,7 +281,7 @@ export default function DashboardLayout({
             {/* Main Content Area */}
             <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
                 {/* Global Dashboard Header */}
-                <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-[40]">
+                <header className="h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-[40]">
                     <div className="flex items-center gap-8 flex-1 max-w-2xl text-zinc-500">
                         <div className="relative flex-1 group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 group-focus-within:text-white transition-colors" />
@@ -290,89 +300,20 @@ export default function DashboardLayout({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 ml-8">
-                        <div className="hidden lg:flex items-center gap-4 text-xs font-semibold text-zinc-500 uppercase tracking-widest border-r border-white/5 pr-6 relative">
-                            {/* Sort Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => {
-                                        setSortOpen(!sortOpen)
-                                        setFilterOpen(false)
-                                        setNotifOpen(false)
-                                    }}
-                                    className={`hover:text-white transition-colors ${sortOpen ? 'text-white' : ''}`}
-                                >
-                                    {t('dash.sort.by')}
-                                </button>
-                                <AnimatePresence>
-                                    {sortOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute top-full right-0 mt-4 w-48 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
-                                        >
-                                            {[t('dash.sort.newest'), t('dash.sort.oldest'), t('dash.sort.priority.high'), t('dash.sort.priority.low')].map((opt) => (
-                                                <button
-                                                    key={opt}
-                                                    onClick={() => setSortOpen(false)}
-                                                    className="w-full text-left px-4 py-2 hover:bg-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:text-white transition-all uppercase tracking-widest"
-                                                >
-                                                    {opt}
-                                                </button>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            {/* Filter Dropdown */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => {
-                                        setFilterOpen(!filterOpen)
-                                        setSortOpen(false)
-                                        setNotifOpen(false)
-                                    }}
-                                    className={`hover:text-white transition-colors ${filterOpen ? 'text-white' : ''}`}
-                                >
-                                    {t('dash.filters')}
-                                </button>
-                                <AnimatePresence>
-                                    {filterOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute top-full right-0 mt-4 w-56 bg-[#0a0a0a] border border-white/10 rounded-2xl p-2 shadow-2xl z-[60]"
-                                        >
-                                            <div className="px-4 py-2 border-b border-white/5 mb-1">
-                                                <span className="text-[11px] text-zinc-600">{t('dash.filter.status')}</span>
-                                            </div>
-                                            {[t('dash.filter.all'), t('dash.filter.transit'), t('dash.filter.pending'), t('dash.filter.critical')].map((opt) => (
-                                                <button
-                                                    key={opt}
-                                                    onClick={() => setFilterOpen(false)}
-                                                    className="w-full text-left px-4 py-2 hover:bg-white/5 rounded-xl text-[10px] font-bold text-zinc-400 hover:text-white transition-all uppercase tracking-widest"
-                                                >
-                                                    {opt}
-                                                </button>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-4 ml-8">
+                        {/* Mobile hamburger */}
+                        <button
+                            onClick={() => setMobileNavOpen(true)}
+                            className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors"
+                        >
+                            <Menu className="w-5 h-5 text-zinc-400" />
+                        </button>
 
                         <div className="flex items-center gap-4">
                             {/* Notification Popover */}
                             <div className="relative">
                                 <button
-                                    onClick={() => {
-                                        setNotifOpen(!notifOpen)
-                                        setSortOpen(false)
-                                        setFilterOpen(false)
-                                    }}
+                                    onClick={() => setNotifOpen(!notifOpen)}
                                     className={`relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors group ${notifOpen ? 'bg-white/10 text-white' : ''}`}
                                 >
                                     <Bell className={`w-5 h-5 ${notifOpen ? 'text-white' : 'text-zinc-500'} group-hover:text-white transition-colors`} />
@@ -381,8 +322,8 @@ export default function DashboardLayout({
                                             {notifUnread > 9 ? '9+' : notifUnread}
                                         </span>
                                     )}
-                                    {notifUnread === 0 && (
-                                        <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-zinc-700 rounded-full border-2 border-[#050505]" />
+                                    {notifUnread === 0 && notifications.length > 0 && (
+                                        <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-[#050505]" />
                                     )}
                                 </button>
                                 <AnimatePresence>
@@ -402,7 +343,7 @@ export default function DashboardLayout({
                                                 )}
                                             </div>
                                             <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
-                                                {notifications.length > 0 ? notifications.map((n: any, i: number) => (
+                                                {notifications.length > 0 ? notifications.map((n, i) => (
                                                     <Link
                                                         key={i}
                                                         href={n.type === 'NEW_QUOTE' ? '/dashboard/shipments' : n.link ? n.link : '/dashboard/messages'}
@@ -452,6 +393,90 @@ export default function DashboardLayout({
                     {children}
                 </main>
             </div>
+
+            {/* Mobile Nav Overlay */}
+            <AnimatePresence>
+                {mobileNavOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setMobileNavOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+                        />
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="fixed left-0 top-0 h-full w-72 bg-[#080808] border-r border-white/[0.04] z-[70] flex flex-col md:hidden"
+                        >
+                            <div className="flex items-center justify-between h-20 px-6 border-b border-white/[0.04]">
+                                <Link href="/" onClick={() => setMobileNavOpen(false)}>
+                                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-95" />
+                                </Link>
+                                <button onClick={() => setMobileNavOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
+                                    <X className="w-4 h-4 text-zinc-500" />
+                                </button>
+                            </div>
+                            <div className="flex-1 px-3 py-5 space-y-6 overflow-y-auto custom-scrollbar">
+                                <div className="space-y-0.5">
+                                    {mainNav.map((item) => {
+                                        const isActive = pathname === item.href
+                                        return (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                onClick={() => setMobileNavOpen(false)}
+                                                className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group ${isActive ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isActive ? 'bg-black/10' : 'bg-white/[0.04]'}`}>
+                                                        <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
+                                                    </div>
+                                                    <span className="text-[13px] font-semibold">{item.name}</span>
+                                                </div>
+                                                {item.badge && (
+                                                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-zinc-400'}`}>
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+                                {user?.role !== 'forwarder' && (
+                                    <div className="space-y-0.5">
+                                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">{t('dash.ecosystem')}</p>
+                                        {ecosystemNav.map((item) => {
+                                            const isActive = pathname === item.href
+                                            return (
+                                                <Link key={item.name} href={item.href} onClick={() => setMobileNavOpen(false)}
+                                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${isActive ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}>
+                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isActive ? 'bg-black/10' : 'bg-white/[0.04]'}`}>
+                                                        <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
+                                                    </div>
+                                                    <span className="text-[13px] font-semibold">{item.name}</span>
+                                                </Link>
+                                            )
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4 border-t border-white/5">
+                                <Link href="/profile" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all">
+                                    <Avatar src={user?.avatar_url} name={user?.name} size="sm" className="border-zinc-800" />
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
+                                        <p className="text-[11px] text-zinc-500 font-mono truncate">{user?.email}</p>
+                                    </div>
+                                </Link>
+                            </div>
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

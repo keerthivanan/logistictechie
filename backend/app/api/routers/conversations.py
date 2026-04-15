@@ -382,7 +382,12 @@ async def send_message(
         content=data.content,
         is_read=False,
     )
-    conv.updated_at = _utcnow()
+    _now = _utcnow()
+    conv.updated_at = _now
+    if sender_role == "SHIPPER":
+        conv.shipper_last_seen = _now
+    else:
+        conv.forwarder_last_seen = _now
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
@@ -438,7 +443,9 @@ async def send_offer(
     db.add(msg)
     conv.current_offer = data.offer_amount
     conv.offer_side = "SHIPPER"
-    conv.updated_at = _utcnow()
+    _now = _utcnow()
+    conv.updated_at = _now
+    conv.shipper_last_seen = _now
     await db.commit()
     await db.refresh(msg)
 
@@ -507,7 +514,9 @@ async def respond_offer(
         is_read=False,
     )
     db.add(msg)
-    conv.updated_at = _utcnow()
+    _now = _utcnow()
+    conv.updated_at = _now
+    conv.forwarder_last_seen = _now
     await db.commit()
     await db.refresh(msg)
 
@@ -546,7 +555,9 @@ async def accept_counter(
         is_read=False,
     )
     db.add(msg)
-    conv.updated_at = _utcnow()
+    _now = _utcnow()
+    conv.updated_at = _now
+    conv.shipper_last_seen = _now
     await db.commit()
     await db.refresh(msg)
 

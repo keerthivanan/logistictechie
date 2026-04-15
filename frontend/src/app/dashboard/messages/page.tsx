@@ -129,7 +129,7 @@ export default function MessagesPage() {
                                             }
                                         </div>
                                         {hasUnread && !isClosed && (
-                                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-1">
+                                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-white text-black text-[9px] font-semibold rounded-full flex items-center justify-center px-1 border-2 border-[#050505]">
                                                 {conv.unread_count! > 9 ? '9+' : conv.unread_count}
                                             </span>
                                         )}
