@@ -832,24 +832,38 @@ async def portal_list_conversations(
         .limit(50)
     )
     convs = res.scalars().all()
+    if not convs:
+        return {"conversations": []}
+
+    conv_ids = [c.id for c in convs]
+
+    # Batch: last message per conversation (1 query instead of N)
+    subq = (
+        select(ChatMessage.conversation_id, func.max(ChatMessage.id).label("max_id"))
+        .where(ChatMessage.conversation_id.in_(conv_ids))
+        .group_by(ChatMessage.conversation_id)
+        .subquery()
+    )
+    last_msgs_res = await db.execute(
+        select(ChatMessage).join(subq, ChatMessage.id == subq.c.max_id)
+    )
+    last_msgs = {m.conversation_id: m for m in last_msgs_res.scalars().all()}
+
+    # Batch: unread counts per conversation (1 query instead of N)
+    unread_rows = await db.execute(
+        select(ChatMessage.conversation_id, func.count(ChatMessage.id))
+        .where(
+            ChatMessage.conversation_id.in_(conv_ids),
+            ChatMessage.sender_role == "SHIPPER",
+            ChatMessage.is_read == False,  # noqa: E712
+        )
+        .group_by(ChatMessage.conversation_id)
+    )
+    unread_map = {row[0]: row[1] for row in unread_rows.all()}
+
     result = []
     for conv in convs:
-        last_msg_res = await db.execute(
-            select(ChatMessage)
-            .where(ChatMessage.conversation_id == conv.id)
-            .order_by(ChatMessage.created_at.desc())
-            .limit(1)
-        )
-        last_msg = last_msg_res.scalars().first()
-        unread_res = await db.execute(
-            select(func.count(ChatMessage.id))
-            .where(
-                ChatMessage.conversation_id == conv.id,
-                ChatMessage.sender_role == "SHIPPER",
-                ChatMessage.is_read == False,  # noqa: E712
-            )
-        )
-        unread = unread_res.scalar() or 0
+        last_msg = last_msgs.get(conv.id)
         result.append({
             "public_id": conv.public_id,
             "request_id": conv.request_id,
@@ -863,7 +877,7 @@ async def portal_list_conversations(
             "offer_side": conv.offer_side,
             "shipper_book_req": conv.shipper_book_req,
             "forwarder_book_req": conv.forwarder_book_req,
-            "unread_count": unread,
+            "unread_count": unread_map.get(conv.id, 0),
             "updated_at": conv.updated_at.isoformat() if conv.updated_at else None,
             "last_message": {
                 "content": last_msg.content,
@@ -891,7 +905,7 @@ async def portal_get_messages(
 
     # Mark shipper messages as read
     msgs_res = await db.execute(
-        select(ChatMessage).where(ChatMessage.conversation_id == conv.id).order_by(ChatMessage.created_at.asc())
+        select(ChatMessage).where(ChatMessage.conversation_id == conv.id).order_by(ChatMessage.created_at.asc()).limit(500)
     )
     msgs = msgs_res.scalars().all()
     for m in msgs:
