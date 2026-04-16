@@ -13,5 +13,4 @@ from .activity import UserActivity
 from .task import Task
 from .booking import Booking
 from .conversation import Conversation, ChatMessage
-
-
+from .forwarder_network import F2FRequest, F2FQuote, F2FConversation, F2FMessage

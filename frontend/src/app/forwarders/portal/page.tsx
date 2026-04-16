@@ -5,7 +5,7 @@ import {
     ArrowRight, Loader2, Package,
     TrendingUp, CheckCircle2, Clock,
     DollarSign, Ship, Truck, Info,
-    BarChart3, MessageSquare
+    BarChart3, MessageSquare, Globe, Plus, X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/config';
@@ -31,9 +31,32 @@ export default function ForwarderPortal() {
     const [bidSuccess, setBidSuccess] = useState(false);
     const [bidError, setBidError] = useState('');
 
-    const [activeTab, setActiveTab] = useState<'requests' | 'conversations'>('requests');
+    const [activeTab, setActiveTab] = useState<'requests' | 'conversations' | 'network'>('requests');
     const [conversations, setConversations] = useState<any[]>([]);
     const [convLoading, setConvLoading] = useState(false);
+
+    // ── F2F Network state ──────────────────────────────────────────────────
+    const [f2fTab, setF2fTab] = useState<'browse' | 'my-posts' | 'f2f-chats'>('browse');
+    const [f2fBrowse, setF2fBrowse] = useState<any[]>([]);
+    const [myF2fPosts, setMyF2fPosts] = useState<any[]>([]);
+    const [f2fConvs, setF2fConvs] = useState<any[]>([]);
+    const [f2fLoading, setF2fLoading] = useState(false);
+    const [showPostForm, setShowPostForm] = useState(false);
+    const [postOrigin, setPostOrigin] = useState('');
+    const [postDest, setPostDest] = useState('');
+    const [postCargoType, setPostCargoType] = useState('FCL');
+    const [postCommodity, setPostCommodity] = useState('');
+    const [postWeight, setPostWeight] = useState('');
+    const [postNotes, setPostNotes] = useState('');
+    const [posting, setPosting] = useState(false);
+    const [postSuccess, setPostSuccess] = useState(false);
+    const [selectedF2f, setSelectedF2f] = useState<any>(null);
+    const [f2fPrice, setF2fPrice] = useState('');
+    const [f2fCurrency, setF2fCurrency] = useState('USD');
+    const [f2fTransitDays, setF2fTransitDays] = useState('');
+    const [f2fNotes, setF2fNotes] = useState('');
+    const [submittingF2fQuote, setSubmittingF2fQuote] = useState(false);
+    const [f2fQuoteSuccess, setF2fQuoteSuccess] = useState(false);
 
     const [cvAmount, setCvAmount] = useState('');
     const [cvFrom, setCvFrom] = useState('USD');
@@ -41,12 +64,16 @@ export default function ForwarderPortal() {
     const [cvResult, setCvResult] = useState<string | null>(null);
     const [cvLoading, setCvLoading] = useState(false);
 
-    const switchTab = (tab: 'requests' | 'conversations') => {
+    const switchTab = (tab: 'requests' | 'conversations' | 'network') => {
         setActiveTab(tab);
-        if (tab === 'conversations') {
-            const id = localStorage.getItem('cl_fwd_id');
-            const mail = localStorage.getItem('cl_fwd_email');
-            if (id && mail) fetchConversations(id, mail);
+        const id = localStorage.getItem('cl_fwd_id');
+        const mail = localStorage.getItem('cl_fwd_email');
+        if (!id || !mail) return;
+        if (tab === 'conversations') fetchConversations(id, mail);
+        if (tab === 'network') {
+            setF2fLoading(true);
+            Promise.all([fetchF2fBrowse(id, mail), fetchMyF2fPosts(id, mail), fetchF2fConvs(id, mail)])
+                .finally(() => setF2fLoading(false));
         }
     };
 
@@ -67,6 +94,91 @@ export default function ForwarderPortal() {
             setConvLoading(false);
         }
     }, []);
+
+    const fetchF2fBrowse = useCallback(async (id: string, mail: string) => {
+        try {
+            const res = await apiFetch('/api/f2f/requests', { headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail } });
+            if (res.ok) { const d = await res.json(); setF2fBrowse(d.requests || []); }
+        } catch { /* silent */ }
+    }, []);
+
+    const fetchMyF2fPosts = useCallback(async (id: string, mail: string) => {
+        try {
+            const res = await apiFetch('/api/f2f/my-requests', { headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail } });
+            if (res.ok) { const d = await res.json(); setMyF2fPosts(d.requests || []); }
+        } catch { /* silent */ }
+    }, []);
+
+    const fetchF2fConvs = useCallback(async (id: string, mail: string) => {
+        try {
+            const res = await apiFetch('/api/f2f/conversations', { headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail } });
+            if (res.ok) { const d = await res.json(); setF2fConvs(d.conversations || []); }
+        } catch { /* silent */ }
+    }, []);
+
+    const submitF2fPost = async () => {
+        if (!postOrigin || !postDest || posting) return;
+        const id = localStorage.getItem('cl_fwd_id') || '';
+        const mail = localStorage.getItem('cl_fwd_email') || '';
+        setPosting(true);
+        try {
+            const res = await apiFetch('/api/f2f/requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
+                body: JSON.stringify({
+                    origin: postOrigin, destination: postDest, cargo_type: postCargoType,
+                    commodity: postCommodity || undefined, weight_kg: postWeight ? parseFloat(postWeight) : undefined,
+                    notes: postNotes || undefined,
+                }),
+            });
+            if (res.ok) {
+                setPostSuccess(true);
+                setPostOrigin(''); setPostDest(''); setPostCommodity(''); setPostWeight(''); setPostNotes('');
+                await fetchMyF2fPosts(id, mail);
+                setTimeout(() => { setPostSuccess(false); setShowPostForm(false); }, 2000);
+            }
+        } catch { /* silent */ } finally { setPosting(false); }
+    };
+
+    const submitF2fQuote = async () => {
+        if (!selectedF2f || !f2fPrice || submittingF2fQuote) return;
+        const id = localStorage.getItem('cl_fwd_id') || '';
+        const mail = localStorage.getItem('cl_fwd_email') || '';
+        setSubmittingF2fQuote(true);
+        try {
+            const res = await apiFetch(`/api/f2f/requests/${selectedF2f.public_id}/quote`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
+                body: JSON.stringify({
+                    price: parseFloat(f2fPrice), currency: f2fCurrency,
+                    transit_days: f2fTransitDays ? parseInt(f2fTransitDays) : undefined,
+                    notes: f2fNotes || undefined,
+                }),
+            });
+            if (res.ok) {
+                setF2fQuoteSuccess(true);
+                setF2fPrice(''); setF2fTransitDays(''); setF2fNotes('');
+                await fetchF2fBrowse(id, mail);
+                setTimeout(() => { setF2fQuoteSuccess(false); setSelectedF2f(null); }, 2000);
+            }
+        } catch { /* silent */ } finally { setSubmittingF2fQuote(false); }
+    };
+
+    const acceptF2fQuote = async (requestPublicId: string, quoteId: number) => {
+        const id = localStorage.getItem('cl_fwd_id') || '';
+        const mail = localStorage.getItem('cl_fwd_email') || '';
+        const res = await apiFetch(`/api/f2f/requests/${requestPublicId}/accept/${quoteId}`, {
+            method: 'POST',
+            headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
+        });
+        if (res.ok) {
+            const d = await res.json();
+            await fetchMyF2fPosts(id, mail);
+            await fetchF2fConvs(id, mail);
+            setF2fTab('f2f-chats');
+            if (d.conv_public_id) window.location.href = `/forwarders/f2f-chat/${d.conv_public_id}`;
+        }
+    };
 
     const fetchDashboardData = useCallback(async (id: string | null) => {
         if (!id) return;
@@ -152,6 +264,19 @@ export default function ForwarderPortal() {
         const iv = setInterval(() => fetchConversations(id, mail), 10000);
         return () => clearInterval(iv);
     }, [isAuthenticated, activeTab, fetchConversations]);
+
+    // Poll F2F network tab every 15s
+    useEffect(() => {
+        if (!isAuthenticated || activeTab !== 'network') return;
+        const id = localStorage.getItem('cl_fwd_id');
+        const mail = localStorage.getItem('cl_fwd_email');
+        if (!id || !mail) return;
+        const iv = setInterval(() => {
+            fetchF2fBrowse(id, mail);
+            fetchF2fConvs(id, mail);
+        }, 15000);
+        return () => clearInterval(iv);
+    }, [isAuthenticated, activeTab, fetchF2fBrowse, fetchF2fConvs]);
 
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -288,6 +413,7 @@ export default function ForwarderPortal() {
     const tabLabels: Record<string, string> = {
         requests: t('portal.tab.requests'),
         conversations: t('portal.tab.messages'),
+        network: 'F2F Network',
     };
 
     return (
@@ -313,24 +439,323 @@ export default function ForwarderPortal() {
 
                 {/* Tab bar */}
                 <div className="flex gap-1 bg-white/[0.03] border border-white/5 rounded-xl p-1 flex-shrink-0">
-                    {(['requests', 'conversations'] as const).map((tab) => {
+                    {(['requests', 'conversations', 'network'] as const).map((tab) => {
                         const hasUnread = tab === 'conversations' && conversations.some((c: any) => c.unread_count > 0);
+                        const hasF2fUnread = tab === 'network' && f2fConvs.some((c: any) => c.unread_count > 0);
                         return (
                             <button
                                 key={tab}
                                 onClick={() => switchTab(tab)}
-                                className={`flex-1 relative py-2 px-4 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${
+                                className={`flex-1 relative py-2 px-3 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${
                                     activeTab === tab ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'
                                 }`}
                             >
                                 {tabLabels[tab]}
-                                {hasUnread && (
+                                {(hasUnread || hasF2fUnread) && (
                                     <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
                                 )}
                             </button>
                         );
                     })}
                 </div>
+
+                {/* ── F2F Network tab ─────────────────────────────────────────── */}
+                {activeTab === 'network' && (
+                    <div className="flex-1 flex flex-col min-h-0 gap-3">
+
+                        {/* Sub-tab bar */}
+                        <div className="flex gap-1 bg-white/[0.02] border border-white/5 rounded-xl p-1 flex-shrink-0">
+                            {(['browse', 'my-posts', 'f2f-chats'] as const).map(st => (
+                                <button key={st} onClick={() => setF2fTab(st)}
+                                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${f2fTab === st ? 'bg-white/10 text-white' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                                    {st === 'browse' ? 'Browse' : st === 'my-posts' ? 'My Posts' : 'Messages'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Browse — open F2F requests from other forwarders */}
+                        {f2fTab === 'browse' && (
+                            <div className="flex-1 flex gap-4 min-h-0">
+                                {/* Left: request list */}
+                                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+                                    <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
+                                        <div className="flex items-center gap-2">
+                                            <Globe className="w-3.5 h-3.5 text-zinc-600" />
+                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Open F2F Requests</span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">{f2fBrowse.length} open</span>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                                        {f2fLoading ? (
+                                            <div className="h-full flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin text-zinc-700" /></div>
+                                        ) : f2fBrowse.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
+                                                <Globe className="w-8 h-8 text-zinc-600" />
+                                                <p className="text-sm font-bold text-white">No open requests</p>
+                                                <p className="text-xs text-zinc-600">Other forwarders&apos; requests appear here</p>
+                                            </div>
+                                        ) : f2fBrowse.map((r: any) => (
+                                            <div key={r.public_id} onClick={() => { setSelectedF2f(r); setF2fQuoteSuccess(false); }}
+                                                className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedF2f?.public_id === r.public_id ? 'bg-white/[0.04] border-white/20' : 'bg-black border-white/5 hover:border-white/10'}`}>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-bold text-white">{r.origin}</span>
+                                                        <ArrowRight className="w-3 h-3 text-zinc-600" />
+                                                        <span className="text-sm font-bold text-white">{r.destination}</span>
+                                                    </div>
+                                                    <span className="text-[9px] font-bold bg-white/5 text-zinc-500 px-2 py-0.5 rounded-full uppercase">{r.cargo_type}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] text-zinc-600">{r.posted_by_company}</span>
+                                                    {r.already_quoted
+                                                        ? <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-wider">Quoted</span>
+                                                        : <span className="text-[9px] text-zinc-600">{r.quote_count} quote{r.quote_count !== 1 ? 's' : ''}</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Right: quote form */}
+                                <div className="w-72 flex-shrink-0 bg-[#0a0a0a] border border-white/5 rounded-2xl p-5 flex flex-col">
+                                    {!selectedF2f ? (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 opacity-25">
+                                            <CheckCircle2 className="w-8 h-8 text-zinc-600" />
+                                            <p className="text-xs text-zinc-500">Select a request to quote</p>
+                                        </div>
+                                    ) : f2fQuoteSuccess ? (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/20 flex items-center justify-center">
+                                                <CheckCircle2 className="w-6 h-6 text-white" />
+                                            </div>
+                                            <p className="text-sm font-bold text-white">Quote Submitted!</p>
+                                            <p className="text-xs text-zinc-500">The forwarder will review your quote.</p>
+                                        </div>
+                                    ) : selectedF2f.already_quoted ? (
+                                        <div className="flex-1 flex flex-col items-center justify-center text-center gap-3 opacity-60">
+                                            <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                                            <p className="text-sm font-bold text-white">Already Quoted</p>
+                                            <p className="text-xs text-zinc-500">You&apos;ve already submitted a quote for this request.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-4 h-full">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Submit Quote</span>
+                                                <button onClick={() => setSelectedF2f(null)} className="text-zinc-700 hover:text-white transition-colors"><X className="w-3.5 h-3.5" /></button>
+                                            </div>
+                                            <div className="bg-black border border-white/5 rounded-xl p-3">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-white mb-1">
+                                                    <span>{selectedF2f.origin}</span><ArrowRight className="w-3 h-3 text-zinc-600" /><span>{selectedF2f.destination}</span>
+                                                </div>
+                                                <span className="text-[10px] text-zinc-600">{selectedF2f.posted_by_company} · {selectedF2f.cargo_type}</span>
+                                            </div>
+                                            <div className="flex-1 flex flex-col gap-3">
+                                                <div className="flex gap-2">
+                                                    <div className="w-20">
+                                                        <label className="block text-[10px] text-zinc-500 mb-1">Currency</label>
+                                                        <select value={f2fCurrency} onChange={e => setF2fCurrency(e.target.value)}
+                                                            className="w-full bg-black border border-white/5 rounded-xl px-2 py-2.5 text-xs text-white outline-none">
+                                                            {['USD','EUR','SAR','AED','GBP'].map(c => <option key={c} value={c}>{c}</option>)}
+                                                        </select>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="block text-[10px] text-zinc-500 mb-1">Your Price</label>
+                                                        <div className="relative">
+                                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" />
+                                                            <input type="number" placeholder="0.00" value={f2fPrice} onChange={e => setF2fPrice(e.target.value)}
+                                                                className="w-full bg-black border border-white/5 rounded-xl pl-8 pr-3 py-2.5 text-sm font-bold text-white placeholder-zinc-800 outline-none focus:border-white/20 font-mono" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Transit Days</label>
+                                                    <input type="number" placeholder="e.g. 14" value={f2fTransitDays} onChange={e => setF2fTransitDays(e.target.value)}
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20 font-mono" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Notes (optional)</label>
+                                                    <textarea value={f2fNotes} onChange={e => setF2fNotes(e.target.value)} rows={2} placeholder="Routing, inclusions..."
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white placeholder-zinc-700 outline-none focus:border-white/20 resize-none" />
+                                                </div>
+                                                <button onClick={submitF2fQuote} disabled={!f2fPrice || submittingF2fQuote}
+                                                    className="w-full bg-white text-black font-bold text-xs py-3 rounded-xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
+                                                    {submittingF2fQuote ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Submit Quote <ArrowRight className="w-3.5 h-3.5" /></>}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* My Posts — my posted F2F requests + incoming quotes */}
+                        {f2fTab === 'my-posts' && (
+                            <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+                                <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <Package className="w-3.5 h-3.5 text-zinc-600" />
+                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">My Posted Requests</span>
+                                    </div>
+                                    <button onClick={() => setShowPostForm(v => !v)}
+                                        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-white text-black px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-all">
+                                        <Plus className="w-3 h-3" /> Post Request
+                                    </button>
+                                </div>
+
+                                {/* Inline post form */}
+                                {showPostForm && (
+                                    <div className="border-b border-white/5 px-5 py-4 bg-white/[0.02]">
+                                        {postSuccess ? (
+                                            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                                                <CheckCircle2 className="w-4 h-4" /> Request posted! Other forwarders will be notified.
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Origin</label>
+                                                    <input value={postOrigin} onChange={e => setPostOrigin(e.target.value)} placeholder="e.g. Shanghai"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Destination</label>
+                                                    <input value={postDest} onChange={e => setPostDest(e.target.value)} placeholder="e.g. Riyadh"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Mode</label>
+                                                    <select value={postCargoType} onChange={e => setPostCargoType(e.target.value)}
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white outline-none">
+                                                        {['FCL','LCL','AIR','ROAD'].map(m => <option key={m} value={m}>{m}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Commodity</label>
+                                                    <input value={postCommodity} onChange={e => setPostCommodity(e.target.value)} placeholder="e.g. Electronics"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Weight (kg)</label>
+                                                    <input type="number" value={postWeight} onChange={e => setPostWeight(e.target.value)} placeholder="e.g. 5000"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20 font-mono" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] text-zinc-500 mb-1">Notes</label>
+                                                    <input value={postNotes} onChange={e => setPostNotes(e.target.value)} placeholder="Any special requirements"
+                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
+                                                </div>
+                                                <div className="col-span-2 flex gap-2 justify-end">
+                                                    <button onClick={() => setShowPostForm(false)} className="text-[10px] text-zinc-600 hover:text-white transition-colors px-3 py-2">Cancel</button>
+                                                    <button onClick={submitF2fPost} disabled={!postOrigin || !postDest || posting}
+                                                        className="bg-white text-black text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl hover:bg-zinc-100 transition-all disabled:opacity-30 flex items-center gap-1.5">
+                                                        {posting ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Plus className="w-3 h-3" /> Post</>}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                                    {myF2fPosts.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
+                                            <Plus className="w-8 h-8 text-zinc-600" />
+                                            <p className="text-sm font-bold text-white">No requests yet</p>
+                                            <p className="text-xs text-zinc-600">Post a request to get quotes from other forwarders</p>
+                                        </div>
+                                    ) : myF2fPosts.map((r: any) => (
+                                        <div key={r.public_id} className="bg-black border border-white/5 rounded-xl p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold text-white">{r.origin}</span>
+                                                    <ArrowRight className="w-3 h-3 text-zinc-600" />
+                                                    <span className="text-sm font-bold text-white">{r.destination}</span>
+                                                    <span className="text-[9px] bg-white/5 text-zinc-500 px-2 py-0.5 rounded-full uppercase">{r.cargo_type}</span>
+                                                </div>
+                                                <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                                    r.status === 'MATCHED' ? 'bg-emerald-500/10 text-emerald-400'
+                                                    : r.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500'
+                                                    : 'bg-white/5 text-zinc-400'}`}>{r.status}</span>
+                                            </div>
+                                            {r.quotes.length === 0 ? (
+                                                <p className="text-xs text-zinc-600">No quotes yet. Forwarders have been notified.</p>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">{r.quotes.length} Quote{r.quotes.length !== 1 ? 's' : ''} Received</p>
+                                                    {r.quotes.map((q: any) => (
+                                                        <div key={q.id} className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2.5">
+                                                            <div>
+                                                                <p className="text-xs font-bold text-white">{q.company_name}</p>
+                                                                {q.transit_days && <p className="text-[10px] text-zinc-600">{q.transit_days} days transit</p>}
+                                                                {q.notes && <p className="text-[10px] text-zinc-600 truncate max-w-[200px]">{q.notes}</p>}
+                                                            </div>
+                                                            <div className="text-right flex items-center gap-3">
+                                                                <div>
+                                                                    <p className="text-sm font-bold font-mono text-white">{q.currency} {Number(q.price).toLocaleString()}</p>
+                                                                    <p className={`text-[9px] font-bold uppercase ${q.status === 'ACCEPTED' ? 'text-emerald-400' : q.status === 'REJECTED' ? 'text-zinc-600' : 'text-zinc-500'}`}>{q.status}</p>
+                                                                </div>
+                                                                {r.status === 'OPEN' && q.status === 'PENDING' && (
+                                                                    <button onClick={() => acceptF2fQuote(r.public_id, q.id)}
+                                                                        className="text-[10px] font-bold bg-white text-black px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-all">
+                                                                        Accept
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* F2F Chats */}
+                        {f2fTab === 'f2f-chats' && (
+                            <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
+                                <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        <MessageSquare className="w-3.5 h-3.5 text-zinc-600" />
+                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">F2F Conversations</span>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">{f2fConvs.length}</span>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                                    {f2fConvs.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
+                                            <MessageSquare className="w-8 h-8 text-zinc-600" />
+                                            <p className="text-sm font-bold text-white">No F2F conversations</p>
+                                            <p className="text-xs text-zinc-600">Accept a quote to start a negotiation</p>
+                                        </div>
+                                    ) : f2fConvs.map((c: any) => (
+                                        <a key={c.public_id} href={`/forwarders/f2f-chat/${c.public_id}`}
+                                            className="block p-4 rounded-xl border bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-white">{c.other_company}</span>
+                                                    <span className="text-[9px] text-zinc-600 bg-amber-500/10 text-amber-400/70 px-1.5 py-0.5 rounded font-medium">{c.my_role}</span>
+                                                    {c.unread_count > 0 && (
+                                                        <span className="text-[9px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{c.unread_count}</span>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                                                    c.status === 'CONFIRMED' ? 'bg-emerald-500/10 text-emerald-400'
+                                                    : c.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500'
+                                                    : 'bg-white/5 text-zinc-500'}`}>{c.status}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs text-zinc-500 truncate max-w-[180px]">{c.last_message?.content || 'No messages yet'}</p>
+                                                {c.agreed_price && (
+                                                    <p className="text-sm font-bold font-mono text-white flex-shrink-0 ml-3">{c.currency} {Number(c.agreed_price).toLocaleString()}</p>
+                                                )}
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Conversations tab */}
                 {activeTab === 'conversations' && (

@@ -23,6 +23,7 @@ const WORKFLOWS_TO_DEPLOY = [
   'WF_BID_CONFIRM.json',
   'WF_PASSWORD_RESET.json',
   'WF_WELCOME.json',
+  'WF_F2F_BROADCAST.json',
 ];
 
 const PLAN_DIR = path.join(__dirname, 'n8n_plan');

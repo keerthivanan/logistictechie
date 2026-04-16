@@ -164,4 +164,17 @@ class WebhookService:
             "BID_CONFIRMATION"
         )
 
+    async def trigger_f2f_broadcast(self, payload: dict):
+        """
+        Fires when a forwarder posts an F2F request.
+        n8n WF_F2F_BROADCAST sends an email to all other active forwarders via quote@.
+        Payload keys: request_public_id, posted_by_company, origin, destination,
+                      cargo_type, commodity, weight_kg, notes, recipients (list of {email, company})
+        """
+        return await self._trigger(
+            os.getenv("N8N_F2F_BROADCAST_WEBHOOK"),
+            payload,
+            "F2F_BROADCAST"
+        )
+
 webhook_service = WebhookService()
