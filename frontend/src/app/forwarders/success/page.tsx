@@ -52,7 +52,7 @@ export default function PartnerSuccessPage() {
 
                         <h1 className="text-4xl font-bold font-outfit uppercase tracking-tight mb-4">Welcome Aboard</h1>
 
-                        <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full mb-8 text-left">
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 w-full mb-8 text-left">
                             <p className="text-zinc-400 font-inter text-sm mb-2 uppercase tracking-widest font-bold text-[10px]">Your Partner ID</p>
                             <p className="text-2xl font-mono text-white font-bold">{user?.sovereign_id}</p>
                             <div className="h-px bg-white/5 my-4" />
@@ -82,7 +82,7 @@ export default function PartnerSuccessPage() {
 
                         <h1 className="text-4xl font-bold font-outfit uppercase tracking-tight mb-4">Application Submitted</h1>
 
-                        <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full mb-8 text-left">
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 w-full mb-8 text-left">
                             <p className="text-zinc-400 font-inter text-sm leading-relaxed">
                                 Your forwarder application has been received. Our team will review your credentials and notify you by email within 1–2 business days.
                             </p>

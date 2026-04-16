@@ -19,7 +19,7 @@ export default function ContactPage() {
         {
             icon: Mail,
             label: t('contact.email.label'),
-            lines: ['support@cargolink.sa', 'quotes@cargolink.sa'],
+            lines: ['support@cargolink.sa', 'quote@cargolink.sa'],
             sub: null,
         },
     ]

@@ -86,7 +86,7 @@ export default function GlobalNetworkMap() {
                 >
                     <div className="absolute -inset-2 bg-blue-500/30 rounded-full animate-ping"></div>
                     {/* Tooltip on Hover */}
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 border border-white/10 px-2 py-1 rounded text-[10px] text-gray-300 pointer-events-none whitespace-nowrap">
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 border border-white/10 px-2 py-1 rounded text-[10px] text-zinc-300 pointer-events-none whitespace-nowrap">
                         {loc.name}
                     </div>
                 </motion.div>

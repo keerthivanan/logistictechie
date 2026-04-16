@@ -263,11 +263,11 @@ export default function ServicePage() {
             <section className="py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('service.upgrade.title')}</h2>
-                    <p className="text-xl text-gray-400 mb-10">
+                    <p className="text-xl text-zinc-400 mb-10">
                         {t('service.upgrade.sub')}
                     </p>
                     <div className="flex justify-center gap-4">
-                        <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-all">
+                        <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-all">
                             {t('service.upgrade.cta1')}
                         </Link>
                         <Link href="/contact" className="px-8 py-4 bg-transparent border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-all">

@@ -79,7 +79,7 @@ export default function AiChatVisual() {
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/50">
                 <div className="flex items-center gap-2">
                     <Bot className="w-5 h-5 text-zinc-400" />
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{t('ai.header')}</span>
+                    <span className="text-xs font-bold text-zinc-300 uppercase tracking-widest">{t('ai.header')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
@@ -103,7 +103,7 @@ export default function AiChatVisual() {
                             px-4 py-3 rounded-2xl max-w-[85%] text-sm leading-relaxed
                             ${m.role === 'user'
                                 ? 'bg-zinc-800 text-white rounded-tr-sm border border-white/5'
-                                : 'bg-black/80 text-gray-200 rounded-tl-sm border border-white/10 shadow-xl'
+                                : 'bg-black/80 text-zinc-200 rounded-tl-sm border border-white/10 shadow-xl'
                             }
                         `}>
                             {m.role === 'assistant' && i === messages.length - 1 && loading && (
@@ -121,7 +121,7 @@ export default function AiChatVisual() {
                         </div>
                         {m.role === 'user' && (
                             <div className="ml-3 w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0 border border-white/10">
-                                <User className="w-4 h-4 text-gray-400" />
+                                <User className="w-4 h-4 text-zinc-400" />
                             </div>
                         )}
                     </div>
@@ -141,7 +141,7 @@ export default function AiChatVisual() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-white text-black p-2 rounded-xl hover:bg-gray-200 transition-all disabled:opacity-50"
+                    className="bg-white text-black p-2 rounded-xl hover:bg-zinc-200 transition-all disabled:opacity-50"
                 >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </button>
