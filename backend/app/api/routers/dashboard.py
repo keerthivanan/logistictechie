@@ -262,8 +262,8 @@ async def get_notifications(
         # ── 2. New quotes on user's requests (last 48h) ───────────────────────
         if current_user.role != "forwarder":
             from app.models.marketplace import MarketplaceRequest
-            from datetime import datetime as _dt
-            cutoff = _dt.utcnow() - timedelta(hours=48)
+            from datetime import datetime as _dt, timezone as _tz
+            cutoff = (_dt.now(_tz.utc) - timedelta(hours=48)).replace(tzinfo=None)
             # Get the user's request IDs
             req_ids_res = await db.execute(
                 select(MarketplaceRequest.request_id)
