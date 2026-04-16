@@ -897,7 +897,7 @@ async def portal_get_messages(
     for m in msgs:
         if m.sender_role == "SHIPPER" and not m.is_read:
             m.is_read = True
-    conv.forwarder_last_seen = datetime.utcnow()
+    conv.forwarder_last_seen = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
 
     return {
@@ -959,7 +959,7 @@ async def portal_send_message(
         content=data.content,
         is_read=False,
     )
-    conv.updated_at = datetime.utcnow()
+    conv.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
     db.add(msg)
     await db.commit()
     await db.refresh(msg)
@@ -1026,7 +1026,7 @@ async def portal_respond_offer(
         is_read=False,
     )
     db.add(msg)
-    conv.updated_at = datetime.utcnow()
+    conv.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
     await db.refresh(msg)
     return {"id": msg.id, "message_type": msg.message_type, "content": msg.content}
@@ -1115,7 +1115,7 @@ async def portal_confirm_booking(
                 is_read=False,
             ))
 
-        conv.updated_at = datetime.utcnow()
+        conv.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
         await db.commit()
 
         if shipper and req:
@@ -1141,7 +1141,7 @@ async def portal_confirm_booking(
         conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
         message_type="SYSTEM", content="Forwarder confirmed — waiting for shipper to lock the deal.", is_read=False,
     ))
-    conv.updated_at = datetime.utcnow()
+    conv.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
     return {"success": True, "status": "waiting_for_shipper"}
 
@@ -1174,6 +1174,6 @@ async def portal_close_conversation(
             conversation_id=conv.id, sender_role="SYSTEM", sender_id="SYSTEM",
             message_type="SYSTEM", content="Forwarder requested to close — waiting for shipper.", is_read=False,
         ))
-    conv.updated_at = datetime.utcnow()
+    conv.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
     return {"success": True, "status": conv.status}
