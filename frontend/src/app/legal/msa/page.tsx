@@ -68,7 +68,7 @@ export default function MSAPage() {
                         <p className="text-xs text-zinc-500 font-inter">Contact our team to receive the full executed MSA document.</p>
                     </div>
                     <a
-                        href="mailto:legal@cargolink.sa?subject=MSA Request"
+                        href="mailto:osama@cargolink.sa?subject=MSA Request"
                         className="bg-white text-black px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest font-inter hover:bg-zinc-100 transition-colors flex-shrink-0"
                     >
                         Request Document
@@ -92,7 +92,7 @@ export default function MSAPage() {
 
                 <p className="text-xs text-zinc-700 font-inter text-center mt-8">
                     Legal inquiries:{' '}
-                    <a href="mailto:legal@cargolink.sa" className="text-zinc-500 hover:text-white transition-colors underline">legal@cargolink.sa</a>
+                    <a href="mailto:osama@cargolink.sa" className="text-zinc-500 hover:text-white transition-colors underline">osama@cargolink.sa</a>
                 </p>
             </div>
         </div>

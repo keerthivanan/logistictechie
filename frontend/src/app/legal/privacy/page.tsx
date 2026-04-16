@@ -47,7 +47,7 @@ export default function PrivacyPage() {
 
                 <p className="text-xs text-zinc-700 font-inter text-center mt-8">
                     {t('legal.questions')}{' '}
-                    <a href="mailto:privacy@cargolink.sa" className="text-zinc-500 hover:text-white transition-colors underline">privacy@cargolink.sa</a>
+                    <a href="mailto:osama@cargolink.sa" className="text-zinc-500 hover:text-white transition-colors underline">osama@cargolink.sa</a>
                 </p>
                 <div className="flex justify-center mt-8">
                     <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
