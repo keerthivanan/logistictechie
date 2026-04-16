@@ -56,6 +56,10 @@ class MarketplaceRequest(Base):
     closed_at = Column(DateTime, nullable=True) # Column P
     closed_reason = Column(String, nullable=True) # Column Q
     
+    # F2F: set when a forwarder posts this request (not a shipper)
+    is_f2f = Column(Boolean, default=False, nullable=False)
+    posted_by_forwarder_id = Column(String, nullable=True, index=True)  # forwarder_id of poster
+
     # Timestamps for dashboard logic
     created_at = Column(DateTime, default=_utcnow)
     updated_at = Column(DateTime, default=_utcnow, onupdate=_utcnow)
@@ -64,6 +68,7 @@ class MarketplaceRequest(Base):
     __table_args__ = (
         Index("idx_request_sovereign_user", "user_sovereign_id"),
         Index("idx_request_status_submitted", "status", "submitted_at"),
+        Index("idx_request_f2f", "is_f2f", "posted_by_forwarder_id"),
     )
 
 class MarketplaceBid(Base):

@@ -141,7 +141,6 @@ async def browse_f2f_requests(
 
     # Check which ones I've already quoted on
     if reqs:
-        public_ids = [r.public_id for r in reqs]
         ids = [r.id for r in reqs]
         my_quotes_res = await db.execute(
             select(F2FQuote.request_id)
@@ -284,6 +283,7 @@ async def submit_f2f_quote(
 async def accept_f2f_quote(
     public_id: str,
     quote_id: int,
+    bg: BackgroundTasks,
     fwd: Forwarder = Depends(_verify_fwd),
     db: AsyncSession = Depends(get_db),
 ):
@@ -334,6 +334,27 @@ async def accept_f2f_quote(
     db.add(opening)
     await db.commit()
     await db.refresh(conv)
+
+    # Notify the quoter by email — they have no other way to know their quote was accepted
+    quoter_res = await db.execute(
+        select(Forwarder).where(Forwarder.forwarder_id == accepted_quote.forwarder_id)
+    )
+    quoter = quoter_res.scalars().first()
+    if quoter:
+        bg.add_task(
+            webhook_service.trigger_f2f_accept,
+            {
+                "quoter_email": quoter.email,
+                "quoter_company": accepted_quote.company_name,
+                "requester_company": req.posted_by_company,
+                "origin": req.origin,
+                "destination": req.destination,
+                "cargo_type": req.cargo_type,
+                "price": float(accepted_quote.price),
+                "currency": accepted_quote.currency,
+                "conv_public_id": conv.public_id,
+            }
+        )
 
     return {"success": True, "conv_public_id": conv.public_id}
 
@@ -551,6 +572,10 @@ async def confirm_f2f_deal(
         raise HTTPException(status_code=404, detail="Conversation not found.")
     if conv.requester_id != fwd.forwarder_id and conv.quoter_id != fwd.forwarder_id:
         raise HTTPException(status_code=403, detail="Not authorized.")
+    if conv.status == "CLOSED":
+        raise HTTPException(status_code=409, detail="This conversation is closed.")
+    if conv.status == "CONFIRMED":
+        return {"success": True, "status": "CONFIRMED"}
 
     if conv.requester_id == fwd.forwarder_id:
         conv.requester_confirmed = True

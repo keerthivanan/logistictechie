@@ -265,9 +265,13 @@ async def get_notifications(
             from datetime import datetime as _dt, timezone as _tz
             cutoff = (_dt.now(_tz.utc) - timedelta(hours=48)).replace(tzinfo=None)
             # Get the user's request IDs
+            # Handle REG- prefix: forwarder-promoted users keep old requests under original sovereign_id
+            sovereign_ids = [current_user.sovereign_id]
+            if current_user.sovereign_id.startswith("REG-"):
+                sovereign_ids.append(current_user.sovereign_id[4:])
             req_ids_res = await db.execute(
                 select(MarketplaceRequest.request_id)
-                .where(MarketplaceRequest.user_sovereign_id == current_user.sovereign_id)
+                .where(MarketplaceRequest.user_sovereign_id.in_(sovereign_ids))
             )
             req_ids = [r[0] for r in req_ids_res.all()]
             if req_ids:

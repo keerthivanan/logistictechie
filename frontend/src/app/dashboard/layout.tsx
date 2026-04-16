@@ -68,7 +68,11 @@ export default function DashboardLayout({
             }
         }
 
-        if (user) fetchDashboardSummary()
+        if (user) {
+            fetchDashboardSummary()
+            const iv = setInterval(fetchDashboardSummary, 30000)
+            return () => clearInterval(iv)
+        }
     }, [user])
 
     // Poll structured notifications every 15s

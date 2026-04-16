@@ -177,4 +177,17 @@ class WebhookService:
             "F2F_BROADCAST"
         )
 
+    async def trigger_f2f_accept(self, payload: dict):
+        """
+        Fires when a requester accepts a quoter's F2F quote.
+        n8n WF_F2F_ACCEPT sends an email to the quoter forwarder via support@.
+        Payload keys: quoter_email, quoter_company, requester_company,
+                      origin, destination, cargo_type, price, currency, conv_public_id
+        """
+        return await self._trigger(
+            os.getenv("N8N_F2F_ACCEPT_WEBHOOK"),
+            payload,
+            "F2F_ACCEPT"
+        )
+
 webhook_service = WebhookService()
