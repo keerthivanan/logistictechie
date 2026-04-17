@@ -46,6 +46,7 @@ function DropdownMenu({ items }: { items: NavChild[] }) {
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const [scrolled, setScrolled] = useState(false);
     const { user, logout } = useAuth();
     const pathname = usePathname();
@@ -94,33 +95,12 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const mobileNavItems = user
-        ? user.role === 'forwarder'
-            ? [
-                { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-                { label: 'Freight Portal', href: '/forwarders/portal', icon: Store },
-                { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
-                { label: 'Marketplace', href: '/marketplace', icon: Globe },
-                { label: 'About', href: '/about', icon: Info },
-                { label: 'Contact', href: '/contact', icon: MessageSquare },
-            ]
-            : [
-                { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-                { label: 'My Shipments', href: '/dashboard/shipments', icon: Package },
-                { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
-                { label: 'Marketplace', href: '/marketplace', icon: Store },
-                { label: 'Services', href: '/services/ocean-freight', icon: Ship },
-                { label: 'About', href: '/about', icon: Info },
-                { label: 'Contact', href: '/contact', icon: MessageSquare },
-            ]
-        : [
-            { label: 'Services', href: '/services/ocean-freight', icon: Ship },
-            { label: 'Marketplace', href: '/marketplace', icon: Store },
-            { label: 'Forwarder Network', href: '/forwarders', icon: Users },
-            { label: 'Freight Tools', href: '/tools/calculator', icon: Calculator },
-            { label: 'About', href: '/about', icon: Info },
-            { label: 'Contact', href: '/contact', icon: MessageSquare },
-        ];
+    const mobileAccordionSections = [
+        ...(user?.role !== 'forwarder' ? [{ key: 'services', label: t('nav.services'), icon: Ship, items: navItems[0].children }] : []),
+        { key: 'ecosystem', label: t('nav.ecosystem'), icon: Globe, items: navItems[1].children },
+        { key: 'tools', label: t('nav.tools'), icon: Calculator, items: navItems[2].children },
+        { key: 'company', label: t('nav.company'), icon: Info, items: navItems[3].children },
+    ];
 
     return (
         <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${scrolled ? 'scale-[0.97]' : 'scale-100'}`}>
@@ -329,7 +309,7 @@ export default function Navbar() {
                     )}
 
                     {/* Mobile menu toggle */}
-                    <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-white hover:text-zinc-300 transition-colors ml-4">
+                    <button onClick={() => { setMobileMenuOpen(v => { if (v) setExpandedSection(null); return !v; }); }} className="md:hidden text-white hover:text-zinc-300 transition-colors ml-4">
                         {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
                 </div>
@@ -340,7 +320,7 @@ export default function Navbar() {
                 {mobileMenuOpen && (
                     <>
                         {/* Backdrop */}
-                        <div className="md:hidden fixed inset-0 z-[55]" onClick={() => setMobileMenuOpen(false)} />
+                        <div className="md:hidden fixed inset-0 z-[55]" onClick={() => { setMobileMenuOpen(false); setExpandedSection(null); }} />
 
                         <motion.div
                             initial={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -365,15 +345,84 @@ export default function Navbar() {
                                     </div>
                                 )}
 
-                                {/* Nav items */}
+                                {/* Nav items — accordion */}
                                 <div className="divide-y divide-white/[0.05]">
-                                    {mobileNavItems.map(({ label, href, icon: Icon }) => (
-                                        <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+
+                                    {/* Role-based quick links */}
+                                    {user && (
+                                        <>
+                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                                <LayoutDashboard className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                                {user.role === 'forwarder' ? t('nav.partner.dashboard') : 'Dashboard'}
+                                            </Link>
+                                            {user.role === 'forwarder' ? (
+                                                <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)}
+                                                    className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                                    <Store className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                                    {t('nav.portal')}
+                                                </Link>
+                                            ) : (
+                                                <Link href="/dashboard/shipments" onClick={() => setMobileMenuOpen(false)}
+                                                    className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                                    <Package className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                                    My Shipments
+                                                </Link>
+                                            )}
+                                            <Link href="/dashboard/messages" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                                <MessageSquare className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                                Messages
+                                            </Link>
+                                        </>
+                                    )}
+
+                                    {/* Instant Search — direct link (not for forwarders) */}
+                                    {user?.role !== 'forwarder' && (
+                                        <Link href="/search" onClick={() => setMobileMenuOpen(false)}
                                             className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
-                                            <Icon className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
-                                            {label}
+                                            <Search className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                            {t('nav.search')}
                                         </Link>
-                                    ))}
+                                    )}
+
+                                    {/* Expandable sections: Services / Ecosystem / Tools / Company */}
+                                    {mobileAccordionSections.map(({ key, label, icon: Icon, items }) => {
+                                        const isOpen = expandedSection === key;
+                                        return (
+                                            <div key={key}>
+                                                <button
+                                                    onClick={() => setExpandedSection(isOpen ? null : key)}
+                                                    className="w-full flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 transition-colors"
+                                                >
+                                                    <Icon className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                                    <span className="flex-1 text-left">{label}</span>
+                                                    <ChevronDown className={`w-4 h-4 text-zinc-700 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                                                </button>
+                                                <AnimatePresence>
+                                                    {isOpen && (
+                                                        <motion.div
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
+                                                            transition={{ duration: 0.18, ease: 'easeInOut' }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="pl-9 pb-2">
+                                                                {items.map((child: NavChild) => (
+                                                                    <Link key={child.href} href={child.href} onClick={() => setMobileMenuOpen(false)}
+                                                                        className="flex items-center gap-3 py-3 text-sm text-zinc-500 active:text-zinc-200 transition-colors">
+                                                                        <child.icon className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
+                                                                        {child.label}
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Auth actions */}
