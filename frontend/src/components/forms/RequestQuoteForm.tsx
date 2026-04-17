@@ -279,7 +279,7 @@ export default function RequestQuoteForm() {
                             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.type')}</h2>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {([
                                 { value: 'FCL', label: 'FCL', sub: t('rqf.mode.fcl.sub'), icon: Ship },
                                 { value: 'LCL', label: 'LCL', sub: t('rqf.mode.lcl.sub'), icon: Package },
@@ -300,7 +300,7 @@ export default function RequestQuoteForm() {
                         {isFCL && (
                             <div>
                                 <label className={lbl}>{t('rqf.container.type')}</label>
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {CONTAINER_TYPES.map(ct => (
                                         <button key={ct.value} type="button"
                                             onClick={() => set('container_type', formData.container_type === ct.value ? '' : ct.value)}
@@ -518,7 +518,7 @@ export default function RequestQuoteForm() {
                         {/* Cargo Flags */}
                         <div>
                             <label className={lbl}>{t('rqf.cargo.props')}</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <ToggleCard name="is_stackable" checked={formData.is_stackable} label={t('rqf.stackable')} icon={Layers} color="emerald" />
                                 <ToggleCard name="is_hazardous" checked={formData.is_hazardous} label={t('rqf.hazardous')} icon={ShieldAlert} color="red" />
                                 <ToggleCard name="is_reefer" checked={formData.is_reefer} label={t('rqf.reefer')} icon={Thermometer} color="blue" />
@@ -532,7 +532,7 @@ export default function RequestQuoteForm() {
                                     <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
                                     <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest font-inter">{t('rqf.dg.title')}</span>
                                 </div>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     <div>
                                         <label className={lbl}>{t('rqf.imo.class')}</label>
                                         <select name="imo_class" value={formData.imo_class} onChange={handleChange} className={sel}>
@@ -599,7 +599,7 @@ export default function RequestQuoteForm() {
 
                         <div>
                             <label className={lbl}>{t('rqf.add.services')}</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <ToggleCard name="needs_insurance" checked={formData.needs_insurance} label={t('rqf.insurance')} icon={FileText} color="emerald" />
                                 <ToggleCard name="customs_origin" checked={formData.customs_origin} label={t('rqf.customs.origin')} icon={FileText} color="amber" />
                                 <ToggleCard name="customs_dest" checked={formData.customs_dest} label={t('rqf.customs.dest')} icon={FileText} color="amber" />
@@ -640,7 +640,7 @@ export default function RequestQuoteForm() {
                     {/* How it works */}
                     <div>
                         <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-6 font-inter">{t('rqf.how')}</p>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {[
                                 { step: '01', title: t('rqf.step1.title'), desc: t('rqf.step1.desc') },
                                 { step: '02', title: t('rqf.step2.title'), desc: t('rqf.step2.desc') },
@@ -656,7 +656,7 @@ export default function RequestQuoteForm() {
                     </div>
 
                     {/* Trust badges */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
                             { value: '100+', label: t('rqf.stat1') },
                             { value: '195',  label: t('rqf.stat2') },

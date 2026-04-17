@@ -147,7 +147,7 @@ export default function SearchPage() {
                 >
 
                     {/* ── 1. ROUTE ── */}
-                    <div className="p-8">
+                    <div className="p-4 md:p-8">
                         <div className="flex items-center gap-2 mb-6">
                             <Ship className="w-3.5 h-3.5 text-white" />
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-inter">{t('search.route')}</p>
@@ -228,14 +228,14 @@ export default function SearchPage() {
                     </div>
 
                     {/* ── 2. LOAD ── */}
-                    <div className={`p-8 ${divider}`}>
+                    <div className={`p-4 md:p-8 ${divider}`}>
                         <div className="flex items-center gap-2 mb-6">
                             <Package className="w-3.5 h-3.5 text-zinc-400" />
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-inter">{t('search.load')}</p>
                         </div>
 
                         {/* Mode tabs */}
-                        <div className="grid grid-cols-4 gap-2 mb-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6">
                             {([
                                 { value: 'FCL', label: 'FCL', sub: t('search.mode.fcl.sub'), Icon: Ship },
                                 { value: 'LCL', label: 'LCL', sub: t('search.mode.lcl.sub'), Icon: Package },
@@ -260,7 +260,7 @@ export default function SearchPage() {
                             <div className="space-y-5">
                                 <div>
                                     <label className={lbl}>{t('search.container.type')}</label>
-                                    <div className="grid grid-cols-4 gap-2">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                         {CONTAINER_TYPES.map(ct => (
                                             <button key={ct.value} type="button"
                                                 onClick={() => setContainerType(ct.value)}
@@ -297,7 +297,7 @@ export default function SearchPage() {
                         {/* LCL / Air */}
                         {(mode === 'LCL' || mode === 'Air') && (
                             <div className="space-y-5">
-                                <div className="grid grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
                                         <label className={lbl}>{t('search.units')}</label>
                                         <input type="number" min="1" value={units}
@@ -369,13 +369,13 @@ export default function SearchPage() {
                     </div>
 
                     {/* ── 3. DETAILS + SUBMIT ── */}
-                    <div className={`p-8 ${divider}`}>
+                    <div className={`p-4 md:p-8 ${divider}`}>
                         <div className="flex items-center gap-2 mb-6">
                             <Calendar className="w-3.5 h-3.5 text-zinc-400" />
                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-inter">{t('search.details')}</p>
                         </div>
 
-                        <div className="grid md:grid-cols-4 gap-4 mb-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                             {/* Commodity */}
                             <div>
                                 <label className={lbl}>Commodity</label>
@@ -479,7 +479,7 @@ export default function SearchPage() {
             <section className="px-4 pb-24 max-w-4xl mx-auto space-y-4 mt-4">
 
                 {/* What you get */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {([
                         { step: '01', titleKey: 'search.how1.title', descKey: 'search.how1.desc' },
                         { step: '02', titleKey: 'search.how2.title', descKey: 'search.how2.desc' },
@@ -494,7 +494,7 @@ export default function SearchPage() {
                 </div>
 
                 {/* Stats relevant to instant search */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {([
                         { valueKey: 'search.stat1', label: 'Trade Lanes' },
                         { valueKey: 'search.stat2', label: 'Rate Response Time' },

@@ -277,7 +277,7 @@ export default function ForwarderRegisterPage() {
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.personal.email')}</label>
                                 <input name="email" type="email" value={formData.email} readOnly
@@ -334,7 +334,7 @@ export default function ForwarderRegisterPage() {
                         <div>
                             <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">{t('reg.cargo.types')}</label>
                             <p className="text-[10px] text-zinc-600 font-inter mb-3">{t('reg.cargo.hint')}</p>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {SPECIALIZATION_OPTIONS.map(spec => {
                                     const sel = formData.specializations.includes(spec);
                                     return (
@@ -438,7 +438,7 @@ export default function ForwarderRegisterPage() {
                 {/* ── Content Below Form ── */}
                 <div className="mt-16 space-y-10 pb-10">
                     {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {[
                             { value: '100+', label: t('reg.stat1.label') },
                             { value: '195',  label: t('reg.stat2.label') },

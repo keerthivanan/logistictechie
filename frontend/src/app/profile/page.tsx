@@ -43,8 +43,8 @@ export default function ProfilePage() {
                 </Link>
 
                 {/* Profile Card */}
-                <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 mb-4">
-                    <div className="flex items-start gap-6">
+                <div className="bg-zinc-950 border border-white/5 rounded-2xl p-4 sm:p-8 mb-4">
+                    <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                         <Avatar src={user.avatar_url} name={user.name} size="lg" className="border-white/10 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 flex-wrap mb-1">

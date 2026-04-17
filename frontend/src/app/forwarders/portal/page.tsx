@@ -806,7 +806,7 @@ export default function ForwarderPortal() {
                 )}
 
                 {/* Main split — Requests + Performance tabs */}
-                {activeTab !== 'conversations' && <div className="flex-1 flex gap-5 min-h-0">
+                {activeTab !== 'conversations' && <div className="flex-1 flex flex-col lg:flex-row gap-5 min-h-0">
 
                     {/* LEFT — Open Requests */}
                     <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col">
@@ -877,7 +877,7 @@ export default function ForwarderPortal() {
                     </div>
 
                     {/* RIGHT — Metrics + Bid Form */}
-                    <div className="w-72 flex flex-col gap-4 flex-shrink-0 overflow-y-auto custom-scrollbar">
+                    <div className="w-full lg:w-72 flex flex-col gap-4 lg:flex-shrink-0 overflow-y-auto custom-scrollbar">
 
                         {/* Metrics */}
                         <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
