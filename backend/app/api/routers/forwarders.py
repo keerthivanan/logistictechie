@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Header
+from fastapi.responses import Response
+import base64
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.forwarder import Forwarder
@@ -136,6 +138,20 @@ async def activate_forwarder(f_id: str, db: AsyncSession = Depends(get_db), _: N
     await db.commit()
     return {"success": True, "message": "Partner Activated."}
 
+@router.get("/logo/{forwarder_id}")
+async def get_forwarder_logo(forwarder_id: str, db: AsyncSession = Depends(get_db)):
+    """Serve forwarder logo as image — avoids inlining 150KB base64 in every list response."""
+    result = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == forwarder_id))
+    fwd = result.scalars().first()
+    if not fwd or not fwd.logo_url:
+        raise HTTPException(status_code=404, detail="Logo not found")
+    if fwd.logo_url.startswith("data:"):
+        header, data = fwd.logo_url.split(",", 1)
+        content_type = header.split(":")[1].split(";")[0]
+        return Response(content=base64.b64decode(data), media_type=content_type)
+    raise HTTPException(status_code=404, detail="Logo not found")
+
+
 @router.get("/active")
 async def list_forwarders(db: AsyncSession = Depends(get_db)):
     """
@@ -143,7 +159,7 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
     """
     result = await db.execute(select(Forwarder).where(Forwarder.status.in_(["ACTIVE", "APPROVED"])))
     forwarders = result.scalars().all()
-    
+
     return [
         {
             "id": f.id,
@@ -155,7 +171,7 @@ async def list_forwarders(db: AsyncSession = Depends(get_db)):
             "whatsapp": f.whatsapp or "", # CRITICAL for n8n broadcast
             "website": f.website,
             "reliability_score": f.reliability_score,
-            "logo_url": f.logo_url,
+            "logo_url": f"/api/forwarders/logo/{f.forwarder_id}" if f.logo_url else None,
             "is_verified": f.is_verified,
             "status": f.status,
             "routes": f.routes or "",

@@ -17,6 +17,7 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
     const getFullSrc = (url?: string) => {
         if (!url) return undefined;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
+        if (url.startsWith('/api/') || url.startsWith('/static/')) return `${API_URL}${url}`;
         return `${API_URL}/static/${url}`;
     };
 
