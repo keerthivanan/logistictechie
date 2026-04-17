@@ -68,7 +68,7 @@ export default function Navbar() {
         {
             label: t('nav.ecosystem'),
             children: [
-                { label: t('nav.marketplace'), href: '/marketplace', desc: t('nav.marketplace.desc'), icon: Store },
+                { label: user?.role === 'forwarder' ? 'F2F Request' : t('nav.marketplace'), href: user?.role === 'forwarder' ? '/forwarders/f2f' : '/marketplace', desc: user?.role === 'forwarder' ? 'Post to Forwarder Network' : t('nav.marketplace.desc'), icon: Store },
                 { label: t('nav.partner.dir'), href: '/forwarders', desc: t('nav.partner.dir.desc'), icon: Users },
                 { label: t('nav.carrier.reg'), href: '/forwarders/register', desc: t('nav.carrier.reg.desc'), icon: UserPlus },
             ],

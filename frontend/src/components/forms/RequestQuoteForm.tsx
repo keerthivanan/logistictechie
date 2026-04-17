@@ -26,7 +26,7 @@ const getFlagEmoji = (code: string) => {
 
 const INCOTERMS = ['EXW', 'FCA', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP'];
 
-export default function RequestQuoteForm() {
+export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean }) {
     const t = useT();
 
     const CONTAINER_TYPES = [
@@ -203,15 +203,40 @@ export default function RequestQuoteForm() {
                 currency: 'USD',
             };
 
-            const token = localStorage.getItem('token');
-            const res = await apiFetch('/api/marketplace/submit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-                body: JSON.stringify(payload),
-            });
-            const data = await res.json();
-            if (data.success) router.push(`/marketplace/${data.uniqueId}`);
-            else setFormError(data.detail || data.message || t('rqf.err.unknown'));
+            let res: Response;
+            if (isF2F) {
+                const fwdId = localStorage.getItem('cl_fwd_id') || '';
+                const fwdEmail = localStorage.getItem('cl_fwd_email') || '';
+                const f2fPayload = {
+                    origin: payload.origin,
+                    destination: payload.destination,
+                    cargo_type: payload.cargo_type,
+                    commodity: payload.commodity,
+                    weight_kg: payload.weight,
+                    container_type: payload.container_type || null,
+                    incoterms: payload.incoterms || null,
+                    currency: payload.currency,
+                    notes: payload.special_requirements || null,
+                };
+                res = await apiFetch('/api/f2f/requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
+                    body: JSON.stringify(f2fPayload),
+                });
+                const data = await res.json();
+                if (res.ok) router.push('/forwarders/portal');
+                else setFormError(data.detail || data.message || t('rqf.err.unknown'));
+            } else {
+                const token = localStorage.getItem('token');
+                res = await apiFetch('/api/marketplace/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (data.success) router.push(`/marketplace/${data.uniqueId}`);
+                else setFormError(data.detail || data.message || t('rqf.err.unknown'));
+            }
         } catch { setFormError(t('rqf.err.network')); }
         finally { setLoading(false); }
     };
@@ -265,9 +290,9 @@ export default function RequestQuoteForm() {
 
             <div className="max-w-3xl mx-auto px-4 py-28 pb-20">
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-                    <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-3 font-inter">{t('rqf.badge')}</p>
-                    <h1 className="text-3xl font-bold tracking-tight font-outfit mb-2">{t('rqf.title')}</h1>
-                    <p className="text-sm text-zinc-500 font-inter">{t('rqf.sub')}</p>
+                    <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-3 font-inter">{isF2F ? 'F2F Network' : t('rqf.badge')}</p>
+                    <h1 className="text-3xl font-bold tracking-tight font-outfit mb-2">{isF2F ? 'Post F2F Request' : t('rqf.title')}</h1>
+                    <p className="text-sm text-zinc-500 font-inter">{isF2F ? 'Broadcast your freight requirement to the CargoLink forwarder network.' : t('rqf.sub')}</p>
                 </motion.div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
