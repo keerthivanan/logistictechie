@@ -41,7 +41,7 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
                         src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=200&format=png`}
                         alt={name}
                         onError={() => setFailed(true)}
-                        className="h-8 w-auto max-w-[120px] object-contain filter brightness-0 invert opacity-70 group-hover:opacity-100 group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
+                        className="h-8 w-auto max-w-[120px] object-contain opacity-40 group-hover:opacity-100 transition-opacity duration-300"
                     />
                 )}
             </div>
