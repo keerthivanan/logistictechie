@@ -144,7 +144,6 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
         setFormError('');
         setLoading(true);
         try {
-            if (!user) { setFormError(t('rqf.err.login')); setLoading(false); return; }
             if (!formData.origin_district.trim()) { setFormError(t('rqf.err.origin')); setLoading(false); return; }
             if (!formData.dest_district.trim()) { setFormError(t('rqf.err.dest')); setLoading(false); return; }
             if (!formData.commodity.trim()) { setFormError(t('rqf.err.commodity')); setLoading(false); return; }
@@ -155,8 +154,9 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
 
             const originC = countries.find((c: Country) => c.code === formData.origin_country);
             const destC = countries.find((c: Country) => c.code === formData.dest_country);
-
-            // Build special_requirements to include extra logistics fields
+            const origin = formData.origin_district || (originC?.name || formData.origin_country);
+            const destination = formData.dest_district || (destC?.name || formData.dest_country);
+            const cargo_type = formData.mode === 'FCL' ? 'FCL' : formData.mode === 'LCL' ? 'LCL' : formData.mode === 'Air' ? 'AIR' : 'TRUCK';
             const extras = [
                 formData.hs_code && `HS Code: ${formData.hs_code}`,
                 formData.is_hazardous && `IMO Class: ${formData.imo_class} | UN: ${formData.un_number} | PG: ${formData.packing_group}`,
@@ -167,68 +167,74 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                 formData.notes,
             ].filter(Boolean).join(' | ');
 
-            const payload = {
-                user_id: user.id,
-                sovereign_id: user.sovereign_id || '',
-                name: user.name || user.email || 'Client',
-                email: user.email,
-                phone: '',
-                origin: formData.origin_district || (originC?.name || formData.origin_country),
-                origin_locode: formData.origin_locode,
-                origin_type: formData.origin_type,
-                destination: formData.dest_district || (destC?.name || formData.dest_country),
-                destination_locode: formData.dest_locode,
-                destination_type: formData.dest_type,
-                cargo_type: formData.mode === 'FCL' ? 'FCL' : formData.mode === 'LCL' ? 'LCL' : formData.mode === 'Air' ? 'AIR' : 'TRUCK',
-                commodity: formData.commodity,
-                hs_code: formData.hs_code,
-                cargo_specification: formData.cargo_specification,
-                packing_type: formData.packing_type.toUpperCase(),
-                quantity: parseInt(formData.quantity) || 1,
-                weight: parseFloat(formData.weight) || 0,
-                weight_unit: formData.weight_unit,
-                total_volume_cbm: parseFloat(formData.total_volume_cbm) || null,
-                container_count: formData.mode === 'FCL' ? (parseInt(formData.container_count) || 1) : null,
-                container_type: formData.mode === 'FCL' ? formData.container_type : '',
-                dimensions: `${formData.length}x${formData.width}x${formData.height}`,
-                dim_unit: formData.dim_unit,
-                is_stackable: formData.is_stackable,
-                is_hazardous: formData.is_hazardous,
-                needs_insurance: formData.needs_insurance,
-                pickup_ready_date: formData.pickup_ready_date || null,
-                target_date: formData.delivery_date || null,
-                special_requirements: extras,
-                vessel: formData.vessel,
-                incoterms: formData.incoterms,
-                currency: 'USD',
-            };
-
-            let res: Response;
             if (isF2F) {
-                const fwdId = localStorage.getItem('cl_fwd_id') || '';
-                const fwdEmail = localStorage.getItem('cl_fwd_email') || '';
-                const f2fPayload = {
-                    origin: payload.origin,
-                    destination: payload.destination,
-                    cargo_type: payload.cargo_type,
-                    commodity: payload.commodity,
-                    weight_kg: payload.weight,
-                    container_type: payload.container_type || null,
-                    incoterms: payload.incoterms || null,
-                    currency: payload.currency,
-                    notes: payload.special_requirements || null,
-                };
-                res = await apiFetch('/api/f2f/requests', {
+                // Auth: portal forwarders use localStorage; JWT forwarders use user + localStorage fallback
+                const fwdId = localStorage.getItem('cl_fwd_id')
+                    || user?.forwarder_id
+                    || localStorage.getItem('forwarder_id')
+                    || user?.sovereign_id
+                    || '';
+                const fwdEmail = localStorage.getItem('cl_fwd_email') || user?.email || '';
+                if (!fwdId || !fwdEmail) { setFormError('Please log in as a forwarder first.'); setLoading(false); return; }
+
+                const res = await apiFetch('/api/f2f/requests', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': fwdId, 'X-Forwarder-Email': fwdEmail },
-                    body: JSON.stringify(f2fPayload),
+                    body: JSON.stringify({
+                        origin,
+                        destination,
+                        cargo_type,
+                        commodity: formData.commodity || null,
+                        weight_kg: parseFloat(formData.weight) || null,
+                        container_type: formData.mode === 'FCL' ? formData.container_type : null,
+                        incoterms: formData.incoterms || null,
+                        currency: 'USD',
+                        notes: extras || null,
+                    }),
                 });
                 const data = await res.json();
                 if (res.ok) router.push('/forwarders/portal');
                 else setFormError(data.detail || data.message || t('rqf.err.unknown'));
             } else {
+                if (!user) { setFormError(t('rqf.err.login')); setLoading(false); return; }
+
+                const payload = {
+                    user_id: user.id,
+                    sovereign_id: user.sovereign_id || '',
+                    name: user.name || user.email || 'Client',
+                    email: user.email,
+                    phone: '',
+                    origin,
+                    origin_locode: formData.origin_locode,
+                    origin_type: formData.origin_type,
+                    destination,
+                    destination_locode: formData.dest_locode,
+                    destination_type: formData.dest_type,
+                    cargo_type,
+                    commodity: formData.commodity,
+                    hs_code: formData.hs_code,
+                    cargo_specification: formData.cargo_specification,
+                    packing_type: formData.packing_type.toUpperCase(),
+                    quantity: parseInt(formData.quantity) || 1,
+                    weight: parseFloat(formData.weight) || 0,
+                    weight_unit: formData.weight_unit,
+                    total_volume_cbm: parseFloat(formData.total_volume_cbm) || null,
+                    container_count: formData.mode === 'FCL' ? (parseInt(formData.container_count) || 1) : null,
+                    container_type: formData.mode === 'FCL' ? formData.container_type : '',
+                    dimensions: `${formData.length}x${formData.width}x${formData.height}`,
+                    dim_unit: formData.dim_unit,
+                    is_stackable: formData.is_stackable,
+                    is_hazardous: formData.is_hazardous,
+                    needs_insurance: formData.needs_insurance,
+                    pickup_ready_date: formData.pickup_ready_date || null,
+                    target_date: formData.delivery_date || null,
+                    special_requirements: extras,
+                    vessel: formData.vessel,
+                    incoterms: formData.incoterms,
+                    currency: 'USD',
+                };
                 const token = localStorage.getItem('token');
-                res = await apiFetch('/api/marketplace/submit', {
+                const res = await apiFetch('/api/marketplace/submit', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
                     body: JSON.stringify(payload),
