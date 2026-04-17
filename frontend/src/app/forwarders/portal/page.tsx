@@ -167,16 +167,24 @@ export default function ForwarderPortal() {
     const acceptF2fQuote = async (requestPublicId: string, quoteId: number) => {
         const id = localStorage.getItem('cl_fwd_id') || '';
         const mail = localStorage.getItem('cl_fwd_email') || '';
-        const res = await apiFetch(`/api/f2f/requests/${requestPublicId}/accept/${quoteId}`, {
-            method: 'POST',
-            headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
-        });
-        if (res.ok) {
-            const d = await res.json();
-            await fetchMyF2fPosts(id, mail);
-            await fetchF2fConvs(id, mail);
-            setF2fTab('f2f-chats');
-            if (d.conv_public_id) window.location.href = `/forwarders/f2f-chat/${d.conv_public_id}`;
+        try {
+            const res = await apiFetch(`/api/f2f/requests/${requestPublicId}/accept/${quoteId}`, {
+                method: 'POST',
+                headers: { 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
+            });
+            if (res.ok) {
+                const d = await res.json();
+                await fetchMyF2fPosts(id, mail);
+                await fetchF2fConvs(id, mail);
+                setF2fTab('f2f-chats');
+                if (d.conv_public_id) window.location.href = `/forwarders/f2f-chat/${d.conv_public_id}`;
+            } else {
+                const err = await res.json().catch(() => ({}));
+                alert(err.detail || 'Failed to accept quote. It may have already been accepted by someone else.');
+                await fetchMyF2fPosts(id, mail);
+            }
+        } catch {
+            alert('Network error — please try again.');
         }
     };
 

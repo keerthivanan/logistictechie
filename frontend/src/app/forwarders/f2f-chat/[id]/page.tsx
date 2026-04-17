@@ -60,9 +60,14 @@ export default function F2FChatPage() {
     useEffect(() => {
         const storedId = localStorage.getItem('cl_fwd_id') || ''
         const storedEmail = localStorage.getItem('cl_fwd_email') || ''
+        if (!storedId || !storedEmail) {
+            setLoading(false)
+            router.push('/forwarders/portal')
+            return
+        }
         setFwdId(storedId)
         setFwdEmail(storedEmail)
-    }, [])
+    }, [router])
 
     const fetchMessages = useCallback(async (fi: string, fe: string) => {
         if (!fi || !fe) return
