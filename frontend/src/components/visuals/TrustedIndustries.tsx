@@ -48,7 +48,6 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
 }
 
 export default function TrustedIndustries() {
-    const repeated = [...GIANTS, ...GIANTS];
 
     return (
         <section className="py-16 bg-black overflow-hidden relative">
@@ -59,9 +58,12 @@ export default function TrustedIndustries() {
                 Connecting you to the world's freight giants
             </p>
 
-            <div className="flex animate-infinite-scroll">
-                {repeated.map((g, i) => (
-                    <GiantLogo key={i} name={g.name} domain={g.domain} />
+            <div className="flex w-max animate-infinite-scroll">
+                {GIANTS.map((g, i) => (
+                    <GiantLogo key={`a-${i}`} name={g.name} domain={g.domain} />
+                ))}
+                {GIANTS.map((g, i) => (
+                    <GiantLogo key={`b-${i}`} name={g.name} domain={g.domain} />
                 ))}
             </div>
         </section>
