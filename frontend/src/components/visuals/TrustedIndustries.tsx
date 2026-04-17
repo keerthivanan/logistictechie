@@ -32,17 +32,20 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
     const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     return (
-        <div className="flex items-center gap-3 whitespace-nowrap mx-4 sm:mx-8 md:mx-12 opacity-90 hover:opacity-100 transition-opacity duration-300 cursor-default group">
-            {failed ? (
-                <span className="text-sm font-bold text-zinc-400">{initials}</span>
-            ) : (
-                <img
-                    src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=400&format=png`}
-                    alt={name}
-                    onError={() => setFailed(true)}
-                    className="h-12 w-auto max-w-[160px] object-contain transition-opacity duration-300"
-                />
-            )}
+        <div className="mx-3 sm:mx-5 whitespace-nowrap cursor-default shrink-0">
+            <div className="flex items-center justify-center px-5 py-3 bg-white/[0.03] border border-white/[0.07] rounded-2xl hover:border-white/[0.14] transition-colors h-16 w-36">
+                {failed ? (
+                    <span className="text-sm font-bold text-zinc-500 tracking-wide">{initials}</span>
+                ) : (
+                    <img
+                        src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=400&format=png`}
+                        alt={name}
+                        onError={() => setFailed(true)}
+                        className="h-8 w-auto max-w-[100px] object-contain"
+                        style={{ filter: 'grayscale(1) opacity(0.55)' }}
+                    />
+                )}
+            </div>
         </div>
     );
 }

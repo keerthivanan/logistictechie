@@ -233,7 +233,7 @@ export default function Navbar() {
                         {lang === 'en' ? 'عربي' : 'EN'}
                     </button>
                     {user ? (
-                        <div className="relative">
+                        <div className="hidden md:block relative">
                             <button
                                 onClick={() => setActiveDropdown(activeDropdown === 'User' ? null : 'User')}
                                 className="relative group transition-transform active:scale-95 flex items-center gap-2 md:gap-4 py-1.5"
