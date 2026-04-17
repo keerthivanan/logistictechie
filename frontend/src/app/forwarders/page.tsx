@@ -5,7 +5,7 @@ import { Search, ArrowRight, Globe, CheckCircle2, ExternalLink, Users, Shield, Z
 import Navbar from '@/components/layout/Navbar'
 import Avatar from '@/components/visuals/Avatar'
 import PartnerModal from '@/components/modals/PartnerModal'
-import { apiFetch } from '@/lib/config'
+import { apiFetch, API_URL } from '@/lib/config'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -92,7 +92,10 @@ export default function ForwarderDirectoryPage() {
         apiFetch('/api/forwarders/active')
             .then(r => r.json())
             .then(data => {
-                const list = Array.isArray(data) ? data : (data.forwarders || [])
+                const list = (Array.isArray(data) ? data : (data.forwarders || [])).map((f: Forwarder) => ({
+                    ...f,
+                    logo_url: f.logo_url?.startsWith('/') ? `${API_URL}${f.logo_url}` : f.logo_url
+                }))
                 setForwarders(list)
             })
             .catch(() => {})
