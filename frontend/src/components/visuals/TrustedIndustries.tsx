@@ -40,7 +40,7 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
                     src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=400&format=png`}
                     alt={name}
                     onError={() => setFailed(true)}
-                    className="h-20 w-auto max-w-[220px] object-contain transition-opacity duration-300"
+                    className="h-12 w-auto max-w-[160px] object-contain transition-opacity duration-300"
                 />
             )}
         </div>
