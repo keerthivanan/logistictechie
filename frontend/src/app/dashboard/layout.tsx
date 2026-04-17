@@ -97,10 +97,12 @@ export default function DashboardLayout({
         return () => clearInterval(iv)
     }, [user])
 
-    // Auth guard — redirect to login if not authenticated
+    // Auth guard — redirect to login if not authenticated; forwarders use portal instead
     useEffect(() => {
         if (!loading && !user) {
             router.push('/login')
+        } else if (!loading && user?.role === 'forwarder') {
+            router.push('/forwarders/portal')
         }
     }, [user, loading, router])
 

@@ -148,14 +148,8 @@ export default function Navbar() {
                     )}
 
                     {user && (
-                        <Link href="/dashboard" className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-white/70 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
+                        <Link href={user?.role === 'forwarder' ? '/forwarders/portal' : '/dashboard'} className={`text-[11px] font-medium uppercase tracking-[0.18em] transition-colors ${user?.role === 'forwarder' ? 'text-white/70 hover:text-white' : 'text-zinc-400 hover:text-white'}`}>
                             {user?.role === 'forwarder' ? t('nav.partner.dashboard') : t('nav.dashboard')}
-                        </Link>
-                    )}
-
-                    {user?.role === 'forwarder' && (
-                        <Link href="/forwarders/portal" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
-                            {t('nav.portal')}
                         </Link>
                     )}
 
@@ -351,18 +345,12 @@ export default function Navbar() {
                                     {/* Role-based quick links */}
                                     {user && (
                                         <>
-                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
+                                            <Link href={user.role === 'forwarder' ? '/forwarders/portal' : '/dashboard'} onClick={() => setMobileMenuOpen(false)}
                                                 className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
                                                 <LayoutDashboard className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
                                                 {user.role === 'forwarder' ? t('nav.partner.dashboard') : 'Dashboard'}
                                             </Link>
-                                            {user.role === 'forwarder' ? (
-                                                <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)}
-                                                    className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
-                                                    <Store className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
-                                                    {t('nav.portal')}
-                                                </Link>
-                                            ) : (
+                                            {user.role !== 'forwarder' && (
                                                 <Link href="/dashboard/shipments" onClick={() => setMobileMenuOpen(false)}
                                                     className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
                                                     <Package className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
