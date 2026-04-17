@@ -72,7 +72,7 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
                     alt={name || 'Avatar'}
                     onLoad={() => setStatus('loaded')}
                     onError={() => setStatus('error')}
-                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
                 />
             )}
 
