@@ -36,7 +36,7 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
                     <span className="text-[9px] font-bold text-zinc-400">{initials}</span>
                 ) : (
                     <img
-                        src={`https://logo.clearbit.com/${domain}`}
+                        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
                         alt={name}
                         onError={() => setFailed(true)}
                         className="w-full h-full object-contain p-0.5 filter brightness-0 invert group-hover:brightness-100 group-hover:invert-0 transition-all duration-300"
