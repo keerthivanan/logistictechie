@@ -94,6 +94,34 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const mobileNavItems = user
+        ? user.role === 'forwarder'
+            ? [
+                { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+                { label: 'Freight Portal', href: '/forwarders/portal', icon: Store },
+                { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
+                { label: 'Marketplace', href: '/marketplace', icon: Globe },
+                { label: 'About', href: '/about', icon: Info },
+                { label: 'Contact', href: '/contact', icon: MessageSquare },
+            ]
+            : [
+                { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+                { label: 'My Shipments', href: '/dashboard/shipments', icon: Package },
+                { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
+                { label: 'Marketplace', href: '/marketplace', icon: Store },
+                { label: 'Services', href: '/services/ocean-freight', icon: Ship },
+                { label: 'About', href: '/about', icon: Info },
+                { label: 'Contact', href: '/contact', icon: MessageSquare },
+            ]
+        : [
+            { label: 'Services', href: '/services/ocean-freight', icon: Ship },
+            { label: 'Marketplace', href: '/marketplace', icon: Store },
+            { label: 'Forwarder Network', href: '/forwarders', icon: Users },
+            { label: 'Freight Tools', href: '/tools/calculator', icon: Calculator },
+            { label: 'About', href: '/about', icon: Info },
+            { label: 'Contact', href: '/contact', icon: MessageSquare },
+        ];
+
     return (
         <nav className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${scrolled ? 'scale-[0.97]' : 'scale-100'}`}>
             <div className="bg-black/30 backdrop-blur-3xl border border-white/10 rounded-full px-4 md:px-20 h-14 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center justify-between w-[calc(100vw-32px)] md:w-max md:min-w-[1100px]">
@@ -307,194 +335,76 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Menu — app-style full screen */}
+            {/* Mobile Menu — Dizilo-style dropdown card */}
             <AnimatePresence>
                 {mobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="md:hidden fixed inset-0 z-[60] bg-black overflow-y-auto"
-                    >
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                                <img src="/cargolink.png" alt="CargoLink" className="h-11 w-auto object-contain opacity-90" />
-                            </Link>
-                            <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/[0.08]">
-                                <X className="w-5 h-5 text-white" />
-                            </button>
-                        </div>
+                    <>
+                        {/* Backdrop */}
+                        <div className="md:hidden fixed inset-0 z-[55]" onClick={() => setMobileMenuOpen(false)} />
 
-                        <div className="px-5 pb-10 space-y-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="md:hidden absolute top-full left-0 right-0 mt-3 z-[60] bg-[#0f0f0f] border border-white/[0.09] rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.95)]"
+                        >
+                            <div className="px-5 pt-4 pb-5 max-h-[75vh] overflow-y-auto">
 
-                            {/* ── User card (logged in) ── */}
-                            {user && (
-                                <div className="flex items-center gap-3 p-4 bg-white/[0.03] border border-white/[0.07] rounded-2xl">
-                                    <Avatar src={user.avatar_url} name={user.name} size="md" />
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-bold text-white truncate">{user.name}</p>
-                                        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">{user.sovereign_id}</p>
+                                {/* User row */}
+                                {user && (
+                                    <div className="flex items-center gap-3 pb-4 mb-1 border-b border-white/[0.06]">
+                                        <Avatar src={user.avatar_url} name={user.name} size="sm" className="shrink-0" />
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-[13px] font-bold text-white truncate">{user.name}</p>
+                                            <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-wider mt-0.5">{user.sovereign_id}</p>
+                                        </div>
+                                        <span className="shrink-0 text-[9px] font-bold uppercase tracking-widest text-zinc-600 border border-white/[0.07] rounded-lg px-2 py-1">
+                                            {user.role === 'forwarder' ? 'Partner' : user.role === 'admin' ? 'Admin' : 'Shipper'}
+                                        </span>
                                     </div>
-                                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 border border-white/[0.07] rounded-lg px-2 py-1">
-                                        {user.role === 'forwarder' ? 'Partner' : user.role === 'admin' ? 'Admin' : 'Shipper'}
-                                    </span>
-                                </div>
-                            )}
+                                )}
 
-                            {/* ── Quick actions grid ── */}
-                            <div>
-                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-3 font-inter">Quick Access</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {/* Logged-in shipper/admin */}
-                                    {user && user.role !== 'forwarder' && (
-                                        <>
-                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname === '/dashboard' ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <LayoutDashboard className={`w-6 h-6 ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`}>Dashboard</span>
-                                            </Link>
-                                            <Link href="/dashboard/shipments" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/shipments') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <Package className={`w-6 h-6 ${pathname.includes('/shipments') ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/shipments') ? 'text-black' : 'text-zinc-300'}`}>Shipments</span>
-                                            </Link>
-                                            <Link href="/dashboard/messages" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/messages') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <MessageSquare className={`w-6 h-6 ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`}>Messages</span>
-                                            </Link>
-                                            <Link href="/search" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Search className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Get Quote</span>
-                                            </Link>
-                                        </>
-                                    )}
-                                    {/* Logged-in forwarder */}
-                                    {user?.role === 'forwarder' && (
-                                        <>
-                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname === '/dashboard' ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <LayoutDashboard className={`w-6 h-6 ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`}>Dashboard</span>
-                                            </Link>
-                                            <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/portal') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <Store className={`w-6 h-6 ${pathname.includes('/portal') ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/portal') ? 'text-black' : 'text-zinc-300'}`}>Portal</span>
-                                            </Link>
-                                            <Link href="/dashboard/messages" onClick={() => setMobileMenuOpen(false)}
-                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/messages') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
-                                                <MessageSquare className={`w-6 h-6 ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`} />
-                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`}>Messages</span>
-                                            </Link>
-                                            <Link href="/forwarders" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Users className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Partners</span>
-                                            </Link>
-                                        </>
-                                    )}
-                                    {/* Guest */}
-                                    {!user && (
+                                {/* Nav items */}
+                                <div className="divide-y divide-white/[0.05]">
+                                    {mobileNavItems.map(({ label, href, icon: Icon }) => (
+                                        <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                            <Icon className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                            {label}
+                                        </Link>
+                                    ))}
+                                </div>
+
+                                {/* Auth actions */}
+                                <div className="mt-4 pt-4 border-t border-white/[0.05] space-y-2.5">
+                                    {user ? (
                                         <>
                                             <Link href="/search" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Search className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Get Quote</span>
+                                                className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-black font-bold text-sm rounded-2xl active:bg-zinc-200 transition-colors">
+                                                Get a Quote <ArrowRight className="w-4 h-4" />
                                             </Link>
-                                            <Link href="/marketplace" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Store className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Marketplace</span>
-                                            </Link>
-                                            <Link href="/forwarders" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Users className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Partners</span>
-                                            </Link>
-                                            <Link href="/about" onClick={() => setMobileMenuOpen(false)}
-                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
-                                                <Globe className="w-6 h-6 text-zinc-300" />
-                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">About</span>
-                                            </Link>
+                                            <button onClick={() => { logout(); setMobileMenuOpen(false); }}
+                                                className="w-full py-2.5 text-sm font-medium text-zinc-600 active:text-red-400 transition-colors text-center">
+                                                Sign Out
+                                            </button>
                                         </>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-2.5">
+                                            <Link href="/login" onClick={() => setMobileMenuOpen(false)}
+                                                className="py-3.5 text-center border border-white/[0.1] rounded-2xl text-white font-semibold text-sm active:bg-white/5 transition-colors">
+                                                Log In
+                                            </Link>
+                                            <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
+                                                className="py-3.5 text-center bg-white text-black rounded-2xl font-bold text-sm active:bg-zinc-200 transition-colors">
+                                                Sign Up
+                                            </Link>
+                                        </div>
                                     )}
                                 </div>
                             </div>
-
-                            {/* ── Secondary grouped links ── */}
-                            <div>
-                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-3 font-inter">Explore</p>
-                                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.05] overflow-hidden">
-                                    {user?.role !== 'forwarder' && navItems[0].children.map(child => (
-                                        <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                            <child.icon className="w-4 h-4 text-zinc-600 shrink-0" />
-                                            <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{child.label}</span>
-                                            <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                        </Link>
-                                    ))}
-                                    {navItems[2].children.map(child => (
-                                        <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                            <child.icon className="w-4 h-4 text-zinc-600 shrink-0" />
-                                            <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{child.label}</span>
-                                            <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                        </Link>
-                                    ))}
-                                    <Link href="/about" onClick={() => setMobileMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                        <Info className="w-4 h-4 text-zinc-600 shrink-0" />
-                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.about')}</span>
-                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                    </Link>
-                                    <Link href="/contact" onClick={() => setMobileMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                        <MessageSquare className="w-4 h-4 text-zinc-600 shrink-0" />
-                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.contact')}</span>
-                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* ── Auth actions ── */}
-                            {user ? (
-                                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.05] overflow-hidden">
-                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                        <UserIcon className="w-4 h-4 text-zinc-600 shrink-0" />
-                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.profile')}</span>
-                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                    </Link>
-                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
-                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
-                                        <SettingsIcon className="w-4 h-4 text-zinc-600 shrink-0" />
-                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.settings')}</span>
-                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
-                                    </Link>
-                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }}
-                                        className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-red-500/5 transition-colors">
-                                        <LogOut className="w-4 h-4 text-red-500/60 shrink-0" />
-                                        <span className="text-sm font-medium text-red-400 font-inter">{t('nav.signout')}</span>
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                                        className="py-4 text-center border border-white/10 rounded-2xl text-white font-bold text-sm font-inter active:bg-white/5 transition-colors">
-                                        {t('nav.login')}
-                                    </Link>
-                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
-                                        className="py-4 text-center bg-white text-black rounded-2xl font-bold text-sm font-inter active:bg-zinc-200 transition-colors">
-                                        {t('nav.signup')}
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
         </nav>
