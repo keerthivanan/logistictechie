@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     ArrowRight, Loader2, Package,
     TrendingUp, CheckCircle2, Clock,
@@ -15,6 +16,7 @@ import { useT } from '@/lib/i18n/t';
 export default function ForwarderPortal() {
     const t = useT();
     const { user } = useAuth();
+    const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -47,15 +49,6 @@ export default function ForwarderPortal() {
     const [f2fQuoteNotes, setF2fQuoteNotes] = useState('');
     const [f2fQuoting, setF2fQuoting] = useState(false);
     const [f2fQuoteSuccess, setF2fQuoteSuccess] = useState<string | null>(null);
-    const [showPostForm, setShowPostForm] = useState(false);
-    const [postOrigin, setPostOrigin] = useState('');
-    const [postDest, setPostDest] = useState('');
-    const [postCargoType, setPostCargoType] = useState('FCL');
-    const [postCommodity, setPostCommodity] = useState('');
-    const [postWeight, setPostWeight] = useState('');
-    const [postNotes, setPostNotes] = useState('');
-    const [posting, setPosting] = useState(false);
-    const [postSuccess, setPostSuccess] = useState(false);
 
     const [cvAmount, setCvAmount] = useState('');
     const [cvFrom, setCvFrom] = useState('USD');
@@ -140,29 +133,6 @@ export default function ForwarderPortal() {
         } catch { /* silent */ } finally { setF2fQuoting(false); }
     };
 
-    const submitF2fPost = async () => {
-        if (!postOrigin || !postDest || posting) return;
-        const id = localStorage.getItem('cl_fwd_id') || '';
-        const mail = localStorage.getItem('cl_fwd_email') || '';
-        setPosting(true);
-        try {
-            const res = await apiFetch('/api/f2f/requests', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Forwarder-Id': id, 'X-Forwarder-Email': mail },
-                body: JSON.stringify({
-                    origin: postOrigin, destination: postDest, cargo_type: postCargoType,
-                    commodity: postCommodity || undefined, weight_kg: postWeight ? parseFloat(postWeight) : undefined,
-                    notes: postNotes || undefined,
-                }),
-            });
-            if (res.ok) {
-                setPostSuccess(true);
-                setPostOrigin(''); setPostDest(''); setPostCommodity(''); setPostWeight(''); setPostNotes('');
-                await fetchMyF2fPosts(id, mail);
-                setTimeout(() => { setPostSuccess(false); setShowPostForm(false); }, 2000);
-            }
-        } catch { /* silent */ } finally { setPosting(false); }
-    };
 
     const acceptF2fQuote = async (requestPublicId: string, quoteId: number) => {
         const id = localStorage.getItem('cl_fwd_id') || '';
@@ -577,64 +547,11 @@ export default function ForwarderPortal() {
                                         <Package className="w-3.5 h-3.5 text-zinc-600" />
                                         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">My Posted Requests</span>
                                     </div>
-                                    <button onClick={() => setShowPostForm(v => !v)}
+                                    <button onClick={() => router.push('/forwarders/f2f')}
                                         className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest bg-white text-black px-3 py-1.5 rounded-lg hover:bg-zinc-100 transition-all">
                                         <Plus className="w-3 h-3" /> Post Request
                                     </button>
                                 </div>
-
-                                {/* Inline post form */}
-                                {showPostForm && (
-                                    <div className="border-b border-white/5 px-5 py-4 bg-white/[0.02]">
-                                        {postSuccess ? (
-                                            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                                                <CheckCircle2 className="w-4 h-4" /> Request posted! Other forwarders will be notified.
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Origin</label>
-                                                    <input value={postOrigin} onChange={e => setPostOrigin(e.target.value)} placeholder="e.g. Shanghai"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Destination</label>
-                                                    <input value={postDest} onChange={e => setPostDest(e.target.value)} placeholder="e.g. Riyadh"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Mode</label>
-                                                    <select value={postCargoType} onChange={e => setPostCargoType(e.target.value)}
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white outline-none">
-                                                        {['FCL','LCL','AIR','ROAD'].map(m => <option key={m} value={m}>{m}</option>)}
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Commodity</label>
-                                                    <input value={postCommodity} onChange={e => setPostCommodity(e.target.value)} placeholder="e.g. Electronics"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Weight (kg)</label>
-                                                    <input type="number" value={postWeight} onChange={e => setPostWeight(e.target.value)} placeholder="e.g. 5000"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20 font-mono" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[10px] text-zinc-500 mb-1">Notes</label>
-                                                    <input value={postNotes} onChange={e => setPostNotes(e.target.value)} placeholder="Any special requirements"
-                                                        className="w-full bg-black border border-white/5 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-700 outline-none focus:border-white/20" />
-                                                </div>
-                                                <div className="col-span-2 flex gap-2 justify-end">
-                                                    <button onClick={() => setShowPostForm(false)} className="text-[10px] text-zinc-600 hover:text-white transition-colors px-3 py-2">Cancel</button>
-                                                    <button onClick={submitF2fPost} disabled={!postOrigin || !postDest || posting}
-                                                        className="bg-white text-black text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl hover:bg-zinc-100 transition-all disabled:opacity-30 flex items-center gap-1.5">
-                                                        {posting ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Plus className="w-3 h-3" /> Post</>}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
 
                                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
                                     {myF2fPosts.length === 0 ? (
