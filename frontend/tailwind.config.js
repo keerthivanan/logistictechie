@@ -38,7 +38,7 @@ module.exports = {
         },
         'infinite-scroll': {
           '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-33.333%)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
         'spin-slow': {
           '0%': { transform: 'rotate(0deg)' },
@@ -47,7 +47,7 @@ module.exports = {
       },
       animation: {
         shimmer: 'shimmer 8s infinite linear',
-        'infinite-scroll': 'infinite-scroll 25s linear infinite',
+        'infinite-scroll': 'infinite-scroll 40s linear infinite',
         'spin-slow': 'spin-slow 30s linear infinite',
       },
     },

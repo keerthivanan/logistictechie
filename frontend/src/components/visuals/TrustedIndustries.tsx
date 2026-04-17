@@ -48,7 +48,7 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
 }
 
 export default function TrustedIndustries() {
-    const repeated = [...GIANTS, ...GIANTS, ...GIANTS];
+    const repeated = [...GIANTS, ...GIANTS];
 
     return (
         <section className="py-16 bg-black overflow-hidden relative">
