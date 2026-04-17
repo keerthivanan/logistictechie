@@ -410,14 +410,16 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.logo')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">
+                                {t('reg.logo')} <span className="text-red-500">*</span>
+                            </label>
                             <div onClick={() => document.getElementById('logo-upload')?.click()}
-                                className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:border-white/15 transition-colors">
+                                className={`w-full bg-black rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer transition-colors ${formData.logo_url ? 'border border-white/20' : 'border border-dashed border-white/20 hover:border-white/40'}`}>
                                 <input id="logo-upload" type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'logo_url')} accept="image/*" />
                                 <div className="flex items-center gap-3">
-                                    <Avatar src={formData.logo_url} name={formData.company_name} size="md" shape="square" className="border-white/10" />
-                                    <span className="text-sm text-zinc-500 font-inter">
-                                        {uploadingField === 'logo_url' ? t('reg.uploading') : t('reg.logo.upload')}
+                                    <Avatar src={formData.logo_url} name={formData.company_name || '?'} size="md" shape="square" className="border-white/10" />
+                                    <span className="text-sm font-inter text-zinc-500">
+                                        {uploadingField === 'logo_url' ? t('reg.uploading') : formData.logo_url ? 'Logo uploaded ✓' : 'Upload company logo (required)'}
                                     </span>
                                 </div>
                                 <Upload className="w-4 h-4 text-zinc-600 flex-shrink-0" />
@@ -426,7 +428,7 @@ export default function ForwarderRegisterPage() {
                     </div>
 
                     {/* Submit */}
-                    <button type="submit" disabled={loading || !!phoneError || formData.specializations.length === 0}
+                    <button type="submit" disabled={loading || !!phoneError || formData.specializations.length === 0 || !formData.logo_url}
                         className="w-full bg-white text-black py-4 rounded-xl text-sm font-bold uppercase tracking-wide hover:bg-zinc-100 transition-all font-inter active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xl">
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('fwd.register.cta')}
                     </button>
