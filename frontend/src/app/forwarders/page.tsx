@@ -289,28 +289,32 @@ function PartnerCard({ fwd, index, onClick }: { fwd: Forwarder; index: number; o
             onClick={onClick}
             className="w-full bg-white/[0.02] border border-white/[0.06] hover:border-white/20 hover:bg-white/[0.04] rounded-2xl p-5 flex flex-col gap-4 transition-all text-left group"
         >
-            {/* Top: avatar + verified */}
-            <div className="flex items-start justify-between">
-                <Avatar
-                    src={fwd.logo_url || undefined}
-                    name={fwd.company_name}
-                    size="md"
-                    shape="square"
-                    className="border-white/5 flex-shrink-0"
-                />
+            {/* Verified badge */}
+            <div className="flex justify-end">
                 <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] px-2 py-1 rounded-lg">
                     <CheckCircle2 className="w-2.5 h-2.5 text-white/60" />
                     <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Verified</span>
                 </div>
             </div>
 
+            {/* Centered avatar */}
+            <div className="flex justify-center">
+                <Avatar
+                    src={fwd.logo_url || undefined}
+                    name={fwd.company_name}
+                    size="xl"
+                    shape="square"
+                    className="border-white/5"
+                />
+            </div>
+
             {/* Company name */}
-            <div className="space-y-1 flex-1">
+            <div className="space-y-1 flex-1 text-center">
                 <p className="text-sm font-bold text-white font-outfit leading-snug group-hover:text-zinc-200 transition-colors">
                     {fwd.company_name}
                 </p>
                 {fwd.country ? (
-                    <p className="text-[11px] text-zinc-500 font-inter flex items-center gap-1.5">
+                    <p className="text-[11px] text-zinc-500 font-inter flex items-center justify-center gap-1.5">
                         <span>{getFlag(fwd.country)}</span>
                         <span>{normalizeCountry(fwd.country)}</span>
                     </p>
@@ -321,7 +325,7 @@ function PartnerCard({ fwd, index, onClick }: { fwd: Forwarder; index: number; o
 
             {/* Specialization tags */}
             {specs.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 justify-center">
                     {specs.map(s => (
                         <span key={s} className="text-[9px] font-semibold text-zinc-500 bg-white/[0.03] border border-white/[0.05] px-2 py-0.5 rounded-md uppercase tracking-wide font-inter">
                             {s}
@@ -331,7 +335,7 @@ function PartnerCard({ fwd, index, onClick }: { fwd: Forwarder; index: number; o
             )}
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
+            <div className="flex items-center justify-center gap-1.5 pt-3 border-t border-white/[0.05]">
                 <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest font-inter">View Profile</span>
                 <ExternalLink className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 transition-colors" />
             </div>
