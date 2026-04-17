@@ -23,7 +23,33 @@ interface Forwarder {
     routes?: string
 }
 
+// ISO 2-letter codes → full country name
+const ISO_TO_NAME: Record<string, string> = {
+    'IN': 'India', 'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea', 'SG': 'Singapore',
+    'AU': 'Australia', 'MY': 'Malaysia', 'ID': 'Indonesia', 'TH': 'Thailand', 'VN': 'Vietnam',
+    'PH': 'Philippines', 'HK': 'Hong Kong', 'TW': 'Taiwan', 'BD': 'Bangladesh', 'PK': 'Pakistan',
+    'SA': 'Saudi Arabia', 'AE': 'UAE', 'QA': 'Qatar', 'KW': 'Kuwait', 'BH': 'Bahrain',
+    'OM': 'Oman', 'JO': 'Jordan', 'IQ': 'Iraq', 'LB': 'Lebanon', 'YE': 'Yemen',
+    'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'DE': 'Germany',
+    'FR': 'France', 'NL': 'Netherlands', 'BE': 'Belgium', 'ES': 'Spain', 'IT': 'Italy',
+    'PL': 'Poland', 'RU': 'Russia', 'CH': 'Switzerland', 'SE': 'Sweden', 'NO': 'Norway',
+    'DK': 'Denmark', 'FI': 'Finland', 'AT': 'Austria', 'PT': 'Portugal', 'GR': 'Greece',
+    'IE': 'Ireland', 'IL': 'Israel', 'TR': 'Turkey', 'BR': 'Brazil', 'MX': 'Mexico',
+    'AR': 'Argentina', 'CO': 'Colombia', 'EG': 'Egypt', 'ZA': 'South Africa',
+    'NG': 'Nigeria', 'KE': 'Kenya', 'MA': 'Morocco', 'ET': 'Ethiopia', 'GH': 'Ghana',
+}
+
+function normalizeCountry(country: string): string {
+    if (!country) return ''
+    // If it's a 2-letter ISO code, convert to full name
+    if (country.length === 2 && ISO_TO_NAME[country.toUpperCase()]) {
+        return ISO_TO_NAME[country.toUpperCase()]
+    }
+    return country
+}
+
 function getFlag(country: string): string {
+    const name = normalizeCountry(country)
     const map: Record<string, string> = {
         'Saudi Arabia': '🇸🇦', 'UAE': '🇦🇪', 'United Arab Emirates': '🇦🇪',
         'USA': '🇺🇸', 'United States': '🇺🇸', 'UK': '🇬🇧', 'United Kingdom': '🇬🇧',
@@ -40,7 +66,7 @@ function getFlag(country: string): string {
         'Norway': '🇳🇴', 'Denmark': '🇩🇰', 'Finland': '🇫🇮', 'Austria': '🇦🇹',
         'Portugal': '🇵🇹', 'Greece': '🇬🇷', 'Ireland': '🇮🇪', 'Israel': '🇮🇱',
     }
-    return map[country] || '🌐'
+    return map[name] || '🌐'
 }
 
 const FILTERS = ['All', 'Asia Pacific', 'Middle East', 'Europe', 'Americas', 'Africa'] as const
@@ -91,7 +117,7 @@ export default function ForwarderDirectoryPage() {
         }
         if (filter !== 'All') {
             const regionCountries = REGION_COUNTRIES[filter] || []
-            list = list.filter(f => regionCountries.includes(f.country))
+            list = list.filter(f => regionCountries.includes(normalizeCountry(f.country)))
         }
         return list
     }, [forwarders, search, filter])
@@ -286,7 +312,7 @@ function PartnerCard({ fwd, index, onClick }: { fwd: Forwarder; index: number; o
                 {fwd.country ? (
                     <p className="text-[11px] text-zinc-500 font-inter flex items-center gap-1.5">
                         <span>{getFlag(fwd.country)}</span>
-                        <span>{fwd.country}</span>
+                        <span>{normalizeCountry(fwd.country)}</span>
                     </p>
                 ) : (
                     <p className="text-[11px] text-zinc-700 font-inter">Global operations</p>

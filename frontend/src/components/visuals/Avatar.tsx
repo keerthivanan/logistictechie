@@ -45,9 +45,12 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
         square: 'rounded-[32%] md:rounded-[24%]'
     };
 
-    const initials = name
-        ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-        : '?';
+    const words = name ? name.trim().split(/\s+/) : []
+    const initials = words.length > 1
+        ? words.map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : words.length === 1
+            ? words[0].slice(0, 2).toUpperCase()
+            : '?'
 
     return (
         <div className={`relative flex-shrink-0 overflow-hidden bg-black border border-white/10 shadow-2xl ${sizeClasses[size]} ${shapeClasses[shape]} ${className}`}>
