@@ -267,7 +267,7 @@ function ResultsContent() {
                       <motion.div key={idx}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                         transition={{ delay: idx * 0.06 }}
-                        className={`p-6 flex items-center gap-6 transition-colors group ${isBest ? 'bg-white/[0.03] hover:bg-white/[0.05]' : 'hover:bg-white/[0.02]'}`}
+                        className={`p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 transition-colors group ${isBest ? 'bg-white/[0.03] hover:bg-white/[0.05]' : 'hover:bg-white/[0.02]'}`}
                       >
                         {/* Carrier avatar */}
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm font-mono flex-shrink-0 transition-all ${
@@ -279,7 +279,7 @@ function ResultsContent() {
                         </div>
 
                         {/* Carrier name + badges */}
-                        <div className="w-40 flex-shrink-0">
+                        <div className="w-full sm:w-40 flex-shrink-0">
                           <p className="text-sm font-black text-white uppercase tracking-tight leading-tight">{quote.carrier_name}</p>
                           <p className="text-[9px] text-zinc-700 font-mono mt-0.5 uppercase">{container}</p>
                           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -324,7 +324,7 @@ function ResultsContent() {
                         </div>
 
                         {/* Price + CTA */}
-                        <div className="flex items-center gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-4 flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                           <div className="text-right">
                             <p className="text-[8px] text-zinc-600 uppercase tracking-widest font-inter mb-1">{t('res.all.in')}</p>
                             <p className={`text-2xl font-black font-mono tracking-tight ${isBest ? 'text-white' : 'text-white'}`}>

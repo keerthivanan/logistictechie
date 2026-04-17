@@ -78,7 +78,7 @@ export default function SolutionsGrid() {
                             </div>
 
                             <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                                <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                                <div className="absolute inset-0 p-5 md:p-10 flex flex-col justify-end">
                                     <h3 className="text-2xl font-semibold mb-4 text-white group-hover:text-white/80 transition-colors tracking-tight font-outfit">{item.title}</h3>
                                     <p className="text-zinc-400 leading-relaxed text-sm opacity-80 group-hover:opacity-100 transition-all duration-300">
                                         {item.desc}

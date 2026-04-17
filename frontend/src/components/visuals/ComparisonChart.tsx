@@ -30,7 +30,7 @@ export default function ComparisonChart() {
     ]
 
     return (
-        <div className="bg-[#0a0a0a] border border-white/[0.07] rounded-2xl p-8 relative overflow-hidden">
+        <div className="bg-[#0a0a0a] border border-white/[0.07] rounded-2xl p-4 sm:p-8 relative overflow-hidden">
             <div className="relative z-10">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-10">
