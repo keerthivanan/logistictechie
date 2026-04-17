@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/config';
-import NextImage from 'next/image';
 import { User } from 'lucide-react';
 
 interface AvatarProps {
@@ -64,28 +63,15 @@ export default function Avatar({ src, name, size = 'md', shape = 'circle', class
                 )}
             </div>
 
-            {/* Image Layer */}
+            {/* Image Layer — native img for all sources to avoid Next.js Image CORS/processing issues */}
             {finalSrc && status !== 'error' && (
-                finalSrc.startsWith('data:') ? (
-                    // Native img for base64 data URLs — next/image rejects data: schemes
-                    <img
-                        src={finalSrc}
-                        alt={name || 'Avatar'}
-                        onLoad={() => setStatus('loaded')}
-                        onError={() => setStatus('error')}
-                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-                    />
-                ) : (
-                    <NextImage
-                        src={finalSrc}
-                        alt={name || 'Avatar'}
-                        fill
-                        unoptimized
-                        onLoad={() => setStatus('loaded')}
-                        onError={() => setStatus('error')}
-                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-                    />
-                )
+                <img
+                    src={finalSrc}
+                    alt={name || 'Avatar'}
+                    onLoad={() => setStatus('loaded')}
+                    onError={() => setStatus('error')}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out filter brightness-[1.1] ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+                />
             )}
 
             {/* Loading / Glossy Overlay */}
