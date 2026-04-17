@@ -113,7 +113,12 @@ async def start_conversation(
         raise HTTPException(status_code=404, detail="Request not found.")
     if req.user_sovereign_id != current_user.sovereign_id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="You do not own this request.")
-    if req.status == "BOOKED":
+
+    # Block if a booking has already been confirmed for this request
+    booking_check = await db.execute(
+        select(Booking).where(Booking.marketplace_request_id == data.request_id)
+    )
+    if booking_check.scalars().first():
         raise HTTPException(status_code=409, detail="This request has already been booked.")
 
     # 2. Fetch the quote
@@ -133,6 +138,8 @@ async def start_conversation(
     )
     existing = existing_res.scalars().first()
     if existing:
+        if existing.status in ("CLOSED", "BOOKED"):
+            raise HTTPException(status_code=409, detail="The conversation with this forwarder has already ended.")
         return {"public_id": existing.public_id, "existed": True}
 
     # 4. Create Conversation
