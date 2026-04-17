@@ -32,19 +32,17 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
     const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     return (
-        <div className="flex items-center gap-3 whitespace-nowrap mx-10 opacity-50 hover:opacity-100 transition-opacity duration-300 cursor-default group">
-            <div className="h-8 flex items-center justify-center flex-shrink-0">
-                {failed ? (
-                    <span className="text-[11px] font-bold text-zinc-400">{initials}</span>
-                ) : (
-                    <img
-                        src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=200&format=png`}
-                        alt={name}
-                        onError={() => setFailed(true)}
-                        className="h-8 w-auto max-w-[120px] object-contain opacity-40 group-hover:opacity-100 transition-opacity duration-300"
-                    />
-                )}
-            </div>
+        <div className="flex items-center gap-3 whitespace-nowrap mx-12 opacity-60 hover:opacity-100 transition-opacity duration-300 cursor-default group">
+            {failed ? (
+                <span className="text-sm font-bold text-zinc-400">{initials}</span>
+            ) : (
+                <img
+                    src={`https://img.logo.dev/${domain}?token=${TOKEN}&size=400&format=png`}
+                    alt={name}
+                    onError={() => setFailed(true)}
+                    className="h-14 w-auto max-w-[160px] object-contain transition-opacity duration-300"
+                />
+            )}
         </div>
     );
 }
