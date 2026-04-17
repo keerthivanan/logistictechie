@@ -12,6 +12,7 @@ import {
     Store, Users, UserPlus,
     Calculator, BookOpen,
     Info, MessageSquare,
+    LayoutDashboard, Package, Search, ArrowRight, Globe,
 } from 'lucide-react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -306,104 +307,192 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Menu — full screen overlay */}
+            {/* Mobile Menu — app-style full screen */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.2 }}
-                        className="md:hidden fixed inset-0 top-0 left-0 right-0 bottom-0 z-[60] bg-black/95 backdrop-blur-2xl overflow-y-auto"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="md:hidden fixed inset-0 z-[60] bg-black overflow-y-auto"
                     >
-                        {/* Close button row */}
-                        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 pt-5 pb-3">
                             <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                                <img src="/cargolink.png" alt="CargoLink" className="h-12 w-auto object-contain opacity-90" />
+                                <img src="/cargolink.png" alt="CargoLink" className="h-11 w-auto object-contain opacity-90" />
                             </Link>
-                            <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white">
-                                <X className="w-5 h-5" />
+                            <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/[0.08]">
+                                <X className="w-5 h-5 text-white" />
                             </button>
                         </div>
 
-                        <div className="px-6 pb-10 space-y-1">
-                            {/* User info banner if logged in */}
+                        <div className="px-5 pb-10 space-y-4">
+
+                            {/* ── User card (logged in) ── */}
                             {user && (
-                                <div className="flex items-center gap-3 py-4 mb-2 border-b border-white/10">
+                                <div className="flex items-center gap-3 p-4 bg-white/[0.03] border border-white/[0.07] rounded-2xl">
                                     <Avatar src={user.avatar_url} name={user.name} size="md" />
-                                    <div>
-                                        <p className="text-sm font-bold text-white">{user.name}</p>
-                                        <p className="text-[10px] text-zinc-500 font-mono uppercase">{user.sovereign_id}</p>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-bold text-white truncate">{user.name}</p>
+                                        <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">{user.sovereign_id}</p>
                                     </div>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 border border-white/[0.07] rounded-lg px-2 py-1">
+                                        {user.role === 'forwarder' ? 'Partner' : user.role === 'admin' ? 'Admin' : 'Shipper'}
+                                    </span>
                                 </div>
                             )}
 
-                            {/* Primary links */}
-                            {user?.role !== 'forwarder' && (
-                                <Link href="/search" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3.5 border-b border-white/[0.06] text-base font-semibold text-white font-inter">
-                                    {t('nav.search')}
-                                </Link>
-                            )}
-                            {user && (
-                                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3.5 border-b border-white/[0.06] text-base font-semibold text-white font-inter">
-                                    {user?.role === 'forwarder' ? t('nav.partner.dashboard') : t('nav.dashboard')}
-                                </Link>
-                            )}
-                            {user?.role === 'forwarder' && (
-                                <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3.5 border-b border-white/[0.06] text-base font-semibold text-white font-inter">
-                                    {t('nav.partner.portal')}
-                                </Link>
-                            )}
+                            {/* ── Quick actions grid ── */}
+                            <div>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-3 font-inter">Quick Access</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* Logged-in shipper/admin */}
+                                    {user && user.role !== 'forwarder' && (
+                                        <>
+                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname === '/dashboard' ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <LayoutDashboard className={`w-6 h-6 ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`}>Dashboard</span>
+                                            </Link>
+                                            <Link href="/dashboard/shipments" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/shipments') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <Package className={`w-6 h-6 ${pathname.includes('/shipments') ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/shipments') ? 'text-black' : 'text-zinc-300'}`}>Shipments</span>
+                                            </Link>
+                                            <Link href="/dashboard/messages" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/messages') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <MessageSquare className={`w-6 h-6 ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`}>Messages</span>
+                                            </Link>
+                                            <Link href="/search" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Search className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Get Quote</span>
+                                            </Link>
+                                        </>
+                                    )}
+                                    {/* Logged-in forwarder */}
+                                    {user?.role === 'forwarder' && (
+                                        <>
+                                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname === '/dashboard' ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <LayoutDashboard className={`w-6 h-6 ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname === '/dashboard' ? 'text-black' : 'text-zinc-300'}`}>Dashboard</span>
+                                            </Link>
+                                            <Link href="/forwarders/portal" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/portal') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <Store className={`w-6 h-6 ${pathname.includes('/portal') ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/portal') ? 'text-black' : 'text-zinc-300'}`}>Portal</span>
+                                            </Link>
+                                            <Link href="/dashboard/messages" onClick={() => setMobileMenuOpen(false)}
+                                                className={`flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border transition-colors active:scale-95 ${pathname.includes('/messages') ? 'bg-white border-white' : 'bg-white/[0.03] border-white/[0.08] active:bg-white/[0.07]'}`}>
+                                                <MessageSquare className={`w-6 h-6 ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`} />
+                                                <span className={`text-[11px] font-bold uppercase tracking-widest font-inter ${pathname.includes('/messages') ? 'text-black' : 'text-zinc-300'}`}>Messages</span>
+                                            </Link>
+                                            <Link href="/forwarders" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Users className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Partners</span>
+                                            </Link>
+                                        </>
+                                    )}
+                                    {/* Guest */}
+                                    {!user && (
+                                        <>
+                                            <Link href="/search" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Search className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Get Quote</span>
+                                            </Link>
+                                            <Link href="/marketplace" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Store className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Marketplace</span>
+                                            </Link>
+                                            <Link href="/forwarders" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Users className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">Partners</span>
+                                            </Link>
+                                            <Link href="/about" onClick={() => setMobileMenuOpen(false)}
+                                                className="flex flex-col items-center justify-center gap-2.5 p-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] active:bg-white/[0.07] transition-colors active:scale-95">
+                                                <Globe className="w-6 h-6 text-zinc-300" />
+                                                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest font-inter">About</span>
+                                            </Link>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
 
-                            {/* Services sub-links */}
-                            {user?.role !== 'forwarder' && (
-                                <>
-                                    <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest pt-5 pb-2">{t('nav.services')}</p>
-                                    {navItems[0].children.map(child => (
-                                        <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 border-b border-white/[0.06] text-zinc-400 font-inter text-sm">
-                                            <child.icon className="w-4 h-4 shrink-0" /> {child.label}
+                            {/* ── Secondary grouped links ── */}
+                            <div>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-3 font-inter">Explore</p>
+                                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.05] overflow-hidden">
+                                    {user?.role !== 'forwarder' && navItems[0].children.map(child => (
+                                        <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                            <child.icon className="w-4 h-4 text-zinc-600 shrink-0" />
+                                            <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{child.label}</span>
+                                            <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
                                         </Link>
                                     ))}
-                                </>
-                            )}
-
-                            {/* Ecosystem sub-links */}
-                            <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest pt-5 pb-2">{t('nav.ecosystem')}</p>
-                            {navItems[1].children.map(child => (
-                                <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 border-b border-white/[0.06] text-zinc-400 font-inter text-sm">
-                                    <child.icon className="w-4 h-4 shrink-0" /> {child.label}
-                                </Link>
-                            ))}
-
-                            {/* Tools sub-links */}
-                            <p className="text-[10px] font-semibold text-zinc-600 uppercase tracking-widest pt-5 pb-2">{t('nav.tools')}</p>
-                            {navItems[2].children.map(child => (
-                                <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 border-b border-white/[0.06] text-zinc-400 font-inter text-sm">
-                                    <child.icon className="w-4 h-4 shrink-0" /> {child.label}
-                                </Link>
-                            ))}
-
-                            {/* Auth actions */}
-                            <div className="pt-6 space-y-3">
-                                {user ? (
-                                    <>
-                                        <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 w-full py-3.5 px-4 border border-white/10 rounded-2xl text-white font-semibold text-sm font-inter">
-                                            <UserIcon className="w-4 h-4 opacity-60" /> {t('nav.profile')}
+                                    {navItems[2].children.map(child => (
+                                        <Link key={child.label} href={child.href} onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                            <child.icon className="w-4 h-4 text-zinc-600 shrink-0" />
+                                            <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{child.label}</span>
+                                            <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
                                         </Link>
-                                        <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 w-full py-3.5 px-4 border border-white/10 rounded-2xl text-white font-semibold text-sm font-inter">
-                                            <SettingsIcon className="w-4 h-4 opacity-60" /> {t('nav.settings')}
-                                        </Link>
-                                        <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="flex items-center gap-3 w-full py-3.5 px-4 border border-red-500/20 bg-red-500/5 rounded-2xl text-red-400 font-semibold text-sm font-inter">
-                                            <LogOut className="w-4 h-4 opacity-60" /> {t('nav.signout')}
-                                        </button>
-                                    </>
-                                ) : (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="py-4 text-center border border-white/10 rounded-2xl text-white font-semibold text-sm font-inter">{t('nav.login')}</Link>
-                                        <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="py-4 text-center bg-white text-black rounded-2xl font-bold text-sm font-inter">{t('nav.signup')}</Link>
-                                    </div>
-                                )}
+                                    ))}
+                                    <Link href="/about" onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                        <Info className="w-4 h-4 text-zinc-600 shrink-0" />
+                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.about')}</span>
+                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
+                                    </Link>
+                                    <Link href="/contact" onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                        <MessageSquare className="w-4 h-4 text-zinc-600 shrink-0" />
+                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.contact')}</span>
+                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
+                                    </Link>
+                                </div>
                             </div>
+
+                            {/* ── Auth actions ── */}
+                            {user ? (
+                                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl divide-y divide-white/[0.05] overflow-hidden">
+                                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                        <UserIcon className="w-4 h-4 text-zinc-600 shrink-0" />
+                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.profile')}</span>
+                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
+                                    </Link>
+                                    <Link href="/settings" onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3.5 active:bg-white/[0.04] transition-colors">
+                                        <SettingsIcon className="w-4 h-4 text-zinc-600 shrink-0" />
+                                        <span className="text-sm font-medium text-zinc-400 font-inter flex-1">{t('nav.settings')}</span>
+                                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700" />
+                                    </Link>
+                                    <button onClick={() => { logout(); setMobileMenuOpen(false); }}
+                                        className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-red-500/5 transition-colors">
+                                        <LogOut className="w-4 h-4 text-red-500/60 shrink-0" />
+                                        <span className="text-sm font-medium text-red-400 font-inter">{t('nav.signout')}</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}
+                                        className="py-4 text-center border border-white/10 rounded-2xl text-white font-bold text-sm font-inter active:bg-white/5 transition-colors">
+                                        {t('nav.login')}
+                                    </Link>
+                                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}
+                                        className="py-4 text-center bg-white text-black rounded-2xl font-bold text-sm font-inter active:bg-zinc-200 transition-colors">
+                                        {t('nav.signup')}
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
