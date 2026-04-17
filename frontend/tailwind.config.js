@@ -47,7 +47,7 @@ module.exports = {
       },
       animation: {
         shimmer: 'shimmer 8s infinite linear',
-        'infinite-scroll': 'infinite-scroll 40s linear infinite',
+        'infinite-scroll': 'infinite-scroll 70s linear infinite',
         'spin-slow': 'spin-slow 30s linear infinite',
       },
     },
