@@ -680,7 +680,7 @@ export default function ForwarderPortal() {
                             <div className="flex items-center gap-2">
                                 <Package className="w-3.5 h-3.5 text-zinc-600" />
                                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                                    {t('portal.open.requests')}
+                                    Shipper Requests
                                 </span>
                             </div>
                             <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
