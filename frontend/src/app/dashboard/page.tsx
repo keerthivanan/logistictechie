@@ -100,7 +100,7 @@ export default function DashboardPage() {
     return (
         <div className="h-full flex flex-col gap-4 overflow-hidden">
             {/* Header row: name + metrics */}
-            <div className="flex-shrink-0 flex items-center justify-between gap-6 pb-4 border-b border-white/5">
+            <div className="flex-shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 pb-4 border-b border-white/5">
                 <DashboardHeader userName={user?.name} />
                 <MetricCards stats={stats} />
             </div>

@@ -413,7 +413,7 @@ export default function CalculatorPage() {
             </section>
 
             {/* ─── CTA ─── */}
-            <section className="py-32 bg-black border-t border-white/5">
+            <section className="py-16 md:py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('calc.cta.title')}</h2>
                     <p className="text-xl text-zinc-400 mb-10">{t('calc.cta.sub')}</p>

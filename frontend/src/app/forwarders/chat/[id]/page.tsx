@@ -560,8 +560,8 @@ export default function ForwarderChatPage() {
                 )}
             </div>
 
-            {/* ── RIGHT: Deal Details Panel ── */}
-            <div className="w-80 flex-shrink-0 flex flex-col bg-black/20 overflow-y-auto border-l border-white/[0.05]">
+            {/* ── RIGHT: Deal Details Panel — hidden on mobile ── */}
+            <div className="hidden md:flex w-80 flex-shrink-0 flex-col bg-black/20 overflow-y-auto border-l border-white/[0.05]">
 
                 {/* Price card */}
                 <div className="p-5 border-b border-white/[0.05]">

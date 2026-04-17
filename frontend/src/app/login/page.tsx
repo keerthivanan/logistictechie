@@ -159,7 +159,7 @@ function LoginContent() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none" />
 
-            <div className="w-full max-w-sm p-8 relative z-10">
+            <div className="w-full max-w-sm px-4 sm:px-8 py-8 relative z-10">
                 {/* Logo */}
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center group mb-8">

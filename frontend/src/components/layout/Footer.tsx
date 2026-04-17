@@ -59,7 +59,7 @@ export default function Footer() {
                 <div className="py-16 flex flex-col items-center text-center">
                     {/* Logo — matches Navbar */}
                     <Link href="/" className="flex items-center mb-4 group">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-36 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
+                        <img src="/cargolink.png" alt="CargoLink" className="h-20 md:h-36 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     <p className="text-sm text-zinc-500 font-inter max-w-md leading-relaxed">
                         {t('footer.tagline')}
@@ -67,7 +67,7 @@ export default function Footer() {
                 </div>
 
                 {/* Middle — link columns */}
-                <div className="py-14 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 border-b border-white/[0.05]">
+                <div className="py-10 md:py-14 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-10 border-b border-white/[0.05]">
                     {columns.map((col) => (
                         <div key={col.heading}>
                             <h4 className="text-[10px] font-semibold text-white uppercase tracking-[0.2em] font-inter mb-5">

@@ -25,14 +25,14 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
+      <section className="relative pt-24 pb-20 md:pt-32 md:pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
         <div className="absolute inset-0 z-0 opacity-100 mix-blend-screen pointer-events-none">
           <Prism />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          <h1 className="text-5xl md:text-7xl font-semibold tracking-tighter mb-6 text-white">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-semibold tracking-tighter mb-5 md:mb-6 text-white">
             {t('hero.line1')} <br />
             <span className="text-white/70">{t('hero.line2')}</span>
           </h1>
@@ -59,9 +59,9 @@ export default function Home() {
       </section>
 
       {/* The Shift Section */}
-      <section className="py-24 bg-black border-t-0 -mt-1 relative z-20">
+      <section className="py-16 md:py-24 bg-black border-t-0 -mt-1 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div>
               <h2 className="text-3xl font-semibold tracking-tight mb-6 font-outfit">{t('home.shift.title')}</h2>
               <p className="text-sm text-zinc-400 mb-6 font-inter leading-relaxed">
@@ -79,9 +79,9 @@ export default function Home() {
       </section>
 
       {/* Comparison Section */}
-      <section className="py-24 bg-black">
+      <section className="py-16 md:py-24 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className="order-2 md:order-1">
               <ComparisonChart />
             </div>
@@ -113,11 +113,11 @@ export default function Home() {
       </section>
 
       {/* Everything You Need Section */}
-      <section className="py-24">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-semibold tracking-tight mb-12 text-center font-outfit">{t('home.scale.title')}</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-8 md:mb-12 text-center font-outfit">{t('home.scale.title')}</h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
               { icon: Search, label: t('home.scale.smart.search') },
               { icon: Layers, label: t('home.scale.tracking') },
@@ -128,9 +128,9 @@ export default function Home() {
               { icon: Users, label: t('home.scale.team') },
               { icon: Globe, label: t('home.scale.api') },
             ].map((feature, i) => (
-              <div key={i} className="flex flex-col items-center justify-center p-6 bg-[#0a0a0a] border border-white/[0.05] rounded-2xl hover:border-white/[0.15] transition-all cursor-pointer">
+              <div key={i} className="flex flex-col items-center justify-center p-4 md:p-6 bg-[#0a0a0a] border border-white/[0.05] rounded-2xl hover:border-white/[0.15] transition-all cursor-pointer">
                 <feature.icon className="w-5 h-5 text-zinc-400 mb-3" />
-                <span className="text-xs font-semibold text-zinc-300 font-inter uppercase tracking-widest text-center">{feature.label}</span>
+                <span className="text-[10px] md:text-xs font-semibold text-zinc-300 font-inter uppercase tracking-widest text-center">{feature.label}</span>
               </div>
             ))}
           </div>
@@ -140,7 +140,7 @@ export default function Home() {
       <TrustedIndustries />
 
       {/* Smart Dashboard Section */}
-      <section className="py-32 bg-black relative overflow-hidden">
+      <section className="py-16 md:py-32 bg-black relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-semibold mb-4 tracking-tight font-outfit">{t('home.platform.title')}</h2>
@@ -155,9 +155,9 @@ export default function Home() {
       <SolutionsGrid />
 
       {/* Global Network Section */}
-      <section className="py-32 bg-black relative">
+      <section className="py-16 md:py-32 bg-black relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/[0.03] border border-white/[0.08] text-zinc-400 text-xs font-inter mb-6">
                 <Globe className="w-3.5 h-3.5" /> {t('home.network.badge')}
@@ -188,7 +188,7 @@ export default function Home() {
       <TestimonialsSection />
 
       {/* Final CTA */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-16 md:py-32 relative overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-6 font-outfit">{t('home.cta.title')}</h2>
           <p className="text-sm text-zinc-400 mb-10 max-w-xl mx-auto font-inter leading-relaxed">{t('home.cta.sub')}</p>

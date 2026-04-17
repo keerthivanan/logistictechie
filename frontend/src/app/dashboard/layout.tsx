@@ -285,8 +285,12 @@ export default function DashboardLayout({
             {/* Main Content Area */}
             <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
                 {/* Global Dashboard Header */}
-                <header className="h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-[40]">
-                    <div className="flex items-center gap-8 flex-1 max-w-2xl text-zinc-500">
+                <header className="h-16 md:h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-[40]">
+                    {/* Mobile: show logo; Desktop: show search */}
+                    <Link href="/" className="md:hidden shrink-0">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
+                    </Link>
+                    <div className="hidden md:flex items-center gap-8 flex-1 max-w-2xl text-zinc-500">
                         <div className="relative flex-1 group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 group-focus-within:text-white transition-colors" />
                             <input
@@ -304,7 +308,7 @@ export default function DashboardLayout({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 ml-8">
+                    <div className="flex items-center gap-3 md:gap-4 ml-auto md:ml-8">
                         {/* Mobile hamburger */}
                         <button
                             onClick={() => setMobileNavOpen(true)}
@@ -385,7 +389,7 @@ export default function DashboardLayout({
                             </div>
 
                             {user?.role !== 'forwarder' && (
-                            <Link href="/search" className="bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <Link href="/search" className="hidden md:flex bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                 <Plus className="w-4 h-4" /> {t('dash.book')}
                             </Link>
                             )}
@@ -393,7 +397,7 @@ export default function DashboardLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-6 h-[calc(100vh-80px)]">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
                     {children}
                 </main>
             </div>

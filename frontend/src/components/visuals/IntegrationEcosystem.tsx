@@ -19,9 +19,9 @@ const TOTAL = integrationNodes.length;
 export default function IntegrationEcosystem() {
     const t = useT()
     return (
-        <section className="py-24 bg-black border-y border-white/[0.05] overflow-hidden">
+        <section className="py-16 md:py-24 bg-black border-y border-white/[0.05] overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid md:grid-cols-2 gap-16 items-center">
+                <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
 
                     {/* Left — text */}
                     <div>

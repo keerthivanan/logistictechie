@@ -186,7 +186,7 @@ export default function ServicePage() {
                     </h1>
 
                     {/* Stats Row */}
-                    <div className="flex flex-wrap justify-center gap-12 md:gap-20 mb-12">
+                    <div className="flex flex-wrap justify-center gap-6 md:gap-20 mb-8 md:mb-12">
                         {service.stats.map((stat: any, i: number) => (
                             <div key={i} className="flex flex-col gap-1">
                                 <div className="text-3xl md:text-4xl font-bold text-white tracking-tighter">{stat.value}</div>
@@ -203,10 +203,10 @@ export default function ServicePage() {
             </section>
 
             {/* --- MAIN CONTENT & FEATURES --- */}
-            <section className="py-24 relative bg-black border-t border-white/5">
+            <section className="py-16 md:py-24 relative bg-black border-t border-white/5">
                 <div className="max-w-7xl mx-auto px-4">
 
-                    <div className="grid md:grid-cols-2 gap-20 mb-32 items-center">
+                    <div className="grid md:grid-cols-2 gap-8 md:gap-20 mb-12 md:mb-32 items-center">
                         <div className="space-y-8">
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{t('service.why.switch')}</h2>
                             <p className="text-lg text-zinc-400 leading-relaxed max-w-xl">
@@ -225,7 +225,7 @@ export default function ServicePage() {
                                 <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 mb-8">{t('service.intel.protocol')}</h2>
                             </div>
                         )}
-                        <div className="grid md:grid-cols-3 gap-12 text-center">
+                        <div className="grid md:grid-cols-3 gap-6 md:gap-12 text-center">
                             {service.features.map((feature: any, i: number) => (
                                 <div key={i} className="group space-y-4">
                                     <h3 className="text-xl font-bold text-white">{feature.title}</h3>
@@ -238,8 +238,8 @@ export default function ServicePage() {
                     </div>
 
                     {/* --- WORKFLOW STEPS --- */}
-                    <div className="border-t border-white/5 pt-24">
-                        <div className="text-center mb-16">
+                    <div className="border-t border-white/5 pt-12 md:pt-24">
+                        <div className="text-center mb-8 md:mb-16">
                             <h2 className="text-3xl font-bold mb-4">{t('service.the.protocol')}</h2>
                         </div>
 
@@ -260,13 +260,13 @@ export default function ServicePage() {
             </section>
 
             {/* --- CTA SECTION --- */}
-            <section className="py-32 bg-black border-t border-white/5">
+            <section className="py-16 md:py-32 bg-black border-t border-white/5">
                 <div className="max-w-4xl mx-auto text-center px-4">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('service.upgrade.title')}</h2>
-                    <p className="text-xl text-zinc-400 mb-10">
+                    <h2 className="text-3xl md:text-5xl font-bold mb-6 md:mb-8">{t('service.upgrade.title')}</h2>
+                    <p className="text-base md:text-xl text-zinc-400 mb-8 md:mb-10">
                         {t('service.upgrade.sub')}
                     </p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-zinc-200 transition-all">
                             {t('service.upgrade.cta1')}
                         </Link>

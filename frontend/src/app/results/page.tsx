@@ -160,7 +160,7 @@ function ResultsContent() {
 
       {/* ── Loading ── */}
       {loading ? (
-        <div className="max-w-4xl mx-auto px-4 py-32 flex flex-col items-center gap-6">
+        <div className="max-w-4xl mx-auto px-4 py-16 md:py-32 flex flex-col items-center gap-6">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             className="w-20 h-20 rounded-3xl bg-[#0a0a0a] border border-white/[0.08] flex items-center justify-center relative">
             <Ship className="w-8 h-8 text-zinc-500" />

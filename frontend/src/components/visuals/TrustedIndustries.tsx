@@ -32,7 +32,7 @@ function GiantLogo({ name, domain }: { name: string; domain: string }) {
     const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     return (
-        <div className="flex items-center gap-3 whitespace-nowrap mx-12 opacity-90 hover:opacity-100 transition-opacity duration-300 cursor-default group">
+        <div className="flex items-center gap-3 whitespace-nowrap mx-4 sm:mx-8 md:mx-12 opacity-90 hover:opacity-100 transition-opacity duration-300 cursor-default group">
             {failed ? (
                 <span className="text-sm font-bold text-zinc-400">{initials}</span>
             ) : (
