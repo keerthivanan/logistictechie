@@ -38,7 +38,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://unpkg.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://api.cargolink.sa https://logo.clearbit.com https://t2.gstatic.com https://www.google.com https://ssl.gstatic.com",
+              "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://api.cargolink.sa https://img.logo.dev",
               "connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 ws://127.0.0.1:8000 ws://localhost:8000 https://api.cargolink.sa https://*.neon.tech https://accounts.google.com https://*.ngrok-free.app https://*.ngrok.io https://*.ngrok-free.dev",
               "frame-src https://accounts.google.com",
               "media-src 'self' data: blob:",
