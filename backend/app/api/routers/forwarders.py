@@ -525,7 +525,7 @@ async def portal_forwarder_dashboard(
     """
     stmt = select(Forwarder).where(
         Forwarder.forwarder_id == f_id,
-        Forwarder.email == email,
+        func.lower(Forwarder.email) == email.lower(),
         Forwarder.status == "ACTIVE"
     )
     result = await db.execute(stmt)
@@ -633,7 +633,7 @@ async def portal_submit_bid(bid_in: PortalBidSubmit, background_tasks: Backgroun
     # Validate forwarder identity
     stmt = select(Forwarder).where(
         Forwarder.forwarder_id == bid_in.forwarder_id,
-        Forwarder.email == bid_in.email,
+        func.lower(Forwarder.email) == bid_in.email.lower(),
         Forwarder.status == "ACTIVE"
     )
     result = await db.execute(stmt)
