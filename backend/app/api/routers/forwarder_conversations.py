@@ -55,7 +55,7 @@ async def _verify_portal_forwarder(
     fwd_res = await db.execute(
         select(Forwarder).where(
             Forwarder.forwarder_id == forwarder_id,
-            Forwarder.email == email,
+            func.lower(Forwarder.email) == email.lower(),
             Forwarder.status == "ACTIVE",
         )
     )
@@ -128,7 +128,7 @@ async def list_portal_conversations(
     fwd_res = await db.execute(
         select(Forwarder).where(
             Forwarder.forwarder_id == x_forwarder_id,
-            Forwarder.email == x_forwarder_email,
+            func.lower(Forwarder.email) == x_forwarder_email.lower(),
             Forwarder.status == "ACTIVE",
         )
     )
