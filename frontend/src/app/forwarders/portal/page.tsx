@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
     ArrowRight, Loader2, Package,
     TrendingUp, CheckCircle2, Clock,
     DollarSign, Ship, Truck,
-    BarChart3, MessageSquare, Plus
+    BarChart3, MessageSquare, Plus,
+    Zap, Menu, X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/config';
@@ -33,7 +35,8 @@ export default function ForwarderPortal() {
     const [bidSuccess, setBidSuccess] = useState(false);
     const [bidError, setBidError] = useState('');
 
-    const [activeTab, setActiveTab] = useState<'requests' | 'conversations' | 'network'>('requests');
+    const [activeTab, setActiveTab] = useState<'requests' | 'conversations' | 'network' | 'f2f-messages'>('requests');
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [conversations, setConversations] = useState<any[]>([]);
     const [convLoading, setConvLoading] = useState(false);
 
@@ -55,12 +58,13 @@ export default function ForwarderPortal() {
     const [cvResult, setCvResult] = useState<string | null>(null);
     const [cvLoading, setCvLoading] = useState(false);
 
-    const switchTab = (tab: 'requests' | 'conversations' | 'network') => {
+    const switchTab = (tab: 'requests' | 'conversations' | 'network' | 'f2f-messages') => {
         setActiveTab(tab);
         const id = localStorage.getItem('cl_fwd_id');
         const mail = localStorage.getItem('cl_fwd_email');
         if (!id || !mail) return;
         if (tab === 'conversations') fetchConversations(id, mail);
+        if (tab === 'f2f-messages') fetchF2fConvs(id, mail);
         if (tab === 'network') {
             Promise.all([fetchMyF2fPosts(id, mail), fetchF2fConvs(id, mail), fetchF2fBrowse(id, mail)]);
         }
@@ -255,6 +259,16 @@ export default function ForwarderPortal() {
         return () => clearInterval(iv);
     }, [isAuthenticated, activeTab, fetchMyF2fPosts, fetchF2fConvs, fetchF2fBrowse]);
 
+    // Poll F2F messages tab every 10s
+    useEffect(() => {
+        if (!isAuthenticated || activeTab !== 'f2f-messages') return;
+        const id = localStorage.getItem('cl_fwd_id');
+        const mail = localStorage.getItem('cl_fwd_email');
+        if (!id || !mail) return;
+        const iv = setInterval(() => fetchF2fConvs(id, mail), 10000);
+        return () => clearInterval(iv);
+    }, [isAuthenticated, activeTab, fetchF2fConvs]);
+
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         handleAuth(forwarderId.toUpperCase(), email);
@@ -387,54 +401,119 @@ export default function ForwarderPortal() {
     const companyName = dashboardData?.company_name || user?.name || '—';
     const fwdId = localStorage.getItem('cl_fwd_id') || user?.sovereign_id || '';
 
-    const tabLabels: Record<string, string> = {
-        requests: t('portal.tab.requests'),
-        conversations: t('portal.tab.messages'),
-        network: 'F2F Network',
-    };
-
     return (
-        <div className="h-screen bg-[#080808] text-white flex flex-col overflow-hidden">
-            <Navbar />
+        <div className="h-screen bg-[#050505] text-white flex overflow-hidden">
 
-            <div className="flex-1 flex flex-col min-h-0 px-6 pt-24 pb-6 gap-5">
+            {/* ── Sidebar ── */}
+            <aside className="w-64 border-r border-white/[0.04] fixed h-full bg-[#080808] z-50 hidden md:flex flex-col">
+                <div className="flex items-center justify-center h-20 px-6 border-b border-white/[0.04]">
+                    <Link href="/" className="flex items-center group">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-12 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
+                    </Link>
+                </div>
 
-                {/* Header */}
-                <div className="flex items-center justify-between flex-shrink-0">
+                <div className="flex-1 px-3 py-5 space-y-6 overflow-y-auto custom-scrollbar">
+
+                    {/* SHIPPER section */}
                     <div>
-                        <h1 className="text-lg font-bold font-outfit text-white tracking-tight">{companyName}</h1>
-                        <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-xs font-mono text-zinc-500">{fwdId}</span>
-                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                            <span className="flex items-center gap-1.5 text-[10px] font-bold text-white uppercase tracking-widest">
+                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">Shipper</p>
+                        <div className="space-y-0.5">
+                            {([
+                                { tab: 'requests' as const, label: 'Shipper Requests', icon: Package },
+                                { tab: 'conversations' as const, label: t('portal.tab.messages'), icon: MessageSquare },
+                            ]).map(({ tab, label, icon: Icon }) => {
+                                const isActive = activeTab === tab;
+                                const hasUnread = tab === 'conversations' && conversations.some((c: any) => c.unread_count > 0);
+                                return (
+                                    <button key={tab} onClick={() => switchTab(tab)}
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-white text-black font-bold shadow-[0_2px_16px_rgba(255,255,255,0.08)]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                            </div>
+                                            <span className="text-[13px] font-semibold tracking-tight">{label}</span>
+                                        </div>
+                                        {hasUnread && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* F2F NETWORK section */}
+                    <div>
+                        <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">F2F Network</p>
+                        <div className="space-y-0.5">
+                            {([
+                                { tab: 'network' as const, label: 'F2F Requests', icon: Zap, unread: false },
+                                { tab: 'f2f-messages' as const, label: 'F2F Messages', icon: MessageSquare, unread: f2fConvs.some((c: any) => c.unread_count > 0) },
+                            ]).map(({ tab, label, icon: Icon, unread }) => {
+                                const isActive = activeTab === tab;
+                                return (
+                                    <button key={tab} onClick={() => switchTab(tab)}
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive ? 'bg-white text-black font-bold shadow-[0_2px_16px_rgba(255,255,255,0.08)]' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${isActive ? 'bg-black/10' : 'bg-white/[0.04] group-hover:bg-white/[0.08]'}`}>
+                                                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500 group-hover:text-white'}`} />
+                                            </div>
+                                            <span className="text-[13px] font-semibold tracking-tight">{label}</span>
+                                        </div>
+                                        {unread && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />}
+                                    </button>
+                                );
+                            })}
+                            <button onClick={() => router.push('/forwarders/f2f')}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group text-zinc-500 hover:text-white hover:bg-white/[0.06]">
+                                <div className="w-7 h-7 rounded-lg bg-white/[0.04] group-hover:bg-white/[0.08] flex items-center justify-center transition-all">
+                                    <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white" />
+                                </div>
+                                <span className="text-[13px] font-semibold tracking-tight">Post F2F Request</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div className="p-4 border-t border-white/5">
+                    <div className="flex items-center gap-3 p-2 rounded-xl">
+                        <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-bold text-white">{(companyName || '?')[0]?.toUpperCase()}</span>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <p className="text-sm font-bold text-white truncate">{companyName}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                {t('portal.active')}
-                            </span>
+                                <span className="text-[10px] font-bold text-white uppercase tracking-widest">{t('portal.active')}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </aside>
 
-                {/* Tab bar */}
-                <div className="flex gap-1 bg-white/[0.03] border border-white/5 rounded-xl p-1 flex-shrink-0">
-                    {(['requests', 'conversations', 'network'] as const).map((tab) => {
-                        const hasUnread = tab === 'conversations' && conversations.some((c: any) => c.unread_count > 0);
-                        const hasF2fUnread = tab === 'network' && f2fConvs.some((c: any) => c.unread_count > 0);
-                        return (
-                            <button
-                                key={tab}
-                                onClick={() => switchTab(tab)}
-                                className={`flex-1 relative py-2 px-3 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${
-                                    activeTab === tab ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'
-                                }`}
-                            >
-                                {tabLabels[tab]}
-                                {(hasUnread || hasF2fUnread) && (
-                                    <span className="absolute top-1.5 right-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
+            {/* ── Main Content ── */}
+            <div className="flex-1 md:ml-64 flex flex-col min-h-0 overflow-hidden">
+
+                {/* Top header */}
+                <header className="h-16 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-[#080808]/80 backdrop-blur-xl sticky top-0 z-[40] flex-shrink-0">
+                    <Link href="/" className="md:hidden shrink-0">
+                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
+                    </Link>
+                    <div className="hidden md:flex items-center gap-3">
+                        <h1 className="text-sm font-bold text-white">{companyName}</h1>
+                        <span className="text-[10px] font-mono text-zinc-600">{fwdId}</span>
+                    </div>
+                    <div className="flex items-center gap-3 ml-auto">
+                        <button onClick={() => router.push('/forwarders/f2f')}
+                            className="hidden md:flex items-center gap-2 bg-white text-black text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.08)]">
+                            <Plus className="w-3.5 h-3.5" /> Post F2F Request
+                        </button>
+                        <button onClick={() => setMobileNavOpen(true)} className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
+                            <Menu className="w-5 h-5 text-zinc-400" />
+                        </button>
+                    </div>
+                </header>
+
+                <main className="flex-1 overflow-hidden p-4 md:p-6 flex flex-col gap-4 min-h-0">
 
                 {/* ── F2F Network tab — 2-column: Browse left, My Posts right ── */}
                 {activeTab === 'network' && (
@@ -590,24 +669,20 @@ export default function ForwarderPortal() {
                     </div>
                 )}
 
-                {/* Messages tab — shipper chats + F2F chats unified */}
+                {/* Shipper Messages tab */}
                 {activeTab === 'conversations' && (
                     <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col min-h-0">
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
                             <div className="flex items-center gap-2">
                                 <MessageSquare className="w-3.5 h-3.5 text-zinc-600" />
-                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">All Messages</span>
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Shipper Messages</span>
                             </div>
-                            <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">
-                                {conversations.length + f2fConvs.length} chats
-                            </span>
+                            <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">{conversations.length} chats</span>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
                             {convLoading ? (
-                                <div className="h-full flex items-center justify-center">
-                                    <Loader2 className="w-5 h-5 animate-spin text-zinc-700" />
-                                </div>
-                            ) : conversations.length === 0 && f2fConvs.length === 0 ? (
+                                <div className="h-full flex items-center justify-center"><Loader2 className="w-5 h-5 animate-spin text-zinc-700" /></div>
+                            ) : conversations.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
                                     <MessageSquare className="w-8 h-8 text-zinc-600" />
                                     <div>
@@ -615,58 +690,67 @@ export default function ForwarderPortal() {
                                         <p className="text-xs text-zinc-600">{t('portal.no.conv.sub')}</p>
                                     </div>
                                 </div>
-                            ) : (
-                                <>
-                                    {conversations.length > 0 && (
-                                        <>
-                                            <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest px-1">Shipper Chats</p>
-                                            {conversations.map((conv: any) => (
-                                                <a key={conv.public_id} href={`/forwarders/chat/${conv.public_id}`}
-                                                    className="block p-4 rounded-xl border bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all group">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-mono text-zinc-600">{conv.request_id}</span>
-                                                            {conv.unread_count > 0 && <span className="text-[9px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{conv.unread_count}</span>}
-                                                        </div>
-                                                        <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${conv.status === 'BOOKED' ? 'bg-white/[0.06] text-white' : conv.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500' : 'bg-white/5 text-zinc-500'}`}>
-                                                            {conv.status === 'BOOKED' ? t('portal.booked') : conv.status === 'CLOSED' ? t('portal.closed') : t('portal.open')}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-xs text-zinc-400 truncate max-w-[180px]">{conv.last_message?.content || t('portal.no.messages')}</p>
-                                                        <div className="text-right flex-shrink-0 ml-3">
-                                                            <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">{conv.agreed_price ? t('portal.agreed') : conv.current_offer ? t('portal.offer') : t('portal.quoted')}</p>
-                                                            <p className="text-sm font-bold font-mono text-white">{conv.currency} {Number(conv.agreed_price ?? conv.current_offer ?? conv.original_price).toLocaleString()}</p>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            ))}
-                                        </>
-                                    )}
-                                    {f2fConvs.length > 0 && (
-                                        <>
-                                            <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest px-1 pt-2">F2F Chats</p>
-                                            {f2fConvs.map((c: any) => (
-                                                <a key={c.public_id} href={`/forwarders/f2f-chat/${c.public_id}`}
-                                                    className="block p-4 rounded-xl border bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-bold text-white">{c.other_company}</span>
-                                                            <span className="text-[9px] bg-amber-500/10 text-amber-400/70 px-1.5 py-0.5 rounded font-medium">{c.my_role}</span>
-                                                            {c.unread_count > 0 && <span className="text-[9px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{c.unread_count}</span>}
-                                                        </div>
-                                                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${c.status === 'CONFIRMED' ? 'bg-emerald-500/10 text-emerald-400' : c.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500' : 'bg-white/5 text-zinc-500'}`}>{c.status}</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-xs text-zinc-500 truncate max-w-[180px]">{c.last_message?.content || 'No messages yet'}</p>
-                                                        {c.agreed_price && <p className="text-sm font-bold font-mono text-white flex-shrink-0 ml-3">{c.currency} {Number(c.agreed_price).toLocaleString()}</p>}
-                                                    </div>
-                                                </a>
-                                            ))}
-                                        </>
-                                    )}
-                                </>
-                            )}
+                            ) : conversations.map((conv: any) => (
+                                <a key={conv.public_id} href={`/forwarders/chat/${conv.public_id}`}
+                                    className="block p-4 rounded-xl border bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all group">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-mono text-zinc-600">{conv.request_id}</span>
+                                            {conv.unread_count > 0 && <span className="text-[9px] font-semibold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{conv.unread_count}</span>}
+                                        </div>
+                                        <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${conv.status === 'BOOKED' ? 'bg-white/[0.06] text-white' : conv.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500' : 'bg-white/5 text-zinc-500'}`}>
+                                            {conv.status === 'BOOKED' ? t('portal.booked') : conv.status === 'CLOSED' ? t('portal.closed') : t('portal.open')}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-zinc-400 truncate max-w-[180px]">{conv.last_message?.content || t('portal.no.messages')}</p>
+                                        <div className="text-right flex-shrink-0 ml-3">
+                                            <p className="text-[9px] text-zinc-600 uppercase tracking-wider mb-0.5">{conv.agreed_price ? t('portal.agreed') : conv.current_offer ? t('portal.offer') : t('portal.quoted')}</p>
+                                            <p className="text-sm font-bold font-mono text-white">{conv.currency} {Number(conv.agreed_price ?? conv.current_offer ?? conv.original_price).toLocaleString()}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* F2F Messages tab */}
+                {activeTab === 'f2f-messages' && (
+                    <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden flex flex-col min-h-0">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 flex-shrink-0">
+                            <div className="flex items-center gap-2">
+                                <MessageSquare className="w-3.5 h-3.5 text-zinc-600" />
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">F2F Messages</span>
+                            </div>
+                            <span className="text-[10px] font-bold text-zinc-700 bg-white/[0.03] border border-white/5 px-2.5 py-1 rounded-lg">{f2fConvs.length} chats</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                            {f2fConvs.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-30 py-16">
+                                    <MessageSquare className="w-8 h-8 text-zinc-600" />
+                                    <div>
+                                        <p className="text-sm font-bold text-white mb-1">No F2F chats yet</p>
+                                        <p className="text-xs text-zinc-600">Chats with other forwarders appear here</p>
+                                    </div>
+                                </div>
+                            ) : f2fConvs.map((c: any) => (
+                                <a key={c.public_id} href={`/forwarders/f2f-chat/${c.public_id}`}
+                                    className="block p-4 rounded-xl border bg-black border-white/5 hover:border-white/10 hover:bg-white/[0.02] transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-white">{c.other_company}</span>
+                                            <span className="text-[9px] bg-amber-500/10 text-amber-400/70 px-1.5 py-0.5 rounded font-medium">{c.my_role}</span>
+                                            {c.unread_count > 0 && <span className="text-[9px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full">{c.unread_count}</span>}
+                                        </div>
+                                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${c.status === 'CONFIRMED' ? 'bg-emerald-500/10 text-emerald-400' : c.status === 'CLOSED' ? 'bg-zinc-800 text-zinc-500' : 'bg-white/5 text-zinc-500'}`}>{c.status}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-zinc-500 truncate max-w-[180px]">{c.last_message?.content || 'No messages yet'}</p>
+                                        {c.agreed_price && <p className="text-sm font-bold font-mono text-white flex-shrink-0 ml-3">{c.currency} {Number(c.agreed_price).toLocaleString()}</p>}
+                                    </div>
+                                </a>
+                            ))}
                         </div>
                     </div>
                 )}
@@ -958,7 +1042,88 @@ export default function ForwarderPortal() {
                     </div>
                 </div>}
 
+                </main>
             </div>
+
+            {/* Mobile nav overlay */}
+            {mobileNavOpen && (
+                <>
+                    <div onClick={() => setMobileNavOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden" />
+                    <aside className="fixed left-0 top-0 h-full w-72 bg-[#080808] border-r border-white/[0.04] z-[70] flex flex-col md:hidden">
+                        <div className="flex items-center justify-between h-20 px-6 border-b border-white/[0.04]">
+                            <Link href="/" onClick={() => setMobileNavOpen(false)}>
+                                <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-95" />
+                            </Link>
+                            <button onClick={() => setMobileNavOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
+                                <X className="w-4 h-4 text-zinc-500" />
+                            </button>
+                        </div>
+                        <div className="flex-1 px-3 py-5 space-y-6 overflow-y-auto custom-scrollbar">
+                            <div>
+                                <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">Shipper</p>
+                                <div className="space-y-0.5">
+                                    {([
+                                        { tab: 'requests' as const, label: 'Shipper Requests', icon: Package },
+                                        { tab: 'conversations' as const, label: t('portal.tab.messages'), icon: MessageSquare },
+                                    ]).map(({ tab, label, icon: Icon }) => {
+                                        const isActive = activeTab === tab;
+                                        return (
+                                            <button key={tab} onClick={() => { switchTab(tab); setMobileNavOpen(false); }}
+                                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}>
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isActive ? 'bg-black/10' : 'bg-white/[0.04]'}`}>
+                                                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
+                                                </div>
+                                                <span className="text-[13px] font-semibold">{label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <div>
+                                <p className="px-3 text-[9px] font-semibold text-zinc-600 uppercase tracking-[0.25em] mb-2">F2F Network</p>
+                                <div className="space-y-0.5">
+                                    {([
+                                        { tab: 'network' as const, label: 'F2F Requests', icon: Zap },
+                                        { tab: 'f2f-messages' as const, label: 'F2F Messages', icon: MessageSquare },
+                                    ]).map(({ tab, label, icon: Icon }) => {
+                                        const isActive = activeTab === tab;
+                                        return (
+                                            <button key={tab} onClick={() => { switchTab(tab); setMobileNavOpen(false); }}
+                                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? 'bg-white text-black font-bold' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}>
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isActive ? 'bg-black/10' : 'bg-white/[0.04]'}`}>
+                                                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-black' : 'text-zinc-500'}`} />
+                                                </div>
+                                                <span className="text-[13px] font-semibold">{label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                    <button onClick={() => { router.push('/forwarders/f2f'); setMobileNavOpen(false); }}
+                                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-zinc-500 hover:text-white hover:bg-white/[0.06]">
+                                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center">
+                                            <Plus className="w-3.5 h-3.5 text-zinc-500" />
+                                        </div>
+                                        <span className="text-[13px] font-semibold">Post F2F Request</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-white/5">
+                            <div className="flex items-center gap-3 p-2 rounded-xl">
+                                <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center flex-shrink-0">
+                                    <span className="text-xs font-bold text-white">{(companyName || '?')[0]?.toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">{companyName}</p>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                        <span className="text-[10px] font-bold text-white uppercase tracking-widest">{t('portal.active')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </>
+            )}
         </div>
     );
 }
