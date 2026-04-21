@@ -4,7 +4,7 @@ const translations = {
     en: {
         // Navbar
         'nav.services': 'Services',
-        'nav.search': 'Instant Search',
+        'nav.search': 'Marketplace',
         'nav.dashboard': 'Dashboard',
         'nav.ecosystem': 'Ecosystem',
         'nav.tools': 'Tools',
@@ -1437,7 +1437,7 @@ const translations = {
     ar: {
         // Navbar
         'nav.services': 'الخدمات',
-        'nav.search': 'بحث فوري',
+        'nav.search': 'السوق',
         'nav.dashboard': 'لوحة التحكم',
         'nav.ecosystem': 'النظام البيئي',
         'nav.tools': 'الأدوات',

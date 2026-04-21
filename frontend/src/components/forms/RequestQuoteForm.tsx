@@ -434,6 +434,18 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 )}
                             </div>
                         )}
+
+                        {/* Commodity — always visible since it's required */}
+                        <div className="mt-5">
+                            <label className={lbl}>{t('rqf.commodity')} <span className="text-red-400">*</span></label>
+                            <CommodityAutocomplete name="commodity" value={formData.commodity} onChange={handleAutocompleteChange} onSelectItem={handleCommoditySelect} placeholder="e.g. Lithium-Ion Batteries" />
+                            <div className="mt-2 flex items-center gap-2">
+                                <input type="text" name="hs_code" value={formData.hs_code} onChange={handleChange}
+                                    placeholder={t('rqf.hs.placeholder')}
+                                    className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-700 font-mono font-inter" />
+                                <a href="/tools/hs-codes" target="_blank" className="text-[9px] text-zinc-600 hover:text-zinc-300 uppercase tracking-widest font-inter whitespace-nowrap transition-colors">{t('rqf.lookup')}</a>
+                            </div>
+                        </div>
                     </motion.div>
 
                     {/* ── MORE OPTIONS ── */}
@@ -493,27 +505,15 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                         <Package className="w-3.5 h-3.5 text-zinc-400" />
                                         <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.cargo')}</h2>
                                     </div>
-                                    <div className="grid md:grid-cols-2 gap-5">
-                                        <div>
-                                            <label className={lbl}>{t('rqf.commodity')}</label>
-                                            <CommodityAutocomplete name="commodity" value={formData.commodity} onChange={handleAutocompleteChange} onSelectItem={handleCommoditySelect} placeholder="e.g. Lithium-Ion Batteries" />
-                                            <div className="mt-2 flex items-center gap-2">
-                                                <input type="text" name="hs_code" value={formData.hs_code} onChange={handleChange}
-                                                    placeholder={t('rqf.hs.placeholder')}
-                                                    className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-700 font-mono font-inter" />
-                                                <a href="/tools/hs-codes" target="_blank" className="text-[9px] text-zinc-600 hover:text-zinc-300 uppercase tracking-widest font-inter whitespace-nowrap transition-colors">{t('rqf.lookup')}</a>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className={lbl}>{t('rqf.cargo.handling')}</label>
-                                            <div className="grid grid-cols-2 gap-1.5">
-                                                {(CARGO_SPECS[formData.mode] || ['General Cargo']).map(opt => (
-                                                    <button key={opt} type="button" onClick={() => set('cargo_specification', opt)}
-                                                        className={`text-left px-3 py-2 rounded-lg border text-[10px] font-inter transition-all ${formData.cargo_specification === opt ? 'bg-white/[0.06] border-white/20 text-white' : 'border-white/[0.05] text-zinc-600 hover:text-zinc-400 hover:border-white/15'}`}>
-                                                        {opt}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                    <div>
+                                        <label className={lbl}>{t('rqf.cargo.handling')}</label>
+                                        <div className="grid grid-cols-2 gap-1.5">
+                                            {(CARGO_SPECS[formData.mode] || ['General Cargo']).map(opt => (
+                                                <button key={opt} type="button" onClick={() => set('cargo_specification', opt)}
+                                                    className={`text-left px-3 py-2 rounded-lg border text-[10px] font-inter transition-all ${formData.cargo_specification === opt ? 'bg-white/[0.06] border-white/20 text-white' : 'border-white/[0.05] text-zinc-600 hover:text-zinc-400 hover:border-white/15'}`}>
+                                                    {opt}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
                                     <div className="grid md:grid-cols-3 gap-4">
