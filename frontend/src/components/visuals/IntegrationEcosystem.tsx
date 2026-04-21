@@ -87,7 +87,7 @@ export default function IntegrationEcosystem() {
                         <div className="relative z-10 w-28 h-28 rounded-full bg-[#0e0e0e] border border-white/[0.10] flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.08)]">
                             {/* Subtle pulse ring */}
                             <div className="absolute inset-0 rounded-full border border-white/20 animate-ping opacity-30" />
-                            <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-10 object-contain opacity-90" />
+                            <img src="/cargolink.png" alt="CargoLink" className="h-10 w-10 object-contain opacity-90" />
                         </div>
 
                         {/* Orbiting satellites */}

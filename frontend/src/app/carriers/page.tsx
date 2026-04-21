@@ -98,7 +98,7 @@ export default function CarriersPage() {
 
                 {/* Logo */}
                 <div className="flex justify-center mt-6">
-                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
                 </div>
 
                 {/* Bottom CTA */}

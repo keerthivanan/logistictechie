@@ -163,7 +163,7 @@ function LoginContent() {
                 {/* Logo */}
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center group mb-8">
-                        <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
+                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">
                         {mode === 'login' ? t('login.cta') : t('signup.cta')}

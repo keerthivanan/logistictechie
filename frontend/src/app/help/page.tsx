@@ -126,7 +126,7 @@ export default function HelpPage() {
 
                 {/* Logo */}
                 <div className="flex justify-center mt-10">
-                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
                 </div>
 
             </div>
