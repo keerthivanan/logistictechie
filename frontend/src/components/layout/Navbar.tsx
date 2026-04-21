@@ -108,7 +108,7 @@ export default function Navbar() {
                 {/* Logo Area */}
                 <div className="w-auto md:w-[220px] shrink-0">
                     <Link href="/" className="flex items-center group">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-14 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
+                        <img src="/cargolink.png" alt="CargoLink" className="h-9 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
                     </Link>
                 </div>
 
