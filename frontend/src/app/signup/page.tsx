@@ -116,14 +116,14 @@ function SignupContent() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none" />
 
-            <div className="w-full max-w-sm px-6 relative z-10">
+            <div className="w-full max-w-sm px-4 sm:px-8 py-8 relative z-10">
                 {/* Logo + Title */}
-                <div className="text-center mb-6">
-                    <Link href="/" className="inline-flex items-center group mb-1">
+                <div className="text-center mb-10">
+                    <Link href="/" className="inline-flex items-center group mb-8">
                         <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
-                    <h1 className="text-2xl font-bold font-outfit uppercase tracking-tight">{t('signup.title')}</h1>
-                    <p className="text-zinc-500 text-xs font-inter mt-1.5">{t('signup.sub')}</p>
+                    <h1 className="text-3xl font-bold mb-2 font-outfit uppercase tracking-tight">{t('signup.title')}</h1>
+                    <p className="text-zinc-500 font-medium text-xs font-inter">{t('signup.sub')}</p>
                 </div>
 
                 {/* Card */}
