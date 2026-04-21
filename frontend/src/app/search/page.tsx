@@ -91,6 +91,7 @@ export default function SearchPage() {
 
         if (mode === 'FCL' && !containerType) { setError(t('search.err.container')); return }
         if ((mode === 'LCL' || mode === 'Air') && !weight) { setError(t('search.err.weight')); return }
+        if ((mode === 'LCL' || mode === 'Air') && !volume) { setError('Volume (CBM) is required.'); return }
 
         const params: Record<string, string> = {
             origin: originCity,
@@ -318,10 +319,10 @@ export default function SearchPage() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className={lbl}>{t('search.volume')}</label>
+                                        <label className={lbl}>{t('search.volume')} <span className="text-red-400">*</span></label>
                                         <input type="number" step="0.01" min="0" value={volume} placeholder="e.g. 3.5"
                                             onChange={e => setVolume(e.target.value)}
-                                            className={inp} />
+                                            required className={inp} />
                                     </div>
                                 </div>
                                 <div>

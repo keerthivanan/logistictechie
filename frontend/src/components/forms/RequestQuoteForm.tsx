@@ -151,6 +151,9 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
             if (!formData.weight || parseFloat(formData.weight) <= 0) {
                 setFormError(t('rqf.err.weight')); setLoading(false); return;
             }
+            if ((formData.mode === 'LCL' || formData.mode === 'Air') && (!formData.total_volume_cbm || parseFloat(formData.total_volume_cbm) <= 0)) {
+                setFormError('Volume (CBM) is required.'); setLoading(false); return;
+            }
 
             const originC = countries.find((c: Country) => c.code === formData.origin_country);
             const destC = countries.find((c: Country) => c.code === formData.dest_country);
@@ -382,9 +385,9 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                         </div>
                                     </div>
                                     <div>
-                                        <label className={lbl}>{t('rqf.volume.cbm')}</label>
+                                        <label className={lbl}>{t('rqf.volume.cbm')} <span className="text-red-400">*</span></label>
                                         <input type="number" step="0.01" min="0" name="total_volume_cbm" value={formData.total_volume_cbm}
-                                            onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 3.5" className={inp} />
+                                            onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 3.5" required className={inp} />
                                     </div>
                                 </div>
                                 <div>
