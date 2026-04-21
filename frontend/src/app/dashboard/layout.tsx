@@ -167,7 +167,7 @@ export default function DashboardLayout({
                 {/* Logo Section */}
                 <div className="flex items-center justify-center h-20 px-6 border-b border-white/[0.04]">
                     <Link href="/" className="flex items-center group">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-12 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
+                        <img src="/cargolink-white.png" alt="CargoLink" className="h-12 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity" />
                     </Link>
                 </div>
 
@@ -290,7 +290,7 @@ export default function DashboardLayout({
                 <header className="h-16 md:h-20 border-b border-white/5 flex items-center justify-between px-4 md:px-8 bg-[#050505]/80 backdrop-blur-xl sticky top-0 z-[40]">
                     {/* Mobile: show logo; Desktop: show search */}
                     <Link href="/" className="md:hidden shrink-0">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
+                        <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
                     </Link>
                     <div className="hidden md:flex items-center gap-8 flex-1 max-w-2xl text-zinc-500">
                         <div className="relative flex-1 group">
@@ -424,7 +424,7 @@ export default function DashboardLayout({
                         >
                             <div className="flex items-center justify-between h-20 px-6 border-b border-white/[0.04]">
                                 <Link href="/" onClick={() => setMobileNavOpen(false)}>
-                                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-95" />
+                                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-95" />
                                 </Link>
                                 <button onClick={() => setMobileNavOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
                                     <X className="w-4 h-4 text-zinc-500" />
