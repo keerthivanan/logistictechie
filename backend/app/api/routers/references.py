@@ -35,7 +35,7 @@ def _fallback_ports(q: str, country: str = "") -> Dict[str, Any]:
             "country": country_name,
             "country_code": country_code,
             "region": "",
-            "type": "PORT",
+            "type": "",
         })
     # Exact city-start matches first
     results.sort(key=lambda r: (0 if r["city"].lower().startswith(q_lower) else 1, r["name"]))
@@ -59,13 +59,12 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
         if country:
             params.append(f"countryCode={quote(country.strip())}")
 
-        # Request only relevant location types from Maersk to cut noise
+        # Request port-level data from Maersk
         tt = term_type.upper()
         if tt == "CFS":
             params.append("locationType=CONTAINER FREIGHT STATION")
         else:
-            # CY / PORT / default → terminals
-            params.append("locationType=TERMINAL")
+            params.append("locationType=PORT")
 
         url = f"https://api.maersk.com/reference-data/locations?{'&'.join(params)}"
 
@@ -85,7 +84,6 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
         for item in data:
             city_name = item.get("cityName", "").strip()
             unlocode = item.get("UNLocationCode", "").strip()
-            loc_type = item.get("locationType", "")
             country_name = item.get("countryName", "")
             country_code = item.get("countryCode", "")
             region_code = item.get("UNRegionCode", "")
@@ -101,13 +99,13 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
             seen.add(unlocode)
 
             results.append({
-                "name": display,        # display label
-                "city": city_name,      # always the city
-                "code": unlocode,       # UNLOCODE e.g. "CNSHA"
+                "name": display,
+                "city": city_name,
+                "code": unlocode,
                 "country": country_name,
                 "country_code": country_code,
                 "region": region_code,
-                "type": loc_type,
+                "type": "",
             })
 
         # Sort: exact city match first, then alphabetical
