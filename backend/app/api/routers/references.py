@@ -84,7 +84,6 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
 
         for item in data:
             city_name = item.get("cityName", "").strip()
-            location_name = item.get("locationName", "").strip()
             unlocode = item.get("UNLocationCode", "").strip()
             loc_type = item.get("locationType", "")
             country_name = item.get("countryName", "")
@@ -94,13 +93,12 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
             if not unlocode or not city_name:
                 continue
 
-            # Use specific terminal name if available, else city name
-            display = location_name if (location_name and location_name != city_name) else city_name
+            # Always use city name — show ports, not specific terminals
+            display = city_name
 
-            key = f"{unlocode}_{display.upper()}"
-            if key in seen:
+            if unlocode in seen:
                 continue
-            seen.add(key)
+            seen.add(unlocode)
 
             results.append({
                 "name": display,        # display label

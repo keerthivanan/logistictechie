@@ -103,7 +103,7 @@ export default function PortAutocomplete({
                         setCountryError('');
                         if (query.length >= 2 && suggestions.length === 0) fetchSuggestions(query);
                     }}
-                    placeholder={placeholder || 'Search port or terminal...'}
+                    placeholder={placeholder || 'Search port...'}
                     className="w-full bg-black border border-white/[0.06] rounded-xl pl-9 pr-8 py-3 text-sm text-white placeholder-zinc-700 font-inter"
                     autoComplete="off"
                 />

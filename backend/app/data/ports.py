@@ -1,29 +1,29 @@
-# Major global seaports and terminals with UNLOCODEs
+# Major global seaports with UNLOCODEs
 # Used as fallback when Maersk API key is not configured
 # Format: (name, city, unlocode, country_name, country_code)
 
 MAJOR_PORTS = [
     # China (CN)
-    ("Shanghai Yangshan Deep Water Port", "Shanghai", "CNSHA", "China", "CN"),
-    ("Ningbo-Zhoushan Port", "Ningbo", "CNNBO", "China", "CN"),
-    ("Shenzhen Yantian Terminal", "Shenzhen", "CNSZX", "China", "CN"),
-    ("Guangzhou Nansha Port", "Guangzhou", "CNGZH", "China", "CN"),
-    ("Qingdao Port", "Qingdao", "CNTAO", "China", "CN"),
-    ("Tianjin Xingang Port", "Tianjin", "CNTSN", "China", "CN"),
-    ("Xiamen Port", "Xiamen", "CNXMN", "China", "CN"),
-    ("Dalian Port", "Dalian", "CNDLC", "China", "CN"),
-    ("Hong Kong Kwai Tsing Terminal", "Hong Kong", "HKHKG", "Hong Kong", "HK"),
-    ("Suzhou Port", "Suzhou", "CNSUZ", "China", "CN"),
-    ("Wuhan Port", "Wuhan", "CNWUH", "China", "CN"),
-    ("Chongqing Port", "Chongqing", "CNCKG", "China", "CN"),
-    ("Nanjing Port", "Nanjing", "CNNKG", "China", "CN"),
-    ("Lianyungang Port", "Lianyungang", "CNLYG", "China", "CN"),
-    ("Yingkou Port", "Yingkou", "CNYKO", "China", "CN"),
+    ("Port of Shanghai", "Shanghai", "CNSHA", "China", "CN"),
+    ("Port of Ningbo", "Ningbo", "CNNBO", "China", "CN"),
+    ("Port of Shenzhen", "Shenzhen", "CNSZX", "China", "CN"),
+    ("Port of Guangzhou", "Guangzhou", "CNGZH", "China", "CN"),
+    ("Port of Qingdao", "Qingdao", "CNTAO", "China", "CN"),
+    ("Port of Tianjin", "Tianjin", "CNTSN", "China", "CN"),
+    ("Port of Xiamen", "Xiamen", "CNXMN", "China", "CN"),
+    ("Port of Dalian", "Dalian", "CNDLC", "China", "CN"),
+    ("Port of Hong Kong", "Hong Kong", "HKHKG", "Hong Kong", "HK"),
+    ("Port of Suzhou", "Suzhou", "CNSUZ", "China", "CN"),
+    ("Port of Wuhan", "Wuhan", "CNWUH", "China", "CN"),
+    ("Port of Chongqing", "Chongqing", "CNCKG", "China", "CN"),
+    ("Port of Nanjing", "Nanjing", "CNNKG", "China", "CN"),
+    ("Port of Lianyungang", "Lianyungang", "CNLYG", "China", "CN"),
+    ("Port of Yingkou", "Yingkou", "CNYKO", "China", "CN"),
 
     # United States (US)
     ("Port of Los Angeles", "Los Angeles", "USLAX", "United States", "US"),
     ("Port of Long Beach", "Long Beach", "USLGB", "United States", "US"),
-    ("Port of New York & New Jersey", "New York", "USNYC", "United States", "US"),
+    ("Port of New York", "New York", "USNYC", "United States", "US"),
     ("Port of Savannah", "Savannah", "USSAV", "United States", "US"),
     ("Port of Seattle", "Seattle", "USSEA", "United States", "US"),
     ("Port of Houston", "Houston", "USHOU", "United States", "US"),
@@ -39,7 +39,7 @@ MAJOR_PORTS = [
 
     # Germany (DE)
     ("Port of Hamburg", "Hamburg", "DEHAM", "Germany", "DE"),
-    ("Port of Bremen / Bremerhaven", "Bremen", "DEBRV", "Germany", "DE"),
+    ("Port of Bremen", "Bremen", "DEBRV", "Germany", "DE"),
     ("Port of Duisburg", "Duisburg", "DEDUI", "Germany", "DE"),
     ("Port of Rostock", "Rostock", "DERSK", "Germany", "DE"),
 
@@ -59,13 +59,13 @@ MAJOR_PORTS = [
     ("Port of Bristol", "Bristol", "GBBRS", "United Kingdom", "GB"),
 
     # Singapore (SG)
-    ("Port of Singapore (PSA)", "Singapore", "SGSIN", "Singapore", "SG"),
-    ("Jurong Port", "Singapore", "SGJUR", "Singapore", "SG"),
+    ("Port of Singapore", "Singapore", "SGSIN", "Singapore", "SG"),
+    ("Port of Jurong", "Singapore", "SGJUR", "Singapore", "SG"),
 
     # South Korea (KR)
-    ("Busan New Port", "Busan", "KRPUS", "South Korea", "KR"),
-    ("Incheon Port", "Incheon", "KRINC", "South Korea", "KR"),
-    ("Gwangyang Port", "Gwangyang", "KRKWJ", "South Korea", "KR"),
+    ("Port of Busan", "Busan", "KRPUS", "South Korea", "KR"),
+    ("Port of Incheon", "Incheon", "KRINC", "South Korea", "KR"),
+    ("Port of Gwangyang", "Gwangyang", "KRKWJ", "South Korea", "KR"),
 
     # Japan (JP)
     ("Port of Tokyo", "Tokyo", "JPTYO", "Japan", "JP"),
@@ -73,56 +73,56 @@ MAJOR_PORTS = [
     ("Port of Kobe", "Kobe", "JPUKB", "Japan", "JP"),
     ("Port of Osaka", "Osaka", "JPOSA", "Japan", "JP"),
     ("Port of Nagoya", "Nagoya", "JPNGO", "Japan", "JP"),
-    ("Port of Hakata", "Fukuoka", "JPFUK", "Japan", "JP"),
+    ("Port of Fukuoka", "Fukuoka", "JPFUK", "Japan", "JP"),
 
     # India (IN)
-    ("Jawaharlal Nehru Port (JNPT)", "Mumbai", "INBOM", "India", "IN"),
-    ("Mundra Port", "Mundra", "INMUN", "India", "IN"),
-    ("Chennai Port", "Chennai", "INMAA", "India", "IN"),
-    ("Cochin Port", "Kochi", "INCOK", "India", "IN"),
-    ("Visakhapatnam Port", "Visakhapatnam", "INVTZ", "India", "IN"),
-    ("Kolkata Port", "Kolkata", "INCCU", "India", "IN"),
-    ("Pipavav Port", "Pipavav", "INPAV", "India", "IN"),
-    ("Hazira Port", "Surat", "INHAZ", "India", "IN"),
-    ("Ennore Port", "Chennai", "INENN", "India", "IN"),
-    ("Tuticorin Port", "Thoothukudi", "INTUT", "India", "IN"),
+    ("Port of Mumbai", "Mumbai", "INBOM", "India", "IN"),
+    ("Port of Mundra", "Mundra", "INMUN", "India", "IN"),
+    ("Port of Chennai", "Chennai", "INMAA", "India", "IN"),
+    ("Port of Kochi", "Kochi", "INCOK", "India", "IN"),
+    ("Port of Visakhapatnam", "Visakhapatnam", "INVTZ", "India", "IN"),
+    ("Port of Kolkata", "Kolkata", "INCCU", "India", "IN"),
+    ("Port of Pipavav", "Pipavav", "INPAV", "India", "IN"),
+    ("Port of Hazira", "Surat", "INHAZ", "India", "IN"),
+    ("Port of Ennore", "Chennai", "INENN", "India", "IN"),
+    ("Port of Thoothukudi", "Thoothukudi", "INTUT", "India", "IN"),
 
     # UAE (AE)
-    ("Jebel Ali Port (DP World)", "Dubai", "AEJEA", "United Arab Emirates", "AE"),
-    ("Port of Abu Dhabi (Khalifa)", "Abu Dhabi", "AEAUH", "United Arab Emirates", "AE"),
+    ("Port of Dubai", "Dubai", "AEJEA", "United Arab Emirates", "AE"),
+    ("Port of Abu Dhabi", "Abu Dhabi", "AEAUH", "United Arab Emirates", "AE"),
     ("Port of Sharjah", "Sharjah", "AESHJ", "United Arab Emirates", "AE"),
 
     # Saudi Arabia (SA)
-    ("Jeddah Islamic Port", "Jeddah", "SAJED", "Saudi Arabia", "SA"),
-    ("King Abdulaziz Port (Dammam)", "Dammam", "SADMM", "Saudi Arabia", "SA"),
-    ("Jubail Commercial Port", "Jubail", "SAJUB", "Saudi Arabia", "SA"),
+    ("Port of Jeddah", "Jeddah", "SAJED", "Saudi Arabia", "SA"),
+    ("Port of Dammam", "Dammam", "SADMM", "Saudi Arabia", "SA"),
+    ("Port of Jubail", "Jubail", "SAJUB", "Saudi Arabia", "SA"),
 
     # Malaysia (MY)
-    ("Port Klang (Westports)", "Port Klang", "MYPKG", "Malaysia", "MY"),
+    ("Port of Klang", "Port Klang", "MYPKG", "Malaysia", "MY"),
     ("Port of Penang", "Penang", "MYPGU", "Malaysia", "MY"),
-    ("Tanjung Pelepas", "Johor", "MYTPP", "Malaysia", "MY"),
+    ("Port of Tanjung Pelepas", "Johor", "MYTPP", "Malaysia", "MY"),
 
     # Thailand (TH)
-    ("Laem Chabang Port", "Laem Chabang", "THLCH", "Thailand", "TH"),
-    ("Bangkok Port", "Bangkok", "THBKK", "Thailand", "TH"),
+    ("Port of Laem Chabang", "Laem Chabang", "THLCH", "Thailand", "TH"),
+    ("Port of Bangkok", "Bangkok", "THBKK", "Thailand", "TH"),
 
     # Vietnam (VN)
-    ("Cai Mep Terminal", "Ho Chi Minh City", "VNVUT", "Vietnam", "VN"),
-    ("Cat Lai Port", "Ho Chi Minh City", "VNSGN", "Vietnam", "VN"),
-    ("Hai Phong Port", "Hai Phong", "VNHPH", "Vietnam", "VN"),
-    ("Da Nang Port", "Da Nang", "VNDAD", "Vietnam", "VN"),
+    ("Port of Ho Chi Minh City", "Ho Chi Minh City", "VNVUT", "Vietnam", "VN"),
+    ("Port of Saigon", "Ho Chi Minh City", "VNSGN", "Vietnam", "VN"),
+    ("Port of Hai Phong", "Hai Phong", "VNHPH", "Vietnam", "VN"),
+    ("Port of Da Nang", "Da Nang", "VNDAD", "Vietnam", "VN"),
 
     # Indonesia (ID)
-    ("Tanjung Priok Port (Jakarta)", "Jakarta", "IDJKT", "Indonesia", "ID"),
-    ("Tanjung Perak Port (Surabaya)", "Surabaya", "IDSUB", "Indonesia", "ID"),
-    ("Belawan Port (Medan)", "Medan", "IDMDN", "Indonesia", "ID"),
+    ("Port of Jakarta", "Jakarta", "IDJKT", "Indonesia", "ID"),
+    ("Port of Surabaya", "Surabaya", "IDSUB", "Indonesia", "ID"),
+    ("Port of Medan", "Medan", "IDMDN", "Indonesia", "ID"),
 
     # Australia (AU)
-    ("Port Botany (Sydney)", "Sydney", "AUSYD", "Australia", "AU"),
+    ("Port of Sydney", "Sydney", "AUSYD", "Australia", "AU"),
     ("Port of Melbourne", "Melbourne", "AUMEL", "Australia", "AU"),
     ("Port of Brisbane", "Brisbane", "AUBNE", "Australia", "AU"),
-    ("Fremantle Port (Perth)", "Fremantle", "AUFRE", "Australia", "AU"),
-    ("Port Adelaide", "Adelaide", "AUADL", "Australia", "AU"),
+    ("Port of Fremantle", "Fremantle", "AUFRE", "Australia", "AU"),
+    ("Port of Adelaide", "Adelaide", "AUADL", "Australia", "AU"),
 
     # Canada (CA)
     ("Port of Vancouver", "Vancouver", "CAVAN", "Canada", "CA"),
@@ -141,12 +141,12 @@ MAJOR_PORTS = [
     # South Africa (ZA)
     ("Port of Durban", "Durban", "ZADUR", "South Africa", "ZA"),
     ("Port of Cape Town", "Cape Town", "ZACPT", "South Africa", "ZA"),
-    ("Port Elizabeth (Gqeberha)", "Gqeberha", "ZAPLZ", "South Africa", "ZA"),
+    ("Port of Gqeberha", "Gqeberha", "ZAPLZ", "South Africa", "ZA"),
 
     # Egypt (EG)
-    ("Port Said East Port", "Port Said", "EGPSD", "Egypt", "EG"),
-    ("Alexandria Port", "Alexandria", "EGALY", "Egypt", "EG"),
-    ("Damietta Port", "Damietta", "EGDAM", "Egypt", "EG"),
+    ("Port of Port Said", "Port Said", "EGPSD", "Egypt", "EG"),
+    ("Port of Alexandria", "Alexandria", "EGALY", "Egypt", "EG"),
+    ("Port of Damietta", "Damietta", "EGDAM", "Egypt", "EG"),
 
     # Spain (ES)
     ("Port of Valencia", "Valencia", "ESVLC", "Spain", "ES"),
@@ -168,7 +168,7 @@ MAJOR_PORTS = [
     ("Port of Dunkirk", "Dunkirk", "FRDKK", "France", "FR"),
 
     # Turkey (TR)
-    ("Ambarlı Port (Istanbul)", "Istanbul", "TRISK", "Turkey", "TR"),
+    ("Port of Istanbul", "Istanbul", "TRISK", "Turkey", "TR"),
     ("Port of Mersin", "Mersin", "TRMER", "Turkey", "TR"),
     ("Port of Izmir", "Izmir", "TRIZM", "Turkey", "TR"),
 
@@ -187,11 +187,11 @@ MAJOR_PORTS = [
     ("Port of Lazaro Cardenas", "Lázaro Cárdenas", "MXLZC", "Mexico", "MX"),
 
     # Pakistan (PK)
-    ("Karachi Port", "Karachi", "PKKHI", "Pakistan", "PK"),
+    ("Port of Karachi", "Karachi", "PKKHI", "Pakistan", "PK"),
     ("Port Qasim", "Karachi", "PKPQI", "Pakistan", "PK"),
 
     # Bangladesh (BD)
-    ("Chittagong Port", "Chittagong", "BDCGP", "Bangladesh", "BD"),
+    ("Port of Chittagong", "Chittagong", "BDCGP", "Bangladesh", "BD"),
 
     # Sri Lanka (LK)
     ("Port of Colombo", "Colombo", "LKCMB", "Sri Lanka", "LK"),
@@ -200,16 +200,16 @@ MAJOR_PORTS = [
     ("Port of Mombasa", "Mombasa", "KEMBA", "Kenya", "KE"),
 
     # Nigeria (NG)
-    ("Port of Lagos (Apapa)", "Lagos", "NGLOS", "Nigeria", "NG"),
+    ("Port of Lagos", "Lagos", "NGLOS", "Nigeria", "NG"),
     ("Port of Tin Can Island", "Lagos", "NGTIN", "Nigeria", "NG"),
 
     # Morocco (MA)
-    ("Tanger Med Port", "Tangier", "MATNR", "Morocco", "MA"),
+    ("Port of Tangier", "Tangier", "MATNR", "Morocco", "MA"),
     ("Port of Casablanca", "Casablanca", "MACAS", "Morocco", "MA"),
 
     # Oman (OM)
     ("Port of Salalah", "Salalah", "OMSLL", "Oman", "OM"),
-    ("Port of Muscat (Sohar)", "Sohar", "OMSOH", "Oman", "OM"),
+    ("Port of Sohar", "Sohar", "OMSOH", "Oman", "OM"),
 
     # Israel (IL)
     ("Port of Haifa", "Haifa", "ILHFA", "Israel", "IL"),
@@ -241,13 +241,13 @@ MAJOR_PORTS = [
     ("Port of Sines", "Sines", "PTSIN", "Portugal", "PT"),
 
     # Taiwan (TW)
-    ("Kaohsiung Port", "Kaohsiung", "TWKHH", "Taiwan", "TW"),
-    ("Port of Taipei (Keelung)", "Keelung", "TWKEL", "Taiwan", "TW"),
-    ("Taichung Port", "Taichung", "TWTXG", "Taiwan", "TW"),
+    ("Port of Kaohsiung", "Kaohsiung", "TWKHH", "Taiwan", "TW"),
+    ("Port of Keelung", "Keelung", "TWKEL", "Taiwan", "TW"),
+    ("Port of Taichung", "Taichung", "TWTXG", "Taiwan", "TW"),
 
     # Philippines (PH)
     ("Port of Manila", "Manila", "PHMNL", "Philippines", "PH"),
-    ("Cebu Port", "Cebu", "PHCEB", "Philippines", "PH"),
+    ("Port of Cebu", "Cebu", "PHCEB", "Philippines", "PH"),
 
     # Argentina (AR)
     ("Port of Buenos Aires", "Buenos Aires", "ARBUE", "Argentina", "AR"),
@@ -255,7 +255,7 @@ MAJOR_PORTS = [
 
     # Chile (CL)
     ("Port of Valparaíso", "Valparaíso", "CLVAP", "Chile", "CL"),
-    ("San Antonio Port", "San Antonio", "CLSAI", "Chile", "CL"),
+    ("Port of San Antonio", "San Antonio", "CLSAI", "Chile", "CL"),
 
     # Colombia (CO)
     ("Port of Cartagena", "Cartagena", "COCTG", "Colombia", "CO"),
@@ -270,5 +270,5 @@ MAJOR_PORTS = [
     # Panama (PA)
     ("Port of Balboa", "Panama City", "PABLB", "Panama", "PA"),
     ("Port of Colon", "Colón", "PAONX", "Panama", "PA"),
-    ("Manzanillo International Terminal", "Colón", "PAMANIT", "Panama", "PA"),
+    ("Port of Manzanillo", "Colón", "PAMANIT", "Panama", "PA"),
 ]
