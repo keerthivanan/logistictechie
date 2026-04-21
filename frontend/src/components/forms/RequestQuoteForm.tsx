@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import {
     Ship, Plane, Truck, Calendar, Package, Layers,
     ShieldAlert, FileText, ArrowRight, Loader2, Info,
-    MapPin, Thermometer, AlertTriangle, CheckSquare, Square
+    MapPin, Thermometer, AlertTriangle, CheckSquare, Square, ChevronDown
 } from 'lucide-react';
 import { countries } from '@/lib/countries';
 import { apiFetch } from '@/lib/config';
@@ -50,6 +50,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [formError, setFormError] = useState('');
+    const [showMore, setShowMore] = useState(false);
     const { user } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -306,13 +307,58 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
-                    {/* ── 1. SHIPMENT TYPE ── */}
+                    {/* ── ROUTE ── */}
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }} className={card}>
+                        <div className={hdr}>
+                            <MapPin className="w-3.5 h-3.5 text-zinc-500" />
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.route')}</h2>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                                    <span className="text-xs font-semibold text-zinc-300 font-inter">{t('rqf.origin')}</span>
+                                </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.country')}</label>
+                                    <select name="origin_country" value={formData.origin_country} onChange={handleChange} className={sel}>
+                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.port.address')}</label>
+                                    {['CY', 'CFS'].includes(formData.origin_type)
+                                        ? <PortAutocomplete name="origin_district" value={formData.origin_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('origin')} placeholder={t('rqf.port.search')} countryCode={formData.origin_country} countryName={originC?.name} termType={formData.origin_type} />
+                                        : <input type="text" name="origin_district" value={formData.origin_district} onChange={handleChange} placeholder={t('rqf.addr.origin')} className={inp} />}
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                                    <span className="text-xs font-semibold text-zinc-300 font-inter">{t('rqf.destination')}</span>
+                                </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.country')}</label>
+                                    <select name="dest_country" value={formData.dest_country} onChange={handleChange} className={sel}>
+                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.port.address')}</label>
+                                    {['CY', 'CFS'].includes(formData.dest_type)
+                                        ? <PortAutocomplete name="dest_district" value={formData.dest_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('dest')} placeholder={t('rqf.port.search')} countryCode={formData.dest_country} countryName={destC2?.name} termType={formData.dest_type} />
+                                        : <input type="text" name="dest_district" value={formData.dest_district} onChange={handleChange} placeholder={t('rqf.addr.dest')} className={inp} />}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* ── LOAD ── */}
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className={card}>
                         <div className={hdr}>
                             <Ship className="w-3.5 h-3.5 text-zinc-500" />
                             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.type')}</h2>
                         </div>
-
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                             {([
                                 { value: 'FCL', label: 'FCL', sub: t('rqf.mode.fcl.sub'), icon: Ship },
@@ -329,8 +375,6 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 </button>
                             ))}
                         </div>
-
-                        {/* FCL Container Type */}
                         {isFCL && (
                             <div>
                                 <label className={lbl}>{t('rqf.container.type')}</label>
@@ -345,8 +389,6 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 </div>
                             </div>
                         )}
-
-                        {/* FCL: container count | LCL+Air: weight/vol/dims */}
                         {isFCL ? (
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -369,291 +411,253 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className={lbl}>{t('rqf.gross.weight.req')}</label>
-                                        <div className="flex">
-                                            <input type="number" min="0" name="weight" value={formData.weight} onChange={handleChange}
-                                                onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 500"
-                                                className="flex-1 bg-black border border-white/[0.06] border-r-0 rounded-l-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
-                                            <select name="weight_unit" value={formData.weight_unit} onChange={handleChange}
-                                                className="bg-zinc-900 border border-white/[0.06] border-l-0 rounded-r-xl px-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer">
-                                                <option value="KGM">KG</option>
-                                                <option value="LBS">LB</option>
-                                            </select>
-                                        </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className={lbl}>{t('rqf.gross.weight.req')}</label>
+                                    <div className="flex">
+                                        <input type="number" min="0" name="weight" value={formData.weight} onChange={handleChange}
+                                            onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 500"
+                                            className="flex-1 bg-black border border-white/[0.06] border-r-0 rounded-l-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
+                                        <select name="weight_unit" value={formData.weight_unit} onChange={handleChange}
+                                            className="bg-zinc-900 border border-white/[0.06] border-l-0 rounded-r-xl px-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer">
+                                            <option value="KGM">KG</option>
+                                            <option value="LBS">LB</option>
+                                        </select>
                                     </div>
+                                </div>
+                                {(formData.mode === 'LCL' || formData.mode === 'Air') && (
                                     <div>
                                         <label className={lbl}>{t('rqf.volume.cbm')} <span className="text-red-400">*</span></label>
                                         <input type="number" step="0.01" min="0" name="total_volume_cbm" value={formData.total_volume_cbm}
                                             onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 3.5" required className={inp} />
                                     </div>
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.dims')}</label>
-                                    <div className="flex gap-2">
-                                        {['length', 'width', 'height'].map((dim, i) => (
-                                            <input key={dim} type="number" min="0" name={dim}
-                                                value={formData[dim as keyof typeof formData] as string}
-                                                onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()}
-                                                placeholder={['L', 'W', 'H'][i]}
-                                                className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-700 font-inter text-center" />
-                                        ))}
-                                        <select name="dim_unit" value={formData.dim_unit} onChange={handleChange}
-                                            className="h-full bg-zinc-900 border border-white/[0.06] rounded-xl px-3 py-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer min-w-[56px]">
-                                            <option value="CM">CM</option>
-                                            <option value="IN">IN</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         )}
                     </motion.div>
 
-                    {/* ── 2. ROUTE ── */}
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className={card}>
-                        <div className={hdr}>
-                            <MapPin className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.route')}</h2>
-                        </div>
+                    {/* ── MORE OPTIONS ── */}
+                    <div>
+                        <button
+                            type="button"
+                            onClick={() => setShowMore(!showMore)}
+                            className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl border border-white/[0.08] text-[11px] font-bold text-zinc-500 hover:text-white hover:border-white/20 transition-all font-inter uppercase tracking-[0.2em]"
+                        >
+                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${showMore ? 'rotate-180' : ''}`} />
+                            {showMore ? t('rqf.less.options') : t('rqf.more.options')}
+                        </button>
 
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {/* Origin */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                                    <span className="text-xs font-semibold text-zinc-300 font-inter">{t('rqf.origin')}</span>
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.country')}</label>
-                                    <select name="origin_country" value={formData.origin_country} onChange={handleChange} className={sel}>
-                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.port.address')}</label>
-                                    {['CY', 'CFS'].includes(formData.origin_type)
-                                        ? <PortAutocomplete name="origin_district" value={formData.origin_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('origin')} placeholder={t('rqf.port.search')} countryCode={formData.origin_country} countryName={originC?.name} termType={formData.origin_type} />
-                                        : <input type="text" name="origin_district" value={formData.origin_district} onChange={handleChange} placeholder={t('rqf.addr.origin')} className={inp} />}
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.pickup.type')}</label>
-                                    <select name="origin_type" value={formData.origin_type} onChange={handleChange} className={sel}>
-                                        <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
-                                        <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
-                                        <option value="Door" className="bg-zinc-900">{t('rqf.type.door.origin')}</option>
-                                    </select>
-                                </div>
-                            </div>
-                            {/* Destination */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-                                    <span className="text-xs font-semibold text-zinc-300 font-inter">{t('rqf.destination')}</span>
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.country')}</label>
-                                    <select name="dest_country" value={formData.dest_country} onChange={handleChange} className={sel}>
-                                        {countries.map((c: Country) => <option key={c.code} value={c.code} className="bg-zinc-900">{getFlagEmoji(c.code)} {c.name}</option>)}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.port.address')}</label>
-                                    {['CY', 'CFS'].includes(formData.dest_type)
-                                        ? <PortAutocomplete name="dest_district" value={formData.dest_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('dest')} placeholder={t('rqf.port.search')} countryCode={formData.dest_country} countryName={destC2?.name} termType={formData.dest_type} />
-                                        : <input type="text" name="dest_district" value={formData.dest_district} onChange={handleChange} placeholder={t('rqf.addr.dest')} className={inp} />}
-                                </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.delivery.type')}</label>
-                                    <select name="dest_type" value={formData.dest_type} onChange={handleChange} className={sel}>
-                                        <option value="Door" className="bg-zinc-900">{t('rqf.type.door.dest')}</option>
-                                        <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
-                                        <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className={lbl}>{t('rqf.incoterms')}</label>
-                            <div className="grid grid-cols-5 gap-2">
-                                {INCOTERMS.map(term => (
-                                    <button key={term} type="button" onClick={() => set('incoterms', term)}
-                                        className={`py-2 rounded-xl border text-xs font-bold font-inter transition-all ${formData.incoterms === term ? 'bg-white text-black border-white' : 'border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'}`}>
-                                        {term}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* ── 3. CARGO ── */}
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className={card}>
-                        <div className={hdr}>
-                            <Package className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.cargo')}</h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className={lbl}>{t('rqf.commodity')}</label>
-                                <CommodityAutocomplete name="commodity" value={formData.commodity} onChange={handleAutocompleteChange} onSelectItem={handleCommoditySelect} placeholder="e.g. Lithium-Ion Batteries" />
-                                <div className="mt-2 flex items-center gap-2">
-                                    <input type="text" name="hs_code" value={formData.hs_code} onChange={handleChange}
-                                        placeholder={t('rqf.hs.placeholder')}
-                                        className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-700 font-mono font-inter" />
-                                    <a href="/tools/hs-codes" target="_blank" className="text-[9px] text-zinc-600 hover:text-zinc-300 uppercase tracking-widest font-inter whitespace-nowrap transition-colors">{t('rqf.lookup')}</a>
-                                </div>
-                            </div>
-                            <div>
-                                <label className={lbl}>{t('rqf.cargo.handling')}</label>
-                                <div className="grid grid-cols-2 gap-1.5">
-                                    {(CARGO_SPECS[formData.mode] || ['General Cargo']).map(opt => (
-                                        <button key={opt} type="button" onClick={() => set('cargo_specification', opt)}
-                                            className={`text-left px-3 py-2 rounded-lg border text-[10px] font-inter transition-all ${formData.cargo_specification === opt ? 'bg-white/[0.06] border-white/20 text-white' : 'border-white/[0.05] text-zinc-600 hover:text-zinc-400 hover:border-white/15'}`}>
-                                            {opt}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-4">
-                            <div>
-                                <label className={lbl}>{t('rqf.packing.type')}</label>
-                                <select name="packing_type" value={formData.packing_type} onChange={handleChange} className={sel}>
-                                    {[
-                                        { val: 'Pallets', label: t('rqf.pack.pallets') },
-                                        { val: 'Boxes / Cartons', label: t('rqf.pack.boxes') },
-                                        { val: 'Crates', label: t('rqf.pack.crates') },
-                                        { val: 'Drums', label: t('rqf.pack.drums') },
-                                        { val: 'Bags', label: t('rqf.pack.bags') },
-                                        { val: 'Loose / Bulk', label: t('rqf.pack.loose') },
-                                        { val: 'Rolls', label: t('rqf.pack.rolls') },
-                                    ].map(p => (
-                                        <option key={p.val} value={p.val} className="bg-zinc-900">{p.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className={lbl}>{t('rqf.num.pieces')}</label>
-                                <input type="number" min="0" name="quantity" value={formData.quantity} onChange={handleChange}
-                                    onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 50" className={inp} />
-                            </div>
-                            {iOcean && (
-                                <div>
-                                    <label className={lbl}>{t('rqf.vessel')}</label>
-                                    <VesselAutocomplete name="vessel" value={formData.vessel} onChange={handleAutocompleteChange} placeholder="IMO or ship name..." />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Cargo Flags */}
-                        <div>
-                            <label className={lbl}>{t('rqf.cargo.props')}</label>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <ToggleCard name="is_stackable" checked={formData.is_stackable} label={t('rqf.stackable')} icon={Layers} color="emerald" />
-                                <ToggleCard name="is_hazardous" checked={formData.is_hazardous} label={t('rqf.hazardous')} icon={ShieldAlert} color="red" />
-                                <ToggleCard name="is_reefer" checked={formData.is_reefer} label={t('rqf.reefer')} icon={Thermometer} color="blue" />
-                            </div>
-                        </div>
-
-                        {/* Hazardous fields */}
-                        {formData.is_hazardous && (
-                            <div className="bg-red-500/[0.03] border border-red-500/15 rounded-xl p-4 space-y-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest font-inter">{t('rqf.dg.title')}</span>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label className={lbl}>{t('rqf.imo.class')}</label>
-                                        <select name="imo_class" value={formData.imo_class} onChange={handleChange} className={sel}>
-                                            <option value="">{t('rqf.imo.select')}</option>
-                                            {IMO_CLASSES.map(c => <option key={c} className="bg-zinc-900">{c}</option>)}
-                                        </select>
+                        {showMore && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="space-y-4 mt-4"
+                            >
+                                {/* Pickup & Delivery Type + Incoterms */}
+                                <div className={card}>
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className={lbl}>{t('rqf.pickup.type')}</label>
+                                            <select name="origin_type" value={formData.origin_type} onChange={handleChange} className={sel}>
+                                                <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
+                                                <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
+                                                <option value="Door" className="bg-zinc-900">{t('rqf.type.door.origin')}</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className={lbl}>{t('rqf.delivery.type')}</label>
+                                            <select name="dest_type" value={formData.dest_type} onChange={handleChange} className={sel}>
+                                                <option value="Door" className="bg-zinc-900">{t('rqf.type.door.dest')}</option>
+                                                <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
+                                                <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className={lbl}>{t('rqf.un.number')}</label>
-                                        <input type="text" name="un_number" value={formData.un_number} onChange={handleChange}
-                                            placeholder="e.g. UN3480" className={inp} />
-                                    </div>
-                                    <div>
-                                        <label className={lbl}>{t('rqf.packing.group')}</label>
-                                        <select name="packing_group" value={formData.packing_group} onChange={handleChange} className={sel}>
-                                            <option value="">{t('rqf.select')}</option>
-                                            {PACKING_GROUPS.map(p => <option key={p} className="bg-zinc-900">{p}</option>)}
-                                        </select>
+                                        <label className={lbl}>{t('rqf.incoterms')}</label>
+                                        <div className="grid grid-cols-5 gap-2">
+                                            {INCOTERMS.map(term => (
+                                                <button key={term} type="button" onClick={() => set('incoterms', term)}
+                                                    className={`py-2 rounded-xl border text-xs font-bold font-inter transition-all ${formData.incoterms === term ? 'bg-white text-black border-white' : 'border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'}`}>
+                                                    {term}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+
+                                {/* Cargo Details */}
+                                <div className={card}>
+                                    <div className={hdr}>
+                                        <Package className="w-3.5 h-3.5 text-zinc-400" />
+                                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.cargo')}</h2>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className={lbl}>{t('rqf.commodity')}</label>
+                                            <CommodityAutocomplete name="commodity" value={formData.commodity} onChange={handleAutocompleteChange} onSelectItem={handleCommoditySelect} placeholder="e.g. Lithium-Ion Batteries" />
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <input type="text" name="hs_code" value={formData.hs_code} onChange={handleChange}
+                                                    placeholder={t('rqf.hs.placeholder')}
+                                                    className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-700 font-mono font-inter" />
+                                                <a href="/tools/hs-codes" target="_blank" className="text-[9px] text-zinc-600 hover:text-zinc-300 uppercase tracking-widest font-inter whitespace-nowrap transition-colors">{t('rqf.lookup')}</a>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className={lbl}>{t('rqf.cargo.handling')}</label>
+                                            <div className="grid grid-cols-2 gap-1.5">
+                                                {(CARGO_SPECS[formData.mode] || ['General Cargo']).map(opt => (
+                                                    <button key={opt} type="button" onClick={() => set('cargo_specification', opt)}
+                                                        className={`text-left px-3 py-2 rounded-lg border text-[10px] font-inter transition-all ${formData.cargo_specification === opt ? 'bg-white/[0.06] border-white/20 text-white' : 'border-white/[0.05] text-zinc-600 hover:text-zinc-400 hover:border-white/15'}`}>
+                                                        {opt}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="grid md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className={lbl}>{t('rqf.packing.type')}</label>
+                                            <select name="packing_type" value={formData.packing_type} onChange={handleChange} className={sel}>
+                                                {[
+                                                    { val: 'Pallets', label: t('rqf.pack.pallets') },
+                                                    { val: 'Boxes / Cartons', label: t('rqf.pack.boxes') },
+                                                    { val: 'Crates', label: t('rqf.pack.crates') },
+                                                    { val: 'Drums', label: t('rqf.pack.drums') },
+                                                    { val: 'Bags', label: t('rqf.pack.bags') },
+                                                    { val: 'Loose / Bulk', label: t('rqf.pack.loose') },
+                                                    { val: 'Rolls', label: t('rqf.pack.rolls') },
+                                                ].map(p => (
+                                                    <option key={p.val} value={p.val} className="bg-zinc-900">{p.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className={lbl}>{t('rqf.num.pieces')}</label>
+                                            <input type="number" min="0" name="quantity" value={formData.quantity} onChange={handleChange}
+                                                onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 50" className={inp} />
+                                        </div>
+                                        {iOcean && (
+                                            <div>
+                                                <label className={lbl}>{t('rqf.vessel')}</label>
+                                                <VesselAutocomplete name="vessel" value={formData.vessel} onChange={handleAutocompleteChange} placeholder="IMO or ship name..." />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {!isFCL && (formData.mode === 'LCL' || formData.mode === 'Air') && (
+                                        <div>
+                                            <label className={lbl}>{t('rqf.dims')}</label>
+                                            <div className="flex gap-2">
+                                                {['length', 'width', 'height'].map((dim, i) => (
+                                                    <input key={dim} type="number" min="0" name={dim}
+                                                        value={formData[dim as keyof typeof formData] as string}
+                                                        onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()}
+                                                        placeholder={['L', 'W', 'H'][i]}
+                                                        className="flex-1 bg-black border border-white/[0.06] rounded-xl px-3 py-3 text-sm text-white placeholder-zinc-700 font-inter text-center" />
+                                                ))}
+                                                <select name="dim_unit" value={formData.dim_unit} onChange={handleChange}
+                                                    className="h-full bg-zinc-900 border border-white/[0.06] rounded-xl px-3 py-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer min-w-[56px]">
+                                                    <option value="CM">CM</option>
+                                                    <option value="IN">IN</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className={lbl}>{t('rqf.cargo.props')}</label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <ToggleCard name="is_stackable" checked={formData.is_stackable} label={t('rqf.stackable')} icon={Layers} color="emerald" />
+                                            <ToggleCard name="is_hazardous" checked={formData.is_hazardous} label={t('rqf.hazardous')} icon={ShieldAlert} color="red" />
+                                            <ToggleCard name="is_reefer" checked={formData.is_reefer} label={t('rqf.reefer')} icon={Thermometer} color="blue" />
+                                        </div>
+                                    </div>
+                                    {formData.is_hazardous && (
+                                        <div className="bg-red-500/[0.03] border border-red-500/15 rounded-xl p-4 space-y-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                                                <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest font-inter">{t('rqf.dg.title')}</span>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label className={lbl}>{t('rqf.imo.class')}</label>
+                                                    <select name="imo_class" value={formData.imo_class} onChange={handleChange} className={sel}>
+                                                        <option value="">{t('rqf.imo.select')}</option>
+                                                        {IMO_CLASSES.map(c => <option key={c} className="bg-zinc-900">{c}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className={lbl}>{t('rqf.un.number')}</label>
+                                                    <input type="text" name="un_number" value={formData.un_number} onChange={handleChange} placeholder="e.g. UN3480" className={inp} />
+                                                </div>
+                                                <div>
+                                                    <label className={lbl}>{t('rqf.packing.group')}</label>
+                                                    <select name="packing_group" value={formData.packing_group} onChange={handleChange} className={sel}>
+                                                        <option value="">{t('rqf.select')}</option>
+                                                        {PACKING_GROUPS.map(p => <option key={p} className="bg-zinc-900">{p}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {formData.is_reefer && (
+                                        <div className="bg-blue-500/[0.03] border border-blue-500/15 rounded-xl p-4 space-y-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Thermometer className="w-3.5 h-3.5 text-blue-400" />
+                                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest font-inter">{t('rqf.temp.title')}</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className={lbl}>{t('rqf.temp.min')}</label>
+                                                    <input type="number" name="temp_min" value={formData.temp_min} onChange={handleChange} placeholder="e.g. -18" className={inp} />
+                                                </div>
+                                                <div>
+                                                    <label className={lbl}>{t('rqf.temp.max')}</label>
+                                                    <input type="number" name="temp_max" value={formData.temp_max} onChange={handleChange} placeholder="e.g. -15" className={inp} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Services & Timeline */}
+                                <div className={card}>
+                                    <div className={hdr}>
+                                        <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                                        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.services')}</h2>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className={lbl}>{t('rqf.ready.date')}</label>
+                                            <input type="date" name="pickup_ready_date" value={formData.pickup_ready_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
+                                        </div>
+                                        <div>
+                                            <label className={lbl}>{t('rqf.delivery.by')}</label>
+                                            <input type="date" name="delivery_date" value={formData.delivery_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className={lbl}>{t('rqf.add.services')}</label>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <ToggleCard name="needs_insurance" checked={formData.needs_insurance} label={t('rqf.insurance')} icon={FileText} color="emerald" />
+                                            <ToggleCard name="customs_origin" checked={formData.customs_origin} label={t('rqf.customs.origin')} icon={FileText} color="amber" />
+                                            <ToggleCard name="customs_dest" checked={formData.customs_dest} label={t('rqf.customs.dest')} icon={FileText} color="amber" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className={lbl}>{t('rqf.notes')}</label>
+                                        <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2}
+                                            placeholder={t('rqf.notes.placeholder')}
+                                            className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter resize-none" />
+                                    </div>
+                                    <p className="text-[10px] text-zinc-600 font-inter flex items-center gap-1.5">
+                                        <Info className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                                        {t('rqf.privacy')}
+                                    </p>
+                                </div>
+                            </motion.div>
                         )}
-
-                        {/* Reefer fields */}
-                        {formData.is_reefer && (
-                            <div className="bg-blue-500/[0.03] border border-blue-500/15 rounded-xl p-4 space-y-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <Thermometer className="w-3.5 h-3.5 text-blue-400" />
-                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest font-inter">{t('rqf.temp.title')}</span>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className={lbl}>{t('rqf.temp.min')}</label>
-                                        <input type="number" name="temp_min" value={formData.temp_min} onChange={handleChange}
-                                            placeholder="e.g. -18" className={inp} />
-                                    </div>
-                                    <div>
-                                        <label className={lbl}>{t('rqf.temp.max')}</label>
-                                        <input type="number" name="temp_max" value={formData.temp_max} onChange={handleChange}
-                                            placeholder="e.g. -15" className={inp} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-
-                    {/* ── 4. SERVICES & TIMELINE ── */}
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className={card}>
-                        <div className={hdr}>
-                            <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.services')}</h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className={lbl}>{t('rqf.ready.date')}</label>
-                                <input type="date" name="pickup_ready_date" value={formData.pickup_ready_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
-                            </div>
-                            <div>
-                                <label className={lbl}>{t('rqf.delivery.by')}</label>
-                                <input type="date" name="delivery_date" value={formData.delivery_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className={lbl}>{t('rqf.add.services')}</label>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <ToggleCard name="needs_insurance" checked={formData.needs_insurance} label={t('rqf.insurance')} icon={FileText} color="emerald" />
-                                <ToggleCard name="customs_origin" checked={formData.customs_origin} label={t('rqf.customs.origin')} icon={FileText} color="amber" />
-                                <ToggleCard name="customs_dest" checked={formData.customs_dest} label={t('rqf.customs.dest')} icon={FileText} color="amber" />
-                            </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-1 gap-5">
-                            <div>
-                                <label className={lbl}>{t('rqf.notes')}</label>
-                                <textarea name="notes" value={formData.notes} onChange={handleChange} rows={2}
-                                    placeholder={t('rqf.notes.placeholder')}
-                                    className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter resize-none" />
-                            </div>
-                        </div>
-
-                        <p className="text-[10px] text-zinc-600 font-inter flex items-center gap-1.5">
-                            <Info className="w-3 h-3 text-zinc-500 flex-shrink-0" />
-                            {t('rqf.privacy')}
-                        </p>
-                    </motion.div>
+                    </div>
 
                     {formError && (
                         <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-xs text-red-400 font-inter">
