@@ -90,6 +90,9 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
 
             if not unlocode or not city_name:
                 continue
+            # Standard UNLOCODEs are exactly 5 chars — longer codes are terminal sub-identifiers
+            if len(unlocode) != 5:
+                continue
 
             # Always use city name — show ports, not specific terminals
             display = city_name

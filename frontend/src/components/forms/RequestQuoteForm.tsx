@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import {
     Ship, Plane, Truck, Calendar, Package, Layers,
     ShieldAlert, FileText, ArrowRight, Loader2, Info,
-    MapPin, Thermometer, AlertTriangle, CheckSquare, Square, ChevronDown
+    MapPin, Thermometer, AlertTriangle, CheckSquare, Square, ChevronDown,
+    Shield, Award, Archive, Tag, Box, ClipboardList, Eye, Train
 } from 'lucide-react';
 import { countries } from '@/lib/countries';
 import { apiFetch } from '@/lib/config';
@@ -95,9 +96,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
         temp_min: '',
         temp_max: '',
         // Services
-        needs_insurance: false,
-        customs_origin: false,
-        customs_dest: false,
+        selected_services: [] as string[],
         // Timeline
         pickup_ready_date: '',
         delivery_date: '',
@@ -107,6 +106,29 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
     });
 
     const set = (key: string, val: any) => setFormData(prev => ({ ...prev, [key]: val }));
+
+    const toggleService = (svc: string) => setFormData(prev => ({
+        ...prev,
+        selected_services: prev.selected_services.includes(svc)
+            ? prev.selected_services.filter(s => s !== svc)
+            : [...prev.selected_services, svc],
+    }));
+
+    const SERVICES = [
+        { key: 'Insurance',          label: 'Insurance',           icon: Shield },
+        { key: 'Customs Clearance',  label: 'Customs Clearance',   icon: FileText },
+        { key: 'Certification',      label: 'Certification',       icon: Award },
+        { key: 'Inspection',         label: 'Inspection Services', icon: ClipboardList },
+        { key: 'Handling',           label: 'Handling',            icon: Truck },
+        { key: 'Stuffing',           label: 'Stuffing',            icon: Box },
+        { key: 'Survey',             label: 'Survey',              icon: Eye },
+        { key: 'Fulfilment',         label: 'Fulfilment',          icon: Package },
+        { key: 'Storage',            label: 'Storage',             icon: Archive },
+        { key: 'Packaging',          label: 'Packaging',           icon: Package },
+        { key: 'Marking',            label: 'Marking',             icon: Tag },
+        { key: 'Palletization',      label: 'Palletization',       icon: Layers },
+        { key: 'Railway Services',   label: 'Railway Services',    icon: Train },
+    ];
 
     const handleAutocompleteChange = (name: string, value: string) => set(name, value);
 
@@ -165,8 +187,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                 formData.hs_code && `HS Code: ${formData.hs_code}`,
                 formData.is_hazardous && `IMO Class: ${formData.imo_class} | UN: ${formData.un_number} | PG: ${formData.packing_group}`,
                 formData.is_reefer && `Temp Range: ${formData.temp_min}°C to ${formData.temp_max}°C`,
-                formData.customs_origin && 'Origin customs clearance required',
-                formData.customs_dest && 'Destination customs clearance required',
+                formData.selected_services.length > 0 && `Services: ${formData.selected_services.join(', ')}`,
                 formData.delivery_date && `Required delivery by: ${formData.delivery_date}`,
                 formData.notes,
             ].filter(Boolean).join(' | ');
@@ -229,7 +250,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                     dim_unit: formData.dim_unit,
                     is_stackable: formData.is_stackable,
                     is_hazardous: formData.is_hazardous,
-                    needs_insurance: formData.needs_insurance,
+                    needs_insurance: formData.selected_services.includes('Insurance'),
                     pickup_ready_date: formData.pickup_ready_date || null,
                     target_date: formData.delivery_date || null,
                     special_requirements: extras,
@@ -326,7 +347,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                     </select>
                                 </div>
                                 <div>
-                                    <label className={lbl}>{t('rqf.port.address')}</label>
+                                    <label className={lbl}>{t('rqf.port.address')} <span className="text-red-400">*</span></label>
                                     {['CY', 'CFS'].includes(formData.origin_type)
                                         ? <PortAutocomplete name="origin_district" value={formData.origin_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('origin')} placeholder={t('rqf.port.search')} countryCode={formData.origin_country} countryName={originC?.name} termType={formData.origin_type} />
                                         : <input type="text" name="origin_district" value={formData.origin_district} onChange={handleChange} placeholder={t('rqf.addr.origin')} className={inp} />}
@@ -352,7 +373,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                     </select>
                                 </div>
                                 <div>
-                                    <label className={lbl}>{t('rqf.port.address')}</label>
+                                    <label className={lbl}>{t('rqf.port.address')} <span className="text-red-400">*</span></label>
                                     {['CY', 'CFS'].includes(formData.dest_type)
                                         ? <PortAutocomplete name="dest_district" value={formData.dest_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('dest')} placeholder={t('rqf.port.search')} countryCode={formData.dest_country} countryName={destC2?.name} termType={formData.dest_type} />
                                         : <input type="text" name="dest_district" value={formData.dest_district} onChange={handleChange} placeholder={t('rqf.addr.dest')} className={inp} />}
@@ -393,7 +414,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                         </div>
                         {isFCL && (
                             <div>
-                                <label className={lbl}>{t('rqf.container.type')}</label>
+                                <label className={lbl}>{t('rqf.container.type')} <span className="text-red-400">*</span></label>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     {CONTAINER_TYPES.map(ct => (
                                         <button key={ct.value} type="button"
@@ -405,51 +426,34 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 </div>
                             </div>
                         )}
-                        {isFCL ? (
-                            <div className="grid grid-cols-2 gap-4">
+                        <div className={`grid gap-4 ${isFCL ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                            {isFCL && (
                                 <div>
                                     <label className={lbl}>{t('rqf.num.containers')}</label>
                                     <input type="number" min="1" name="container_count" value={formData.container_count} onChange={handleChange}
                                         onWheel={e => (e.target as HTMLElement).blur()} placeholder="1" className={inp} />
                                 </div>
-                                <div>
-                                    <label className={lbl}>{t('rqf.gross.weight')}</label>
-                                    <div className="flex">
-                                        <input type="number" min="0" name="weight" value={formData.weight} onChange={handleChange}
-                                            onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 18000"
-                                            className="flex-1 bg-black border border-white/[0.06] border-r-0 rounded-l-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
-                                        <select name="weight_unit" value={formData.weight_unit} onChange={handleChange}
-                                            className="bg-zinc-900 border border-white/[0.06] border-l-0 rounded-r-xl px-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer">
-                                            <option value="KGM">KG</option>
-                                            <option value="LBS">LB</option>
-                                        </select>
-                                    </div>
+                            )}
+                            <div>
+                                <label className={lbl}>{isFCL ? t('rqf.gross.weight') : t('rqf.gross.weight.req')} <span className="text-red-400">*</span></label>
+                                <div className="flex">
+                                    <input type="number" min="0" name="weight" value={formData.weight} onChange={handleChange}
+                                        onWheel={e => (e.target as HTMLElement).blur()} placeholder={isFCL ? 'e.g. 18000' : 'e.g. 500'}
+                                        className="flex-1 bg-black border border-white/[0.06] border-r-0 rounded-l-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
+                                    <select name="weight_unit" value={formData.weight_unit} onChange={handleChange}
+                                        className="bg-zinc-900 border border-white/[0.06] border-l-0 rounded-r-xl px-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer">
+                                        <option value="KGM">KG</option>
+                                        <option value="LBS">LB</option>
+                                    </select>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className={lbl}>{t('rqf.gross.weight.req')}</label>
-                                    <div className="flex">
-                                        <input type="number" min="0" name="weight" value={formData.weight} onChange={handleChange}
-                                            onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 500"
-                                            className="flex-1 bg-black border border-white/[0.06] border-r-0 rounded-l-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
-                                        <select name="weight_unit" value={formData.weight_unit} onChange={handleChange}
-                                            className="bg-zinc-900 border border-white/[0.06] border-l-0 rounded-r-xl px-3 text-xs font-bold text-zinc-400 font-inter cursor-pointer">
-                                            <option value="KGM">KG</option>
-                                            <option value="LBS">LB</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                {(formData.mode === 'LCL' || formData.mode === 'Air') && (
-                                    <div>
-                                        <label className={lbl}>{t('rqf.volume.cbm')} <span className="text-red-400">*</span></label>
-                                        <input type="number" step="0.01" min="0" name="total_volume_cbm" value={formData.total_volume_cbm}
-                                            onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 3.5" required className={inp} />
-                                    </div>
-                                )}
+                            <div>
+                                <label className={lbl}>{t('rqf.volume.cbm')} {(formData.mode === 'LCL' || formData.mode === 'Air') && <span className="text-red-400">*</span>}</label>
+                                <input type="number" step="0.01" min="0" name="total_volume_cbm" value={formData.total_volume_cbm}
+                                    onChange={handleChange} onWheel={e => (e.target as HTMLElement).blur()} placeholder="e.g. 3.5"
+                                    required={formData.mode === 'LCL' || formData.mode === 'Air'} className={inp} />
                             </div>
-                        )}
+                        </div>
 
                         {/* Commodity — always visible since it's required */}
                         <div className="mt-5">
@@ -633,11 +637,21 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                         </div>
                                     </div>
                                     <div>
-                                        <label className={lbl}>{t('rqf.add.services')}</label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                            <ToggleCard name="needs_insurance" checked={formData.needs_insurance} label={t('rqf.insurance')} icon={FileText} color="emerald" />
-                                            <ToggleCard name="customs_origin" checked={formData.customs_origin} label={t('rqf.customs.origin')} icon={FileText} color="amber" />
-                                            <ToggleCard name="customs_dest" checked={formData.customs_dest} label={t('rqf.customs.dest')} icon={FileText} color="amber" />
+                                        <label className={lbl}>Associated Services</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {SERVICES.map(({ key, label, icon: Icon }) => {
+                                                const checked = formData.selected_services.includes(key);
+                                                return (
+                                                    <button key={key} type="button" onClick={() => toggleService(key)}
+                                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${checked ? 'border-white/20 bg-white/[0.05]' : 'border-white/[0.06] hover:border-white/15'}`}>
+                                                        {checked
+                                                            ? <CheckSquare className="w-4 h-4 text-white flex-shrink-0" />
+                                                            : <Square className="w-4 h-4 text-zinc-600 flex-shrink-0" />}
+                                                        <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${checked ? 'text-white' : 'text-zinc-600'}`} />
+                                                        <span className={`text-[11px] font-semibold font-inter leading-tight ${checked ? 'text-zinc-300' : 'text-zinc-500'}`}>{label}</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                     <div>
