@@ -298,7 +298,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             <Navbar />
 
-            <div className="max-w-3xl mx-auto px-4 py-28 pb-20">
+            <div className="max-w-5xl mx-auto px-6 py-28 pb-20">
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
                     <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-3 font-inter">{isF2F ? 'F2F Network' : t('rqf.badge')}</p>
                     <h1 className="text-3xl font-bold tracking-tight font-outfit mb-2">{isF2F ? 'Post F2F Request' : t('rqf.title')}</h1>
