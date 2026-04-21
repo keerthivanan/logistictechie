@@ -559,7 +559,7 @@ export default function MarketplaceLiveDashboard() {
                             <div className="mt-8 pt-6 border-t border-white/[0.05] w-full max-w-xs">
                                 <p className="text-[10px] text-zinc-700 uppercase tracking-widest mb-4">{t('mkt.need.now')}</p>
                                 <Link
-                                    href="/search"
+                                    href="/marketplace"
                                     className="inline-flex items-center gap-2 bg-white/10 text-white border border-white/[0.08] px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-white/20 transition-all"
                                 >
                                     <Search className="w-3.5 h-3.5" /> {t('mkt.get.instant')}

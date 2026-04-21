@@ -381,7 +381,7 @@ export default function CalculatorPage() {
                                         </div>
                                     </div>
 
-                                    <Link href="/search" className="block w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold hover:bg-blue-500 transition-all text-center font-inter shadow-xl">
+                                    <Link href="/marketplace" className="block w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold hover:bg-blue-500 transition-all text-center font-inter shadow-xl">
                                         {t('calc.get.quotes')}
                                     </Link>
                                 </div>
@@ -418,7 +418,7 @@ export default function CalculatorPage() {
                     <h2 className="text-4xl md:text-5xl font-bold mb-8">{t('calc.cta.title')}</h2>
                     <p className="text-xl text-zinc-400 mb-10">{t('calc.cta.sub')}</p>
                     <div className="flex justify-center gap-4 flex-wrap">
-                        <Link href="/search" className="px-8 py-4 bg-white text-black font-semibold rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">{t('calc.get.live')}</Link>
+                        <Link href="/marketplace" className="px-8 py-4 bg-white text-black font-semibold rounded-xl hover:bg-zinc-100 transition-all text-xs uppercase tracking-widest font-inter">{t('calc.get.live')}</Link>
                         <Link href="/services/ocean-freight" className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-xl hover:bg-white/5 transition-all text-xs uppercase tracking-widest font-inter">{t('calc.ocean.services')}</Link>
                     </div>
                 </div>

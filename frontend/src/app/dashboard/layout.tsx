@@ -391,7 +391,7 @@ export default function DashboardLayout({
                             </div>
 
                             {user?.role !== 'forwarder' && (
-                            <Link href="/search" className="hidden md:flex bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            <Link href="/marketplace" className="hidden md:flex bg-white text-black text-xs font-semibold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-all items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                 <Plus className="w-4 h-4" /> {t('dash.book')}
                             </Link>
                             )}

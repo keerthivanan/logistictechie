@@ -141,7 +141,7 @@ export default function Navbar() {
                                 </AnimatePresence>
                             </div>
 
-                            <Link href="/search" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            <Link href="/marketplace" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
                                 {t('nav.search')}
                             </Link>
                         </>
@@ -367,7 +367,7 @@ export default function Navbar() {
 
                                     {/* Instant Search — direct link (not for forwarders) */}
                                     {user?.role !== 'forwarder' && (
-                                        <Link href="/search" onClick={() => setMobileMenuOpen(false)}
+                                        <Link href="/marketplace" onClick={() => setMobileMenuOpen(false)}
                                             className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
                                             <Search className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
                                             {t('nav.search')}
@@ -417,7 +417,7 @@ export default function Navbar() {
                                 <div className="mt-4 pt-4 border-t border-white/[0.05] space-y-2.5">
                                     {user ? (
                                         <>
-                                            <Link href="/search" onClick={() => setMobileMenuOpen(false)}
+                                            <Link href="/marketplace" onClick={() => setMobileMenuOpen(false)}
                                                 className="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-black font-bold text-sm rounded-2xl active:bg-zinc-200 transition-colors">
                                                 Get a Quote <ArrowRight className="w-4 h-4" />
                                             </Link>

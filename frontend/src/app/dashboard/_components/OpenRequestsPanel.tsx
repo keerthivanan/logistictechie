@@ -143,7 +143,7 @@ export default function OpenRequestsPanel() {
                     )}
                 </div>
                 <Link
-                    href="/search"
+                    href="/marketplace"
                     className="flex items-center gap-1.5 bg-white text-black px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-zinc-200 transition-colors"
                 >
                     <Plus className="w-3 h-3" /> {t('panel.new')}
@@ -419,7 +419,7 @@ function EmptyState({ filter }: { filter: Filter }) {
                     {filter === 'OPEN' ? t('panel.no.open') : filter === 'CLOSED' ? t('panel.no.closed') : t('panel.no.requests')}
                 </p>
                 {filter !== 'CLOSED' && (
-                    <Link href="/search" className="text-[10px] text-zinc-600 font-inter hover:text-white transition-colors underline underline-offset-4 mt-1 block">
+                    <Link href="/marketplace" className="text-[10px] text-zinc-600 font-inter hover:text-white transition-colors underline underline-offset-4 mt-1 block">
                         {t('panel.get.quote')}
                     </Link>
                 )}
