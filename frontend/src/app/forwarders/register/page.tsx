@@ -494,7 +494,7 @@ export default function ForwarderRegisterPage() {
                         <a href="/login" className="text-zinc-400 hover:text-white transition-colors underline">{t('reg.signin.link')}</a>
                     </p>
                     <div className="flex justify-center mt-6">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                        <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
                     </div>
                 </div>
 

@@ -150,7 +150,7 @@ export default function CalculatorPage() {
             {/* ─── HERO ─── */}
             <section className="relative bg-black min-h-screen flex flex-col justify-center">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-80 mb-8" />
+                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-80 mb-8" />
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tighter font-outfit uppercase mb-12 leading-[1.1] text-white max-w-4xl">
                         {t('tools.calculator.title')}
                     </h1>

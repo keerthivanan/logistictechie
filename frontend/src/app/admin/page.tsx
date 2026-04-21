@@ -228,7 +228,7 @@ export default function AdminPage() {
 
             <div className="border-b border-white/5 px-8 py-5 flex items-center justify-between sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40">
                 <div className="flex items-center gap-4">
-                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
+                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
                     <h1 className="text-lg font-semibold uppercase tracking-tight">Admin Control Panel</h1>
                 </div>
                 <div className="flex items-center gap-3">

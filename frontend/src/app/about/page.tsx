@@ -33,7 +33,7 @@ export default function AboutPage() {
                 {/* Header */}
                 <div className="mb-12 max-w-2xl">
                     <h1 className="text-2xl font-semibold font-outfit uppercase tracking-tight text-white mb-3 flex items-center gap-3">
-                        {t('about.title')} <img src="/cargolink.png" alt="CargoLink" className="h-8 w-auto object-contain opacity-90 inline-block" />
+                        {t('about.title')} <img src="/cargolink-white.png" alt="CargoLink" className="h-8 w-auto object-contain opacity-90 inline-block" />
                     </h1>
                     <p className="text-sm text-zinc-400 font-inter leading-relaxed">{t('about.sub')}</p>
                 </div>

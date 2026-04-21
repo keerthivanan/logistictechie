@@ -50,7 +50,7 @@ export default function CookiePage() {
                     <a href="mailto:osama@cargolink.sa" className="text-zinc-500 hover:text-white transition-colors underline">osama@cargolink.sa</a>
                 </p>
                 <div className="flex justify-center mt-8">
-                    <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
+                    <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-30" />
                 </div>
             </div>
         </div>

@@ -120,7 +120,7 @@ function SignupContent() {
                 {/* Logo + Title */}
                 <div className="text-center mb-10">
                     <Link href="/" className="inline-flex items-center group mb-8">
-                        <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
+                        <img src="/cargolink-white.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity" />
                     </Link>
                     <h1 className="text-2xl font-bold mb-2 font-outfit uppercase tracking-tight whitespace-nowrap">{t('signup.title')}</h1>
                     <p className="text-zinc-500 font-medium text-xs font-inter">{t('signup.sub')}</p>
