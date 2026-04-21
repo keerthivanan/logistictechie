@@ -331,6 +331,14 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                         ? <PortAutocomplete name="origin_district" value={formData.origin_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('origin')} placeholder={t('rqf.port.search')} countryCode={formData.origin_country} countryName={originC?.name} termType={formData.origin_type} />
                                         : <input type="text" name="origin_district" value={formData.origin_district} onChange={handleChange} placeholder={t('rqf.addr.origin')} className={inp} />}
                                 </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.pickup.type')}</label>
+                                    <select name="origin_type" value={formData.origin_type} onChange={handleChange} className={sel}>
+                                        <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
+                                        <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
+                                        <option value="Door" className="bg-zinc-900">{t('rqf.type.door.origin')}</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2">
@@ -348,6 +356,14 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                     {['CY', 'CFS'].includes(formData.dest_type)
                                         ? <PortAutocomplete name="dest_district" value={formData.dest_district} onChange={handleAutocompleteChange} onSelect={handlePortSelect('dest')} placeholder={t('rqf.port.search')} countryCode={formData.dest_country} countryName={destC2?.name} termType={formData.dest_type} />
                                         : <input type="text" name="dest_district" value={formData.dest_district} onChange={handleChange} placeholder={t('rqf.addr.dest')} className={inp} />}
+                                </div>
+                                <div>
+                                    <label className={lbl}>{t('rqf.delivery.type')}</label>
+                                    <select name="dest_type" value={formData.dest_type} onChange={handleChange} className={sel}>
+                                        <option value="Door" className="bg-zinc-900">{t('rqf.type.door.dest')}</option>
+                                        <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
+                                        <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -466,36 +482,16 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                 transition={{ duration: 0.2 }}
                                 className="space-y-4 mt-4"
                             >
-                                {/* Pickup & Delivery Type + Incoterms */}
+                                {/* Incoterms */}
                                 <div className={card}>
-                                    <div className="grid md:grid-cols-2 gap-5">
-                                        <div>
-                                            <label className={lbl}>{t('rqf.pickup.type')}</label>
-                                            <select name="origin_type" value={formData.origin_type} onChange={handleChange} className={sel}>
-                                                <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
-                                                <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
-                                                <option value="Door" className="bg-zinc-900">{t('rqf.type.door.origin')}</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className={lbl}>{t('rqf.delivery.type')}</label>
-                                            <select name="dest_type" value={formData.dest_type} onChange={handleChange} className={sel}>
-                                                <option value="Door" className="bg-zinc-900">{t('rqf.type.door.dest')}</option>
-                                                <option value="CY" className="bg-zinc-900">{t('rqf.type.cy')}</option>
-                                                <option value="CFS" className="bg-zinc-900">{t('rqf.type.cfs')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className={lbl}>{t('rqf.incoterms')}</label>
-                                        <div className="grid grid-cols-5 gap-2">
-                                            {INCOTERMS.map(term => (
-                                                <button key={term} type="button" onClick={() => set('incoterms', term)}
-                                                    className={`py-2 rounded-xl border text-xs font-bold font-inter transition-all ${formData.incoterms === term ? 'bg-white text-black border-white' : 'border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'}`}>
-                                                    {term}
-                                                </button>
-                                            ))}
-                                        </div>
+                                    <label className={lbl}>{t('rqf.incoterms')}</label>
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {INCOTERMS.map(term => (
+                                            <button key={term} type="button" onClick={() => set('incoterms', term)}
+                                                className={`py-2 rounded-xl border text-xs font-bold font-inter transition-all ${formData.incoterms === term ? 'bg-white text-black border-white' : 'border-white/[0.08] text-zinc-600 hover:border-white/20 hover:text-zinc-400'}`}>
+                                                {term}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
