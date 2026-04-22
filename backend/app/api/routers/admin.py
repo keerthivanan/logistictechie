@@ -6,6 +6,8 @@ from app.db.session import get_db
 from app.models.forwarder import Forwarder
 from app.models.user import User
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
+from app.models.booking import Booking
+from app.models.conversation import Conversation
 from app.api.deps import get_admin_user
 from app.services.webhook import webhook_service
 from datetime import datetime, timezone
@@ -382,3 +384,55 @@ async def close_request(
     req.closed_reason = "Closed by admin"
     await db.commit()
     return {"success": True, "message": f"Request {request_id} closed."}
+
+
+@router.get("/all-bookings")
+async def list_all_bookings(
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """All confirmed bookings with shipper info and linked conversation details."""
+    bookings_result = await db.execute(
+        select(Booking).order_by(Booking.confirmed_at.desc())
+    )
+    bookings = bookings_result.scalars().all()
+
+    # Fetch linked users by sovereign_id
+    sovereign_ids = list({b.user_sovereign_id for b in bookings if b.user_sovereign_id})
+    users_map: dict = {}
+    if sovereign_ids:
+        u_res = await db.execute(select(User).where(User.sovereign_id.in_(sovereign_ids)))
+        users_map = {u.sovereign_id: u for u in u_res.scalars().all()}
+
+    # Fetch linked conversations by quote_id (for agreed_price + forwarder company)
+    quote_ids = list({b.quote_id for b in bookings if b.quote_id})
+    conv_map: dict = {}
+    if quote_ids:
+        c_res = await db.execute(select(Conversation).where(Conversation.quote_id.in_(quote_ids)))
+        conv_map = {c.quote_id: c for c in c_res.scalars().all()}
+
+    return [
+        {
+            "id": b.id,
+            "reference": b.reference,
+            "user_sovereign_id": b.user_sovereign_id,
+            "user_name": users_map[b.user_sovereign_id].full_name if b.user_sovereign_id in users_map else "—",
+            "user_email": users_map[b.user_sovereign_id].email if b.user_sovereign_id in users_map else "—",
+            "carrier_name": b.carrier_name,
+            "origin": b.origin_locode,
+            "destination": b.destination_locode,
+            "container_type": b.container_type,
+            "transit_days": b.transit_days,
+            "total_price": float(b.total_price) if b.total_price else None,
+            "currency": b.currency,
+            "marketplace_request_id": b.marketplace_request_id,
+            "quote_id": b.quote_id,
+            "agreed_price": float(conv_map[b.quote_id].agreed_price)
+                if b.quote_id in conv_map and conv_map[b.quote_id].agreed_price else None,
+            "forwarder_company": conv_map[b.quote_id].forwarder_company
+                if b.quote_id in conv_map else None,
+            "status": b.status,
+            "confirmed_at": str(b.confirmed_at),
+        }
+        for b in bookings
+    ]

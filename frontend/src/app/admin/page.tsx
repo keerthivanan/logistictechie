@@ -9,7 +9,7 @@ import {
     Phone, FileText, RefreshCw, Package,
     TrendingUp, UserCheck, UserX, Briefcase, ShoppingBag,
     AlertCircle, Lock, Unlock, ArrowDownLeft, Image as ImageIcon,
-    ArrowRight, X, Flame, ShieldCheck,
+    ArrowRight, X, Flame, ShieldCheck, DollarSign, CalendarCheck,
 } from 'lucide-react'
 
 interface ForwarderApp {
@@ -84,7 +84,28 @@ interface AdminStats {
     total_quotes: number
 }
 
-type Tab = 'pending' | 'all' | 'users' | 'requests'
+interface BookingRow {
+    id: number
+    reference: string
+    user_sovereign_id: string
+    user_name: string
+    user_email: string
+    carrier_name: string
+    origin: string
+    destination: string
+    container_type: string
+    transit_days: number | null
+    total_price: number | null
+    currency: string
+    marketplace_request_id: string | null
+    quote_id: string | null
+    agreed_price: number | null
+    forwarder_company: string | null
+    status: string
+    confirmed_at: string
+}
+
+type Tab = 'pending' | 'requests' | 'bookings' | 'all' | 'users'
 
 const statusColor = (s: string) => {
     if (s === 'ACTIVE') return 'text-white bg-white/[0.06] border-white/20'
@@ -112,6 +133,7 @@ export default function AdminPage() {
     const [allForwarders, setAllForwarders] = useState<ForwarderApp[]>([])
     const [allUsers, setAllUsers] = useState<UserRow[]>([])
     const [allRequests, setAllRequests] = useState<RequestRow[]>([])
+    const [allBookings, setAllBookings] = useState<BookingRow[]>([])
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
     const [tab, setTab] = useState<Tab>('pending')
@@ -135,12 +157,13 @@ export default function AdminPage() {
         try {
             const token = localStorage.getItem('token')
             const h = { Authorization: `Bearer ${token}` }
-            const [statsRes, pendingRes, allRes, usersRes, reqsRes] = await Promise.all([
+            const [statsRes, pendingRes, allRes, usersRes, reqsRes, bkRes] = await Promise.all([
                 apiFetch('/api/admin/stats', { headers: h }),
                 apiFetch('/api/admin/pending-forwarders', { headers: h }),
                 apiFetch('/api/admin/all-forwarders', { headers: h }),
                 apiFetch('/api/admin/all-users', { headers: h }),
                 apiFetch('/api/admin/all-requests', { headers: h }),
+                apiFetch('/api/admin/all-bookings', { headers: h }),
             ])
             if (statsRes.status === 401 || statsRes.status === 403) { router.replace('/dashboard'); return }
             setStats(await statsRes.json())
@@ -148,6 +171,7 @@ export default function AdminPage() {
             setAllForwarders(await allRes.json())
             setAllUsers(await usersRes.json())
             setAllRequests(await reqsRes.json())
+            setAllBookings(await bkRes.json())
         } catch {
             showToast('Failed to load data', false)
         } finally {
@@ -334,6 +358,7 @@ export default function AdminPage() {
                     {([
                         { key: 'pending', label: `Pending Review (${pending.length})` },
                         { key: 'requests', label: `All Requests (${allRequests.length})` },
+                        { key: 'bookings', label: `Confirmed Bookings (${allBookings.length})` },
                         { key: 'all', label: `All Partners (${allForwarders.length})` },
                         { key: 'users', label: `All Users (${allUsers.length})` },
                     ] as { key: Tab; label: string }[]).map(t => (
@@ -529,6 +554,75 @@ export default function AdminPage() {
                                 ))}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* CONFIRMED BOOKINGS */}
+                {tab === 'bookings' && (
+                    <div className="space-y-3">
+                        {allBookings.length === 0 ? (
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-16 text-center">
+                                <CalendarCheck className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                                <p className="text-sm font-bold text-zinc-500">No confirmed bookings yet</p>
+                                <p className="text-xs text-zinc-700 mt-1">Bookings appear here once both parties confirm inside the chat.</p>
+                            </div>
+                        ) : allBookings.map(bk => (
+                            <div key={bk.id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition-all">
+                                <div className="flex items-start justify-between gap-4 mb-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-sm font-bold text-white font-mono">{bk.reference}</span>
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${bk.status === 'CONFIRMED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+                                                {bk.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-600 font-mono">{new Date(bk.confirmed_at).toLocaleString()}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-bold text-white">
+                                            {bk.agreed_price
+                                                ? `${bk.currency} ${bk.agreed_price.toLocaleString()}`
+                                                : bk.total_price
+                                                    ? `${bk.currency} ${bk.total_price.toLocaleString()}`
+                                                    : '—'}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-600">Agreed Price</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                    {/* Shipper */}
+                                    <div>
+                                        <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Shipper</p>
+                                        <p className="text-white font-medium">{bk.user_name}</p>
+                                        <p className="text-zinc-500 font-mono text-[10px]">{bk.user_email}</p>
+                                    </div>
+                                    {/* Forwarder */}
+                                    <div>
+                                        <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Forwarder</p>
+                                        <p className="text-white font-medium">{bk.forwarder_company || bk.carrier_name || '—'}</p>
+                                        {bk.marketplace_request_id && (
+                                            <p className="text-zinc-600 font-mono text-[10px]">Req: {bk.marketplace_request_id}</p>
+                                        )}
+                                    </div>
+                                    {/* Route */}
+                                    <div>
+                                        <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Route</p>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-white font-medium">{bk.origin}</span>
+                                            <ArrowRight className="w-3 h-3 text-zinc-600" />
+                                            <span className="text-white font-medium">{bk.destination}</span>
+                                        </div>
+                                        <p className="text-zinc-500">{bk.container_type}</p>
+                                    </div>
+                                    {/* Transit */}
+                                    <div>
+                                        <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Transit</p>
+                                        <p className="text-white">{bk.transit_days ? `${bk.transit_days} days` : '—'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 
