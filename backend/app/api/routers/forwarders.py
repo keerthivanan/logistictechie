@@ -193,6 +193,7 @@ class ForwarderPromote(BaseModel):
     website: str = ""
     document_url: str = ""
     logo_url: str = ""
+    member_networks: str = ""
 
 @router.post("/promote")
 async def promote_to_forwarder(
@@ -240,6 +241,7 @@ async def promote_to_forwarder(
         tax_id=f_in.tax_id,
         document_url=f_in.document_url,
         logo_url=f_in.logo_url,
+        member_networks=f_in.member_networks or None,
         status="PENDING",       # ← awaiting admin approval
         is_verified=False,
         is_paid=False,
@@ -262,6 +264,7 @@ async def promote_to_forwarder(
         "country": f_in.country,
         "specializations": f_in.specializations,
         "routes": f_in.routes,
+        "member_networks": f_in.member_networks or "",
         "tax_id": f_in.tax_id,
         "website": f_in.website or "",
         "document_url": f_in.document_url or "",

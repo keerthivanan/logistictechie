@@ -9,7 +9,7 @@ import {
     Ship, Plane, Truck, Calendar, Package, Layers,
     ShieldAlert, FileText, ArrowRight, Loader2, Info,
     MapPin, Thermometer, AlertTriangle, CheckSquare, Square, ChevronDown,
-    Shield, Award, Archive, Tag, Box, ClipboardList, Eye, Train
+    Shield, Award, Archive, Tag, Box, ClipboardList, Eye, Train, Boxes
 } from 'lucide-react';
 import { countries } from '@/lib/countries';
 import { apiFetch } from '@/lib/config';
@@ -124,7 +124,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
         { key: 'Survey',             label: 'Survey',              icon: Eye },
         { key: 'Fulfilment',         label: 'Fulfilment',          icon: Package },
         { key: 'Storage',            label: 'Storage',             icon: Archive },
-        { key: 'Packaging',          label: 'Packaging',           icon: Package },
+        { key: 'Packaging',          label: 'Packaging',           icon: Boxes },
         { key: 'Marking',            label: 'Marking',             icon: Tag },
         { key: 'Palletization',      label: 'Palletization',       icon: Layers },
         { key: 'Railway Services',   label: 'Railway Services',    icon: Train },
@@ -393,7 +393,7 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                     {/* ── LOAD ── */}
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className={card}>
                         <div className={hdr}>
-                            <Ship className="w-3.5 h-3.5 text-zinc-500" />
+                            {formData.mode === 'Air' ? <Plane className="w-3.5 h-3.5 text-zinc-500" /> : formData.mode === 'Truck' ? <Truck className="w-3.5 h-3.5 text-zinc-500" /> : <Ship className="w-3.5 h-3.5 text-zinc-500" />}
                             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.type')}</h2>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -626,16 +626,6 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                         <Calendar className="w-3.5 h-3.5 text-zinc-400" />
                                         <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">{t('rqf.section.services')}</h2>
                                     </div>
-                                    <div className="grid md:grid-cols-2 gap-5">
-                                        <div>
-                                            <label className={lbl}>{t('rqf.ready.date')}</label>
-                                            <input type="date" name="pickup_ready_date" value={formData.pickup_ready_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
-                                        </div>
-                                        <div>
-                                            <label className={lbl}>{t('rqf.delivery.by')}</label>
-                                            <input type="date" name="delivery_date" value={formData.delivery_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
-                                        </div>
-                                    </div>
                                     <div>
                                         <label className={lbl}>Associated Services</label>
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -652,6 +642,16 @@ export default function RequestQuoteForm({ isF2F = false }: { isF2F?: boolean })
                                                     </button>
                                                 );
                                             })}
+                                        </div>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label className={lbl}>{t('rqf.ready.date')}</label>
+                                            <input type="date" name="pickup_ready_date" value={formData.pickup_ready_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
+                                        </div>
+                                        <div>
+                                            <label className={lbl}>{t('rqf.delivery.by')}</label>
+                                            <input type="date" name="delivery_date" value={formData.delivery_date} onChange={handleChange} style={{ colorScheme: 'dark' }} className={inp} />
                                         </div>
                                     </div>
                                     <div>

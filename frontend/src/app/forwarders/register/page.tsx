@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Globe, Mail, Phone, Upload, Check, Loader2 } from 'lucide-react';
+import { Building2, Globe, Mail, Upload, Check, Loader2, Award } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { countries } from '@/lib/countries';
@@ -38,6 +38,8 @@ export default function ForwarderRegisterPage() {
         phone: '',
         specializations: [] as string[],
         routes: '',
+        member_networks: [] as string[],
+        other_network: '',
         tax_id: '',
         website: '',
         document_url: '',
@@ -46,12 +48,34 @@ export default function ForwarderRegisterPage() {
 
     const SPECIALIZATION_OPTIONS = ['FCL', 'LCL', 'AIR', 'BREAKBULK', 'RORO', 'REEFER'];
 
+    const NETWORK_OPTIONS = [
+        { key: 'IATA',     label: 'IATA',     desc: 'Air Transport Association' },
+        { key: 'FIATA',    label: 'FIATA',    desc: 'Freight Forwarders Assoc.' },
+        { key: 'WCA',      label: 'WCA',      desc: 'World Cargo Alliance' },
+        { key: 'JC Trans', label: 'JC Trans', desc: 'JC Trans Network' },
+        { key: 'PPL',      label: 'PPL',      desc: 'Pan Pacific Logistics' },
+        { key: 'NVOCC',    label: 'NVOCC',    desc: 'Non-Vessel Operating CC' },
+        { key: 'Cargo One',label: 'Cargo One',desc: 'Cargo One Network' },
+        { key: 'CIFA',     label: 'CIFA',     desc: 'China Intl. Freight Assoc.' },
+        { key: 'FONASBA',  label: 'FONASBA',  desc: 'Ship Agents & Brokers' },
+        { key: 'Other',    label: 'Other',    desc: 'Other membership' },
+    ];
+
     const toggleSpec = (spec: string) => {
         setFormData(prev => ({
             ...prev,
             specializations: prev.specializations.includes(spec)
                 ? prev.specializations.filter(s => s !== spec)
                 : [...prev.specializations, spec]
+        }));
+    };
+
+    const toggleNetwork = (net: string) => {
+        setFormData(prev => ({
+            ...prev,
+            member_networks: prev.member_networks.includes(net)
+                ? prev.member_networks.filter(n => n !== net)
+                : [...prev.member_networks, net]
         }));
     };
 
@@ -138,6 +162,10 @@ export default function ForwarderRegisterPage() {
                     country: formData.country,
                     specializations: formData.specializations.join(','),
                     routes: formData.routes,
+                    member_networks: [
+                        ...formData.member_networks.filter(n => n !== 'Other'),
+                        ...(formData.member_networks.includes('Other') && formData.other_network.trim() ? [formData.other_network.trim()] : []),
+                    ].join(','),
                     tax_id: formData.tax_id,
                     website: formData.website || '',
                     whatsapp: formData.phone,
@@ -264,14 +292,14 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.name')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.name')} <span className="text-red-400">*</span></label>
                             <input name="company_name" required value={formData.company_name} onChange={handleChange}
                                 placeholder="Global Logistics Co."
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.contact.person')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.contact.person')} <span className="text-red-400">*</span></label>
                             <input name="contact_person" required value={formData.contact_person} onChange={handleChange}
                                 placeholder="John Doe"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -284,7 +312,7 @@ export default function ForwarderRegisterPage() {
                                     className="w-full bg-zinc-900/60 border border-white/[0.04] rounded-xl px-4 py-3 text-sm text-zinc-600 cursor-not-allowed font-inter" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.email')}</label>
+                                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.company.email')} <span className="text-red-400">*</span></label>
                                 <input name="company_email" type="email" required value={formData.company_email} onChange={handleChange}
                                     placeholder="ops@company.com"
                                     className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -300,7 +328,7 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.country')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.country')} <span className="text-red-400">*</span></label>
                             <select name="country" required value={formData.country} onChange={handleChange}
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white appearance-none cursor-pointer font-inter">
                                 <option value="">{t('reg.country.placeholder')}</option>
@@ -332,7 +360,7 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">{t('reg.cargo.types')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">{t('reg.cargo.types')} <span className="text-red-400">*</span></label>
                             <p className="text-[10px] text-zinc-600 font-inter mb-3">{t('reg.cargo.hint')}</p>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 {SPECIALIZATION_OPTIONS.map(spec => {
@@ -363,7 +391,49 @@ export default function ForwarderRegisterPage() {
                         </div>
                     </div>
 
-                    {/* ── Card 4: Business Verification ── */}
+                    {/* ── Card 4: Member Network ── */}
+                    <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
+                        <div className="flex items-center gap-2.5 mb-1">
+                            <Award className="w-3.5 h-3.5 text-zinc-400" />
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 font-inter">Member Network</h2>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-1 font-inter">Industry Memberships</label>
+                            <p className="text-[10px] text-zinc-600 font-inter mb-3">Select all freight associations or networks your company is a member of. Helps us verify your credentials.</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {NETWORK_OPTIONS.map(({ key, label, desc }) => {
+                                    const active = formData.member_networks.includes(key);
+                                    return (
+                                        <button key={key} type="button" onClick={() => toggleNetwork(key)}
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${active ? 'border-white/20 bg-white/[0.04]' : 'border-white/[0.06] hover:border-white/15'}`}>
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all ${active ? 'bg-white border-white' : 'border-white/20'}`}>
+                                                {active && <Check className="w-2.5 h-2.5 text-black" />}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className={`text-xs font-bold font-inter leading-none ${active ? 'text-white' : 'text-zinc-500'}`}>{label}</p>
+                                                <p className="text-[10px] text-zinc-600 font-inter mt-0.5 leading-none">{desc}</p>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {formData.member_networks.includes('Other') && (
+                                <input
+                                    type="text"
+                                    name="other_network"
+                                    value={formData.other_network}
+                                    onChange={handleChange}
+                                    placeholder="Specify your network or association..."
+                                    className="mt-3 w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter"
+                                />
+                            )}
+                            {formData.member_networks.length === 0 && (
+                                <p className="text-[10px] text-zinc-600 font-inter mt-2">Optional — but strongly recommended for faster approval.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ── Card 5: Business Verification ── */}
                     <div className="bg-[#0a0a0a] border border-white/[0.06] rounded-2xl p-6 space-y-5">
                         <div className="flex items-center gap-2.5 mb-1">
                             <Upload className="w-3.5 h-3.5 text-zinc-400" />
@@ -371,7 +441,7 @@ export default function ForwarderRegisterPage() {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.tax.id')}</label>
+                            <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">{t('reg.tax.id')} <span className="text-red-400">*</span></label>
                             <input name="tax_id" required value={formData.tax_id} onChange={handleChange}
                                 placeholder="e.g. VAT-123456"
                                 className="w-full bg-black border border-white/[0.06] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-700 font-inter" />
@@ -411,7 +481,7 @@ export default function ForwarderRegisterPage() {
 
                         <div>
                             <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2 font-inter">
-                                {t('reg.logo')} <span className="text-red-500">*</span>
+                                {t('reg.logo')} <span className="text-red-400">*</span>
                             </label>
                             <div onClick={() => document.getElementById('logo-upload')?.click()}
                                 className={`w-full bg-black rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer transition-colors ${formData.logo_url ? 'border border-white/20' : 'border border-dashed border-white/20 hover:border-white/40'}`}>

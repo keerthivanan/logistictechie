@@ -30,6 +30,7 @@ class Forwarder(Base):
     activated_at = Column(DateTime, nullable=True) # Column L
     
     # Extended System Fields (Not in n8n Sheet but useful for UI)
+    member_networks = Column(String, nullable=True)  # e.g. "IATA,FIATA,WCA"
     website = Column(String, nullable=True)
     tax_id = Column(String, nullable=True)
     document_url = Column(String, nullable=True)

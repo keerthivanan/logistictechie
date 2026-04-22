@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useT } from '@/lib/i18n/t';
 import {
     Menu, X, ChevronDown, LogOut, Settings as SettingsIcon, User as UserIcon,
     Ship, Plane, Truck, Warehouse, FileCheck,
-    Store, Users, UserPlus,
+    Store,
     Calculator, BookOpen,
     Info, MessageSquare,
-    LayoutDashboard, Package, Search, ArrowRight, Globe,
+    LayoutDashboard, Package, Search, ArrowRight,
 } from 'lucide-react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,7 +49,6 @@ export default function Navbar() {
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const [scrolled, setScrolled] = useState(false);
     const { user, logout } = useAuth();
-    const pathname = usePathname();
     const router = useRouter();
     const { lang, setLang } = useLanguage();
     const t = useT();
@@ -63,14 +62,6 @@ export default function Navbar() {
                 { label: t('nav.road'), href: '/services/road-freight', desc: t('nav.road.desc'), icon: Truck },
                 { label: t('nav.warehouse'), href: '/services/smart-warehousing', desc: t('nav.warehouse.desc'), icon: Warehouse },
                 { label: t('nav.customs.svc'), href: '/services/customs-compliance', desc: t('nav.customs.desc'), icon: FileCheck },
-            ],
-        },
-        {
-            label: t('nav.ecosystem'),
-            children: [
-                ...(user?.role === 'forwarder' ? [{ label: 'F2F Request', href: '/forwarders/f2f', desc: 'Post to Forwarder Network', icon: Store }] : []),
-                { label: t('nav.partner.dir'), href: '/forwarders', desc: t('nav.partner.dir.desc'), icon: Users },
-                { label: t('nav.carrier.reg'), href: '/forwarders/register', desc: t('nav.carrier.reg.desc'), icon: UserPlus },
             ],
         },
         {
@@ -97,9 +88,8 @@ export default function Navbar() {
 
     const mobileAccordionSections = [
         ...(user?.role !== 'forwarder' ? [{ key: 'services', label: t('nav.services'), icon: Ship, items: navItems[0].children }] : []),
-        { key: 'ecosystem', label: t('nav.ecosystem'), icon: Globe, items: navItems[1].children },
-        { key: 'tools', label: t('nav.tools'), icon: Calculator, items: navItems[2].children },
-        { key: 'company', label: t('nav.company'), icon: Info, items: navItems[3].children },
+        { key: 'tools', label: t('nav.tools'), icon: Calculator, items: navItems[1].children },
+        { key: 'company', label: t('nav.company'), icon: Info, items: navItems[2].children },
     ];
 
     return (
@@ -153,29 +143,16 @@ export default function Navbar() {
                         </Link>
                     )}
 
-                    {/* Ecosystem */}
-                    <div
-                        className="relative flex items-center"
-                        onMouseEnter={() => setActiveDropdown('Ecosystem')}
-                        onMouseLeave={() => setActiveDropdown(null)}
-                    >
-                        <button className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
-                            {t('nav.ecosystem')} <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-200 ${activeDropdown === 'Ecosystem' ? 'rotate-180' : ''}`} />
-                        </button>
-                        <AnimatePresence>
-                            {activeDropdown === 'Ecosystem' && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="absolute top-full left-1/2 -translate-x-1/2 pt-5"
-                                >
-                                    <DropdownMenu items={navItems[1].children} />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    {/* Partner Registration / F2F Request — direct link */}
+                    {user?.role === 'forwarder' ? (
+                        <Link href="/forwarders/f2f" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            F2F Request
+                        </Link>
+                    ) : (
+                        <Link href="/forwarders/register" className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400 hover:text-white transition-colors">
+                            {t('nav.carrier.reg')}
+                        </Link>
+                    )}
 
                     {/* Tools */}
                     <div
@@ -195,7 +172,7 @@ export default function Navbar() {
                                     transition={{ duration: 0.15 }}
                                     className="absolute top-full left-1/2 -translate-x-1/2 pt-5"
                                 >
-                                    <DropdownMenu items={navItems[2].children} />
+                                    <DropdownMenu items={navItems[1].children} />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -219,7 +196,7 @@ export default function Navbar() {
                                     transition={{ duration: 0.15 }}
                                     className="absolute top-full left-1/2 -translate-x-1/2 pt-5"
                                 >
-                                    <DropdownMenu items={navItems[3].children} />
+                                    <DropdownMenu items={navItems[2].children} />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -371,6 +348,21 @@ export default function Navbar() {
                                             className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
                                             <Search className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
                                             {t('nav.search')}
+                                        </Link>
+                                    )}
+
+                                    {/* Partner Registration / F2F — direct link */}
+                                    {user?.role === 'forwarder' ? (
+                                        <Link href="/forwarders/f2f" onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                            <Store className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                            F2F Request
+                                        </Link>
+                                    ) : (
+                                        <Link href="/forwarders/register" onClick={() => setMobileMenuOpen(false)}
+                                            className="flex items-center gap-4 py-4 text-[15px] font-medium text-zinc-300 active:text-white transition-colors">
+                                            <Store className="w-[17px] h-[17px] text-zinc-600 shrink-0" />
+                                            {t('nav.carrier.reg')}
                                         </Link>
                                     )}
 
