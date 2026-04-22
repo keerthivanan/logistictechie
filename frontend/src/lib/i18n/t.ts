@@ -4,7 +4,7 @@ const translations = {
     en: {
         // Navbar
         'nav.services': 'Services',
-        'nav.search': 'Quote Request',
+        'nav.search': 'Get a Quote',
         'nav.dashboard': 'Dashboard',
         'nav.ecosystem': 'Ecosystem',
         'nav.tools': 'Tools',
@@ -17,7 +17,7 @@ const translations = {
         'hero.sub': 'CargoLink connects freight professionals with verified forwarders worldwide — real quotes, real carriers, and zero guesswork.',
         'hero.cta.dashboard': 'Go to Dashboard',
         'hero.cta.start': 'Get Started',
-        'hero.cta.marketplace': 'Marketplace',
+        'hero.cta.marketplace': 'Get a Quote',
         // Search page
         'search.label': 'Instant Rate Search',
         'search.h1.1': 'Ship Anything.',
@@ -184,13 +184,13 @@ const translations = {
         // Home — CTA section
         'home.cta.title': 'Ready to ship smarter?',
         'home.cta.sub': 'Join thousands of shippers and forwarders already using CargoLink to get instant quotes and move cargo faster.',
-        'home.cta.start': 'Start Free Trial',
+        'home.cta.start': 'Get Started Free',
         'home.cta.contact': 'Talk to the Team',
         // About page
         'about.sub': 'We believe international freight should be simple, transparent, and fast. CargoLink was built to give shippers instant access to the world\'s best freight forwarders — with real pricing, real carriers, and zero guesswork.',
         'about.stat1': 'Countries Covered',
         'about.stat2': 'Verified Forwarders',
-        'about.stat3': 'Quote Generation',
+        'about.stat3': 'Avg. Quote Response',
         'about.stat4': 'Support',
         'about.pillar1.title': 'One Platform, Every Trade Lane',
         'about.pillar1.desc': 'We connect shippers, verified freight forwarders, and carriers across 195 countries from a single dashboard — no brokers, no cold calls, no back-and-forth emails.',
@@ -250,10 +250,10 @@ const translations = {
         'fwd.dir.verified': 'VERIFIED',
         'fwd.dir.status': 'Network Status',
         'fwd.dir.active': 'Active',
-        'fwd.dir.node': 'Public Node',
-        'fwd.dir.connect': 'Initiate Connection',
+        'fwd.dir.node': 'Network Member',
+        'fwd.dir.connect': 'View Profile',
         'fwd.dir.none': 'No forwarders found matching',
-        'fwd.dir.registry': 'GLOBAL REGISTRY',
+        'fwd.dir.registry': 'VERIFIED FORWARDERS',
         // Settings page
         'settings.title': 'Settings',
         'settings.profile': 'Profile',
@@ -281,7 +281,7 @@ const translations = {
         'shipments.title': 'My Shipments',
         'shipments.search': 'Search shipments...',
         'shipments.empty': 'No shipments yet.',
-        'shipments.start': 'Start a new search',
+        'shipments.start': 'Request a Quote',
         'shipments.status.open': 'OPEN',
         'shipments.status.closed': 'CLOSED',
         'shipments.quotes': 'quotes',
@@ -344,12 +344,12 @@ const translations = {
         'hs.results': 'Results',
         'hs.empty': 'No codes found.',
         // Success page
-        'success.upgrading': 'Upgrading',
-        'success.upgrading.sub': 'Securely activating your CargoLink partner account...',
+        'success.upgrading': 'Activating',
+        'success.upgrading.sub': 'Setting up your CargoLink partner account...',
         'success.welcome': 'Welcome to the Network',
         'success.enter': 'Enter Secure Portal',
         'success.error.title': 'Verification Error',
-        'success.error.sub': 'We could not verify your session. If you already paid, please contact support.',
+        'success.error.sub': 'We could not verify your session. Please contact support if this issue persists.',
         'success.error.btn': 'Back to Dashboard',
         // Solutions grid (homepage)
         'sol.title': 'Comprehensive Logistics Solutions',
@@ -436,7 +436,7 @@ const translations = {
         'results.quote.found': 'quote found',
         'results.quotes.found': 'quotes found',
         'results.verified': 'Verified Fleet',
-        'results.best.badge': 'PROPHETIC BEAT',
+        'results.best.badge': 'BEST VALUE',
         'results.departure': 'Departure',
         'results.transit.period': 'Transit Period',
         'results.arrival': 'Arrival',
@@ -607,7 +607,7 @@ const translations = {
         'testimonials.sub': "From enterprise shippers to independent forwarders — here's what teams running real cargo say about CargoLink.",
         // Footer link labels
         'footer.shipper.portal': 'Shipper Portal',
-        'footer.marketplace': 'Marketplace',
+        'footer.marketplace': 'Request a Quote',
         'footer.carrier.partners': 'Carrier Partners',
         'footer.enterprise': 'Enterprise',
         'footer.forwarder.portal': 'Forwarder Portal',
@@ -1034,7 +1034,7 @@ const translations = {
         'dash.no.alerts': 'No alerts',
         'dash.view.activity': 'View all activity',
         'dash.book': 'BOOK SHIPMENT',
-        'dash.marketplace': 'Marketplace',
+        'dash.marketplace': 'Get a Quote',
         'dash.forwarders': 'Forwarders',
         // Dashboard activity page
         'activity.all.loaded': 'All {n} actions loaded',
@@ -1066,8 +1066,8 @@ const translations = {
         'settings.success': 'Profile updated successfully.',
         'settings.error': 'Failed to update profile. Please try again.',
         // Forwarders page
-        'fwd.global.registry': 'GLOBAL REGISTRY',
-        'fwd.public.node': 'Public Node',
+        'fwd.global.registry': 'VERIFIED FORWARDERS',
+        'fwd.public.node': 'Network Member',
         'fwd.no.match': 'No forwarders found matching',
         // Forwarders success page
         'fwd.success.portal': 'PORTAL: Partner Network Active',
@@ -1437,7 +1437,7 @@ const translations = {
     ar: {
         // Navbar
         'nav.services': 'الخدمات',
-        'nav.search': 'طلب عرض سعر',
+        'nav.search': 'احصل على عرض سعر',
         'nav.dashboard': 'لوحة التحكم',
         'nav.ecosystem': 'النظام البيئي',
         'nav.tools': 'الأدوات',
@@ -1450,7 +1450,7 @@ const translations = {
         'hero.sub': 'كارغولينك يربط محترفي الشحن بوكلاء شحن موثّقين حول العالم — عروض أسعار حقيقية، ناقلون حقيقيون، بلا تخمين.',
         'hero.cta.dashboard': 'الذهاب للوحة التحكم',
         'hero.cta.start': 'ابدأ الآن',
-        'hero.cta.marketplace': 'السوق',
+        'hero.cta.marketplace': 'احصل على عرض سعر',
         // Search page
         'search.label': 'بحث فوري عن الأسعار',
         'search.h1.1': 'اشحن أي شيء.',
@@ -1623,7 +1623,7 @@ const translations = {
         'about.sub': 'نؤمن بأن الشحن الدولي يجب أن يكون بسيطاً وشفافاً وسريعاً. بُني كارغولينك ليمنح الشاحنين وصولاً فورياً لأفضل وكلاء الشحن في العالم — بأسعار حقيقية وناقلين حقيقيين وبلا تخمين.',
         'about.stat1': 'دولة مغطاة',
         'about.stat2': 'وكيل شحن موثّق',
-        'about.stat3': 'توليد العروض',
+        'about.stat3': 'متوسط وقت العرض',
         'about.stat4': 'دعم',
         'about.pillar1.title': 'منصة واحدة، كل خطوط التجارة',
         'about.pillar1.desc': 'نربط الشاحنين ووكلاء الشحن الموثّقين والناقلين عبر 195 دولة من لوحة تحكم واحدة — بلا وسطاء، بلا مكالمات باردة، بلا مراسلات لا تنتهي.',
@@ -1683,10 +1683,10 @@ const translations = {
         'fwd.dir.verified': 'موثّق',
         'fwd.dir.status': 'حالة الشبكة',
         'fwd.dir.active': 'نشط',
-        'fwd.dir.node': 'عقدة عامة',
-        'fwd.dir.connect': 'بدء الاتصال',
+        'fwd.dir.node': 'عضو الشبكة',
+        'fwd.dir.connect': 'عرض الملف',
         'fwd.dir.none': 'لم يُعثر على وكلاء يطابقون',
-        'fwd.dir.registry': 'السجل العالمي',
+        'fwd.dir.registry': 'المورّدون الموثّقون',
         // Settings page
         'settings.title': 'الإعدادات',
         'settings.profile': 'الملف الشخصي',
@@ -1714,7 +1714,7 @@ const translations = {
         'shipments.title': 'شحناتي',
         'shipments.search': 'ابحث في الشحنات...',
         'shipments.empty': 'لا توجد شحنات بعد.',
-        'shipments.start': 'ابدأ بحثاً جديداً',
+        'shipments.start': 'طلب عرض سعر',
         'shipments.status.open': 'مفتوح',
         'shipments.status.closed': 'مغلق',
         'shipments.quotes': 'عروض',
@@ -1780,12 +1780,12 @@ const translations = {
         'hs.results': 'النتائج',
         'hs.empty': 'لم يُعثر على رموز.',
         // Success page
-        'success.upgrading': 'جارٍ الترقية',
-        'success.upgrading.sub': 'جارٍ تفعيل حساب شريك كارغولينك بأمان...',
+        'success.upgrading': 'جارٍ التفعيل',
+        'success.upgrading.sub': 'جارٍ إعداد حساب شريك كارغولينك...',
         'success.welcome': 'مرحباً في الشبكة',
         'success.enter': 'الدخول إلى البوابة الآمنة',
         'success.error.title': 'خطأ في التحقق',
-        'success.error.sub': 'تعذّر التحقق من جلستك. إذا دفعت بالفعل، يرجى التواصل مع الدعم.',
+        'success.error.sub': 'تعذّر التحقق من جلستك. يرجى التواصل مع الدعم إذا استمرت المشكلة.',
         'success.error.btn': 'العودة إلى لوحة التحكم',
         // Solutions grid
         'sol.title': 'حلول لوجستية شاملة',
@@ -2043,7 +2043,7 @@ const translations = {
         'testimonials.sub': 'من شاحني المؤسسات الكبرى إلى وكلاء الشحن المستقلين — هذا ما يقوله الفريق عن كارغولينك.',
         // Footer link labels
         'footer.shipper.portal': 'بوابة الشاحن',
-        'footer.marketplace': 'السوق',
+        'footer.marketplace': 'طلب عرض سعر',
         'footer.carrier.partners': 'شركاء الناقلين',
         'footer.enterprise': 'مؤسسات',
         'footer.forwarder.portal': 'بوابة وكيل الشحن',
@@ -2470,7 +2470,7 @@ const translations = {
         'dash.no.alerts': 'لا تنبيهات',
         'dash.view.activity': 'عرض كل النشاط',
         'dash.book': 'احجز شحنة',
-        'dash.marketplace': 'السوق',
+        'dash.marketplace': 'احصل على عرض سعر',
         'dash.forwarders': 'وكلاء الشحن',
         // Dashboard activity page
         'activity.all.loaded': 'تم تحميل {n} إجراءات',
@@ -2502,8 +2502,8 @@ const translations = {
         'settings.success': 'تم تحديث الملف الشخصي بنجاح.',
         'settings.error': 'فشل تحديث الملف. يرجى المحاولة مجدداً.',
         // Forwarders page
-        'fwd.global.registry': 'السجل العالمي',
-        'fwd.public.node': 'عقدة عامة',
+        'fwd.global.registry': 'المورّدون الموثّقون',
+        'fwd.public.node': 'عضو الشبكة',
         'fwd.no.match': 'لا يوجد وكلاء مطابقون لـ',
         // Forwarders success page
         'fwd.success.portal': 'البوابة: شبكة الشركاء نشطة',
