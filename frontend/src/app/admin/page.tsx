@@ -185,13 +185,17 @@ export default function AdminPage() {
     }, [user, authLoading])
 
     const openDoc = async (forwarder_id: string) => {
+        // Open window immediately inside the click handler — before any await.
+        // Browsers block window.open called after async gaps (popup blocker).
+        const win = window.open('', '_blank')
+        if (!win) { showToast('Allow popups to view documents', false); return }
         const token = localStorage.getItem('token')
         const res = await apiFetch(`/api/admin/forwarder-doc/${forwarder_id}`, {
             headers: { Authorization: `Bearer ${token}` },
         })
-        if (!res.ok) { showToast('Document not found', false); return }
+        if (!res.ok) { win.close(); showToast('Document not found', false); return }
         const blob = await res.blob()
-        window.open(URL.createObjectURL(blob), '_blank')
+        win.location.href = URL.createObjectURL(blob)
     }
 
     const handleApprove = async (fwd: ForwarderApp) => {
