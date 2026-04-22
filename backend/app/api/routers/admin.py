@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.db.session import get_db
@@ -8,6 +9,7 @@ from app.models.marketplace import MarketplaceRequest, MarketplaceBid
 from app.api.deps import get_admin_user
 from app.services.webhook import webhook_service
 from datetime import datetime, timezone
+import base64
 
 router = APIRouter()
 
@@ -238,7 +240,6 @@ async def unlock_user(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(get_admin_user),
 ):
-    """Unlock a user account that was locked after repeated failed login attempts."""
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalars().first()
     if not user:
@@ -249,3 +250,73 @@ async def unlock_user(
     user.failed_login_attempts = 0
     await db.commit()
     return {"success": True, "message": f"{user.email} has been unlocked."}
+
+
+@router.get("/forwarder-doc/{forwarder_id}")
+async def get_forwarder_doc(
+    forwarder_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """Serve forwarder business license document as file (base64 stored in DB)."""
+    result = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == forwarder_id))
+    fwd = result.scalars().first()
+    if not fwd or not fwd.document_url:
+        raise HTTPException(status_code=404, detail="Document not found.")
+    if not fwd.document_url.startswith("data:"):
+        raise HTTPException(status_code=404, detail="Document not found.")
+    header, data = fwd.document_url.split(",", 1)
+    content_type = header.split(":")[1].split(";")[0]
+    return Response(content=base64.b64decode(data), media_type=content_type)
+
+
+@router.post("/demote-forwarder/{forwarder_id}")
+async def demote_forwarder(
+    forwarder_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """Demote an approved forwarder back to regular shipper."""
+    f_result = await db.execute(select(Forwarder).where(Forwarder.forwarder_id == forwarder_id))
+    forwarder = f_result.scalars().first()
+    if not forwarder:
+        raise HTTPException(status_code=404, detail="Forwarder not found.")
+
+    forwarder.status = "REJECTED"
+    forwarder.is_verified = False
+
+    u_result = await db.execute(select(User).where(func.lower(User.email) == func.lower(forwarder.email)))
+    user = u_result.scalars().first()
+    if user:
+        user.role = "user"
+        if user.sovereign_id.startswith("REG-"):
+            user.sovereign_id = user.sovereign_id[4:]
+
+    await db.commit()
+    return {"success": True, "message": f"{forwarder.company_name} demoted to shipper."}
+
+
+@router.post("/toggle-lock-user/{user_id}")
+async def toggle_lock_user(
+    user_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Block or unblock a user account."""
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if user.email == admin.email:
+        raise HTTPException(status_code=400, detail="Cannot lock your own account.")
+
+    user.is_locked = not user.is_locked
+    if user.is_locked:
+        user.is_active = False
+    else:
+        user.is_active = True
+        user.failed_login_attempts = 0
+
+    await db.commit()
+    action = "blocked" if user.is_locked else "unblocked"
+    return {"success": True, "message": f"{user.email} {action}.", "is_locked": user.is_locked}

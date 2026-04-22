@@ -8,7 +8,7 @@ import {
     CheckCircle2, XCircle, Clock, Users, Building2, Globe,
     Phone, FileText, RefreshCw, Package,
     TrendingUp, UserCheck, UserX, Briefcase, ShoppingBag,
-    AlertCircle,
+    AlertCircle, Lock, Unlock, ArrowDownLeft, Image as ImageIcon,
 } from 'lucide-react'
 
 interface ForwarderApp {
@@ -84,7 +84,6 @@ export default function AdminPage() {
     const [tab, setTab] = useState<Tab>('pending')
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
-    // GATE: redirect anyone who is not admin — no flash, no "access denied" page
     useEffect(() => {
         if (authLoading) return
         if (!user) { router.replace('/login'); return }
@@ -107,7 +106,6 @@ export default function AdminPage() {
                 apiFetch('/api/admin/all-forwarders', { headers }),
                 apiFetch('/api/admin/all-users', { headers }),
             ])
-            // If somehow unauthorized (edge case), redirect silently
             if (statsRes.status === 401 || statsRes.status === 403) {
                 router.replace('/dashboard')
                 return
@@ -128,6 +126,17 @@ export default function AdminPage() {
         fetchData()
     }, [user, authLoading])
 
+    const openDoc = async (forwarder_id: string) => {
+        const token = localStorage.getItem('token')
+        const res = await apiFetch(`/api/admin/forwarder-doc/${forwarder_id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) { showToast('Document not found', false); return }
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        window.open(url, '_blank')
+    }
+
     const handleApprove = async (fwd: ForwarderApp) => {
         setActionLoading(fwd.forwarder_id)
         try {
@@ -138,7 +147,7 @@ export default function AdminPage() {
             })
             const data = await res.json()
             if (data.success) {
-                showToast(`${fwd.company_name} approved! New ID: ${data.new_sovereign_id}`, true)
+                showToast(`${fwd.company_name} approved! ID: ${data.new_sovereign_id}`, true)
                 fetchData()
             } else {
                 showToast(data.detail || 'Approval failed', false)
@@ -173,10 +182,54 @@ export default function AdminPage() {
         }
     }
 
-    // Show nothing while auth is loading or user is not admin — no flash
-    if (authLoading || !user || user.role !== 'admin') {
-        return null
+    const handleDemote = async (fwd: ForwarderApp) => {
+        if (!confirm(`Demote ${fwd.company_name} back to shipper? This removes their forwarder access.`)) return
+        setActionLoading(fwd.forwarder_id)
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch(`/api/admin/demote-forwarder/${fwd.forwarder_id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast(data.message, true)
+                fetchData()
+            } else {
+                showToast(data.detail || 'Demotion failed', false)
+            }
+        } catch {
+            showToast('Network error', false)
+        } finally {
+            setActionLoading(null)
+        }
     }
+
+    const handleToggleLock = async (u: UserRow) => {
+        const action = u.is_locked ? 'unblock' : 'block'
+        if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} account for ${u.email}?`)) return
+        setActionLoading(u.id)
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch(`/api/admin/toggle-lock-user/${u.id}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast(data.message, true)
+                fetchData()
+            } else {
+                showToast(data.detail || 'Action failed', false)
+            }
+        } catch {
+            showToast('Network error', false)
+        } finally {
+            setActionLoading(null)
+        }
+    }
+
+    if (authLoading || !user || user.role !== 'admin') return null
 
     if (loading) {
         return (
@@ -233,9 +286,7 @@ export default function AdminPage() {
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-xs text-zinc-500 font-mono">{user.email}</span>
-                    <div className="px-2 py-1 rounded border border-purple-500/20 bg-purple-500/5 text-purple-400 text-[10px] font-bold uppercase tracking-widest">
-                        Admin
-                    </div>
+                    <div className="px-2 py-1 rounded border border-purple-500/20 bg-purple-500/5 text-purple-400 text-[10px] font-bold uppercase tracking-widest">Admin</div>
                     <button onClick={fetchData} className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all">
                         <RefreshCw className="w-4 h-4 text-zinc-400" />
                     </button>
@@ -272,6 +323,7 @@ export default function AdminPage() {
                     ))}
                 </div>
 
+                {/* PENDING TAB */}
                 {tab === 'pending' && (
                     <div className="space-y-4">
                         {pending.length === 0 ? (
@@ -282,7 +334,21 @@ export default function AdminPage() {
                             </div>
                         ) : pending.map(fwd => (
                             <div key={fwd.forwarder_id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4 hover:border-white/10 transition-all">
-                                <div className="flex items-start justify-between gap-4">
+
+                                {/* Header row: logo + name + status */}
+                                <div className="flex items-start gap-4">
+                                    <div className="w-14 h-14 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                        {fwd.logo_url ? (
+                                            <img
+                                                src={`/api/forwarders/logo/${fwd.forwarder_id}`}
+                                                alt={fwd.company_name}
+                                                className="w-full h-full object-contain"
+                                                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                                            />
+                                        ) : (
+                                            <ImageIcon className="w-5 h-5 text-zinc-700" />
+                                        )}
+                                    </div>
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-sm font-semibold text-white truncate">{fwd.company_name}</h3>
                                         <p className="text-xs text-zinc-500 mt-0.5">{fwd.contact_person}</p>
@@ -290,6 +356,7 @@ export default function AdminPage() {
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded border flex-shrink-0 ${statusColor(fwd.status)}`}>{fwd.status}</span>
                                 </div>
 
+                                {/* Info grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                                     <div className="flex items-center gap-2 text-zinc-400"><Globe className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{fwd.country || '—'}</span></div>
                                     <div className="flex items-center gap-2 text-zinc-400"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{fwd.phone || '—'}</span></div>
@@ -299,9 +366,7 @@ export default function AdminPage() {
                                     {fwd.website && <div className="flex items-center gap-2 text-zinc-400"><Globe className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{fwd.website}</span></div>}
                                 </div>
 
-                                {fwd.routes && (
-                                    <p className="text-xs text-zinc-500"><span className="text-zinc-700">Routes:</span> {fwd.routes}</p>
-                                )}
+                                {fwd.routes && <p className="text-xs text-zinc-500"><span className="text-zinc-700">Routes:</span> {fwd.routes}</p>}
 
                                 {fwd.specializations && (
                                     <div className="flex flex-wrap gap-1.5">
@@ -311,16 +376,24 @@ export default function AdminPage() {
                                     </div>
                                 )}
 
+                                {/* Actions row */}
                                 <div className="flex items-center gap-3 pt-3 border-t border-white/5">
                                     <p className="text-[10px] text-zinc-700 flex-1 font-mono">
                                         {fwd.forwarder_id} · Applied {new Date(fwd.registered_at).toLocaleDateString()}
                                     </p>
-                                    {fwd.document_url && (
-                                        <a href={fwd.document_url} target="_blank" rel="noopener noreferrer"
-                                            className="px-3 py-2 rounded-lg text-[10px] font-bold bg-white/5 text-zinc-400 hover:bg-white/10 transition-all uppercase tracking-widest">
-                                            Docs
-                                        </a>
+
+                                    {/* Document button */}
+                                    {fwd.document_url ? (
+                                        <button
+                                            onClick={() => openDoc(fwd.forwarder_id)}
+                                            className="px-3 py-2 rounded-lg text-[10px] font-bold bg-white/5 text-zinc-300 hover:bg-white/10 transition-all uppercase tracking-widest flex items-center gap-1.5"
+                                        >
+                                            <FileText className="w-3 h-3" /> View Document
+                                        </button>
+                                    ) : (
+                                        <span className="text-[10px] text-zinc-700 italic">No document uploaded</span>
                                     )}
+
                                     <button
                                         onClick={() => handleReject(fwd)}
                                         disabled={actionLoading === fwd.forwarder_id}
@@ -341,12 +414,13 @@ export default function AdminPage() {
                     </div>
                 )}
 
+                {/* ALL PARTNERS TAB */}
                 {tab === 'all' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.02]">
-                                    {['Company', 'Contact', 'Email', 'Country', 'Specializations', 'Status', 'Verified', 'Applied'].map(h => (
+                                    {['Company', 'Email', 'Country', 'Specializations', 'Status', 'Verified', 'Applied', 'Actions'].map(h => (
                                         <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>
@@ -357,10 +431,9 @@ export default function AdminPage() {
                                 ) : allForwarders.map(fwd => (
                                     <tr key={fwd.forwarder_id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-all">
                                         <td className="px-4 py-3 font-bold text-white whitespace-nowrap">{fwd.company_name}</td>
-                                        <td className="px-4 py-3 text-zinc-500">{fwd.contact_person || '—'}</td>
                                         <td className="px-4 py-3 text-zinc-400 font-mono text-[10px]">{fwd.email}</td>
                                         <td className="px-4 py-3 text-zinc-400">{fwd.country || '—'}</td>
-                                        <td className="px-4 py-3 text-zinc-600 max-w-[180px] truncate">{fwd.specializations || '—'}</td>
+                                        <td className="px-4 py-3 text-zinc-600 max-w-[160px] truncate">{fwd.specializations || '—'}</td>
                                         <td className="px-4 py-3">
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusColor(fwd.status)}`}>{fwd.status}</span>
                                         </td>
@@ -370,6 +443,27 @@ export default function AdminPage() {
                                                 : <XCircle className="w-4 h-4 text-zinc-700" />}
                                         </td>
                                         <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{new Date(fwd.registered_at).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                {fwd.document_url && (
+                                                    <button
+                                                        onClick={() => openDoc(fwd.forwarder_id)}
+                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-white/5 text-zinc-400 hover:bg-white/10 transition-all flex items-center gap-1"
+                                                    >
+                                                        <FileText className="w-3 h-3" /> Doc
+                                                    </button>
+                                                )}
+                                                {fwd.status === 'ACTIVE' && (
+                                                    <button
+                                                        onClick={() => handleDemote(fwd)}
+                                                        disabled={actionLoading === fwd.forwarder_id}
+                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-all disabled:opacity-40 flex items-center gap-1"
+                                                    >
+                                                        <ArrowDownLeft className="w-3 h-3" /> Demote
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -377,19 +471,20 @@ export default function AdminPage() {
                     </div>
                 )}
 
+                {/* ALL USERS TAB */}
                 {tab === 'users' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/[0.02]">
-                                    {['Name', 'Email', 'Account ID', 'Role', 'Status', 'Joined'].map(h => (
+                                    {['Name', 'Email', 'Account ID', 'Role', 'Status', 'Joined', 'Actions'].map(h => (
                                         <th key={h} className="text-left px-4 py-3 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest whitespace-nowrap">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {allUsers.length === 0 ? (
-                                    <tr><td colSpan={6} className="px-4 py-10 text-center text-zinc-600">No users found.</td></tr>
+                                    <tr><td colSpan={7} className="px-4 py-10 text-center text-zinc-600">No users found.</td></tr>
                                 ) : allUsers.map(u => (
                                     <tr key={u.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-all">
                                         <td className="px-4 py-3 font-bold text-white">{u.full_name || '—'}</td>
@@ -400,13 +495,31 @@ export default function AdminPage() {
                                         </td>
                                         <td className="px-4 py-3">
                                             {u.is_locked
-                                                ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-red-400 bg-red-500/10 border-red-500/20">LOCKED</span>
+                                                ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-red-400 bg-red-500/10 border-red-500/20">BLOCKED</span>
                                                 : u.is_active
                                                     ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-white bg-white/[0.06] border-white/20">ACTIVE</span>
                                                     : <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-zinc-400 bg-zinc-500/10 border-zinc-500/20">INACTIVE</span>
                                             }
                                         </td>
                                         <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3">
+                                            {u.email !== user.email && u.role !== 'admin' && (
+                                                <button
+                                                    onClick={() => handleToggleLock(u)}
+                                                    disabled={actionLoading === u.id}
+                                                    className={`px-2 py-1 rounded text-[10px] font-bold transition-all disabled:opacity-40 flex items-center gap-1 ${
+                                                        u.is_locked
+                                                            ? 'bg-white/5 text-zinc-300 hover:bg-white/10'
+                                                            : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'
+                                                    }`}
+                                                >
+                                                    {u.is_locked
+                                                        ? <><Unlock className="w-3 h-3" /> Unblock</>
+                                                        : <><Lock className="w-3 h-3" /> Block</>
+                                                    }
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
