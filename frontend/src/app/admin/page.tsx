@@ -9,6 +9,7 @@ import {
     Phone, FileText, RefreshCw, Package,
     TrendingUp, UserCheck, UserX, Briefcase, ShoppingBag,
     AlertCircle, Lock, Unlock, ArrowDownLeft, Image as ImageIcon,
+    ArrowRight, X, Flame, ShieldCheck,
 } from 'lucide-react'
 
 interface ForwarderApp {
@@ -41,6 +42,32 @@ interface UserRow {
     created_at: string
 }
 
+interface RequestRow {
+    request_id: string
+    user_name: string
+    user_email: string
+    user_sovereign_id: string
+    origin: string
+    destination: string
+    cargo_type: string
+    commodity: string
+    weight_kg: number | null
+    container_type: string | null
+    container_count: number | null
+    incoterms: string
+    status: string
+    quotation_count: number
+    submitted_at: string
+    closed_at: string | null
+    closed_reason: string | null
+    is_hazardous: boolean
+    needs_insurance: boolean
+    special_requirements: string
+    pickup_ready_date: string | null
+    target_date: string | null
+    is_f2f: boolean
+}
+
 interface AdminStats {
     total_users: number
     active_users: number
@@ -57,7 +84,7 @@ interface AdminStats {
     total_quotes: number
 }
 
-type Tab = 'pending' | 'all' | 'users'
+type Tab = 'pending' | 'all' | 'users' | 'requests'
 
 const statusColor = (s: string) => {
     if (s === 'ACTIVE') return 'text-white bg-white/[0.06] border-white/20'
@@ -67,10 +94,15 @@ const statusColor = (s: string) => {
 }
 
 const roleColor = (r: string) => {
-    if (r === 'forwarder') return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+    if (r === 'forwarder') return 'text-blue-400 bg-blue/10 border-blue-500/20'
     if (r === 'admin') return 'text-purple-400 bg-purple-500/10 border-purple-500/20'
     return 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
 }
+
+const reqStatusColor = (s: string) =>
+    s === 'OPEN'
+        ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+        : 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20'
 
 export default function AdminPage() {
     const { user, loading: authLoading } = useAuth()
@@ -79,10 +111,13 @@ export default function AdminPage() {
     const [pending, setPending] = useState<ForwarderApp[]>([])
     const [allForwarders, setAllForwarders] = useState<ForwarderApp[]>([])
     const [allUsers, setAllUsers] = useState<UserRow[]>([])
+    const [allRequests, setAllRequests] = useState<RequestRow[]>([])
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState<string | null>(null)
     const [tab, setTab] = useState<Tab>('pending')
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+    const [expandedReq, setExpandedReq] = useState<string | null>(null)
+    const [reqFilter, setReqFilter] = useState<'ALL' | 'OPEN' | 'CLOSED'>('ALL')
 
     useEffect(() => {
         if (authLoading) return
@@ -99,21 +134,20 @@ export default function AdminPage() {
         setLoading(true)
         try {
             const token = localStorage.getItem('token')
-            const headers = { Authorization: `Bearer ${token}` }
-            const [statsRes, pendingRes, allRes, usersRes] = await Promise.all([
-                apiFetch('/api/admin/stats', { headers }),
-                apiFetch('/api/admin/pending-forwarders', { headers }),
-                apiFetch('/api/admin/all-forwarders', { headers }),
-                apiFetch('/api/admin/all-users', { headers }),
+            const h = { Authorization: `Bearer ${token}` }
+            const [statsRes, pendingRes, allRes, usersRes, reqsRes] = await Promise.all([
+                apiFetch('/api/admin/stats', { headers: h }),
+                apiFetch('/api/admin/pending-forwarders', { headers: h }),
+                apiFetch('/api/admin/all-forwarders', { headers: h }),
+                apiFetch('/api/admin/all-users', { headers: h }),
+                apiFetch('/api/admin/all-requests', { headers: h }),
             ])
-            if (statsRes.status === 401 || statsRes.status === 403) {
-                router.replace('/dashboard')
-                return
-            }
+            if (statsRes.status === 401 || statsRes.status === 403) { router.replace('/dashboard'); return }
             setStats(await statsRes.json())
             setPending(await pendingRes.json())
             setAllForwarders(await allRes.json())
             setAllUsers(await usersRes.json())
+            setAllRequests(await reqsRes.json())
         } catch {
             showToast('Failed to load data', false)
         } finally {
@@ -133,8 +167,7 @@ export default function AdminPage() {
         })
         if (!res.ok) { showToast('Document not found', false); return }
         const blob = await res.blob()
-        const url = URL.createObjectURL(blob)
-        window.open(url, '_blank')
+        window.open(URL.createObjectURL(blob), '_blank')
     }
 
     const handleApprove = async (fwd: ForwarderApp) => {
@@ -142,21 +175,13 @@ export default function AdminPage() {
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch(`/api/admin/approve-forwarder/${fwd.forwarder_id}`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
+                method: 'POST', headers: { Authorization: `Bearer ${token}` },
             })
             const data = await res.json()
-            if (data.success) {
-                showToast(`${fwd.company_name} approved! ID: ${data.new_sovereign_id}`, true)
-                fetchData()
-            } else {
-                showToast(data.detail || 'Approval failed', false)
-            }
-        } catch {
-            showToast('Network error', false)
-        } finally {
-            setActionLoading(null)
-        }
+            data.success ? showToast(`${fwd.company_name} approved! ID: ${data.new_sovereign_id}`, true) : showToast(data.detail || 'Approval failed', false)
+            if (data.success) fetchData()
+        } catch { showToast('Network error', false) }
+        finally { setActionLoading(null) }
     }
 
     const handleReject = async (fwd: ForwarderApp) => {
@@ -165,44 +190,28 @@ export default function AdminPage() {
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch(`/api/admin/reject-forwarder/${fwd.forwarder_id}`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
+                method: 'POST', headers: { Authorization: `Bearer ${token}` },
             })
             const data = await res.json()
-            if (data.success) {
-                showToast(`${fwd.company_name} rejected.`, true)
-                fetchData()
-            } else {
-                showToast(data.detail || 'Rejection failed', false)
-            }
-        } catch {
-            showToast('Network error', false)
-        } finally {
-            setActionLoading(null)
-        }
+            data.success ? showToast(`${fwd.company_name} rejected.`, true) : showToast(data.detail || 'Failed', false)
+            if (data.success) fetchData()
+        } catch { showToast('Network error', false) }
+        finally { setActionLoading(null) }
     }
 
     const handleDemote = async (fwd: ForwarderApp) => {
-        if (!confirm(`Demote ${fwd.company_name} back to shipper? This removes their forwarder access.`)) return
+        if (!confirm(`Demote ${fwd.company_name} back to shipper? This removes forwarder access.`)) return
         setActionLoading(fwd.forwarder_id)
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch(`/api/admin/demote-forwarder/${fwd.forwarder_id}`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
+                method: 'POST', headers: { Authorization: `Bearer ${token}` },
             })
             const data = await res.json()
-            if (data.success) {
-                showToast(data.message, true)
-                fetchData()
-            } else {
-                showToast(data.detail || 'Demotion failed', false)
-            }
-        } catch {
-            showToast('Network error', false)
-        } finally {
-            setActionLoading(null)
-        }
+            data.success ? showToast(data.message, true) : showToast(data.detail || 'Failed', false)
+            if (data.success) fetchData()
+        } catch { showToast('Network error', false) }
+        finally { setActionLoading(null) }
     }
 
     const handleToggleLock = async (u: UserRow) => {
@@ -212,32 +221,36 @@ export default function AdminPage() {
         try {
             const token = localStorage.getItem('token')
             const res = await apiFetch(`/api/admin/toggle-lock-user/${u.id}`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
+                method: 'POST', headers: { Authorization: `Bearer ${token}` },
             })
             const data = await res.json()
-            if (data.success) {
-                showToast(data.message, true)
-                fetchData()
-            } else {
-                showToast(data.detail || 'Action failed', false)
-            }
-        } catch {
-            showToast('Network error', false)
-        } finally {
-            setActionLoading(null)
-        }
+            data.success ? showToast(data.message, true) : showToast(data.detail || 'Failed', false)
+            if (data.success) fetchData()
+        } catch { showToast('Network error', false) }
+        finally { setActionLoading(null) }
+    }
+
+    const handleCloseRequest = async (req: RequestRow) => {
+        if (!confirm(`Force-close request ${req.request_id}? This cannot be undone.`)) return
+        setActionLoading(req.request_id)
+        try {
+            const token = localStorage.getItem('token')
+            const res = await apiFetch(`/api/admin/close-request/${req.request_id}`, {
+                method: 'POST', headers: { Authorization: `Bearer ${token}` },
+            })
+            const data = await res.json()
+            data.success ? showToast(data.message, true) : showToast(data.detail || 'Failed', false)
+            if (data.success) fetchData()
+        } catch { showToast('Network error', false) }
+        finally { setActionLoading(null) }
     }
 
     if (authLoading || !user || user.role !== 'admin') return null
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-black text-white flex items-center justify-center">
-                <RefreshCw className="w-6 h-6 animate-spin text-zinc-500" />
-            </div>
-        )
-    }
+    if (loading) return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 animate-spin text-zinc-500" />
+        </div>
+    )
 
     const statGroups = stats ? [
         {
@@ -270,15 +283,20 @@ export default function AdminPage() {
         },
     ] : []
 
+    const filteredRequests = allRequests.filter(r =>
+        reqFilter === 'ALL' ? true : r.status === reqFilter
+    )
+
     return (
         <div className="min-h-screen bg-[#050505] text-white font-inter">
 
             {toast && (
-                <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl text-sm font-bold border shadow-2xl transition-all ${toast.ok ? 'bg-white/[0.06] border-white/20 text-white' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl text-sm font-bold border shadow-2xl ${toast.ok ? 'bg-white/[0.06] border-white/20 text-white' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                     {toast.msg}
                 </div>
             )}
 
+            {/* Header */}
             <div className="border-b border-white/5 px-8 py-5 flex items-center justify-between sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40">
                 <div className="flex items-center gap-4">
                     <img src="/cargolink.png" alt="CargoLink" className="h-10 w-auto object-contain opacity-90" />
@@ -295,6 +313,7 @@ export default function AdminPage() {
 
             <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
 
+                {/* Stat Cards */}
                 {stats && statGroups.map(group => (
                     <div key={group.label}>
                         <h2 className="text-[10px] font-semibold text-zinc-600 uppercase tracking-[0.3em] mb-4">{group.label}</h2>
@@ -310,9 +329,11 @@ export default function AdminPage() {
                     </div>
                 ))}
 
+                {/* Tabs */}
                 <div className="flex gap-2 flex-wrap">
                     {([
                         { key: 'pending', label: `Pending Review (${pending.length})` },
+                        { key: 'requests', label: `All Requests (${allRequests.length})` },
                         { key: 'all', label: `All Partners (${allForwarders.length})` },
                         { key: 'users', label: `All Users (${allUsers.length})` },
                     ] as { key: Tab; label: string }[]).map(t => (
@@ -323,7 +344,7 @@ export default function AdminPage() {
                     ))}
                 </div>
 
-                {/* PENDING TAB */}
+                {/* PENDING FORWARDER APPLICATIONS */}
                 {tab === 'pending' && (
                     <div className="space-y-4">
                         {pending.length === 0 ? (
@@ -334,17 +355,12 @@ export default function AdminPage() {
                             </div>
                         ) : pending.map(fwd => (
                             <div key={fwd.forwarder_id} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-4 hover:border-white/10 transition-all">
-
-                                {/* Header row: logo + name + status */}
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                         {fwd.logo_url ? (
-                                            <img
-                                                src={`/api/forwarders/logo/${fwd.forwarder_id}`}
-                                                alt={fwd.company_name}
+                                            <img src={`/api/forwarders/logo/${fwd.forwarder_id}`} alt={fwd.company_name}
                                                 className="w-full h-full object-contain"
-                                                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-                                            />
+                                                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                         ) : (
                                             <ImageIcon className="w-5 h-5 text-zinc-700" />
                                         )}
@@ -356,7 +372,6 @@ export default function AdminPage() {
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded border flex-shrink-0 ${statusColor(fwd.status)}`}>{fwd.status}</span>
                                 </div>
 
-                                {/* Info grid */}
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                                     <div className="flex items-center gap-2 text-zinc-400"><Globe className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{fwd.country || '—'}</span></div>
                                     <div className="flex items-center gap-2 text-zinc-400"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{fwd.phone || '—'}</span></div>
@@ -376,36 +391,22 @@ export default function AdminPage() {
                                     </div>
                                 )}
 
-                                {/* Actions row */}
                                 <div className="flex items-center gap-3 pt-3 border-t border-white/5">
-                                    <p className="text-[10px] text-zinc-700 flex-1 font-mono">
-                                        {fwd.forwarder_id} · Applied {new Date(fwd.registered_at).toLocaleDateString()}
-                                    </p>
-
-                                    {/* Document button */}
+                                    <p className="text-[10px] text-zinc-700 flex-1 font-mono">{fwd.forwarder_id} · Applied {new Date(fwd.registered_at).toLocaleDateString()}</p>
                                     {fwd.document_url ? (
-                                        <button
-                                            onClick={() => openDoc(fwd.forwarder_id)}
-                                            className="px-3 py-2 rounded-lg text-[10px] font-bold bg-white/5 text-zinc-300 hover:bg-white/10 transition-all uppercase tracking-widest flex items-center gap-1.5"
-                                        >
+                                        <button onClick={() => openDoc(fwd.forwarder_id)}
+                                            className="px-3 py-2 rounded-lg text-[10px] font-bold bg-white/5 text-zinc-300 hover:bg-white/10 transition-all uppercase tracking-widest flex items-center gap-1.5">
                                             <FileText className="w-3 h-3" /> View Document
                                         </button>
                                     ) : (
                                         <span className="text-[10px] text-zinc-700 italic">No document uploaded</span>
                                     )}
-
-                                    <button
-                                        onClick={() => handleReject(fwd)}
-                                        disabled={actionLoading === fwd.forwarder_id}
-                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40"
-                                    >
+                                    <button onClick={() => handleReject(fwd)} disabled={actionLoading === fwd.forwarder_id}
+                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40">
                                         Reject
                                     </button>
-                                    <button
-                                        onClick={() => handleApprove(fwd)}
-                                        disabled={actionLoading === fwd.forwarder_id}
-                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-white/[0.06] border border-white/20 text-white hover:bg-white/10 transition-all disabled:opacity-40"
-                                    >
+                                    <button onClick={() => handleApprove(fwd)} disabled={actionLoading === fwd.forwarder_id}
+                                        className="px-4 py-2 rounded-lg text-xs font-bold bg-white/[0.06] border border-white/20 text-white hover:bg-white/10 transition-all disabled:opacity-40">
                                         {actionLoading === fwd.forwarder_id ? 'Processing...' : 'Approve'}
                                     </button>
                                 </div>
@@ -414,7 +415,124 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* ALL PARTNERS TAB */}
+                {/* ALL REQUESTS SHEET */}
+                {tab === 'requests' && (
+                    <div className="space-y-4">
+                        {/* Filter */}
+                        <div className="flex gap-2">
+                            {(['ALL', 'OPEN', 'CLOSED'] as const).map(f => (
+                                <button key={f} onClick={() => setReqFilter(f)}
+                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${reqFilter === f ? 'bg-white text-black' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`}>
+                                    {f} {f === 'ALL' ? `(${allRequests.length})` : f === 'OPEN' ? `(${allRequests.filter(r => r.status === 'OPEN').length})` : `(${allRequests.filter(r => r.status === 'CLOSED').length})`}
+                                </button>
+                            ))}
+                        </div>
+
+                        {filteredRequests.length === 0 ? (
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-16 text-center">
+                                <Package className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                                <p className="text-sm font-bold text-zinc-500">No requests found</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {filteredRequests.map(req => (
+                                    <div key={req.request_id} className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-all">
+                                        {/* Main row */}
+                                        <div className="flex items-center gap-3 px-4 py-3">
+                                            {/* Status dot */}
+                                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${req.status === 'OPEN' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+
+                                            {/* Route */}
+                                            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                                                <span className="text-xs font-bold text-white truncate">{req.origin}</span>
+                                                <ArrowRight className="w-3 h-3 text-zinc-600 flex-shrink-0" />
+                                                <span className="text-xs font-bold text-white truncate">{req.destination}</span>
+                                            </div>
+
+                                            {/* Mode badge */}
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 text-zinc-400 uppercase flex-shrink-0">{req.cargo_type}</span>
+
+                                            {/* Commodity */}
+                                            <span className="text-[10px] text-zinc-500 truncate max-w-[120px] flex-shrink-0 hidden md:block">{req.commodity}</span>
+
+                                            {/* Weight / container */}
+                                            <span className="text-[10px] text-zinc-500 flex-shrink-0 hidden lg:block">
+                                                {req.container_count && req.container_type
+                                                    ? `${req.container_count}× ${req.container_type}`
+                                                    : req.weight_kg ? `${req.weight_kg.toLocaleString()} kg` : '—'}
+                                            </span>
+
+                                            {/* Flags */}
+                                            <div className="flex gap-1 flex-shrink-0">
+                                                {req.is_hazardous && <span title="Hazardous"><Flame className="w-3.5 h-3.5 text-red-400" /></span>}
+                                                {req.needs_insurance && <span title="Insurance"><ShieldCheck className="w-3.5 h-3.5 text-blue-400" /></span>}
+                                                {req.is_f2f && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">F2F</span>}
+                                            </div>
+
+                                            {/* Quotes count */}
+                                            <span className="text-[10px] font-mono text-zinc-400 flex-shrink-0">{req.quotation_count} quotes</span>
+
+                                            {/* Date */}
+                                            <span className="text-[10px] text-zinc-600 flex-shrink-0 hidden sm:block">
+                                                {new Date(req.submitted_at).toLocaleDateString()}
+                                            </span>
+
+                                            {/* Status badge */}
+                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border flex-shrink-0 ${reqStatusColor(req.status)}`}>{req.status}</span>
+
+                                            {/* Actions */}
+                                            <div className="flex gap-1.5 flex-shrink-0">
+                                                <button onClick={() => setExpandedReq(expandedReq === req.request_id ? null : req.request_id)}
+                                                    className="px-2 py-1 rounded text-[10px] font-bold bg-white/5 text-zinc-400 hover:bg-white/10 transition-all">
+                                                    {expandedReq === req.request_id ? 'Less' : 'Details'}
+                                                </button>
+                                                {req.status === 'OPEN' && (
+                                                    <button onClick={() => handleCloseRequest(req)}
+                                                        disabled={actionLoading === req.request_id}
+                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all disabled:opacity-40 flex items-center gap-1">
+                                                        <X className="w-3 h-3" /> Close
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Expanded detail panel */}
+                                        {expandedReq === req.request_id && (
+                                            <div className="border-t border-white/5 px-4 py-4 bg-white/[0.01] grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Shipper</p>
+                                                    <p className="text-white font-medium">{req.user_name || '—'}</p>
+                                                    <p className="text-zinc-500 font-mono text-[10px]">{req.user_email}</p>
+                                                    <p className="text-zinc-700 font-mono text-[10px]">{req.user_sovereign_id}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Cargo</p>
+                                                    <p className="text-white">{req.commodity}</p>
+                                                    <p className="text-zinc-500">{req.cargo_type} · {req.incoterms}</p>
+                                                    {req.container_count && <p className="text-zinc-500">{req.container_count}× {req.container_type}</p>}
+                                                    {req.weight_kg && <p className="text-zinc-500">{req.weight_kg.toLocaleString()} kg</p>}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Timeline</p>
+                                                    {req.pickup_ready_date && <p className="text-zinc-400">Ready: {new Date(req.pickup_ready_date).toLocaleDateString()}</p>}
+                                                    {req.target_date && <p className="text-zinc-400">Target: {new Date(req.target_date).toLocaleDateString()}</p>}
+                                                    {req.closed_at && <p className="text-zinc-600">Closed: {new Date(req.closed_at).toLocaleDateString()}</p>}
+                                                    {req.closed_reason && <p className="text-zinc-700 text-[10px]">{req.closed_reason}</p>}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] text-zinc-600 uppercase tracking-widest mb-1">Notes</p>
+                                                    <p className="text-zinc-400 leading-relaxed">{req.special_requirements || '—'}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ALL PARTNERS */}
                 {tab === 'all' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
@@ -434,31 +552,20 @@ export default function AdminPage() {
                                         <td className="px-4 py-3 text-zinc-400 font-mono text-[10px]">{fwd.email}</td>
                                         <td className="px-4 py-3 text-zinc-400">{fwd.country || '—'}</td>
                                         <td className="px-4 py-3 text-zinc-600 max-w-[160px] truncate">{fwd.specializations || '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusColor(fwd.status)}`}>{fwd.status}</span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {fwd.is_verified
-                                                ? <CheckCircle2 className="w-4 h-4 text-white" />
-                                                : <XCircle className="w-4 h-4 text-zinc-700" />}
-                                        </td>
+                                        <td className="px-4 py-3"><span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusColor(fwd.status)}`}>{fwd.status}</span></td>
+                                        <td className="px-4 py-3">{fwd.is_verified ? <CheckCircle2 className="w-4 h-4 text-white" /> : <XCircle className="w-4 h-4 text-zinc-700" />}</td>
                                         <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{new Date(fwd.registered_at).toLocaleDateString()}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 {fwd.document_url && (
-                                                    <button
-                                                        onClick={() => openDoc(fwd.forwarder_id)}
-                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-white/5 text-zinc-400 hover:bg-white/10 transition-all flex items-center gap-1"
-                                                    >
+                                                    <button onClick={() => openDoc(fwd.forwarder_id)}
+                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-white/5 text-zinc-400 hover:bg-white/10 transition-all flex items-center gap-1">
                                                         <FileText className="w-3 h-3" /> Doc
                                                     </button>
                                                 )}
                                                 {fwd.status === 'ACTIVE' && (
-                                                    <button
-                                                        onClick={() => handleDemote(fwd)}
-                                                        disabled={actionLoading === fwd.forwarder_id}
-                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-all disabled:opacity-40 flex items-center gap-1"
-                                                    >
+                                                    <button onClick={() => handleDemote(fwd)} disabled={actionLoading === fwd.forwarder_id}
+                                                        className="px-2 py-1 rounded text-[10px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-all disabled:opacity-40 flex items-center gap-1">
                                                         <ArrowDownLeft className="w-3 h-3" /> Demote
                                                     </button>
                                                 )}
@@ -471,7 +578,7 @@ export default function AdminPage() {
                     </div>
                 )}
 
-                {/* ALL USERS TAB */}
+                {/* ALL USERS */}
                 {tab === 'users' && (
                     <div className="overflow-x-auto rounded-2xl border border-white/5">
                         <table className="w-full text-xs">
@@ -490,9 +597,7 @@ export default function AdminPage() {
                                         <td className="px-4 py-3 font-bold text-white">{u.full_name || '—'}</td>
                                         <td className="px-4 py-3 text-zinc-400 font-mono text-[10px]">{u.email}</td>
                                         <td className="px-4 py-3 text-zinc-500 font-mono text-[10px]">{u.sovereign_id || '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${roleColor(u.role)}`}>{u.role}</span>
-                                        </td>
+                                        <td className="px-4 py-3"><span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${roleColor(u.role)}`}>{u.role}</span></td>
                                         <td className="px-4 py-3">
                                             {u.is_locked
                                                 ? <span className="text-[10px] font-bold px-2 py-0.5 rounded border text-red-400 bg-red-500/10 border-red-500/20">BLOCKED</span>
@@ -504,19 +609,9 @@ export default function AdminPage() {
                                         <td className="px-4 py-3 text-zinc-600 whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
                                         <td className="px-4 py-3">
                                             {u.email !== user.email && u.role !== 'admin' && (
-                                                <button
-                                                    onClick={() => handleToggleLock(u)}
-                                                    disabled={actionLoading === u.id}
-                                                    className={`px-2 py-1 rounded text-[10px] font-bold transition-all disabled:opacity-40 flex items-center gap-1 ${
-                                                        u.is_locked
-                                                            ? 'bg-white/5 text-zinc-300 hover:bg-white/10'
-                                                            : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'
-                                                    }`}
-                                                >
-                                                    {u.is_locked
-                                                        ? <><Unlock className="w-3 h-3" /> Unblock</>
-                                                        : <><Lock className="w-3 h-3" /> Block</>
-                                                    }
+                                                <button onClick={() => handleToggleLock(u)} disabled={actionLoading === u.id}
+                                                    className={`px-2 py-1 rounded text-[10px] font-bold transition-all disabled:opacity-40 flex items-center gap-1 ${u.is_locked ? 'bg-white/5 text-zinc-300 hover:bg-white/10' : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20'}`}>
+                                                    {u.is_locked ? <><Unlock className="w-3 h-3" /> Unblock</> : <><Lock className="w-3 h-3" /> Block</>}
                                                 </button>
                                             )}
                                         </td>

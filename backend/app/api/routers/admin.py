@@ -320,3 +320,65 @@ async def toggle_lock_user(
     await db.commit()
     action = "blocked" if user.is_locked else "unblocked"
     return {"success": True, "message": f"{user.email} {action}.", "is_locked": user.is_locked}
+
+
+@router.get("/all-requests")
+async def list_all_requests(
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """Full marketplace requests sheet for admin — all statuses, all details."""
+    result = await db.execute(
+        select(MarketplaceRequest).order_by(MarketplaceRequest.submitted_at.desc())
+    )
+    reqs = result.scalars().all()
+    return [
+        {
+            "request_id": r.request_id,
+            "user_name": r.user_name,
+            "user_email": r.user_email,
+            "user_sovereign_id": r.user_sovereign_id,
+            "origin": r.origin,
+            "destination": r.destination,
+            "cargo_type": r.cargo_type,
+            "commodity": r.commodity or "—",
+            "weight_kg": float(r.weight_kg) if r.weight_kg else None,
+            "container_type": r.container_type,
+            "container_count": r.container_count,
+            "incoterms": r.incoterms or "—",
+            "status": r.status,
+            "quotation_count": r.quotation_count or 0,
+            "submitted_at": str(r.submitted_at),
+            "closed_at": str(r.closed_at) if r.closed_at else None,
+            "closed_reason": r.closed_reason,
+            "is_hazardous": r.is_hazardous,
+            "needs_insurance": r.needs_insurance,
+            "special_requirements": r.special_requirements or "",
+            "pickup_ready_date": str(r.pickup_ready_date) if r.pickup_ready_date else None,
+            "target_date": str(r.target_date) if r.target_date else None,
+            "is_f2f": r.is_f2f,
+        }
+        for r in reqs
+    ]
+
+
+@router.post("/close-request/{request_id}")
+async def close_request(
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_admin_user),
+):
+    """Admin force-close any open marketplace request."""
+    result = await db.execute(
+        select(MarketplaceRequest).where(MarketplaceRequest.request_id == request_id)
+    )
+    req = result.scalars().first()
+    if not req:
+        raise HTTPException(status_code=404, detail="Request not found.")
+    if req.status == "CLOSED":
+        return {"success": True, "message": "Already closed."}
+    req.status = "CLOSED"
+    req.closed_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    req.closed_reason = "Closed by admin"
+    await db.commit()
+    return {"success": True, "message": f"Request {request_id} closed."}
