@@ -119,13 +119,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const params = [`cityName=${encodeURIComponent(q)}|contains`, 'limit=50']
+    // Use locationType=TERMINAL — the only value confirmed to return results from Maersk.
+    // Port-only display is enforced by: showing cityName (not locationName) + dedup on 5-char UNLOCODE.
+    const params = [`cityName=${encodeURIComponent(q)}|contains`, 'limit=50', 'locationType=TERMINAL']
     if (country) params.push(`countryCode=${encodeURIComponent(country)}`)
-    if (termType === 'CFS') {
-      params.push('locationType=CONTAINER FREIGHT STATION')
-    } else {
-      params.push('locationType=PORT')
-    }
 
     const url = `https://api.maersk.com/reference-data/locations?${params.join('&')}`
     const res = await fetch(url, {
@@ -134,6 +131,8 @@ export async function GET(req: NextRequest) {
     })
 
     if (!res.ok) {
+      const errText = await res.text().catch(() => '')
+      console.error(`Maersk port API ${res.status}: ${errText.slice(0, 200)}`)
       return NextResponse.json({ results: fallbackSearch(q, country), source: 'builtin' })
     }
 
@@ -145,7 +144,7 @@ export async function GET(req: NextRequest) {
       const city = item.cityName?.trim() || ''
       const code = item.UNLocationCode?.trim() || ''
       if (!code || !city) continue
-      // Standard UNLOCODEs are exactly 5 chars — longer codes are terminal sub-identifiers
+      // Keep only 5-char UNLOCODEs — standard port/city level codes (terminals use longer sub-codes)
       if (code.length !== 5) continue
       if (seen.has(code)) continue
       seen.add(code)

@@ -43,7 +43,7 @@ def _fallback_ports(q: str, country: str = "") -> Dict[str, Any]:
 
 
 @router.get("/ports/search", response_model=Dict[str, Any])
-async def search_ports(q: str = "", country: str = "", term_type: str = ""):
+async def search_ports(q: str = "", country: str = "", term_type: str = ""):  # noqa: ARG001
     """
     Maersk Locations API — returns terminals, ports and CFS with UNLOCODE.
     term_type: CY (container yard/terminal), CFS (container freight station), Door (skip — use address)
@@ -55,16 +55,11 @@ async def search_ports(q: str = "", country: str = "", term_type: str = ""):
         return _fallback_ports(q.strip(), country)
 
     try:
+        # No locationType filter — Maersk may reject unknown values.
+        # Port-level results are enforced by 5-char UNLOCODE deduplication + cityName display.
         params = [f"cityName={quote(q.strip())}|contains", "limit=50"]
         if country:
             params.append(f"countryCode={quote(country.strip())}")
-
-        # Request port-level data from Maersk
-        tt = term_type.upper()
-        if tt == "CFS":
-            params.append("locationType=CONTAINER FREIGHT STATION")
-        else:
-            params.append("locationType=PORT")
 
         url = f"https://api.maersk.com/reference-data/locations?{'&'.join(params)}"
 
