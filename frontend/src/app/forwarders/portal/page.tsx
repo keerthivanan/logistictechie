@@ -934,19 +934,13 @@ export default function ForwarderPortal() {
                                             {selectedRequest.commodity && (
                                                 <div className="col-span-2">
                                                     <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Commodity</p>
-                                                    <p className="text-[11px] text-white font-medium truncate">{selectedRequest.commodity}</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.commodity}{selectedRequest.hs_code ? ` (HS: ${selectedRequest.hs_code})` : ''}</p>
                                                 </div>
                                             )}
-                                            {selectedRequest.weight_kg && (
-                                                <div>
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Weight</p>
-                                                    <p className="text-[11px] text-white font-medium">{Number(selectedRequest.weight_kg).toLocaleString()} kg</p>
-                                                </div>
-                                            )}
-                                            {selectedRequest.quantity && (
-                                                <div>
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Qty</p>
-                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.quantity} units</p>
+                                            {selectedRequest.cargo_specification && (
+                                                <div className="col-span-2">
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Cargo Spec</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.cargo_specification}</p>
                                                 </div>
                                             )}
                                             {selectedRequest.container_type && (
@@ -955,16 +949,63 @@ export default function ForwarderPortal() {
                                                     <p className="text-[11px] text-white font-medium">{selectedRequest.container_type} × {selectedRequest.container_count || 1}</p>
                                                 </div>
                                             )}
+                                            {selectedRequest.weight_kg && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Weight</p>
+                                                    <p className="text-[11px] text-white font-medium">{Number(selectedRequest.weight_kg).toLocaleString()} kg</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.total_volume_cbm && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Volume</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.total_volume_cbm} CBM</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.packing_type && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Packing</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.packing_type}{selectedRequest.quantity ? ` — ${selectedRequest.quantity} pcs` : ''}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.dimensions && selectedRequest.dimensions !== 'x x' && selectedRequest.dimensions !== '0x0x0' && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Dimensions</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.dimensions} CM</p>
+                                                </div>
+                                            )}
                                             {selectedRequest.incoterms && (
                                                 <div>
                                                     <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Incoterms</p>
                                                     <p className="text-[11px] text-white font-medium">{selectedRequest.incoterms}</p>
                                                 </div>
                                             )}
-                                            {selectedRequest.target_date && (
+                                            {selectedRequest.is_hazardous && (
                                                 <div className="col-span-2">
-                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Required by</p>
-                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.target_date}</p>
+                                                    <p className="text-[9px] text-red-500 uppercase tracking-wider font-bold">⚠ Hazardous Cargo</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.needs_insurance && (
+                                                <div className="col-span-2">
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Insurance Required</p>
+                                                    <p className="text-[11px] text-white font-medium">Yes</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.pickup_ready_date && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Cargo Ready</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.pickup_ready_date.slice(0,10)}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.target_date && (
+                                                <div>
+                                                    <p className="text-[9px] text-zinc-600 uppercase tracking-wider">Required By</p>
+                                                    <p className="text-[11px] text-white font-medium">{selectedRequest.target_date.slice(0,10)}</p>
+                                                </div>
+                                            )}
+                                            {selectedRequest.special_requirements && (
+                                                <div className="col-span-2 bg-amber-500/5 border border-amber-500/10 rounded-lg p-2">
+                                                    <p className="text-[9px] text-amber-500 uppercase tracking-wider font-bold mb-0.5">Notes / Special Req.</p>
+                                                    <p className="text-[10px] text-zinc-300 leading-relaxed">{selectedRequest.special_requirements}</p>
                                                 </div>
                                             )}
                                         </div>
