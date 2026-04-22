@@ -387,7 +387,7 @@ export default function AdminPage() {
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
                                         {fwd.logo_url ? (
-                                            <img src={`/api/forwarders/logo/${fwd.forwarder_id}`} alt={fwd.company_name}
+                                            <img src={fwd.logo_url} alt={fwd.company_name}
                                                 className="w-full h-full object-contain"
                                                 onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                         ) : (
