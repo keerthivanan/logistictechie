@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     images: ['https://cargolink.sa/og-image.jpg'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/cargolink.png',
     apple: '/apple-touch-icon.png',
   },
 }
