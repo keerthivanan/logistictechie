@@ -6,7 +6,7 @@ import { Building2, Globe, Mail, Upload, Check, Loader2, Award } from 'lucide-re
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { countries } from '@/lib/countries';
-import { AsYouType, isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
+import { isValidPhoneNumber, CountryCode } from 'libphonenumber-js';
 import Navbar from '@/components/layout/Navbar';
 import { apiFetch } from '@/lib/config';
 import Avatar from '@/components/visuals/Avatar';

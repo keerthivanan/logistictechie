@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useT } from '@/lib/i18n/t';
@@ -49,7 +48,6 @@ export default function Navbar() {
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
     const [scrolled, setScrolled] = useState(false);
     const { user, logout } = useAuth();
-    const router = useRouter();
     const { lang, setLang } = useLanguage();
     const t = useT();
 
