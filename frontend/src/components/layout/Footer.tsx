@@ -10,21 +10,19 @@ export default function Footer() {
         {
             heading: t('footer.product'),
             links: [
-                { label: t('footer.shipper.portal'), href: '/search' },
                 { label: t('footer.marketplace'), href: '/marketplace' },
+                { label: t('footer.forwarder.portal'), href: '/forwarders/portal' },
+                { label: t('footer.become.partner'), href: '/forwarders/register' },
                 { label: t('footer.carrier.partners'), href: '/carriers' },
                 { label: t('footer.enterprise'), href: '/services/coming-soon' },
-                { label: t('footer.forwarder.portal'), href: '/forwarders' },
             ],
         },
         {
             heading: t('footer.features'),
             links: [
-                { label: t('footer.search.rates'), href: '/search' },
                 { label: t('footer.dashboard'), href: '/dashboard' },
                 { label: t('footer.freight.calc'), href: '/tools/calculator' },
                 { label: t('footer.hs.codes'), href: '/tools/hs-codes' },
-                { label: t('footer.tracking'), href: '/tracking' },
             ],
         },
         {
@@ -39,7 +37,6 @@ export default function Footer() {
             heading: t('footer.resources'),
             links: [
                 { label: t('footer.help.center'), href: '/help' },
-                { label: t('footer.become.partner'), href: '/forwarders/register' },
             ],
         },
         {
