@@ -1033,7 +1033,7 @@ const translations = {
         'dash.clear.all': 'Clear All',
         'dash.no.alerts': 'No alerts',
         'dash.view.activity': 'View all activity',
-        'dash.book': 'BOOK SHIPMENT',
+        'dash.book': 'GET A QUOTE',
         'dash.marketplace': 'Get a Quote',
         'dash.forwarders': 'Forwarders',
         // Dashboard activity page
@@ -2469,7 +2469,7 @@ const translations = {
         'dash.clear.all': 'مسح الكل',
         'dash.no.alerts': 'لا تنبيهات',
         'dash.view.activity': 'عرض كل النشاط',
-        'dash.book': 'احجز شحنة',
+        'dash.book': 'احصل على عرض سعر',
         'dash.marketplace': 'احصل على عرض سعر',
         'dash.forwarders': 'وكلاء الشحن',
         // Dashboard activity page
