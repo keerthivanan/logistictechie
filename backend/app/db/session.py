@@ -14,7 +14,9 @@ _raw_url = settings.DATABASE_URL
 # Critical for NeonDB + asyncpg: strip ?ssl=require from URL (handled via connect_args below)
 # asyncpg raises "duplicate SSL arguments" if ssl appears in both the URL and connect_args
 _is_neon = "neon.tech" in _raw_url
-DATABASE_URL = _raw_url.split("?")[0] if _is_neon else _raw_url
+_is_supabase = "supabase.co" in _raw_url
+_needs_ssl = _is_neon or _is_supabase
+DATABASE_URL = _raw_url.split("?")[0] if _needs_ssl else _raw_url
 
 _connect_args = {}
 if _is_neon:
@@ -24,7 +26,16 @@ if _is_neon:
     _connect_args = {
         "ssl": ctx,
         "command_timeout": 30,
-        "statement_cache_size": 0,  # Required: Neon pooler (PgBouncer transaction mode) doesn't support prepared statements
+        "statement_cache_size": 0,
+        "server_settings": {"application_name": "cargolink_backend"},
+    }
+elif _is_supabase:
+    ctx = ssl_mod.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl_mod.CERT_NONE
+    _connect_args = {
+        "ssl": ctx,
+        "command_timeout": 30,
         "server_settings": {"application_name": "cargolink_backend"},
     }
 
