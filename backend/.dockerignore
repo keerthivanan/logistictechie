@@ -17,5 +17,3 @@ Dockerfile
 docker-compose.yml
 README.md
 .vscode
-alembic
-alembic.ini
