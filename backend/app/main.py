@@ -42,19 +42,17 @@ async def _db_keepalive():
 async def lifespan(app: FastAPI):
     try:
         redis_mod.redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
-        # Run DB migrations on startup
+        # Create all tables from models on startup (safe for fresh DB)
         try:
-            import subprocess
-            result = subprocess.run(
-                ["alembic", "upgrade", "head"],
-                cwd="/app", capture_output=True, text=True, timeout=60
-            )
-            if result.returncode == 0:
-                print("[SYSTEM] DB migrations applied.")
-            else:
-                print(f"[SYSTEM] DB migration warning: {result.stderr[-200:]}")
+            from app.db.session import engine, Base
+            import app.models.user, app.models.forwarder, app.models.marketplace
+            import app.models.conversation, app.models.booking, app.models.activity
+            import app.models.task, app.models.forwarder_network
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            print("[SYSTEM] DB tables created/verified.")
         except Exception as e:
-            print(f"[SYSTEM] DB migration warning: {e}")
+            print(f"[SYSTEM] DB setup warning: {e}")
         # Pre-warm DB connection pool on startup
         from app.db.session import engine
         from sqlalchemy import text
