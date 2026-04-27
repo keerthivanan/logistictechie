@@ -44,11 +44,15 @@ async def lifespan(app: FastAPI):
         redis_mod.redis_client = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
         # Run DB migrations on startup
         try:
-            from alembic.config import Config
-            from alembic import command
-            alembic_cfg = Config("/app/alembic.ini")
-            command.upgrade(alembic_cfg, "head")
-            print("[SYSTEM] DB migrations applied.")
+            import subprocess
+            result = subprocess.run(
+                ["alembic", "upgrade", "head"],
+                cwd="/app", capture_output=True, text=True, timeout=60
+            )
+            if result.returncode == 0:
+                print("[SYSTEM] DB migrations applied.")
+            else:
+                print(f"[SYSTEM] DB migration warning: {result.stderr[-200:]}")
         except Exception as e:
             print(f"[SYSTEM] DB migration warning: {e}")
         # Pre-warm DB connection pool on startup
