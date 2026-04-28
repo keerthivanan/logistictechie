@@ -62,6 +62,16 @@ async def lifespan(app: FastAPI):
             print("[SYSTEM] DB connection pool warmed up.")
         except Exception as e:
             print(f"[SYSTEM] DB warmup warning: {e}")
+        # Pre-warm RAG knowledge index in background (avoids 10s delay on first knowledge question)
+        async def _prewarm_rag():
+            try:
+                from app.services.rag_service import get_index
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, get_index)
+                print("[SYSTEM] RAG knowledge index pre-warmed.")
+            except Exception as e:
+                print(f"[SYSTEM] RAG pre-warm skipped: {e}")
+        asyncio.create_task(_prewarm_rag())
         # Start background keep-alive so Neon never sleeps
         keepalive_task = asyncio.create_task(_db_keepalive())
         print(f"[SYSTEM] CargoLink Logistics OS Backend Initialized.")
