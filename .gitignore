@@ -73,9 +73,12 @@ Thumbs.db
 *.tmp
 *.bak
 
-# === N8N AUTOMATION — JSON workflows are committed so VPS can pull them ===
-# Ignore only the planning/guide docs, keep the JSON workflow files
+# === N8N AUTOMATION — CONFIDENTIAL, never push workflows ===
 n8n_plan/*.md
+n8n_plan/*.json
+wf_welcome_live.json
+.mcp.json
+png/
 
 # === PROJECT PLANS & AGENT METADATA (CONFIDENTIAL) ===
 plan/
