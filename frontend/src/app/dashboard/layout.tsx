@@ -23,6 +23,7 @@ import { useAuth } from '@/context/AuthContext'
 import Avatar from '@/components/visuals/Avatar'
 import { apiFetch } from '@/lib/config'
 import { useT } from '@/lib/i18n/t'
+import AgentChat from '@/components/agent/AgentChat'
 
 interface Notification {
     type: 'NEW_QUOTE' | 'NEW_MESSAGE' | string
@@ -487,6 +488,7 @@ export default function DashboardLayout({
                     </>
                 )}
             </AnimatePresence>
+            <AgentChat />
         </div>
     )
 }
