@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { Send, Loader2, X, ChevronDown, MessageCircle } from 'lucide-react'
+import { Send, Loader2, X, ChevronDown } from 'lucide-react'
 import { apiFetch } from '@/lib/config'
 import { useAuth } from '@/context/AuthContext'
 
