@@ -143,6 +143,14 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
         ]
 
     if name == "get_quotes_for_request":
+        req_check = await db.execute(
+            select(MarketplaceRequest).where(
+                MarketplaceRequest.request_id == args["request_id"],
+                MarketplaceRequest.user_sovereign_id == sid,
+            )
+        )
+        if not req_check.scalars().first():
+            return {"error": "Request not found"}
         res = await db.execute(
             select(MarketplaceBid).where(MarketplaceBid.request_id == args["request_id"])
         )

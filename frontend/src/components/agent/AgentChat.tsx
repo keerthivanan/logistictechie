@@ -14,7 +14,7 @@ const GREETING = "Hey there 👋 Welcome to CargoLink! Ask me anything about you
 export default function AgentChat() {
     const { user } = useAuth()
     const [open, setOpen] = useState(false)
-    const [showPreview, setShowPreview] = useState(true)
+    const [showPreview, setShowPreview] = useState(false)
     const [dismissed, setDismissed] = useState(false)
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: GREETING }
