@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
         async def _prewarm_rag():
             try:
                 from app.services.rag_service import get_index
-                loop = asyncio.get_event_loop()
+                loop = asyncio.get_running_loop()
                 await loop.run_in_executor(None, get_index)
                 print("[SYSTEM] RAG knowledge index pre-warmed.")
             except Exception as e:
