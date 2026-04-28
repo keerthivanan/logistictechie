@@ -425,8 +425,8 @@ async def register_user(
             detail="An account with this email already exists. Please sign in."
         )
 
-    # Hash password (CPU-bound, ~200ms)
-    password_hash = security.get_password_hash(form_data.password)
+    loop = asyncio.get_event_loop()
+    password_hash = await loop.run_in_executor(None, security.get_password_hash, form_data.password)
 
     # SOVEREIGN ID — 2 queries, no commit yet
     user_count_res = await db.execute(select(func.count(User.id)))
@@ -598,8 +598,10 @@ async def change_password(
     
     if not security.validate_password_strength(data.new_password):
         raise HTTPException(status_code=400, detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character.")
-        
-    await crud.user.update(db, user_id=user_id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
+
+    loop = asyncio.get_event_loop()
+    new_hash = await loop.run_in_executor(None, security.get_password_hash, data.new_password)
+    await crud.user.update(db, user_id=user_id, obj_in={"password_hash": new_hash})
 
     # Invalidate all existing sessions (attacker with stolen token can no longer use it)
     import time as _time
@@ -719,8 +721,9 @@ async def reset_password(data: ResetPassword, background_tasks: BackgroundTasks,
             detail="Password too weak. Must be 10+ chars with uppercase, lowercase, number, and special character."
         )
 
-    # Update password
-    await crud.user.update(db, user_id=user.id, obj_in={"password_hash": security.get_password_hash(data.new_password)})
+    loop = asyncio.get_event_loop()
+    new_hash = await loop.run_in_executor(None, security.get_password_hash, data.new_password)
+    await crud.user.update(db, user_id=user.id, obj_in={"password_hash": new_hash})
 
     if _redis_mod.redis_client:
         # Consume the token — it cannot be used again
