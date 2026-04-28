@@ -1,8 +1,9 @@
 """
-CargoLink AI Agent — LangChain + LlamaIndex RAG + OpenAI
-Answers both live data questions and freight knowledge questions.
+CargoLink AI Agent — Streaming + LlamaIndex RAG + OpenAI
+Bilingual (Arabic/English), streams responses token by token.
 """
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from pydantic import BaseModel
@@ -19,6 +20,19 @@ import json
 
 router = APIRouter()
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+
+# Progress messages shown to user while tools run
+PROGRESS = {
+    "get_my_requests":           {"en": "Fetching your freight requests...",    "ar": "جارٍ جلب طلبات الشحن..."},
+    "get_quotes_for_request":    {"en": "Loading quotes...",                    "ar": "جارٍ تحميل عروض الأسعار..."},
+    "get_my_conversations":      {"en": "Checking your negotiations...",        "ar": "جارٍ فحص المفاوضات..."},
+    "get_my_bookings":           {"en": "Loading your bookings...",             "ar": "جارٍ تحميل الحجوزات..."},
+    "get_dashboard_stats":       {"en": "Analyzing your account...",            "ar": "جارٍ تحليل حسابك..."},
+    "get_request_details":       {"en": "Getting request details...",           "ar": "جارٍ جلب تفاصيل الطلب..."},
+    "search_freight_knowledge":  {"en": "Searching freight knowledge base...", "ar": "جارٍ البحث في قاعدة المعرفة..."},
+    "compare_and_recommend_quotes": {"en": "Comparing and analyzing quotes...", "ar": "جارٍ مقارنة عروض الأسعار..."},
+    "get_all_my_data":           {"en": "Loading your full account overview...", "ar": "جارٍ تحميل نظرة عامة على حسابك..."},
+}
 
 TOOLS = [
     {
@@ -81,15 +95,10 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "search_freight_knowledge",
-            "description": "Search the freight knowledge base for questions about incoterms, HS codes, customs rules, shipping terms, trade regulations, container types, documentation, Middle East trade, pricing benchmarks. Use this for any general freight/logistics/shipping knowledge questions.",
+            "description": "Search the freight knowledge base for questions about incoterms, HS codes, customs rules, shipping terms, trade regulations, container types, documentation, Middle East trade, pricing benchmarks.",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "question": {
-                        "type": "string",
-                        "description": "The freight knowledge question to search for"
-                    }
-                },
+                "properties": {"question": {"type": "string"}},
                 "required": ["question"],
             },
         },
@@ -98,7 +107,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "compare_and_recommend_quotes",
-            "description": "Analyze and compare all quotes for a request and give a recommendation on which to choose",
+            "description": "Analyze and compare all quotes for a request and give a recommendation",
             "parameters": {
                 "type": "object",
                 "properties": {"request_id": {"type": "string"}},
@@ -298,68 +307,110 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
     return {"error": f"Unknown tool: {name}"}
 
 
+def _is_arabic(text: str) -> bool:
+    arabic_chars = sum(1 for c in text if '؀' <= c <= 'ۿ')
+    return arabic_chars / max(len(text), 1) > 0.2
+
+
+def _build_system_prompt(user: User) -> str:
+    first_name = (user.full_name or "").split()[0] if user.full_name else "there"
+    return f"""You are CargoLink AI — a bilingual freight logistics assistant for CargoLink, a marketplace connecting shippers with freight forwarders in the Middle East and globally.
+
+You are helping: {first_name} (Account: {user.sovereign_id})
+
+LANGUAGE (critical):
+- Detect language from the user's message
+- Arabic message → respond FULLY in Arabic (العربية)
+- English message → respond in English
+- Never mix languages
+
+FORMATTING:
+- Use **bold** for prices, company names, key numbers
+- Use bullet points (- ) for lists
+- Keep it concise — no long paragraphs
+
+KNOWLEDGE:
+1. LIVE DATA — use DB tools for real-time account data
+2. FREIGHT KNOWLEDGE — use search_freight_knowledge for incoterms, HS codes, customs, shipping terms, Middle East trade, pricing
+
+RULES:
+- Always fetch live data before answering account questions
+- Give specific numbers and names — no vague answers
+- For quotes: compare **price** AND **transit days**, give a clear recommendation"""
+
+
 class AgentMessage(BaseModel):
     message: str
     history: list = []
 
 
-@router.post("/chat")
-async def agent_chat(
+@router.post("/chat/stream")
+async def agent_chat_stream(
     body: AgentMessage,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    system_prompt = f"""You are CargoLink AI — a bilingual freight logistics assistant for CargoLink, a marketplace connecting shippers with freight forwarders in the Middle East and globally.
-
-You are helping: {current_user.full_name} (ID: {current_user.sovereign_id})
-
-LANGUAGE RULES (critical):
-- Detect the user's language from their message
-- If the user writes in Arabic → respond FULLY in Arabic (العربية)
-- If the user writes in English → respond in English
-- Never mix languages in one response
-
-FORMATTING RULES:
-- Use **bold** for key numbers, prices, company names
-- Use bullet points (- ) for lists of items
-- Keep responses concise — no long paragraphs
-
-KNOWLEDGE:
-1. LIVE DATA — use DB tools to fetch real-time data: requests, quotes, bookings, conversations
-2. FREIGHT KNOWLEDGE — use search_freight_knowledge for incoterms, HS codes, customs, shipping terms, container types, documentation, Middle East trade, pricing benchmarks
-
-RULES:
-- Always fetch live data before answering account questions
-- Use search_freight_knowledge for ANY general freight/logistics/shipping knowledge question
-- Give specific numbers and names — never vague summaries
-- For quote comparisons, highlight **price** AND **transit days**
-- Give a clear recommendation, not just raw data"""
+    """Streaming endpoint — sends SSE events: progress, token, done, error."""
+    lang = "ar" if _is_arabic(body.message) else "en"
+    system_prompt = _build_system_prompt(current_user)
 
     messages = [{"role": "system", "content": system_prompt}]
     for h in body.history[-6:]:
         messages.append(h)
     messages.append({"role": "user", "content": body.message})
 
-    for _ in range(6):
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=TOOLS,
-            tool_choice="auto",
-        )
-        msg = response.choices[0].message
+    async def generate():
+        try:
+            for _ in range(6):
+                response = await client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages,
+                    tools=TOOLS,
+                    tool_choice="auto",
+                )
+                msg = response.choices[0].message
 
-        if msg.tool_calls:
-            messages.append(msg)
-            for tc in msg.tool_calls:
-                args = json.loads(tc.function.arguments) if tc.function.arguments else {}
-                result = await run_tool(tc.function.name, args, current_user, db)
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc.id,
-                    "content": json.dumps(result, default=str),
-                })
-        else:
-            return {"reply": msg.content}
+                if msg.tool_calls:
+                    messages.append(msg)
+                    for tc in msg.tool_calls:
+                        # Send progress event so UI shows what's happening
+                        prog = PROGRESS.get(tc.function.name, {}).get(lang, "Working...")
+                        yield f"data: {json.dumps({'progress': prog})}\n\n"
 
-    return {"reply": "Sorry, I couldn't process that. Please try again."}
+                        args = json.loads(tc.function.arguments) if tc.function.arguments else {}
+                        result = await run_tool(tc.function.name, args, current_user, db)
+                        messages.append({
+                            "role": "tool",
+                            "tool_call_id": tc.id,
+                            "content": json.dumps(result, default=str),
+                        })
+                else:
+                    # No more tool calls — stream the final answer token by token
+                    stream = await client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=messages,
+                        stream=True,
+                    )
+                    async for chunk in stream:
+                        token = chunk.choices[0].delta.content or ""
+                        if token:
+                            yield f"data: {json.dumps({'token': token})}\n\n"
+                    yield "data: [DONE]\n\n"
+                    return
+
+            yield "data: [DONE]\n\n"
+
+        except Exception as e:
+            err = "حدث خطأ. حاول مرة أخرى." if lang == "ar" else "Something went wrong. Please try again."
+            yield f"data: {json.dumps({'error': err})}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
