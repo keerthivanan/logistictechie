@@ -1,3 +1,7 @@
+"""
+CargoLink AI Agent — LangChain + LlamaIndex RAG + OpenAI
+Answers both live data questions and freight knowledge questions.
+"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -7,14 +11,13 @@ from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
 from app.models.marketplace import MarketplaceRequest, MarketplaceBid
-from app.models.conversation import Conversation, ChatMessage
+from app.models.conversation import Conversation
 from app.models.booking import Booking
 from app.core.config import settings
 from openai import AsyncOpenAI
 import json
 
 router = APIRouter()
-
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 TOOLS = [
@@ -22,7 +25,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_my_requests",
-            "description": "Get all freight requests submitted by the user with their status and quote counts",
+            "description": "Get all freight requests submitted by the user with status and quote counts",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -30,12 +33,10 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_quotes_for_request",
-            "description": "Get all quotes/bids received for a specific freight request",
+            "description": "Get all quotes/bids for a specific freight request",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "request_id": {"type": "string", "description": "The request ID"}
-                },
+                "properties": {"request_id": {"type": "string"}},
                 "required": ["request_id"],
             },
         },
@@ -44,7 +45,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_my_conversations",
-            "description": "Get all active negotiation conversations the user has",
+            "description": "Get all active negotiation conversations",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -60,7 +61,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_dashboard_stats",
-            "description": "Get summary stats: total requests, active shipments, unread messages, pending tasks",
+            "description": "Get summary: total requests, active shipments, bookings, conversations",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -68,12 +69,10 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_request_details",
-            "description": "Get full details of a specific freight request including all quotes",
+            "description": "Get full details of a specific request including all quotes",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "request_id": {"type": "string", "description": "The request ID"}
-                },
+                "properties": {"request_id": {"type": "string"}},
                 "required": ["request_id"],
             },
         },
@@ -81,14 +80,29 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "get_conversation_messages",
-            "description": "Get the message history and negotiation state of a conversation",
+            "name": "search_freight_knowledge",
+            "description": "Search the freight knowledge base for questions about incoterms, HS codes, customs rules, shipping terms, trade regulations, container types, documentation, Middle East trade, pricing benchmarks. Use this for any general freight/logistics/shipping knowledge questions.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "public_id": {"type": "string", "description": "The conversation public ID"}
+                    "question": {
+                        "type": "string",
+                        "description": "The freight knowledge question to search for"
+                    }
                 },
-                "required": ["public_id"],
+                "required": ["question"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "compare_and_recommend_quotes",
+            "description": "Analyze and compare all quotes for a request and give a recommendation on which to choose",
+            "parameters": {
+                "type": "object",
+                "properties": {"request_id": {"type": "string"}},
+                "required": ["request_id"],
             },
         },
     },
@@ -96,7 +110,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_all_my_data",
-            "description": "Get a complete overview of everything — requests, quotes, conversations, bookings",
+            "description": "Get complete overview of everything — requests, quotes, conversations, bookings",
             "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
@@ -189,21 +203,10 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
         ]
 
     if name == "get_dashboard_stats":
-        req_count = await db.scalar(
-            select(func.count()).where(MarketplaceRequest.user_sovereign_id == sid)
-        )
-        open_count = await db.scalar(
-            select(func.count()).where(
-                MarketplaceRequest.user_sovereign_id == sid,
-                MarketplaceRequest.status == "OPEN"
-            )
-        )
-        booked_count = await db.scalar(
-            select(func.count()).where(Booking.user_sovereign_id == sid)
-        )
-        conv_count = await db.scalar(
-            select(func.count()).where(Conversation.shipper_id == sid)
-        )
+        req_count = await db.scalar(select(func.count()).where(MarketplaceRequest.user_sovereign_id == sid))
+        open_count = await db.scalar(select(func.count()).where(MarketplaceRequest.user_sovereign_id == sid, MarketplaceRequest.status == "OPEN"))
+        booked_count = await db.scalar(select(func.count()).where(Booking.user_sovereign_id == sid))
+        conv_count = await db.scalar(select(func.count()).where(Conversation.shipper_id == sid))
         return {
             "total_requests": req_count,
             "open_requests": open_count,
@@ -221,9 +224,7 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
         r = res.scalars().first()
         if not r:
             return {"error": "Request not found"}
-        bids_res = await db.execute(
-            select(MarketplaceBid).where(MarketplaceBid.request_id == r.request_id)
-        )
+        bids_res = await db.execute(select(MarketplaceBid).where(MarketplaceBid.request_id == r.request_id))
         bids = bids_res.scalars().all()
         return {
             "request_id": r.request_id,
@@ -245,39 +246,38 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
             ],
         }
 
-    if name == "get_conversation_messages":
+    if name == "search_freight_knowledge":
+        try:
+            from app.services.rag_service import query_knowledge
+            return query_knowledge(args["question"])
+        except Exception as e:
+            return f"Knowledge search error: {e}"
+
+    if name == "compare_and_recommend_quotes":
         res = await db.execute(
-            select(Conversation).where(
-                Conversation.public_id == args["public_id"],
-                Conversation.shipper_id == sid
+            select(MarketplaceRequest).where(
+                MarketplaceRequest.request_id == args["request_id"],
+                MarketplaceRequest.user_sovereign_id == sid
             )
         )
-        conv = res.scalars().first()
-        if not conv:
-            return {"error": "Conversation not found"}
-        msgs_res = await db.execute(
-            select(ChatMessage)
-            .where(ChatMessage.conversation_id == conv.id)
-            .order_by(ChatMessage.created_at.asc())
-            .limit(20)
+        r = res.scalars().first()
+        if not r:
+            return {"error": "Request not found"}
+        bids_res = await db.execute(select(MarketplaceBid).where(MarketplaceBid.request_id == r.request_id))
+        bids = bids_res.scalars().all()
+        if not bids:
+            return {"message": "No quotes yet for this request"}
+        quotes = sorted(
+            [{"forwarder": b.forwarder_company, "price": float(b.total_price) if b.total_price else 0,
+              "currency": b.currency, "transit_days": b.transit_days, "carrier": b.carrier} for b in bids],
+            key=lambda x: x["price"]
         )
-        msgs = msgs_res.scalars().all()
         return {
-            "status": conv.status,
-            "forwarder_company": conv.forwarder_company,
-            "original_price": float(conv.original_price) if conv.original_price else None,
-            "current_offer": float(conv.current_offer) if conv.current_offer else None,
-            "agreed_price": float(conv.agreed_price) if conv.agreed_price else None,
-            "offer_side": conv.offer_side,
-            "messages": [
-                {
-                    "sender": m.sender_role,
-                    "type": m.message_type,
-                    "content": m.content,
-                    "amount": float(m.offer_amount) if m.offer_amount else None,
-                }
-                for m in msgs
-            ],
+            "request": f"{r.origin} → {r.destination} ({r.cargo_type})",
+            "total_quotes": len(quotes),
+            "cheapest": quotes[0],
+            "fastest": min(quotes, key=lambda x: x["transit_days"] or 999),
+            "all_quotes_sorted_by_price": quotes,
         }
 
     if name == "get_all_my_data":
@@ -285,12 +285,7 @@ async def run_tool(name: str, args: dict, user: User, db: AsyncSession) -> Any:
         stats = await run_tool("get_dashboard_stats", {}, user, db)
         bookings = await run_tool("get_my_bookings", {}, user, db)
         conversations = await run_tool("get_my_conversations", {}, user, db)
-        return {
-            "stats": stats,
-            "requests": requests,
-            "bookings": bookings,
-            "conversations": conversations,
-        }
+        return {"stats": stats, "requests": requests, "bookings": bookings, "conversations": conversations}
 
     return {"error": f"Unknown tool: {name}"}
 
@@ -306,24 +301,28 @@ async def agent_chat(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    system_prompt = f"""You are a smart freight logistics assistant for CargoLink — a marketplace connecting shippers with freight forwarders.
+    system_prompt = f"""You are a smart freight logistics assistant for CargoLink — a marketplace connecting shippers with freight forwarders in the Middle East and globally.
 
 You are helping: {current_user.full_name} (ID: {current_user.sovereign_id})
 
-Your job:
-- Answer questions about their freight requests, quotes, bookings, negotiations
-- Use the tools to fetch real live data before answering
-- Be concise, friendly and specific — always use actual numbers/names from the data
-- If they ask something you can't help with, say so briefly
-- Don't make up data — always fetch it first"""
+You have TWO types of knowledge:
+1. LIVE DATA — use DB tools to fetch real-time data about their requests, quotes, bookings, conversations
+2. FREIGHT KNOWLEDGE — use search_freight_knowledge for questions about incoterms, HS codes, customs rules, shipping terms, container types, documentation, trade regulations, pricing benchmarks
+
+Rules:
+- Always fetch data before answering questions about their account
+- Use search_freight_knowledge for ANY general freight/logistics/shipping question
+- Be concise, specific, friendly — use actual numbers and names from data
+- For quote comparisons, highlight price AND transit time
+- Give recommendations, not just data dumps
+- If asked about documents, regulations, or trade terms → use knowledge base"""
 
     messages = [{"role": "system", "content": system_prompt}]
     for h in body.history[-6:]:
         messages.append(h)
     messages.append({"role": "user", "content": body.message})
 
-    # Agentic loop — let GPT call tools until it's done
-    for _ in range(5):
+    for _ in range(6):
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -340,7 +339,7 @@ Your job:
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tc.id,
-                    "content": json.dumps(result),
+                    "content": json.dumps(result, default=str),
                 })
         else:
             return {"reply": msg.content}
