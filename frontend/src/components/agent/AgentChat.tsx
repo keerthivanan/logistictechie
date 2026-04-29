@@ -75,7 +75,8 @@ const SUGGESTIONS = {
 
 export default function AgentChat() {
     const { user } = useAuth()
-    const firstName = user?.name?.split(' ')[0] || ''
+    const rawName = user?.name || ''
+    const firstName = rawName.includes('@') ? '' : rawName.split(' ')[0]
 
     const [open, setOpen] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
@@ -88,16 +89,14 @@ export default function AgentChat() {
     const bottomRef = useRef<HTMLDivElement>(null)
     const abortRef = useRef<AbortController | null>(null)
 
-    // Personalized greeting once user loads
+    // Personalized greeting — set once when user data is available
     useEffect(() => {
-        if (!firstName || messages.length) return
-        const name = firstName ? `${firstName}` : 'there'
-        setMessages([{
-            role: 'assistant',
-            content: `Hey ${name} 👋 I'm **CargoLink AI** — your freight assistant.\nI speak **English** and **العربية**.\n\nAsk me anything about your shipments, quotes, or bookings.`,
-            ts: Date.now(),
-        }])
-    }, [firstName])
+        if (!user || messages.length) return
+        const greeting = firstName
+            ? `Hey ${firstName} 👋 I'm **CargoLink AI** — your freight assistant.\nI speak **English** and **العربية**.\n\nAsk me anything about your shipments, quotes, or bookings.`
+            : `Hey there 👋 I'm **CargoLink AI** — your freight assistant.\nI speak **English** and **العربية**.\n\nAsk me anything about your shipments, quotes, or bookings.`
+        setMessages([{ role: 'assistant', content: greeting, ts: Date.now() }])
+    }, [user?.name])
 
     // Show preview bubble after 3s
     useEffect(() => {
