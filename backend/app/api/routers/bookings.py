@@ -138,6 +138,39 @@ async def create_booking(
     }
 
 
+@router.get("/me")
+async def list_my_bookings(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """List all confirmed bookings for the current user."""
+    result = await db.execute(
+        select(Booking)
+        .where(Booking.user_sovereign_id == current_user.sovereign_id)
+        .order_by(Booking.confirmed_at.desc())
+    )
+    bookings = result.scalars().all()
+    return {
+        "bookings": [
+            {
+                "booking_id": b.id,
+                "reference": b.reference,
+                "status": b.status,
+                "carrier_name": b.carrier_name,
+                "vessel_name": b.vessel_name,
+                "origin": b.origin_locode,
+                "destination": b.destination_locode,
+                "container_type": b.container_type,
+                "transit_days": b.transit_days,
+                "total_price": float(b.total_price),
+                "currency": b.currency,
+                "confirmed_at": b.confirmed_at.isoformat() if b.confirmed_at else None,
+            }
+            for b in bookings
+        ]
+    }
+
+
 @router.get("/{reference}")
 async def get_booking(
     reference: str,
