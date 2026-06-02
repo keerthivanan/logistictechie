@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Package, X, Search } from 'lucide-react';
 import { Spinner } from '@/components/ui/Spinner';
+import { apiFetch } from '@/lib/config';
 
 
 interface CommodityAutocompleteProps {
@@ -41,7 +42,7 @@ export default function CommodityAutocomplete({ name, value, onChange, onSelectI
         setIsSearching(true);
         try {
             const queryParam = q.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
-            const res = await fetch(`/api/references/commodities/search${queryParam}`);
+            const res = await apiFetch(`/api/references/commodities/search${queryParam}`);
             const data = await res.json();
 
             const apiResults = (data.results || []).map((r: any) => ({ ...r, source: "API" }));
