@@ -2,9 +2,9 @@
 
 ## INFRASTRUCTURE
 - **n8n host**: `https://n8n.srv1520651.hstgr.cloud` (Hostinger VPS, self-hosted v2.12.3)
-- **n8n credentials**: email = `keerthivanan.ds.ai@gmail.com`, password in `deploy_n8n.js`
+- **n8n credentials**: email = `keerthivanan.ds.ai@gmail.com`, password = env only (never commit)
 - **n8n API auth**: Session cookie (NOT API key) — login via `POST /rest/login`
-- **Deploy script**: `node deploy_n8n.js Keerthimaster1` — handles login, update, activate for all 10 workflows
+- **Deploy script**: `node deploy_n8n.js <N8N_PASSWORD>` — handles login, update, activate for all 10 workflows
 - **Gmail accounts**: `quote@cargolink.sa` | `support@cargolink.sa`
 - **Backend webhook auth**: All inbound webhooks validated via `OMEGO_API_SECRET` (Bearer + `X-OMEGO-Auth` header)
 

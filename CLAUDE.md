@@ -64,7 +64,7 @@ Freight logistics marketplace. Shippers post requests → forwarders quote → p
 - Deploy script uses `POST /rest/login` with `emailOrLdapLoginId` field → session cookie
 - Update workflow: `PATCH /rest/workflows/{id}` (NOT PUT, NOT `/api/v1/`)
 - Activate: `PATCH /rest/workflows/{id}` with `{ active: true }` + full workflow object
-- Run: `node deploy_n8n.js Keerthimaster1` from project root
+- Run: `node deploy_n8n.js <N8N_PASSWORD>` from project root
 
 ---
 

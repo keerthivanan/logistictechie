@@ -74,9 +74,9 @@ Thumbs.db
 *.bak
 
 # === N8N AUTOMATION — CONFIDENTIAL, never push workflows ===
-n8n_plan/*.md
-n8n_plan/*.json
+n8n_plan/
 wf_welcome_live.json
+*.workflow.json
 .mcp.json
 png/
 
