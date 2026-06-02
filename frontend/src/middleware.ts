@@ -53,11 +53,10 @@ export function middleware(request: NextRequest) {
     }
 
     // 4. Logic: If already logged in, don't show Login page
-    if (AUTH_ROUTES.includes(pathname)) {
-        if (token) {
-            return NextResponse.redirect(new URL('/', request.url))
-        }
-    }
+    // NOTE: We do NOT redirect away from auth routes based on cookie alone.
+    // The cookie may be stale (expired JWT) while refresh token is still valid.
+    // AuthContext handles the redirect to dashboard after verifying the token.
+    // Redirecting here causes a loop: stale cookie → redirect to / → can't login.
 
     return NextResponse.next()
 }

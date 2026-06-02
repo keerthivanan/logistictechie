@@ -179,7 +179,7 @@ function SignupContent() {
                         />
                         <input
                             type="password"
-                            placeholder="Password (min 8 chars, A-Z, a-z, 0-9)"
+                            placeholder="Password (min 10 chars, A-Z, a-z, 0-9, special)"
                             value={signupPassword}
                             onChange={e => setSignupPassword(e.target.value)}
                             required
